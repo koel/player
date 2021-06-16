@@ -56,14 +56,12 @@ class _StartScreenState extends State<StartScreen> {
             return loadingWidget;
           default:
             return Container(
-              color: AppColors.primaryBgr,
               alignment: Alignment.center,
               child: Scaffold(
                 body: Container(
                   padding: EdgeInsets.all(AppDimens.horizontalPadding),
                   child: _widgetOptions.elementAt(_selectedIndex),
                 ),
-                backgroundColor: Colors.transparent,
                 bottomNavigationBar: BottomNavigationBar(
                   items: const <BottomNavigationBarItem>[
                     BottomNavigationBarItem(
@@ -80,7 +78,7 @@ class _StartScreenState extends State<StartScreen> {
                     ),
                   ],
                   currentIndex: _selectedIndex,
-                  selectedItemColor: AppColors.orange,
+                  selectedItemColor: Colors.white,
                   onTap: _onItemTapped,
                 ),
               ),

@@ -27,9 +27,7 @@ class Album {
 
   ImageProvider get image {
     if (_image == null) {
-      _image = cover == null
-          ? AssetImage('assets/images/unknown-album.png')
-          : NetworkImage(this.cover!) as ImageProvider;
+      _image = cover == null ? artist.image : NetworkImage(this.cover!);
     }
 
     return _image!;

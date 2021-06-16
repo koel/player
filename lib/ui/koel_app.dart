@@ -1,3 +1,4 @@
+import 'package:app/constants/colors.dart';
 import 'package:app/constants/strings.dart';
 import 'package:app/models/user.dart';
 import 'package:app/providers/user_provider.dart';
@@ -26,9 +27,20 @@ class _KoelAppState extends State<KoelApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: AppStrings.appName,
       theme: ThemeData(
         brightness: Brightness.dark,
+        dividerColor: Colors.grey.shade600,
+        scaffoldBackgroundColor: Colors.black,
+        backgroundColor: AppColors.primaryBgr,
+        popupMenuTheme: PopupMenuThemeData(
+          elevation: 2,
+          color: Colors.grey.shade900,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+        ),
       ),
       home: FutureBuilder(
         future: futureUser,
