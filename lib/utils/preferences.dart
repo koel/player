@@ -6,7 +6,7 @@ class Preferences {
   }
 
   Future<void> setHostUrl(String url) async {
-    (await getPrefInstance()).setString('hostUrl', url);
+    (await SharedPreferences.getInstance()).setString('hostUrl', url);
   }
 
   Future<String> getApiBaseUrl() async {
