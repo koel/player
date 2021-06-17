@@ -50,11 +50,8 @@ class ApiRequest {
         );
         break;
       case HttpMethod.delete:
-        response = await BaseHttp.delete(
-          uri,
-          headers: headers,
-          body: json.encode(data)
-        );
+        response = await BaseHttp.delete(uri,
+            headers: headers, body: json.encode(data));
         break;
       default:
         throw ArgumentError.value(method);

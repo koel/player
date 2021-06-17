@@ -5,7 +5,7 @@ import 'package:app/providers/artist_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/providers/user_provider.dart';
 import 'package:app/ui/widgets/artist_card.dart';
-import 'package:app/ui/widgets/heading_1.dart';
+import 'package:app/ui/widgets/headings.dart';
 import 'package:app/ui/widgets/song_card.dart';
 import 'package:app/ui/widgets/song_item.dart';
 import 'package:flutter/material.dart';
@@ -47,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       scrollDirection: Axis.horizontal,
                       children: [
                         ..._mostPlayedSongs.expand((song) => [
-                              SongCard(song),
+                              SongCard(song: song),
                               SizedBox(width: 12),
                             ]),
                       ],
@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       scrollDirection: Axis.horizontal,
                       children: [
                         ..._mostPlayedArtists.expand((artist) => [
-                              ArtistCard(artist),
+                              ArtistCard(artist: artist),
                               SizedBox(width: 12),
                             ]),
                       ],

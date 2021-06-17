@@ -15,7 +15,7 @@ class DataProvider with ChangeNotifier {
     Provider.of<AlbumProvider>(context, listen: false)
         .init(context, data['albums']);
     Provider.of<SongProvider>(context, listen: false)
-        ..init(context, data['songs'])
-        ..initInteractions(context, data['interactions']);
+      ..init(context, data['songs'])
+      ..initInteractions(context, data['interactions']);
   }
 }

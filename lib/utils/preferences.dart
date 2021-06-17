@@ -9,6 +9,10 @@ class Preferences {
     (await SharedPreferences.getInstance()).setString('hostUrl', url);
   }
 
+  Future<String?> getHostUrl() async {
+    return (await SharedPreferences.getInstance()).getString('hostUrl');
+  }
+
   Future<String> getApiBaseUrl() async {
     return (await getPrefInstance()).getString('hostUrl')! + '/api';
   }

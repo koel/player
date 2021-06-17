@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 class ArtistDetailsScreen extends StatelessWidget {
   final Artist artist;
 
-  ArtistDetailsScreen(this.artist, {Key? key}) : super(key: key);
+  ArtistDetailsScreen({Key? key, required this.artist}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +142,7 @@ class ArtistDetailsScreen extends StatelessWidget {
               ),
             ),
           ),
-          SongList(_songs),
+          SongList(songs: _songs),
         ],
       ),
     );

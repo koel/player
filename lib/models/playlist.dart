@@ -1,3 +1,1 @@
-class Playlist {
-
-}
+class Playlist {}

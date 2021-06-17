@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/painting/image_provider.dart';
 
 import 'artist.dart';
 

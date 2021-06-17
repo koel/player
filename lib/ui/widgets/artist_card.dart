@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class ArtistCard extends StatefulWidget {
   final Artist artist;
 
-  ArtistCard(this.artist, {Key? key}) : super(key: key);
+  ArtistCard({Key? key, required this.artist}) : super(key: key);
 
   @override
   _ArtistCardState createState() => _ArtistCardState();
@@ -21,7 +21,6 @@ class _ArtistCardState extends State<ArtistCard> {
       onTapUp: (_) => setState(() => opacity = 1),
       onTapCancel: () => setState(() => opacity = 1),
       onTap: () => _gotoArtistDetailsScreen(context, widget.artist),
-
       child: AnimatedOpacity(
         duration: Duration(milliseconds: 100),
         opacity: opacity,
@@ -65,7 +64,7 @@ class _ArtistCardState extends State<ArtistCard> {
 
   void _gotoArtistDetailsScreen(BuildContext context, Artist artist) {
     Navigator.of(context).push(MaterialPageRoute<void>(
-      builder: (BuildContext context) => ArtistDetailsScreen(artist),
+      builder: (BuildContext context) => ArtistDetailsScreen(artist: artist),
     ));
   }
 }

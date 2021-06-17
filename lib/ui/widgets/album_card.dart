@@ -4,14 +4,12 @@ import 'package:flutter/material.dart';
 class AlbumCard extends StatelessWidget {
   final Album album;
 
-  AlbumCard(this.album, {Key? key}): super(key: key);
+  AlbumCard({Key? key, required this.album}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return new Card(
-      child: new Container(
-
-      ),
+      child: new Container(),
     );
   }
 }

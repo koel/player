@@ -1,18 +1,25 @@
-import 'package:app/constants/colors.dart';
 import 'package:app/models/song.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:app/providers/queue_provider.dart';
+import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SongList extends StatefulWidget {
   final List<Song> songs;
 
-  SongList(this.songs, {Key? key}) : super(key: key);
+  SongList({Key? key, required this.songs}) : super(key: key);
 
   @override
   _SongListState createState() => _SongListState();
 }
 
 class _SongListState extends State<SongList> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SliverList(
@@ -23,19 +30,7 @@ class _SongListState extends State<SongList> {
             shape: Border(
               bottom: BorderSide(color: Colors.grey.shade800, width: 0.5),
             ),
-            leading: SizedBox(
-              height: 48,
-              width: 48,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: _song.image,
-                    fit: BoxFit.cover,
-                  ),
-                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                ),
-              ),
-            ),
+            leading: SongThumbnail(song: _song),
             title: Text(_song.title, overflow: TextOverflow.ellipsis),
             subtitle: Text(
               _song.album.name,
@@ -63,14 +58,18 @@ class _SongListState extends State<SongList> {
     TapDownDetails details,
     Song song,
   ) async {
+    QueueProvider queue = Provider.of<QueueProvider>(context, listen: false);
     await showMenu(
       context: context,
       items: <PopupMenuEntry>[
         PopupMenuItem(
           padding: EdgeInsets.all(0),
-          child: ListTile(
-            title: Text('Play Now'),
-            trailing: Icon(Icons.play_circle_outline),
+          child: GestureDetector(
+            child: ListTile(
+              title: Text('Play Now'),
+              trailing: Icon(Icons.play_circle_outline),
+            ),
+            onTap: () => {},
           ),
         ),
         PopupMenuItem(
@@ -82,9 +81,12 @@ class _SongListState extends State<SongList> {
         ),
         PopupMenuItem(
           padding: EdgeInsets.all(0),
-          child: ListTile(
-            title: Text('Play Last'),
-            trailing: Icon(Icons.queue_music),
+          child: GestureDetector(
+            child: ListTile(
+              title: Text('Play Last'),
+              trailing: Icon(Icons.queue_music),
+            ),
+            onTap: () => queue.addToBottom(song),
           ),
         ),
         PopupMenuItem(

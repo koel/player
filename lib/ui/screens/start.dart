@@ -1,11 +1,17 @@
-import 'package:app/constants/colors.dart';
+import 'package:app/audio_playert_task.dart';
 import 'package:app/constants/dimens.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/ui/screens/home.dart';
 import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/screens/search.dart';
+import 'package:app/ui/widgets/footer_player_sheet.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+void _audioPlayerTaskEntrypoint() async {
+  AudioServiceBackground.run(() => AudioPlayerTask());
+}
 
 class StartScreen extends StatefulWidget {
   const StartScreen({Key? key}) : super(key: key);
@@ -17,6 +23,7 @@ class StartScreen extends StatefulWidget {
 class _StartScreenState extends State<StartScreen> {
   late Future futureData;
   int _selectedIndex = 0;
+
   static const List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
     SearchScreen(),
@@ -32,6 +39,13 @@ class _StartScreenState extends State<StartScreen> {
   @override
   void initState() {
     super.initState();
+
+    AudioService.start(
+      backgroundTaskEntrypoint: _audioPlayerTaskEntrypoint,
+      androidNotificationChannelName: 'Koel',
+      androidEnableQueue: true,
+    );
+
     futureData =
         Provider.of<DataProvider>(context, listen: false).init(context);
   }
@@ -62,7 +76,9 @@ class _StartScreenState extends State<StartScreen> {
                   padding: EdgeInsets.all(AppDimens.horizontalPadding),
                   child: _widgetOptions.elementAt(_selectedIndex),
                 ),
+                bottomSheet: FooterPlayerSheet(),
                 bottomNavigationBar: BottomNavigationBar(
+                  elevation: 1,
                   items: const <BottomNavigationBarItem>[
                     BottomNavigationBarItem(
                       icon: Icon(Icons.home),
