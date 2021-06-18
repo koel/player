@@ -2,32 +2,39 @@ import 'package:app/models/artist.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/album_provider.dart';
 import 'package:app/providers/artist_provider.dart';
-import 'package:app/providers/requires_initialization.dart';
+import 'package:app/values/parse_result.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
-class SongProvider with ChangeNotifier, RequiresInitialization {
-  List<Song> _songs = <Song>[];
+ParseResult parseSongs(List<dynamic> data) {
+  ParseResult result = ParseResult();
 
-  void init(BuildContext context, List<dynamic> songData) {
-    AlbumProvider albumProvider =
-        Provider.of<AlbumProvider>(context, listen: false);
+  data.forEach((element) {
+    result.add(Song.fromJson(element), element['id']);
+  });
+
+  return result;
+}
+
+class SongProvider with ChangeNotifier {
+  late List<Song> _songs;
+  late Map<String, Song> _index;
+
+  Future<void> init(BuildContext context, List<dynamic> songData) async {
     ArtistProvider artistProvider =
         Provider.of<ArtistProvider>(context, listen: false);
+    AlbumProvider albumProvider =
+        Provider.of<AlbumProvider>(context, listen: false);
 
-    albumProvider.ensureInitialization();
-    artistProvider.ensureInitialization();
+    ParseResult result = await compute(parseSongs, songData);
+    _songs = result.collection.cast();
+    _index = result.index.cast();
 
-    songData.forEach((element) {
-      _songs.add(Song.fromJson(
-        element,
-        albumProvider.byId(element['album_id']),
-        artistProvider.byId(element['artist_id']),
-      ));
+    _songs.forEach((song) {
+      song.artist = artistProvider.byId(song.artistId);
+      song.album = albumProvider.byId(song.albumId);
     });
-
-    initialized = true;
   }
 
   void initInteractions(BuildContext context, List<dynamic> interactionData) {
@@ -53,7 +60,7 @@ class SongProvider with ChangeNotifier, RequiresInitialization {
   }
 
   Song byId(String id) {
-    return _songs.firstWhere((song) => song.id == id);
+    return _index[id]!;
   }
 
   List<Song> byArtist(Artist artist) {

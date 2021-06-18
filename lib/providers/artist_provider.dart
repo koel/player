@@ -1,19 +1,32 @@
 import 'package:app/models/artist.dart';
-import 'package:app/providers/requires_initialization.dart';
+import 'package:app/values/parse_result.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
-class ArtistProvider with ChangeNotifier, RequiresInitialization {
-  List<Artist> _artists = <Artist>[];
+ParseResult parseArtists(List<dynamic> data) {
+  ParseResult result = ParseResult();
+
+  data.forEach((element) {
+    result.add(Artist.fromJson(element), element['id']);
+  });
+
+  return result;
+}
+
+class ArtistProvider with ChangeNotifier {
+  late List<Artist> _artists;
+  late Map<int, Artist> _index;
 
   List<Artist> get artists => _artists;
 
-  void init(BuildContext context, List<dynamic> artistData) {
-    artistData.forEach((element) => _artists.add(Artist.fromJson(element)));
-    initialized = true;
+  Future<void> init(BuildContext context, List<dynamic> artistData) async {
+    ParseResult result = await compute(parseArtists, artistData);
+    _artists = result.collection.cast();
+    _index = result.index.cast();
   }
 
   Artist byId(int id) {
-    return _artists.firstWhere((song) => song.id == id);
+    return _index[id]!;
   }
 
   List<Artist> mostPlayed({int limit = 15}) {

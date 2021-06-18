@@ -7,20 +7,21 @@ class Album {
   bool isCompilation;
   String name;
   String? cover;
-  Artist artist;
+  int artistId;
+  late Artist artist;
   int playCount = 0;
 
   ImageProvider? _image;
 
-  Album(this.artist, this.id, this.name, this.cover, this.isCompilation);
+  Album(this.id, this.name, this.cover, this.isCompilation, this.artistId);
 
-  factory Album.fromJson(Map<String, dynamic> json, Artist artist) {
+  factory Album.fromJson(Map<String, dynamic> json) {
     return Album(
-      artist,
       json['id'],
       json['name'],
       json['cover'],
       json['is_compilation'],
+      json['artist_id'],
     );
   }
 

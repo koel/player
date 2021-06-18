@@ -1,10 +1,9 @@
 import 'package:app/models/song.dart';
-import 'package:app/providers/requires_initialization.dart';
 import 'package:app/utils/preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 
-class QueueProvider with ChangeNotifier, RequiresInitialization {
+class QueueProvider with ChangeNotifier {
   final ConcatenatingAudioSource _audioSource = ConcatenatingAudioSource(
     children: [],
   );

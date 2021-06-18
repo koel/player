@@ -10,12 +10,14 @@ class DataProvider with ChangeNotifier {
   Future<void> init(BuildContext context) async {
     final Map<String, dynamic> data = await ApiRequest.get('data');
 
-    Provider.of<ArtistProvider>(context, listen: false)
+    await Provider.of<ArtistProvider>(context, listen: false)
         .init(context, data['artists']);
-    Provider.of<AlbumProvider>(context, listen: false)
+    await Provider.of<AlbumProvider>(context, listen: false)
         .init(context, data['albums']);
-    Provider.of<SongProvider>(context, listen: false)
-      ..init(context, data['songs'])
-      ..initInteractions(context, data['interactions']);
+
+    SongProvider songProvider =
+        Provider.of<SongProvider>(context, listen: false);
+    await songProvider.init(context, data['songs']);
+    songProvider.initInteractions(context, data['interactions']);
   }
 }

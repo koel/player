@@ -1,34 +1,41 @@
 import 'package:app/models/album.dart';
-import 'package:app/providers/requires_initialization.dart';
+import 'package:app/values/parse_result.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'artist_provider.dart';
 
-class AlbumProvider with ChangeNotifier, RequiresInitialization {
-  List<Album> _albums = <Album>[];
+ParseResult parseAlbums(List<dynamic> data) {
+  ParseResult result = ParseResult();
+
+  data.forEach((element) {
+    result.add(Album.fromJson(element), element['id']);
+  });
+
+  return result;
+}
+
+class AlbumProvider with ChangeNotifier {
+  late List<Album> _albums;
+  late Map<int, Album> _index;
 
   List<Album> get albums => _albums;
 
-  void init(BuildContext context, List<dynamic> albumData) {
+  Future<void> init(BuildContext context, List<dynamic> albumData) async {
     ArtistProvider artistProvider =
         Provider.of<ArtistProvider>(context, listen: false);
 
-    if (!artistProvider.initialized) {
-      throw Exception('ArtistProvider must be initialized first');
-    }
+    ParseResult result = await compute(parseAlbums, albumData);
+    _albums = result.collection.cast();
+    _index = result.index.cast();
 
-    albumData.forEach((element) {
-      _albums.add(Album.fromJson(
-        element,
-        artistProvider.byId(element['artist_id']),
-      ));
+    _albums.forEach((album) {
+      album.artist = artistProvider.byId(album.artistId);
     });
-
-    initialized = true;
   }
 
   Album byId(int id) {
-    return _albums.firstWhere((album) => album.id == id);
+    return _index[id]!;
   }
 
   List<Album> topAlbums() {
