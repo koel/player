@@ -56,6 +56,22 @@ class ArtistDetailsScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+                  SizedBox(
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                   Center(
                     child: SizedBox(
                       width: 192,
