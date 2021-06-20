@@ -14,7 +14,7 @@ class SongCard extends StatelessWidget {
         SongThumbnail(song: song, size: ThumbnailSize.large),
         SizedBox(height: 8),
         SizedBox(
-          width: 160,
+          width: 144,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

@@ -7,7 +7,7 @@ import 'package:app/providers/user_provider.dart';
 import 'package:app/ui/widgets/artist_card.dart';
 import 'package:app/ui/widgets/headings.dart';
 import 'package:app/ui/widgets/song_card.dart';
-import 'package:app/ui/widgets/song_item.dart';
+import 'package:app/ui/widgets/song_row.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Heading1(text: "Howdy, ${_authUser.name}!"),
-              RecentlyAdded(recentlyAddedSongs: _recentlyAddedSongs),
+              RecentlyAdded(songs: _recentlyAddedSongs),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -77,25 +77,25 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class RecentlyAdded extends StatelessWidget {
-  const RecentlyAdded({
-    Key? key,
-    required List<Song> recentlyAddedSongs,
-  })  : _recentlyAddedSongs = recentlyAddedSongs,
-        super(key: key);
+  final List<Song> songs;
 
-  final List<Song> _recentlyAddedSongs;
+  RecentlyAdded({
+    Key? key,
+    required this.songs,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
-        ..._recentlyAddedSongs.expand(
-          (song) => [
-            SongItem(song),
-            SizedBox(height: 12),
-          ],
-        ),
-      ],
+      children: songs
+          .map(
+            (song) => SongRow(
+              song: song,
+              bordered: false,
+              padding: EdgeInsets.symmetric(horizontal: 0),
+            ),
+          )
+          .toList(),
     );
   }
 }

@@ -16,8 +16,8 @@ class SongThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: size == ThumbnailSize.small ? 48 : 160,
-      height: size == ThumbnailSize.small ? 48 : 160,
+      width: size == ThumbnailSize.small ? 48 : 144,
+      height: size == ThumbnailSize.small ? 48 : 144,
       child: DecoratedBox(
         decoration: BoxDecoration(
           image: DecorationImage(image: song.image, fit: BoxFit.cover),

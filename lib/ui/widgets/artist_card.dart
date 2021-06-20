@@ -27,8 +27,8 @@ class _ArtistCardState extends State<ArtistCard> {
         child: Column(
           children: <Widget>[
             SizedBox(
-              width: 160,
-              height: 160,
+              width: 144,
+              height: 144,
               child: Hero(
                 tag: "artist-hero-${widget.artist.id}",
                 child: DecoratedBox(
@@ -44,7 +44,7 @@ class _ArtistCardState extends State<ArtistCard> {
             ),
             SizedBox(height: 8),
             SizedBox(
-              width: 160,
+              width: 144,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[

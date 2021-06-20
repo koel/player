@@ -11,11 +11,14 @@ class AudioPlayerTask extends BackgroundAudioTask {
   AudioProcessingState? _skipState;
   late StreamSubscription<PlaybackEvent> _eventSubscription;
 
+  late ConcatenatingAudioSource _audioSource;
+
   List<MediaItem> get queue => _mediaLibrary.items;
 
-  int? get index => _player.currentIndex;
+  int? get currentIndex => _player.currentIndex;
 
-  MediaItem? get mediaItem => index == null ? null : queue[index!];
+  MediaItem? get currentMediaItem =>
+      currentIndex == null ? null : queue[currentIndex!];
 
   @override
   Future<void> onStart(Map<String, dynamic>? params) async {
@@ -54,12 +57,14 @@ class AudioPlayerTask extends BackgroundAudioTask {
     String apiToken = (await prefs.getApiToken())!;
 
     try {
-      await _player.setAudioSource(ConcatenatingAudioSource(
+      _audioSource = ConcatenatingAudioSource(
         children: queue.map((item) {
           return AudioSource.uri(
               Uri.parse("$hostUri/play/${item.id}?api_token=$apiToken"));
         }).toList(),
-      ));
+      );
+
+      await _player.setAudioSource(_audioSource);
       // In this example, we automatically start playing on start.
       onPlay();
     } catch (e) {
@@ -69,18 +74,39 @@ class AudioPlayerTask extends BackgroundAudioTask {
   }
 
   @override
+  Future<dynamic> onCustomAction(String name, arguments) async {
+    switch (name) {
+      case 'playNow':
+        await onPlayFromMediaId(arguments as String);
+        return;
+      default:
+        return;
+    }
+  }
+
+  @override
+  Future<void> onPlayFromMediaId(String mediaId) async {
+    await _player.setUrl(mediaId);
+    await _player.play();
+  }
+
+  @override
   Future<void> onAddQueueItem(MediaItem mediaItem) async {
     queue.add(mediaItem);
+    _audioSource.add(AudioSource.uri(Uri.parse(mediaItem.id)));
   }
 
   @override
   Future<void> onAddQueueItemAt(MediaItem mediaItem, int index) async {
     queue.insert(index, mediaItem);
+    _audioSource.insert(index, AudioSource.uri(Uri.parse(mediaItem.id)));
   }
 
   @override
   Future<void> onRemoveQueueItem(MediaItem mediaItem) async {
+    int index = queue.indexOf(mediaItem);
     queue.remove(mediaItem);
+    _audioSource.removeAt(index);
   }
 
   @override
@@ -95,7 +121,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
     // previous. This variable holds the preferred state to send instead of
     // buffering during a skip, and it is cleared as soon as the player exits
     // buffering (see the listener in onStart).
-    _skipState = newIndex > index!
+    _skipState = newIndex > currentIndex!
         ? AudioProcessingState.skippingToNext
         : AudioProcessingState.skippingToPrevious;
     // This jumps to the beginning of the queue item at newIndex.
@@ -105,7 +131,9 @@ class AudioPlayerTask extends BackgroundAudioTask {
   }
 
   @override
-  Future<void> onPlay() => _player.play();
+  Future<void> onPlay() async {
+    _player.play();
+  }
 
   @override
   Future<void> onPause() => _player.pause();
@@ -114,16 +142,19 @@ class AudioPlayerTask extends BackgroundAudioTask {
   Future<void> onSeekTo(Duration position) => _player.seek(position);
 
   @override
-  Future<void> onStop() async {
-    await _player.dispose();
-    _eventSubscription.cancel();
-    // It is important to wait for this state to be broadcast before we shut
-    // down the task. If we don't, the background task will be destroyed before
-    // the message gets sent to the UI.
-    await _broadcastState();
-    // Shut down this task
-    await super.onStop();
-  }
+  Future<void> onSkipToNext() => _player.seekToNext();
+
+  // @override
+  // Future<void> onStop() async {
+  //   // await _player.dispose();
+  //   // _eventSubscription.cancel();
+  //   // // It is important to wait for this state to be broadcast before we shut
+  //   // // down the task. If we don't, the background task will be destroyed before
+  //   // // the message gets sent to the UI.
+  //   // await _broadcastState();
+  //   // // Shut down this task
+  //   await super.onStop();
+  // }
 
   /// Broadcasts the current state to all clients.
   Future<void> _broadcastState() async {
@@ -170,15 +201,24 @@ class AudioPlayerTask extends BackgroundAudioTask {
 }
 
 class MediaLibrary {
-  final _items = <MediaItem>[
-    MediaItem(
-        id: 'dc2dcabd1d31fdc13c19d1048c490d10',
-        album: 'Epica',
-        title: 'On the Coldest Winter\'s Night',
-        artist: 'Kamelot',
+  late final Map<String, dynamic> _extras;
+  late final List<MediaItem> _items;
+
+  MediaLibrary() {
+    _extras = new Map();
+    _extras['songId'] = 'd7fc91319f9ba814b74e312a7df745eb';
+    _items = <MediaItem>[
+      MediaItem(
+        id: 'd7fc91319f9ba814b74e312a7df745eb',
+        album: 'Made in Haven',
+        title: 'Yeah',
+        artist: 'Queen',
         artUri: Uri.parse(
-            'https://lastfm.freetls.fastly.net/i/u/300x300/0f44748e0fc44493bec9ca3b222f3b4b.png'))
-  ];
+            'https://lastfm.freetls.fastly.net/i/u/300x300/3c32fca5ea6c4788959ee4f7013c6fd'),
+        extras: this._extras,
+      ),
+    ];
+  }
 
   List<MediaItem> get items => _items;
 }

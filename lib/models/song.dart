@@ -1,5 +1,7 @@
 import 'package:app/models/album.dart';
 import 'package:app/models/artist.dart';
+import 'package:app/utils/preferences.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 
 class Song {
@@ -14,6 +16,9 @@ class Song {
   int albumId;
   bool liked = false;
   int playCount = 0;
+
+  MediaItem? _mediaItem;
+  String? _sourceUrl;
 
   Song(
     this.id,
@@ -39,5 +44,34 @@ class Song {
 
   ImageProvider get image {
     return this.album.image;
+  }
+
+  Future<MediaItem> asMediaItem() async {
+    if (_mediaItem == null) {
+      Map<String, dynamic> extras = new Map();
+      extras['songId'] = id;
+
+      _mediaItem = MediaItem(
+        id: (await getSourceUrl())!,
+        album: album.name,
+        artist: artist.name,
+        title: title,
+        artUri: Uri.parse((image as NetworkImage).url),
+        extras: extras,
+      );
+    }
+
+    return _mediaItem!;
+  }
+
+  Future<String?> getSourceUrl() async {
+    if (_sourceUrl == null) {
+      Preferences prefs = Preferences();
+      String? hostUrl = await prefs.getHostUrl();
+      String? token = await prefs.getApiToken();
+      _sourceUrl = "$hostUrl/play/$id?api_token=$token";
+    }
+
+    return _sourceUrl;
   }
 }
