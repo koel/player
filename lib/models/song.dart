@@ -26,8 +26,8 @@ class Song {
     this.length,
     this.track,
     this.createdAt,
-      this.artistId,
-      this.albumId,
+    this.artistId,
+    this.albumId,
   );
 
   factory Song.fromJson(Map<String, dynamic> json) {
@@ -66,10 +66,7 @@ class Song {
 
   Future<String?> getSourceUrl() async {
     if (_sourceUrl == null) {
-      Preferences prefs = Preferences();
-      String? hostUrl = await prefs.getHostUrl();
-      String? token = await prefs.getApiToken();
-      _sourceUrl = "$hostUrl/play/$id?api_token=$token";
+      _sourceUrl = "${await hostUrl}/play/$id?api_token=${await apiToken}";
     }
 
     return _sourceUrl;

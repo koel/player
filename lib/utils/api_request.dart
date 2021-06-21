@@ -8,17 +8,16 @@ enum HttpMethod { get, post, patch, put, delete }
 class ApiRequest {
   static Future<Map<String, dynamic>> request(HttpMethod method, String path,
       {Object data = const {}}) async {
-    Preferences preferences = new Preferences();
     late BaseHttp.Response response;
 
-    Uri uri = Uri.parse(await preferences.getApiBaseUrl() + "/$path");
+    Uri uri = Uri.parse("${await apiBaseUrl}/$path");
 
     Map<String, String> headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
 
-    String? token = await preferences.getApiToken();
+    String? token = await apiToken;
 
     if (token != null) {
       headers['Authorization'] = "Bearer $token";

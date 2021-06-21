@@ -9,7 +9,6 @@ class QueueProvider with ChangeNotifier {
   );
 
   final List<Song> _songs = <Song>[];
-  final Song? _currentSong = null;
 
   void addToTop(Song song) async {
     _songs.insert(0, song);
@@ -22,13 +21,9 @@ class QueueProvider with ChangeNotifier {
   }
 
   Future<UriAudioSource> songToAudioSource(Song song) async {
-    Preferences pref = Preferences();
-    String hostUrl = (await pref.getHostUrl())!;
-    String token = (await pref.getApiToken())!;
-
-    print("$hostUrl/play/${song.id}?api_token=$token");
     return AudioSource.uri(
-        Uri.parse("$hostUrl/play/${song.id}?api_token=$token"));
+      Uri.parse("${await hostUrl}/play/${song.id}?api_token=${await apiToken}"),
+    );
   }
 
   List<Song> get songs {

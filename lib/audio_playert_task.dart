@@ -25,6 +25,13 @@ class AudioPlayerTask extends BackgroundAudioTask {
     final session = await AudioSession.instance;
     await session.configure(AudioSessionConfiguration.music());
 
+    // _player.sequenceStateStream
+    //     .map((state) => state?.effectiveSequence)
+    //     .distinct()
+    //     .map((sequence) =>
+    //         sequence?.map((source) => source.tag as MediaItem).toList() ?? [])
+    //     .listen(AudioServiceBackground.setQueue);
+
     _player.currentIndexStream.listen((index) {
       if (index != null) {
         AudioServiceBackground.setMediaItem(queue[index]);
@@ -52,21 +59,20 @@ class AudioPlayerTask extends BackgroundAudioTask {
 
     // Load and broadcast the queue
     AudioServiceBackground.setQueue(queue);
-    Preferences prefs = new Preferences();
-    String hostUri = (await prefs.getHostUrl())!;
-    String apiToken = (await prefs.getApiToken())!;
+    String? host = await hostUrl;
+    String? token = await apiToken;
 
     try {
       _audioSource = ConcatenatingAudioSource(
         children: queue.map((item) {
           return AudioSource.uri(
-              Uri.parse("$hostUri/play/${item.id}?api_token=$apiToken"));
+              Uri.parse("$host/play/${item.id}?api_token=$token"));
         }).toList(),
       );
 
       await _player.setAudioSource(_audioSource);
       // In this example, we automatically start playing on start.
-      onPlay();
+      // onPlay();
     } catch (e) {
       print("Error: $e");
       onStop();
@@ -74,26 +80,11 @@ class AudioPlayerTask extends BackgroundAudioTask {
   }
 
   @override
-  Future<dynamic> onCustomAction(String name, arguments) async {
-    switch (name) {
-      case 'playNow':
-        await onPlayFromMediaId(arguments as String);
-        return;
-      default:
-        return;
-    }
-  }
-
-  @override
-  Future<void> onPlayFromMediaId(String mediaId) async {
-    await _player.setUrl(mediaId);
-    await _player.play();
-  }
-
-  @override
   Future<void> onAddQueueItem(MediaItem mediaItem) async {
+    AudioSource audio =
+        AudioSource.uri(Uri.parse(mediaItem.id), tag: mediaItem);
     queue.add(mediaItem);
-    _audioSource.add(AudioSource.uri(Uri.parse(mediaItem.id)));
+    _audioSource.add(audio);
   }
 
   @override

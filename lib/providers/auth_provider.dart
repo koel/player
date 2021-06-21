@@ -20,7 +20,7 @@ class AuthProvider with ChangeNotifier {
 
     try {
       final responseData = await ApiRequest.post('me', data: loginData);
-      await (new Preferences()).setApiToken(responseData['token']);
+      await setApiToken(responseData['token']);
 
       _loggedInStatus = Status.LoggedIn;
       notifyListeners();

@@ -34,6 +34,7 @@ class _KoelAppState extends State<KoelApp> {
         dividerColor: Colors.grey.shade600,
         scaffoldBackgroundColor: Colors.black,
         backgroundColor: AppColors.primaryBgr,
+        bottomSheetTheme: BottomSheetThemeData(backgroundColor: Colors.black45),
         popupMenuTheme: PopupMenuThemeData(
           elevation: 2,
           color: Colors.grey.shade900,

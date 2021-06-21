@@ -5,6 +5,7 @@ import 'package:app/models/artist.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/widgets/song_list.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -115,7 +116,14 @@ class ArtistDetailsScreen extends StatelessWidget {
                       ),
                       child: ElevatedButton(
                         style: _buttonStyle,
-                        onPressed: () {},
+                        onPressed: () async {
+                          _songs.take(20).forEach(
+                                (song) async => AudioService.addQueueItem(
+                                  await song.asMediaItem(),
+                                ),
+                              );
+                          await AudioService.skipToNext();
+                        },
                         child: Row(
                           children: <Widget>[
                             Icon(Icons.play_arrow),

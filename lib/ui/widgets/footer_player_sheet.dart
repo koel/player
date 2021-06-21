@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:app/models/song.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
@@ -23,24 +25,49 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
         SongProvider songProvider = Provider.of<SongProvider>(context);
         Song song = songProvider.byId(snapshot.data!.extras!['songId']);
 
-        return Container(
-          padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SongThumbnail(song: song),
-              Text(snapshot.data!.title),
-              StreamBuilder<bool>(
-                stream: AudioService.playbackStateStream
-                    .map((state) => state.playing)
-                    .distinct(),
-                builder: (context, snapshot) {
-                  final playing = snapshot.data ?? false;
-                  return playing ? pauseButton() : playButton();
-                },
+        return ClipRect(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: BackdropFilter(
+              filter: new ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SongThumbnail(song: song),
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            snapshot.data!.title,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            snapshot.data!.artist!,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(color: Colors.grey),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  StreamBuilder<bool>(
+                    stream: AudioService.playbackStateStream
+                        .map((state) => state.playing)
+                        .distinct(),
+                    builder: (context, snapshot) {
+                      final playing = snapshot.data ?? false;
+                      return playing ? pauseButton() : playButton();
+                    },
+                  ),
+                  nextButton(),
+                ],
               ),
-              nextButton(),
-            ],
+            ),
           ),
         );
       },
@@ -49,7 +76,7 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
 
   IconButton playButton() => IconButton(
         icon: Icon(Icons.play_arrow),
-        iconSize: 48.0,
+        iconSize: 32.0,
         onPressed: AudioService.play,
       );
 

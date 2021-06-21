@@ -1,27 +1,31 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Preferences {
-  Future<SharedPreferences> getPrefInstance() async {
-    return await SharedPreferences.getInstance();
+SharedPreferences? _sharedPref;
+
+Future<SharedPreferences> get sharedPef async {
+  if (_sharedPref == null) {
+    _sharedPref = await SharedPreferences.getInstance();
   }
 
-  Future<void> setHostUrl(String url) async {
-    (await SharedPreferences.getInstance()).setString('hostUrl', url);
-  }
+  return _sharedPref!;
+}
 
-  Future<String?> getHostUrl() async {
-    return (await SharedPreferences.getInstance()).getString('hostUrl');
-  }
+Future<void> setHostUrl(String url) async {
+  (await sharedPef).setString('hostUrl', url);
+}
 
-  Future<String> getApiBaseUrl() async {
-    return (await getPrefInstance()).getString('hostUrl')! + '/api';
-  }
+Future<String?> get hostUrl async {
+  return (await sharedPef).getString('hostUrl');
+}
 
-  Future<void> setApiToken(String token) async {
-    (await getPrefInstance()).setString('apiToken', token);
-  }
+Future<String?> get apiBaseUrl async {
+  return "${await hostUrl}/api";
+}
 
-  Future<String?> getApiToken() async {
-    return (await getPrefInstance()).getString('apiToken');
-  }
+Future<void> setApiToken(String token) async {
+  (await sharedPef).setString('apiToken', token);
+}
+
+Future<String?> get apiToken async {
+  return (await sharedPef).getString('apiToken');
 }

@@ -29,7 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final koelHostField = TextFormField(
       keyboardType: TextInputType.url,
-      onSaved: (value) => (new Preferences()).setHostUrl(value!),
+      onSaved: (value) => setHostUrl(value!),
       decoration: InputDecoration(hintText: "Koel's Host URL"),
     );
 
