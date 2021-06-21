@@ -38,7 +38,10 @@ class AlbumDetailsScreen extends StatelessWidget {
             pinned: true,
             expandedHeight: 290,
             flexibleSpace: FlexibleSpaceBar(
-              title: Text(album.name, overflow: TextOverflow.ellipsis),
+              title: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Text(album.name, overflow: TextOverflow.ellipsis),
+              ),
               background: Stack(
                 children: <Widget>[
                   SizedBox(
