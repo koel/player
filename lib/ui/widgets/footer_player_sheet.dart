@@ -49,7 +49,9 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
                           Text(
                             snapshot.data!.artist!,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: Colors.grey),
+                            style: TextStyle(
+                              color: Theme.of(context).textTheme.caption?.color,
+                            ),
                           )
                         ],
                       ),

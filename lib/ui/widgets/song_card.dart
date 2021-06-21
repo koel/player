@@ -23,8 +23,12 @@ class SongCard extends StatelessWidget {
                 style: TextStyle(fontWeight: FontWeight.bold),
                 overflow: TextOverflow.ellipsis,
               ),
+              SizedBox(height: 4),
               Text(
                 song.artist.name,
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.caption?.color,
+                ),
                 overflow: TextOverflow.ellipsis,
               )
             ],

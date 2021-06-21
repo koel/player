@@ -30,7 +30,9 @@ class ArtistProvider with ChangeNotifier {
   }
 
   List<Artist> mostPlayed({int limit = 15}) {
-    List<Artist> clone = List<Artist>.from(_artists);
+    List<Artist> clone = List<Artist>.from(_artists)
+        .where((artist) => artist.isStandardArtist)
+        .toList();
     clone.sort((a, b) => b.playCount.compareTo(a.playCount));
     return clone.sublist(0, limit);
   }

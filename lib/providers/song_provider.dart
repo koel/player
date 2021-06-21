@@ -1,3 +1,4 @@
+import 'package:app/models/album.dart';
 import 'package:app/models/artist.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/album_provider.dart';
@@ -65,5 +66,9 @@ class SongProvider with ChangeNotifier {
 
   List<Song> byArtist(Artist artist) {
     return _songs.where((song) => song.artist == artist).toList();
+  }
+
+  List<Song> byAlbum(Album album) {
+    return _songs.where((song) => song.album == album).toList();
   }
 }

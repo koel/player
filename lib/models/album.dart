@@ -32,4 +32,8 @@ class Album {
 
     return _image!;
   }
+
+  bool get isStandardAlbum => !isUnknownAlbum;
+
+  bool get isUnknownAlbum => id == 1;
 }

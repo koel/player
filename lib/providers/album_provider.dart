@@ -38,7 +38,11 @@ class AlbumProvider with ChangeNotifier {
     return _index[id]!;
   }
 
-  List<Album> topAlbums() {
-    return [];
+  List<Album> mostPlayed({int limit = 15}) {
+    List<Album> clone = List<Album>.from(_albums)
+        .where((album) => album.isStandardAlbum)
+        .toList();
+    clone.sort((a, b) => b.playCount.compareTo(a.playCount));
+    return clone.sublist(0, limit);
   }
 }

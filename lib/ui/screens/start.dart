@@ -1,4 +1,4 @@
-import 'package:app/audio_playert_task.dart';
+import 'package:app/audio_player_task.dart';
 import 'package:app/constants/dimens.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/ui/screens/home.dart';

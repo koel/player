@@ -26,4 +26,10 @@ class Artist {
 
     return _image!;
   }
+
+  bool get isStandardArtist => !isUnknownArtist && !isVariousArtist;
+
+  bool get isUnknownArtist => id == 2;
+
+  bool get isVariousArtist => id == 2;
 }
