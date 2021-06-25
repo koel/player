@@ -119,14 +119,7 @@ class ArtistDetailsScreen extends StatelessWidget {
                       ),
                       child: ElevatedButton(
                         style: _buttonStyle,
-                        onPressed: () async {
-                          _songs.take(20).forEach(
-                                (song) async => AudioService.addQueueItem(
-                                  await song.asMediaItem(),
-                                ),
-                              );
-                          await AudioService.skipToNext();
-                        },
+                        onPressed: () async {},
                         child: Row(
                           children: <Widget>[
                             Icon(Icons.play_arrow),

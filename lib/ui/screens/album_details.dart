@@ -120,12 +120,12 @@ class AlbumDetailsScreen extends StatelessWidget {
                       child: ElevatedButton(
                         style: _buttonStyle,
                         onPressed: () async {
-                          _songs.forEach(
-                            (song) async => AudioService.addQueueItem(
-                              await song.asMediaItem(),
+                          List<MediaItem> mediaItems = await Future.wait(
+                            _songs.map(
+                              (song) async => await song.asMediaItem(),
                             ),
                           );
-                          await AudioService.skipToNext();
+                          AudioService.updateQueue(mediaItems);
                         },
                         child: Row(
                           children: <Widget>[

@@ -101,6 +101,17 @@ class AudioPlayerTask extends BackgroundAudioTask {
   }
 
   @override
+  Future<void> onUpdateQueue(List<MediaItem> items) async {
+    queue.clear();
+    queue.addAll(items);
+
+    await _audioSource.clear();
+    await _audioSource.addAll(
+      queue.map((item) => AudioSource.uri(Uri.parse(item.id))).toList(),
+    );
+  }
+
+  @override
   Future<void> onSkipToQueueItem(String mediaId) async {
     // Then default implementations of onSkipToNext and onSkipToPrevious will
     // delegate to this method.

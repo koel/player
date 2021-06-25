@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:app/models/song.dart';
 import 'package:app/providers/song_provider.dart';
+import 'package:app/ui/screens/queue.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
@@ -29,45 +30,49 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: BackdropFilter(
-              filter: new ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SongThumbnail(song: song),
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            snapshot.data!.title,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            snapshot.data!.artist!,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Theme.of(context).textTheme.caption?.color,
+              filter: new ImageFilter.blur(sigmaX: 30.0, sigmaY: 30.0),
+              child: InkWell(
+                onTap: () => _openQueue(context),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SongThumbnail(song: song),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              snapshot.data!.title,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          )
-                        ],
+                            SizedBox(height: 4),
+                            Text(
+                              snapshot.data!.artist!,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color:
+                                    Theme.of(context).textTheme.caption?.color,
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  StreamBuilder<bool>(
-                    stream: AudioService.playbackStateStream
-                        .map((state) => state.playing)
-                        .distinct(),
-                    builder: (context, snapshot) {
-                      final playing = snapshot.data ?? false;
-                      return playing ? pauseButton() : playButton();
-                    },
-                  ),
-                  nextButton(),
-                ],
+                    StreamBuilder<bool>(
+                      stream: AudioService.playbackStateStream
+                          .map((state) => state.playing)
+                          .distinct(),
+                      builder: (context, snapshot) {
+                        final playing = snapshot.data ?? false;
+                        return playing ? pauseButton() : playButton();
+                      },
+                    ),
+                    nextButton(),
+                  ],
+                ),
               ),
             ),
           ),
@@ -93,4 +98,29 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
         iconSize: 32.0,
         onPressed: AudioService.skipToNext,
       );
+
+  Future<void> _openQueue(BuildContext context) async {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).primaryColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(8),
+          topRight: Radius.circular(8),
+        ),
+      ),
+      builder: (BuildContext context) {
+        var padding = MediaQuery.of(context).padding;
+        return Container(
+          height: MediaQuery.of(context).size.height -
+              padding.top -
+              padding.bottom -
+              16,
+          padding: EdgeInsets.all(16),
+          child: QueueScreen(),
+        );
+      },
+    );
+  }
 }
