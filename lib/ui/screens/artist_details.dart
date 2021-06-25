@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:app/constants/dimens.dart';
 import 'package:app/models/artist.dart';
 import 'package:app/models/song.dart';
+import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/widgets/song_list.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ class ArtistDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AudioPlayerProvider audio = Provider.of<AudioPlayerProvider>(context);
     List<Song> _songs = Provider.of<SongProvider>(context).byArtist(artist);
     _songs.sort((a, b) => a.title.compareTo(b.title));
 
@@ -118,7 +120,7 @@ class ArtistDetailsScreen extends StatelessWidget {
                       ),
                       child: ElevatedButton(
                         style: _buttonStyle,
-                        onPressed: () async {},
+                        onPressed: () async => await audio.replaceQueue(_songs),
                         child: Row(
                           children: <Widget>[
                             Icon(Icons.play_arrow),
@@ -141,7 +143,10 @@ class ArtistDetailsScreen extends StatelessWidget {
                         height: 48,
                       ),
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () async => await audio.replaceQueue(
+                          _songs,
+                          shuffle: true,
+                        ),
                         style: _buttonStyle,
                         child: Row(
                           children: <Widget>[

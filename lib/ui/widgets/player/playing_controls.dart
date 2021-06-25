@@ -70,7 +70,7 @@ class PlayingControls extends StatelessWidget {
           child: _loopIcon(context),
         ),
         SizedBox(
-          width: 12,
+          width: 4,
         ),
         IconButton(
           onPressed: onPlay,
@@ -82,7 +82,7 @@ class PlayingControls extends StatelessWidget {
           ),
         ),
         SizedBox(
-          width: 12,
+          width: 4,
         ),
         IconButton(
           onPressed: onNext,
@@ -90,9 +90,6 @@ class PlayingControls extends StatelessWidget {
             Icons.skip_next,
             size: 32,
           ),
-        ),
-        SizedBox(
-          width: 12,
         ),
       ],
     );

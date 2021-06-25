@@ -61,12 +61,12 @@ class _StartScreenState extends State<StartScreen> {
               alignment: Alignment.center,
               child: Scaffold(
                 body: Container(
-                  padding: EdgeInsets.all(AppDimens.horizontalPadding),
+                  padding: EdgeInsets.symmetric(horizontal: AppDimens.horizontalPadding),
                   child: _widgetOptions.elementAt(_selectedIndex),
                 ),
                 bottomSheet: FooterPlayerSheet(),
                 bottomNavigationBar: BottomNavigationBar(
-                  elevation: 1,
+                  elevation: 0,
                   items: const <BottomNavigationBarItem>[
                     BottomNavigationBarItem(
                       icon: Icon(Icons.home),

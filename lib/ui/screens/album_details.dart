@@ -120,9 +120,7 @@ class AlbumDetailsScreen extends StatelessWidget {
                       ),
                       child: ElevatedButton(
                         style: _buttonStyle,
-                        onPressed: () async {
-                          await audio.replaceQueue(_songs);
-                        },
+                        onPressed: () async => await audio.replaceQueue(_songs),
                         child: Row(
                           children: <Widget>[
                             Icon(Icons.play_arrow),
@@ -145,7 +143,10 @@ class AlbumDetailsScreen extends StatelessWidget {
                         height: 48,
                       ),
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () async => await audio.replaceQueue(
+                          _songs,
+                          shuffle: true,
+                        ),
                         style: _buttonStyle,
                         child: Row(
                           children: <Widget>[

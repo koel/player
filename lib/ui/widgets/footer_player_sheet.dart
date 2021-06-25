@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/queue.dart';
@@ -25,6 +26,12 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
     super.initState();
   }
 
+  @override
+  void reassemble() {
+    audio.stop();
+    super.reassemble();
+  }
+
   Future<void> initAudio() async {
     songProvider = Provider.of<SongProvider>(context);
     audio = Provider.of<AudioPlayerProvider>(context);
@@ -35,94 +42,119 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
   Widget build(BuildContext context) {
     initAudio();
 
-    return ClipRect(
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: BackdropFilter(
-          filter: new ImageFilter.blur(sigmaX: 30.0, sigmaY: 30.0),
-          child: InkWell(
-            onTap: () => _openQueue(context),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                audio.player.builderCurrent(
-                  builder: (BuildContext context, Playing playing) {
-                    String? songId = playing.audio.audio.metas.extra?['songId'];
-                    return songId == null
-                        ? SizedBox()
-                        : SongThumbnail(song: songProvider.byId(songId));
-                  },
-                ),
+    return audio.player.builderCurrent(
+      builder: (BuildContext context, Playing playing) {
+        String? songId = playing.audio.audio.metas.extra?['songId'];
+        if (songId == null) return SizedBox.shrink();
 
-                audio.player.builderLoopMode(
-                  builder: (context, loopMode) {
-                    return PlayerBuilder.isPlaying(
-                        player: audio.player,
-                        builder: (context, isPlaying) {
-                          return PlayingControls(
-                            loopMode: loopMode,
-                            isPlaying: isPlaying,
-                            isPlaylist: true,
-                            onStop: () {
-                              audio.player.stop();
-                            },
-                            toggleLoop: () {
-                              audio.player.toggleLoop();
-                            },
-                            onPlay: () {
-                              audio.player.playOrPause();
-                            },
-                            onNext: () {
-                              audio.player.next();
-                            },
-                            onPrevious: () {
-                              audio.player.previous();
-                            },
-                          );
-                        });
-                  },
-                ),
+        Song current = songProvider.byId(songId);
 
-                // SongThumbnail(song: song),
-                // Expanded(
-                //   child: Padding(
-                //     padding: EdgeInsets.symmetric(horizontal: 16),
-                //     child: Column(
-                //       mainAxisSize: MainAxisSize.min,
-                //       crossAxisAlignment: CrossAxisAlignment.start,
-                //       children: [
-                //         Text(
-                //           snapshot.data!.title,
-                //           overflow: TextOverflow.ellipsis,
-                //         ),
-                //         SizedBox(height: 4),
-                //         Text(
-                //           snapshot.data!.artist!,
-                //           overflow: TextOverflow.ellipsis,
-                //           style: TextStyle(
-                //             color:
-                //                 Theme.of(context).textTheme.caption?.color,
-                //           ),
-                //         )
-                //       ],
-                //     ),
-                //   ),
-                // ),
-                // StreamBuilder<bool>(
-                //   stream: AudioService.playbackStateStream
-                //       .map((state) => state.playing)
-                //       .distinct(),
-                //   builder: (context, snapshot) {
-                //     final playing = snapshot.data ?? false;
-                //     return playing ? pauseButton() : playButton();
-                //   },
-                // ),
-                // nextButton(),
-              ],
+        return ClipRect(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: BackdropFilter(
+              filter: new ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+              child: InkWell(
+                onTap: () => _openQueue(context),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    SongThumbnail(song: songProvider.byId(songId)),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              current.title,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              current.artist.name,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color:
+                                    Theme.of(context).textTheme.caption?.color,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    audio.player.builderLoopMode(
+                      builder: (context, loopMode) {
+                        return PlayerBuilder.isPlaying(
+                            player: audio.player,
+                            builder: (context, isPlaying) {
+                              return PlayingControls(
+                                loopMode: loopMode,
+                                isPlaying: isPlaying,
+                                isPlaylist: true,
+                                onStop: () {
+                                  audio.player.stop();
+                                },
+                                toggleLoop: () {
+                                  audio.player.toggleLoop();
+                                },
+                                onPlay: () {
+                                  audio.player.playOrPause();
+                                },
+                                onNext: () {
+                                  audio.player.next();
+                                },
+                                onPrevious: () {
+                                  audio.player.previous();
+                                },
+                              );
+                            });
+                      },
+                    ),
+
+                    // SongThumbnail(song: song),
+                    // Expanded(
+                    //   child: Padding(
+                    //     padding: EdgeInsets.symmetric(horizontal: 16),
+                    //     child: Column(
+                    //       mainAxisSize: MainAxisSize.min,
+                    //       crossAxisAlignment: CrossAxisAlignment.start,
+                    //       children: [
+                    //         Text(
+                    //           snapshot.data!.title,
+                    //           overflow: TextOverflow.ellipsis,
+                    //         ),
+                    //         SizedBox(height: 4),
+                    //         Text(
+                    //           snapshot.data!.artist!,
+                    //           overflow: TextOverflow.ellipsis,
+                    //           style: TextStyle(
+                    //             color:
+                    //                 Theme.of(context).textTheme.caption?.color,
+                    //           ),
+                    //         )
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    // StreamBuilder<bool>(
+                    //   stream: AudioService.playbackStateStream
+                    //       .map((state) => state.playing)
+                    //       .distinct(),
+                    //   builder: (context, snapshot) {
+                    //     final playing = snapshot.data ?? false;
+                    //     return playing ? pauseButton() : playButton();
+                    //   },
+                    // ),
+                    // nextButton(),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

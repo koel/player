@@ -25,23 +25,27 @@ class AudioPlayerProvider with ChangeNotifier {
     );
   }
 
-  Future<void> play() async {
-    await _player.play();
-  }
+  Future<void> play() async => await _player.play();
+  Future<void> stop() async => await _player.stop();
 
   Future<void> queueToBottom(Song song) async {
     _queue.add(await song.asAudio());
   }
 
-  Future<void> replaceQueue(List<Song> songs) async {
+  Future<void> replaceQueue(List<Song> songs, { shuffle = false }) async {
     List<Audio> audios = await Future.wait(
       songs.map((song) async => await song.asAudio()),
     );
-    // _queue.audios.clear();
-    audios.forEach((audio) {
-      print(audio);
-      _player.playlist?.add(audio);
-    });
+
+    if (shuffle) {
+      audios.shuffle();
+    }
+
+    _player.playlist?.audios.clear();
+
+    await _player.stop();
+    audios.forEach((audio) => _player.playlist?.add(audio));
+    _player.play();
   }
 
   AssetsAudioPlayer get player => _player;

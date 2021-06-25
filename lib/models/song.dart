@@ -48,7 +48,9 @@ class Song {
 
   Future<String> get sourceUrl async {
     if (_sourceUrl == null) {
-      _sourceUrl = Uri.encodeFull('${await hostUrl}/play/$id?api_token=${await apiToken}');
+      _sourceUrl = Uri.encodeFull(
+        '${await hostUrl}/play/$id?api_token=${await apiToken}',
+      );
     }
 
     return _sourceUrl!;
@@ -65,7 +67,7 @@ class Song {
           image: album.image is NetworkImage
               ? MetasImage.network((album.image as NetworkImage).url)
               : MetasImage.asset((album.image as AssetImage).assetName),
-          extra: { 'songId': id },
+          extra: {'songId': id},
         ),
       );
     }

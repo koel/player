@@ -29,7 +29,7 @@ class _SongRowState extends State<SongRow> {
         stream: AudioService.currentMediaItemStream,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return SizedBox();
+            return SizedBox.shrink();
           }
 
           return snapshot.data!.extras!['songId'] == widget.song.id
