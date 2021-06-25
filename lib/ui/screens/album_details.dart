@@ -3,9 +3,9 @@ import 'dart:ui';
 import 'package:app/constants/dimens.dart';
 import 'package:app/models/album.dart';
 import 'package:app/models/song.dart';
+import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/widgets/song_list.dart';
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,6 +16,7 @@ class AlbumDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AudioPlayerProvider audio = Provider.of<AudioPlayerProvider>(context);
     List<Song> _songs = Provider.of<SongProvider>(context).byAlbum(album);
     _songs.sort((a, b) => a.title.compareTo(b.title));
 
@@ -120,12 +121,7 @@ class AlbumDetailsScreen extends StatelessWidget {
                       child: ElevatedButton(
                         style: _buttonStyle,
                         onPressed: () async {
-                          List<MediaItem> mediaItems = await Future.wait(
-                            _songs.map(
-                              (song) async => await song.asMediaItem(),
-                            ),
-                          );
-                          AudioService.updateQueue(mediaItems);
+                          await audio.replaceQueue(_songs);
                         },
                         child: Row(
                           children: <Widget>[

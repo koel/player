@@ -5,7 +5,6 @@ import 'package:app/models/artist.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/widgets/song_list.dart';
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

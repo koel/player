@@ -1,17 +1,11 @@
-import 'package:app/audio_player_task.dart';
 import 'package:app/constants/dimens.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/ui/screens/home.dart';
 import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/screens/search.dart';
 import 'package:app/ui/widgets/footer_player_sheet.dart';
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-void _audioPlayerTaskEntrypoint() async {
-  AudioServiceBackground.run(() => AudioPlayerTask());
-}
 
 class StartScreen extends StatefulWidget {
   const StartScreen({Key? key}) : super(key: key);
@@ -39,12 +33,6 @@ class _StartScreenState extends State<StartScreen> {
   @override
   void initState() {
     super.initState();
-
-    AudioService.start(
-      backgroundTaskEntrypoint: _audioPlayerTaskEntrypoint,
-      androidNotificationChannelName: 'Koel',
-      androidEnableQueue: true,
-    );
 
     futureData =
         Provider.of<DataProvider>(context, listen: false).init(context);

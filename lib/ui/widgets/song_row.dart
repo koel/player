@@ -69,10 +69,10 @@ class _SongRowState extends State<SongRow> {
             title: Text('Play Now'),
             trailing: Icon(Icons.play_circle_outline),
             onTap: () async {
-              AudioService.customAction(
-                'playNow',
-                (await song.asMediaItem()).id,
-              );
+              // AudioService.customAction(
+              //   'playNow',
+              //   (await song.asMediaItem()).id,
+              // );
             },
           ),
         ),
@@ -88,8 +88,8 @@ class _SongRowState extends State<SongRow> {
           child: ListTile(
             title: Text('Add to Queue'),
             trailing: Icon(Icons.queue_music),
-            onTap: () async =>
-                await AudioService.addQueueItem(await song.asMediaItem()),
+            // onTap: () async =>
+            //     await AudioService.addQueueItem(await song.asMediaItem()),
           ),
         ),
         PopupMenuItem(

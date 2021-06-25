@@ -1,7 +1,7 @@
 import 'package:app/models/album.dart';
 import 'package:app/models/artist.dart';
 import 'package:app/utils/preferences.dart';
-import 'package:audio_service/audio_service.dart';
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 
 class Song {
@@ -17,7 +17,7 @@ class Song {
   bool liked = false;
   int playCount = 0;
 
-  MediaItem? _mediaItem;
+  Audio? _audio;
   String? _sourceUrl;
 
   Song(
@@ -46,29 +46,30 @@ class Song {
     return this.album.image;
   }
 
-  Future<MediaItem> asMediaItem() async {
-    if (_mediaItem == null) {
-      Map<String, dynamic> extras = new Map();
-      extras['songId'] = id;
+  Future<String> get sourceUrl async {
+    if (_sourceUrl == null) {
+      _sourceUrl = Uri.encodeFull('${await hostUrl}/play/$id?api_token=${await apiToken}');
+    }
 
-      _mediaItem = MediaItem(
-        id: (await getSourceUrl())!,
-        album: album.name,
-        artist: artist.name,
-        title: title,
-        artUri: Uri.parse((image as NetworkImage).url),
-        extras: extras,
+    return _sourceUrl!;
+  }
+
+  Future<Audio> asAudio() async {
+    if (_audio == null) {
+      _audio = Audio.network(
+        await sourceUrl,
+        metas: Metas(
+          title: title,
+          album: album.name,
+          artist: artist.name,
+          image: album.image is NetworkImage
+              ? MetasImage.network((album.image as NetworkImage).url)
+              : MetasImage.asset((album.image as AssetImage).assetName),
+          extra: { 'songId': id },
+        ),
       );
     }
 
-    return _mediaItem!;
-  }
-
-  Future<String?> getSourceUrl() async {
-    if (_sourceUrl == null) {
-      _sourceUrl = "${await hostUrl}/play/$id?api_token=${await apiToken}";
-    }
-
-    return _sourceUrl;
+    return _audio!;
   }
 }

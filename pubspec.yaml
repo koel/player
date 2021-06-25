@@ -35,6 +35,7 @@ dependencies:
   audio_video_progress_bar: ^0.4.0
   audio_service: ^0.17.1
   audio_session: ^0.1.5
+  assets_audio_player: ^3.0.3+3
 
 dev_dependencies:
   flutter_test:
@@ -56,6 +57,7 @@ flutter:
     - assets/images/logo.png
     - assets/images/unknown-album.png
     - assets/images/loading-animation.gif
+    - assets/audio/blank.mp3
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
