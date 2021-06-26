@@ -10,10 +10,7 @@ import 'package:provider/provider.dart';
 
 ParseResult parseSongs(List<dynamic> data) {
   ParseResult result = ParseResult();
-
-  data.forEach((element) {
-    result.add(Song.fromJson(element), element['id']);
-  });
+  data.forEach((json) => result.add(Song.fromJson(json), json['id']));
 
   return result;
 }
@@ -23,10 +20,8 @@ class SongProvider with ChangeNotifier {
   late Map<String, Song> _index;
 
   Future<void> init(BuildContext context, List<dynamic> songData) async {
-    ArtistProvider artistProvider =
-        Provider.of<ArtistProvider>(context, listen: false);
-    AlbumProvider albumProvider =
-        Provider.of<AlbumProvider>(context, listen: false);
+    ArtistProvider artistProvider = context.read<ArtistProvider>();
+    AlbumProvider albumProvider = context.read<AlbumProvider>();
 
     ParseResult result = await compute(parseSongs, songData);
     _songs = result.collection.cast();
@@ -51,24 +46,20 @@ class SongProvider with ChangeNotifier {
   List<Song> recentlyAdded({int limit = 6}) {
     List<Song> clone = List<Song>.from(_songs);
     clone.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return clone.sublist(0, limit);
+    return clone.sublist(0, limit > clone.length ? clone.length : limit);
   }
 
   List<Song> mostPlayed({int limit = 15}) {
     List<Song> clone = List<Song>.from(_songs);
     clone.sort((a, b) => b.playCount.compareTo(a.playCount));
-    return clone.sublist(0, limit);
+    return clone.sublist(0, limit > clone.length ? clone.length : limit);
   }
 
-  Song byId(String id) {
-    return _index[id]!;
-  }
+  Song byId(String id) => _index[id]!;
 
-  List<Song> byArtist(Artist artist) {
-    return _songs.where((song) => song.artist == artist).toList();
-  }
+  List<Song> byArtist(Artist artist) =>
+      _songs.where((song) => song.artist == artist).toList();
 
-  List<Song> byAlbum(Album album) {
-    return _songs.where((song) => song.album == album).toList();
-  }
+  List<Song> byAlbum(Album album) =>
+      _songs.where((song) => song.album == album).toList();
 }

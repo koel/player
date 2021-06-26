@@ -1,7 +1,9 @@
 import 'package:app/models/song.dart';
+import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
-import 'package:audio_service/audio_service.dart';
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SongRow extends StatefulWidget {
   final Song song;
@@ -16,6 +18,14 @@ class SongRow extends StatefulWidget {
 }
 
 class _SongRowState extends State<SongRow> {
+  late AudioPlayerProvider audio;
+
+  @override
+  void initState() {
+    super.initState();
+    audio = context.read<AudioPlayerProvider>();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -25,14 +35,15 @@ class _SongRowState extends State<SongRow> {
               bottom: BorderSide(color: Colors.grey.shade800, width: 0.5),
             )
           : null,
-      leading: StreamBuilder<MediaItem?>(
-        stream: AudioService.currentMediaItemStream,
+      leading: StreamBuilder<Playing?>(
+        stream: audio.player.current,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return SizedBox.shrink();
+            return SizedBox();
           }
 
-          return snapshot.data!.extras!['songId'] == widget.song.id
+          return snapshot.data!.audio.audio.metas.extra?['songId'] ==
+                  widget.song.id
               ? ThumbnailWithPlayingIcon(song: widget.song)
               : SongThumbnail(song: widget.song);
         },
@@ -68,12 +79,7 @@ class _SongRowState extends State<SongRow> {
           child: ListTile(
             title: Text('Play Now'),
             trailing: Icon(Icons.play_circle_outline),
-            onTap: () async {
-              // AudioService.customAction(
-              //   'playNow',
-              //   (await song.asMediaItem()).id,
-              // );
-            },
+            onTap: () async => await audio.play(song: song),
           ),
         ),
         PopupMenuItem(

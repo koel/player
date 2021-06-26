@@ -7,10 +7,7 @@ import 'artist_provider.dart';
 
 ParseResult parseAlbums(List<dynamic> data) {
   ParseResult result = ParseResult();
-
-  data.forEach((element) {
-    result.add(Album.fromJson(element), element['id']);
-  });
+  data.forEach((json) => result.add(Album.fromJson(json), json['id']));
 
   return result;
 }
@@ -22,8 +19,7 @@ class AlbumProvider with ChangeNotifier {
   List<Album> get albums => _albums;
 
   Future<void> init(BuildContext context, List<dynamic> albumData) async {
-    ArtistProvider artistProvider =
-        Provider.of<ArtistProvider>(context, listen: false);
+    ArtistProvider artistProvider = context.read<ArtistProvider>();
 
     ParseResult result = await compute(parseAlbums, albumData);
     _albums = result.collection.cast();
@@ -34,15 +30,14 @@ class AlbumProvider with ChangeNotifier {
     });
   }
 
-  Album byId(int id) {
-    return _index[id]!;
-  }
+  Album byId(int id) => _index[id]!;
 
   List<Album> mostPlayed({int limit = 15}) {
     List<Album> clone = List<Album>.from(_albums)
         .where((album) => album.isStandardAlbum)
-        .toList();
-    clone.sort((a, b) => b.playCount.compareTo(a.playCount));
-    return clone.sublist(0, limit);
+        .toList()
+        ..sort((a, b) => b.playCount.compareTo(a.playCount));
+
+    return clone.sublist(0, limit > clone.length ? clone.length : limit);
   }
 }

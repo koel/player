@@ -22,29 +22,14 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
   late SongProvider songProvider;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void reassemble() {
-    audio.stop();
-    super.reassemble();
-  }
-
-  Future<void> initAudio() async {
-    songProvider = Provider.of<SongProvider>(context);
-    audio = Provider.of<AudioPlayerProvider>(context);
-    await audio.init();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    initAudio();
+    songProvider = context.watch<SongProvider>();
+    audio = context.watch<AudioPlayerProvider>();
 
-    return audio.player.builderCurrent(
-      builder: (BuildContext context, Playing playing) {
-        String? songId = playing.audio.audio.metas.extra?['songId'];
+    return StreamBuilder<Playing?>(
+      stream: audio.player.current,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        String? songId = snapshot.data?.audio.audio.metas.extra?['songId'];
         if (songId == null) return SizedBox.shrink();
 
         Song current = songProvider.byId(songId);

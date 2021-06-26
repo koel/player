@@ -20,8 +20,7 @@ class _KoelAppState extends State<KoelApp> {
   @override
   void initState() {
     super.initState();
-    futureUser =
-        Provider.of<UserProvider>(context, listen: false).tryGetAuthUser();
+    futureUser = context.read<UserProvider>().tryGetAuthUser();
   }
 
   @override

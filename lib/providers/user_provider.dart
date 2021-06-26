@@ -18,8 +18,7 @@ class UserProvider with ChangeNotifier {
       return null;
     }
 
-    final Map<String, dynamic> userData = await ApiRequest.get('me');
-    this.setAuthUser(User.fromJson(userData));
+    this.setAuthUser(User.fromJson(await ApiRequest.get('me')));
 
     return authUser;
   }

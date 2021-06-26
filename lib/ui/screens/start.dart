@@ -1,4 +1,5 @@
 import 'package:app/constants/dimens.dart';
+import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/ui/screens/home.dart';
 import 'package:app/ui/screens/library.dart';
@@ -17,6 +18,7 @@ class StartScreen extends StatefulWidget {
 class _StartScreenState extends State<StartScreen> {
   late Future futureData;
   int _selectedIndex = 0;
+  late AudioPlayerProvider audio;
 
   static const List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
@@ -25,17 +27,15 @@ class _StartScreenState extends State<StartScreen> {
   ];
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    setState(() => _selectedIndex = index);
   }
 
   @override
   void initState() {
     super.initState();
 
-    futureData =
-        Provider.of<DataProvider>(context, listen: false).init(context);
+    futureData = context.read<DataProvider>().init(context);
+    audio = context.read<AudioPlayerProvider>()..init();
   }
 
   @override

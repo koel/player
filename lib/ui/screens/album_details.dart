@@ -16,9 +16,9 @@ class AlbumDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AudioPlayerProvider audio = Provider.of<AudioPlayerProvider>(context);
-    List<Song> _songs = Provider.of<SongProvider>(context).byAlbum(album);
-    _songs.sort((a, b) => a.title.compareTo(b.title));
+    AudioPlayerProvider audio = context.watch<AudioPlayerProvider>();
+    List<Song> _songs = context.watch<SongProvider>().byAlbum(album)
+      ..sort((a, b) => a.title.compareTo(b.title));
 
     ButtonStyle _buttonStyle = ElevatedButton.styleFrom(
       shape: RoundedRectangleBorder(

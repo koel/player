@@ -22,15 +22,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late User _authUser = Provider.of<UserProvider>(context).authUser;
+  late User _authUser = context.watch<UserProvider>().authUser;
   late List<Song> _recentlyAddedSongs =
-      Provider.of<SongProvider>(context).recentlyAdded();
-  late List<Song> _mostPlayedSongs =
-      Provider.of<SongProvider>(context).mostPlayed();
-  late List<Artist> _topArtists =
-      Provider.of<ArtistProvider>(context).mostPlayed();
-  late List<Album> _topAlbums =
-      Provider.of<AlbumProvider>(context).mostPlayed();
+      context.watch<SongProvider>().recentlyAdded();
+  late List<Song> _mostPlayedSongs = context.watch<SongProvider>().mostPlayed();
+  late List<Artist> _topArtists = context.watch<ArtistProvider>().mostPlayed();
+  late List<Album> _topAlbums = context.watch<AlbumProvider>().mostPlayed();
 
   @override
   Widget build(BuildContext context) {
