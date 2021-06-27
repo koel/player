@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:app/constants/dimens.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/data_provider.dart';
@@ -67,25 +69,31 @@ class _StartScreenState extends State<StartScreen> {
                   child: _widgetOptions.elementAt(_selectedIndex),
                 ),
                 bottomSheet: FooterPlayerSheet(),
-                bottomNavigationBar: BottomNavigationBar(
-                  elevation: 0,
-                  items: const <BottomNavigationBarItem>[
-                    BottomNavigationBarItem(
-                      icon: Icon(CupertinoIcons.house_fill),
-                      label: 'Home',
+                bottomNavigationBar: ClipRect(
+                  child: BackdropFilter(
+                    filter: new ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+                    child: BottomNavigationBar(
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      items: const <BottomNavigationBarItem>[
+                        BottomNavigationBarItem(
+                          icon: Icon(CupertinoIcons.house_fill),
+                          label: 'Home',
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(CupertinoIcons.search),
+                          label: 'Search',
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(CupertinoIcons.music_albums_fill),
+                          label: 'Library',
+                        ),
+                      ],
+                      currentIndex: _selectedIndex,
+                      selectedItemColor: Colors.white,
+                      onTap: _onItemTapped,
                     ),
-                    BottomNavigationBarItem(
-                      icon: Icon(CupertinoIcons.search),
-                      label: 'Search',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(CupertinoIcons.music_albums_fill),
-                      label: 'Library',
-                    ),
-                  ],
-                  currentIndex: _selectedIndex,
-                  selectedItemColor: Colors.white,
-                  onTap: _onItemTapped,
+                  ),
                 ),
               ),
             );

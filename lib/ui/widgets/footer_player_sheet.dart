@@ -20,14 +20,21 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
   late AudioPlayerProvider audio;
   late SongProvider songProvider;
   PlayerState _currentState = PlayerState.stop;
+  List<StreamSubscription> _subscriptions = [];
 
   @override
   void initState() {
     super.initState();
     audio = context.read<AudioPlayerProvider>();
-    audio.player.playerState.listen((PlayerState state) {
+    _subscriptions.add(audio.player.playerState.listen((PlayerState state) {
       setState(() => _currentState = state);
-    });
+    }));
+  }
+
+  @override
+  void dispose() {
+    _subscriptions.forEach((element) => element.cancel());
+    super.dispose();
   }
 
   @override
@@ -42,77 +49,90 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
 
         Song current = songProvider.byId(songId);
 
-        return ClipRect(
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: BackdropFilter(
-              filter: new ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
-              child: InkWell(
-                onTap: () => _openNowPlayingSheet(context),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    SongThumbnail(
-                      song: songProvider.byId(songId),
-                      playing: _currentState == PlayerState.play,
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              current.title,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              current.artist.name,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color:
-                                    Theme.of(context).textTheme.caption?.color,
-                              ),
-                            )
-                          ],
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRect(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.white, width: 0.5),
+                  ),
+                ),
+                child: BackdropFilter(
+                  filter: new ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+                  child: InkWell(
+                    onTap: () => _openNowPlayingSheet(context),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        SongThumbnail(
+                          song: songProvider.byId(songId),
+                          playing: _currentState == PlayerState.play,
                         ),
-                      ),
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  current.title,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  current.artist.name,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .caption
+                                        ?.color,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                        audio.player.builderLoopMode(
+                          builder: (context, loopMode) {
+                            return PlayerBuilder.isPlaying(
+                                player: audio.player,
+                                builder: (context, isPlaying) {
+                                  return PlayingControls(
+                                    loopMode: loopMode,
+                                    isPlaying: isPlaying,
+                                    isPlaylist: true,
+                                    onStop: () {
+                                      audio.player.stop();
+                                    },
+                                    toggleLoop: () {
+                                      audio.player.toggleLoop();
+                                    },
+                                    onPlay: () {
+                                      audio.player.playOrPause();
+                                    },
+                                    onNext: () {
+                                      audio.player.next();
+                                    },
+                                    onPrevious: () {
+                                      audio.player.previous();
+                                    },
+                                  );
+                                });
+                          },
+                        ),
+                      ],
                     ),
-                    audio.player.builderLoopMode(
-                      builder: (context, loopMode) {
-                        return PlayerBuilder.isPlaying(
-                            player: audio.player,
-                            builder: (context, isPlaying) {
-                              return PlayingControls(
-                                loopMode: loopMode,
-                                isPlaying: isPlaying,
-                                isPlaylist: true,
-                                onStop: () {
-                                  audio.player.stop();
-                                },
-                                toggleLoop: () {
-                                  audio.player.toggleLoop();
-                                },
-                                onPlay: () {
-                                  audio.player.playOrPause();
-                                },
-                                onNext: () {
-                                  audio.player.next();
-                                },
-                                onPrevious: () {
-                                  audio.player.previous();
-                                },
-                              );
-                            });
-                      },
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
+            Divider(height: .5, color: Colors.white.withOpacity(.2)),
+          ],
         );
       },
     );
