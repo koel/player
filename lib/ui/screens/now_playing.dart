@@ -114,12 +114,16 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
         ),
         Opacity(
           opacity: .4,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(_position.toMs(), style: style),
-              Text('-' + (_duration - _position).toMs(), style: style),
-            ],
+          child: Container(
+            // move the timestamps up a bit
+            transform: Matrix4.translationValues(0.0, -4.0, 0.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(_position.toMs(), style: style),
+                Text('-' + (_duration - _position).toMs(), style: style),
+              ],
+            ),
           ),
         ),
       ],
