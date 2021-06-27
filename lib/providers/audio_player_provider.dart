@@ -42,7 +42,7 @@ class AudioPlayerProvider with ChangeNotifier {
   Future<int> queueAfterCurrent(Song song) async {
     Audio audio = await song.asAudio();
     int index = _player.playlist!.audios.indexOf(_currentAudio!) + 1;
-    _player.playlist!.insert(index + 1, audio);
+    _player.playlist!.insert(index, audio);
 
     return index;
   }
