@@ -28,7 +28,7 @@ class ArtistProvider with ChangeNotifier {
     List<Artist> clone = List<Artist>.from(_artists)
         .where((artist) => artist.isStandardArtist)
         .toList()
-        ..sort((a, b) => b.playCount.compareTo(a.playCount));
+          ..sort((a, b) => b.playCount.compareTo(a.playCount));
 
     return clone.sublist(0, limit > clone.length ? clone.length : limit);
   }

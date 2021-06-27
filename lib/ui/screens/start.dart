@@ -61,7 +61,8 @@ class _StartScreenState extends State<StartScreen> {
               alignment: Alignment.center,
               child: Scaffold(
                 body: Container(
-                  padding: EdgeInsets.symmetric(horizontal: AppDimens.horizontalPadding),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: AppDimens.horizontalPadding),
                   child: _widgetOptions.elementAt(_selectedIndex),
                 ),
                 bottomSheet: FooterPlayerSheet(),

@@ -36,7 +36,7 @@ class AlbumProvider with ChangeNotifier {
     List<Album> clone = List<Album>.from(_albums)
         .where((album) => album.isStandardAlbum)
         .toList()
-        ..sort((a, b) => b.playCount.compareTo(a.playCount));
+          ..sort((a, b) => b.playCount.compareTo(a.playCount));
 
     return clone.sublist(0, limit > clone.length ? clone.length : limit);
   }

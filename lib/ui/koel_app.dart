@@ -4,6 +4,7 @@ import 'package:app/models/user.dart';
 import 'package:app/providers/user_provider.dart';
 import 'package:app/ui/screens/start.dart';
 import 'package:app/ui/screens/login.dart';
+import 'package:app/utils/full_width_slider_track_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -42,6 +43,17 @@ class _KoelAppState extends State<KoelApp> {
           color: Colors.grey.shade900,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+        ),
+        sliderTheme: SliderThemeData(
+          activeTrackColor: Colors.white.withOpacity(.8),
+          inactiveTrackColor: Colors.white.withOpacity(.3),
+          thumbColor: Colors.white,
+          trackHeight: 3,
+          overlayColor: Colors.white.withAlpha(32),
+          trackShape: FullWidthSliderTrackShape(),
+          thumbShape: RoundSliderThumbShape(
+            enabledThumbRadius: 8,
           ),
         ),
       ),

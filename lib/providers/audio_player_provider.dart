@@ -1,6 +1,9 @@
 import 'package:app/models/song.dart';
+import 'package:app/providers/song_provider.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class AudioPlayerProvider with ChangeNotifier {
   late AssetsAudioPlayer _player;
@@ -90,6 +93,16 @@ class AudioPlayerProvider with ChangeNotifier {
     await _player.stop();
     audios.forEach((audio) => _player.playlist?.add(audio));
     _player.play();
+  }
+
+  List<Song> getQueuedSongs(BuildContext context) {
+    if (_player.playlist == null) return [];
+
+    SongProvider songProvider = context.read<SongProvider>();
+
+    return _player.playlist!.audios
+        .map((audio) => songProvider.byId(audio.metas.extra!['songId']))
+        .toList();
   }
 
   AssetsAudioPlayer get player => _player;

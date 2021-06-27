@@ -4,7 +4,7 @@ import 'dart:ui';
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
-import 'package:app/ui/screens/queue.dart';
+import 'package:app/ui/screens/now_playing.dart';
 import 'package:app/ui/widgets/player/playing_controls.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
@@ -97,42 +97,6 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
                             });
                       },
                     ),
-
-                    // SongThumbnail(song: song),
-                    // Expanded(
-                    //   child: Padding(
-                    //     padding: EdgeInsets.symmetric(horizontal: 16),
-                    //     child: Column(
-                    //       mainAxisSize: MainAxisSize.min,
-                    //       crossAxisAlignment: CrossAxisAlignment.start,
-                    //       children: [
-                    //         Text(
-                    //           snapshot.data!.title,
-                    //           overflow: TextOverflow.ellipsis,
-                    //         ),
-                    //         SizedBox(height: 4),
-                    //         Text(
-                    //           snapshot.data!.artist!,
-                    //           overflow: TextOverflow.ellipsis,
-                    //           style: TextStyle(
-                    //             color:
-                    //                 Theme.of(context).textTheme.caption?.color,
-                    //           ),
-                    //         )
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
-                    // StreamBuilder<bool>(
-                    //   stream: AudioService.playbackStateStream
-                    //       .map((state) => state.playing)
-                    //       .distinct(),
-                    //   builder: (context, snapshot) {
-                    //     final playing = snapshot.data ?? false;
-                    //     return playing ? pauseButton() : playButton();
-                    //   },
-                    // ),
-                    // nextButton(),
                   ],
                 ),
               ),
@@ -165,7 +129,8 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).primaryColor,
+      // backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(8),
@@ -175,12 +140,9 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
       builder: (BuildContext context) {
         var padding = MediaQuery.of(context).padding;
         return Container(
-          height: MediaQuery.of(context).size.height -
-              padding.top -
-              padding.bottom -
-              16,
-          padding: EdgeInsets.all(16),
-          child: QueueScreen(),
+          height:
+              MediaQuery.of(context).size.height - padding.top - padding.bottom,
+          child: NowPlayingScreen(),
         );
       },
     );

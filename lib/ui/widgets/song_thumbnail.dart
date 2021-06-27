@@ -1,7 +1,7 @@
 import 'package:app/models/song.dart';
 import 'package:flutter/material.dart';
 
-enum ThumbnailSize { small, large }
+enum ThumbnailSize { small, large, extraLarge }
 
 class SongThumbnail extends StatelessWidget {
   final Song song;
@@ -16,16 +16,40 @@ class SongThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: size == ThumbnailSize.small ? 48 : 144,
-      height: size == ThumbnailSize.small ? 48 : 144,
+      width: width,
+      height: height,
       child: DecoratedBox(
         decoration: BoxDecoration(
           image: DecorationImage(image: song.image, fit: BoxFit.cover),
           borderRadius: BorderRadius.all(
-            Radius.circular(size == ThumbnailSize.small ? 8 : 16),
+            Radius.circular(borderRadius),
           ),
         ),
       ),
     );
   }
+
+  double get width {
+    switch (size) {
+      case ThumbnailSize.large:
+        return 144;
+      case ThumbnailSize.extraLarge:
+        return 256;
+      default:
+        return 48;
+    }
+  }
+
+  double get borderRadius {
+    switch (size) {
+      case ThumbnailSize.large:
+        return 16;
+      case ThumbnailSize.extraLarge:
+        return 20;
+      default:
+        return 8;
+    }
+  }
+
+  double get height => width;
 }
