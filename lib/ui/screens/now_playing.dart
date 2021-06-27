@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:app/models/song.dart';
@@ -25,6 +26,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
   double _volume = 0.7;
   bool _liked = false;
   LoopMode _loopMode = LoopMode.none;
+  List<StreamSubscription> _subscriptions = [];
 
   @override
   void setState(fn) {
@@ -40,11 +42,11 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
     songProvider = context.read<SongProvider>();
     audio = context.read<AudioPlayerProvider>();
 
-    audio.player.currentPosition.listen((position) {
+    _subscriptions.add(audio.player.currentPosition.listen((position) {
       setState(() => _position = position);
-    });
+    }));
 
-    audio.player.current.listen((Playing? playing) {
+    _subscriptions.add(audio.player.current.listen((Playing? playing) {
       if (playing == null) return;
 
       setState(() => _duration = playing.audio.duration);
@@ -53,15 +55,21 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
       if (songId == null) return;
 
       setState(() => _liked = songProvider.byId(songId).liked);
-    });
+    }));
 
-    audio.player.volume.listen((volume) {
+    _subscriptions.add(audio.player.volume.listen((volume) {
       setState(() => _volume = volume);
-    });
+    }));
 
-    audio.player.loopMode.listen((loopMode) {
+    _subscriptions.add(audio.player.loopMode.listen((loopMode) {
       setState(() => _loopMode = loopMode);
-    });
+    }));
+  }
+
+  @override
+  void dispose() {
+    _subscriptions.forEach((element) => element.cancel());
+    super.dispose();
   }
 
   Widget hero(Song song) {
@@ -259,7 +267,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
         setState(() => _liked = !_liked);
       },
       icon: Icon(
-        _liked ? CupertinoIcons.heart_solid : CupertinoIcons.heart_slash,
+        _liked ? CupertinoIcons.heart_solid : CupertinoIcons.heart,
       ),
     );
   }

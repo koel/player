@@ -43,7 +43,7 @@ class SongProvider with ChangeNotifier {
     });
   }
 
-  List<Song> recentlyAdded({int limit = 6}) {
+  List<Song> recentlyAdded({int limit = 5}) {
     List<Song> clone = List<Song>.from(_songs);
     clone.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return clone.sublist(0, limit > clone.length ? clone.length : limit);
@@ -52,6 +52,12 @@ class SongProvider with ChangeNotifier {
   List<Song> mostPlayed({int limit = 15}) {
     List<Song> clone = List<Song>.from(_songs);
     clone.sort((a, b) => b.playCount.compareTo(a.playCount));
+    return clone.sublist(0, limit > clone.length ? clone.length : limit);
+  }
+
+  List<Song> leastPlayed({int limit = 5}) {
+    List<Song> clone = List<Song>.from(_songs);
+    clone.sort((a, b) => a.playCount.compareTo(b.playCount));
     return clone.sublist(0, limit > clone.length ? clone.length : limit);
   }
 

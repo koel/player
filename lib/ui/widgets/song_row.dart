@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
@@ -21,14 +23,21 @@ class SongRow extends StatefulWidget {
 class _SongRowState extends State<SongRow> {
   late AudioPlayerProvider audio;
   PlayerState _state = PlayerState.stop;
+  List<StreamSubscription> _subscriptions = [];
 
   @override
   void initState() {
     super.initState();
     audio = context.read<AudioPlayerProvider>();
-    audio.player.playerState.listen((PlayerState state) {
+    _subscriptions.add(audio.player.playerState.listen((PlayerState state) {
       setState(() => _state = state);
-    });
+    }));
+  }
+
+  @override
+  void dispose() {
+    _subscriptions.forEach((element) => element.cancel());
+    super.dispose();
   }
 
   @override

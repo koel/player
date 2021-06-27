@@ -23,150 +23,102 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late User _authUser = context.watch<UserProvider>().authUser;
-  late List<Song> _recentlyAddedSongs =
-      context.watch<SongProvider>().recentlyAdded();
-  late List<Song> _mostPlayedSongs = context.watch<SongProvider>().mostPlayed();
-  late List<Artist> _topArtists = context.watch<ArtistProvider>().mostPlayed();
-  late List<Album> _topAlbums = context.watch<AlbumProvider>().mostPlayed();
+  late SongProvider songProvider = context.watch<SongProvider>();
+  late ArtistProvider artistProvider = context.watch<ArtistProvider>();
+  late AlbumProvider albumProvider = context.watch<AlbumProvider>();
 
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Heading1(text: "Howdy, ${_authUser.name}!"),
-              RecentlyAdded(songs: _recentlyAddedSongs),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  MostPlayedSongs(songs: _mostPlayedSongs),
-                  TopAlbums(albums: _topAlbums),
-                  TopArtists(artists: _topArtists),
-                  SizedBox(height: 32), // cheap bottom padding
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class MostPlayedSongs extends StatelessWidget {
-  final List<Song> songs;
-
-  const MostPlayedSongs({
-    Key? key,
-    required this.songs,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
+  Widget mostPlayedSongs() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         Heading1(text: 'Most played songs'),
-        Container(
-          height: 225,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              ...songs.expand(
-                (song) => [
-                  SongCard(song: song),
-                  SizedBox(width: 12),
-                ],
-              ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: <Widget>[
+              ...songProvider.mostPlayed().expand(
+                    (song) => [
+                      SongCard(song: song),
+                      SizedBox(width: 12),
+                    ],
+                  ),
             ],
           ),
         ),
       ],
     );
   }
-}
 
-class TopAlbums extends StatelessWidget {
-  final List<Album> albums;
-
-  const TopAlbums({
-    Key? key,
-    required this.albums,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
+  Widget leastPlayedSongs() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
+        Heading1(text: 'Give these a try'),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: <Widget>[
+              ...songProvider.leastPlayed().expand(
+                    (song) => <Widget>[
+                      SongCard(song: song),
+                      SizedBox(width: 12),
+                    ],
+                  ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget topAlbums() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
         Heading1(text: 'Top albums'),
-        Container(
-          height: 225,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              ...albums.expand(
-                (album) => [
-                  AlbumCard(album: album),
-                  SizedBox(width: 12),
-                ],
-              ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: <Widget>[
+              ...albumProvider.mostPlayed().expand(
+                    (album) => <Widget>[
+                      AlbumCard(album: album),
+                      SizedBox(width: 12),
+                    ],
+                  ),
             ],
           ),
         ),
       ],
     );
   }
-}
 
-class TopArtists extends StatelessWidget {
-  final List<Artist> artists;
-
-  const TopArtists({
-    Key? key,
-    required this.artists,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
+  Widget topArtists() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         Heading1(text: 'Top artists'),
-        Container(
-          height: 225,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
             children: [
-              ...artists.expand(
-                (artist) => [
-                  ArtistCard(artist: artist),
-                  SizedBox(width: 12),
-                ],
-              ),
+              ...artistProvider.mostPlayed().expand(
+                    (artist) => <Widget>[
+                      ArtistCard(artist: artist),
+                      SizedBox(width: 12),
+                    ],
+                  ),
             ],
           ),
         ),
       ],
     );
   }
-}
 
-class RecentlyAdded extends StatelessWidget {
-  final List<Song> songs;
-
-  RecentlyAdded({
-    Key? key,
-    required this.songs,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
+  Widget recentlyAdded() {
     return Column(
-      children: songs
+      children: songProvider
+          .recentlyAdded()
           .map(
             (song) => SongRow(
               song: song,
@@ -175,6 +127,33 @@ class RecentlyAdded extends StatelessWidget {
             ),
           )
           .toList(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Container(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              SizedBox(height: 24),
+              Heading1(text: "Howdy, ${_authUser.name}!"),
+              recentlyAdded(),
+              SizedBox(height: 32),
+              mostPlayedSongs(),
+              SizedBox(height: 32),
+              topAlbums(),
+              SizedBox(height: 32),
+              topArtists(),
+              SizedBox(height: 32),
+              leastPlayedSongs(),
+              SizedBox(height: 128), // cheap bottom padding
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
