@@ -8,6 +8,7 @@ import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/queue.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -142,7 +143,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
               audio.player.previous();
             }
           },
-          icon: Icon(Icons.fast_rewind_rounded),
+          icon: Icon(CupertinoIcons.backward_fill),
           iconSize: 48,
         ),
         PlayerBuilder.isPlaying(
@@ -151,7 +152,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
             return IconButton(
               onPressed: () => audio.player.playOrPause(),
               icon: Icon(
-                isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                isPlaying
+                    ? CupertinoIcons.pause_solid
+                    : CupertinoIcons.play_fill,
               ),
               iconSize: 64,
             );
@@ -159,7 +162,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
         ),
         IconButton(
           onPressed: () => audio.player.next(),
-          icon: Icon(Icons.fast_forward_rounded),
+          icon: Icon(CupertinoIcons.forward_fill),
           iconSize: 48,
         ),
       ],
@@ -169,7 +172,11 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
   Widget volumeSlider() {
     return Row(
       children: [
-        Icon(Icons.volume_down, size: 20, color: Colors.white.withOpacity(.5)),
+        Icon(
+          CupertinoIcons.volume_mute,
+          size: 16,
+          color: Colors.white.withOpacity(.5),
+        ),
         Expanded(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 12),
@@ -187,7 +194,11 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
             ),
           ),
         ),
-        Icon(Icons.volume_up, size: 20, color: Colors.white.withOpacity(.5)),
+        Icon(
+          CupertinoIcons.volume_up,
+          size: 16,
+          color: Colors.white.withOpacity(.5),
+        ),
       ],
     );
   }
@@ -209,7 +220,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
         setState(() => _loopMode = newMode);
       },
       icon: Icon(
-        _loopMode == LoopMode.single ? Icons.repeat_one : Icons.repeat,
+        _loopMode == LoopMode.single
+            ? CupertinoIcons.repeat_1
+            : CupertinoIcons.repeat,
       ),
     );
   }
@@ -221,7 +234,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           loopModeButton(),
-          IconButton(onPressed: () {}, icon: Icon(Icons.playlist_add)),
+          IconButton(
+            onPressed: () {},
+            icon: Icon(CupertinoIcons.text_badge_plus),
+          ),
           IconButton(
             onPressed: () {
               Navigator.of(context).push(
@@ -230,7 +246,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                 ),
               );
             },
-            icon: Icon(Icons.list),
+            icon: Icon(CupertinoIcons.music_note_list),
           ),
         ],
       ),
@@ -242,7 +258,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
       onPressed: () {
         setState(() => _liked = !_liked);
       },
-      icon: Icon(_liked ? Icons.favorite_rounded : Icons.favorite_outline),
+      icon: Icon(
+        _liked ? CupertinoIcons.heart_solid : CupertinoIcons.heart_slash,
+      ),
     );
   }
 

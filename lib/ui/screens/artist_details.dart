@@ -5,7 +5,9 @@ import 'package:app/models/artist.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
+import 'package:app/ui/screens/album_details.dart';
 import 'package:app/ui/widgets/song_list.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -112,55 +114,15 @@ class ArtistDetailsScreen extends StatelessWidget {
               padding: EdgeInsets.all(AppDimens.horizontalPadding),
               child: Row(
                 children: <Widget>[
-                  Expanded(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints.expand(
-                        width: double.infinity,
-                        height: 48,
-                      ),
-                      child: ElevatedButton(
-                        style: _buttonStyle,
-                        onPressed: () async => await audio.replaceQueue(_songs),
-                        child: Row(
-                          children: <Widget>[
-                            Icon(Icons.play_arrow),
-                            Expanded(
-                              child: Text(
-                                'Play All',
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                  DetailsScreenButton(
+                    icon: CupertinoIcons.play_fill,
+                    onPressed: () async => await audio.replaceQueue(_songs),
                   ),
                   SizedBox(width: 12),
-                  Expanded(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints.expand(
-                        width: double.infinity,
-                        height: 48,
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () async => await audio.replaceQueue(
-                          _songs,
-                          shuffle: true,
-                        ),
-                        style: _buttonStyle,
-                        child: Row(
-                          children: <Widget>[
-                            Icon(Icons.shuffle),
-                            Expanded(
-                              child: Text(
-                                'Shuffle',
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                  DetailsScreenButton(
+                    icon: CupertinoIcons.shuffle,
+                    onPressed: () async =>
+                        await audio.replaceQueue(_songs, shuffle: true),
                   ),
                 ],
               ),

@@ -2,6 +2,7 @@ import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -66,9 +67,7 @@ class _SongRowState extends State<SongRow> {
             details,
             widget.song,
           ),
-          child: Icon(
-            Icons.more_horiz,
-          ),
+          child: Icon(CupertinoIcons.ellipsis, size: 20),
         ),
       ),
     );
@@ -86,7 +85,7 @@ class _SongRowState extends State<SongRow> {
           padding: EdgeInsets.all(0),
           child: ListTile(
             title: Text('Play Now'),
-            trailing: Icon(Icons.play_circle_outline),
+            trailing: Icon(CupertinoIcons.play_circle),
             onTap: () async => await audio.play(song: song),
           ),
         ),
@@ -110,14 +109,18 @@ class _SongRowState extends State<SongRow> {
           padding: EdgeInsets.all(0),
           child: ListTile(
             title: Text('Add to a Playlist…'),
-            trailing: Icon(Icons.playlist_add),
+            trailing: Icon(CupertinoIcons.text_badge_plus),
           ),
         ),
         PopupMenuItem(
           padding: EdgeInsets.all(0),
           child: ListTile(
             title: Text(song.liked ? 'Unlove' : 'Love'),
-            trailing: Icon(song.liked ? Icons.favorite : Icons.favorite_border),
+            trailing: Icon(
+              song.liked
+                  ? CupertinoIcons.heart_slash
+                  : CupertinoIcons.heart_solid,
+            ),
           ),
         ),
       ],

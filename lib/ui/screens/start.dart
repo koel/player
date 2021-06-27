@@ -5,6 +5,7 @@ import 'package:app/ui/screens/home.dart';
 import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/screens/search.dart';
 import 'package:app/ui/widgets/footer_player_sheet.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -70,15 +71,15 @@ class _StartScreenState extends State<StartScreen> {
                   elevation: 0,
                   items: const <BottomNavigationBarItem>[
                     BottomNavigationBarItem(
-                      icon: Icon(Icons.home),
+                      icon: Icon(CupertinoIcons.house_fill),
                       label: 'Home',
                     ),
                     BottomNavigationBarItem(
-                      icon: Icon(Icons.search),
+                      icon: Icon(CupertinoIcons.search),
                       label: 'Search',
                     ),
                     BottomNavigationBarItem(
-                      icon: Icon(Icons.library_music),
+                      icon: Icon(CupertinoIcons.music_albums_fill),
                       label: 'Library',
                     ),
                   ],

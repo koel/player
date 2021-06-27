@@ -1,4 +1,5 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 
 class PlayingControls extends StatelessWidget {
@@ -31,8 +32,8 @@ class PlayingControls extends StatelessWidget {
         IconButton(
           onPressed: onPlay,
           icon: Icon(
-            isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-            size: 32,
+            isPlaying ? CupertinoIcons.pause_fill : CupertinoIcons.play_fill,
+            size: 24,
           ),
         ),
         SizedBox(
@@ -41,8 +42,8 @@ class PlayingControls extends StatelessWidget {
         IconButton(
           onPressed: onNext,
           icon: Icon(
-            Icons.fast_forward_rounded,
-            size: 32,
+            CupertinoIcons.forward_fill,
+            size: 24,
           ),
         ),
       ],

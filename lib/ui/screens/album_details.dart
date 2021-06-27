@@ -6,6 +6,7 @@ import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/widgets/song_list.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,20 +18,8 @@ class AlbumDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AudioPlayerProvider audio = context.watch<AudioPlayerProvider>();
-    List<Song> _songs = context.watch<SongProvider>().byAlbum(album)
+    List<Song> songs = context.watch<SongProvider>().byAlbum(album)
       ..sort((a, b) => a.title.compareTo(b.title));
-
-    ButtonStyle _buttonStyle = ElevatedButton.styleFrom(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      primary: Colors.grey.shade900,
-      onPrimary: Colors.red,
-      textStyle: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
-      ),
-    );
 
     return Scaffold(
       body: CustomScrollView(
@@ -112,62 +101,75 @@ class AlbumDetailsScreen extends StatelessWidget {
               padding: EdgeInsets.all(AppDimens.horizontalPadding),
               child: Row(
                 children: <Widget>[
-                  Expanded(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints.expand(
-                        width: double.infinity,
-                        height: 48,
-                      ),
-                      child: ElevatedButton(
-                        style: _buttonStyle,
-                        onPressed: () async => await audio.replaceQueue(_songs),
-                        child: Row(
-                          children: <Widget>[
-                            Icon(Icons.play_arrow),
-                            Expanded(
-                              child: Text(
-                                'Play All',
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                  DetailsScreenButton(
+                    icon: CupertinoIcons.play_fill,
+                    onPressed: () async => await audio.replaceQueue(songs),
                   ),
                   SizedBox(width: 12),
-                  Expanded(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints.expand(
-                        width: double.infinity,
-                        height: 48,
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () async => await audio.replaceQueue(
-                          _songs,
-                          shuffle: true,
-                        ),
-                        style: _buttonStyle,
-                        child: Row(
-                          children: <Widget>[
-                            Icon(Icons.shuffle),
-                            Expanded(
-                              child: Text(
-                                'Shuffle',
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                  DetailsScreenButton(
+                    icon: CupertinoIcons.shuffle,
+                    onPressed: () async =>
+                        await audio.replaceQueue(songs, shuffle: true),
                   ),
                 ],
               ),
             ),
           ),
-          SongList(songs: _songs),
+          SongList(songs: songs),
         ],
+      ),
+    );
+  }
+}
+
+class DetailsScreenButton extends StatelessWidget {
+  late final AudioPlayerProvider audio;
+  final VoidCallback onPressed;
+  final IconData icon;
+
+  DetailsScreenButton({
+    Key? key,
+    required this.onPressed,
+    required this.icon,
+  }) : super(key: key);
+
+  final ButtonStyle _buttonStyle = ElevatedButton.styleFrom(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12.0),
+    ),
+    primary: Colors.grey.shade900,
+    onPrimary: Colors.red,
+    textStyle: TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    audio = context.watch<AudioPlayerProvider>();
+
+    return Expanded(
+      child: ConstrainedBox(
+        constraints: BoxConstraints.expand(
+          width: double.infinity,
+          height: 48,
+        ),
+        child: ElevatedButton(
+          style: _buttonStyle,
+          onPressed: onPressed,
+          child: Row(
+            children: <Widget>[
+              Icon(icon, size: 20),
+              Expanded(
+                child: Text(
+                  'Play All',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
