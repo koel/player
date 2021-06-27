@@ -19,11 +19,15 @@ class SongRow extends StatefulWidget {
 
 class _SongRowState extends State<SongRow> {
   late AudioPlayerProvider audio;
+  PlayerState _state = PlayerState.stop;
 
   @override
   void initState() {
     super.initState();
     audio = context.read<AudioPlayerProvider>();
+    audio.player.playerState.listen((PlayerState state) {
+      setState(() => _state = state);
+    });
   }
 
   @override
@@ -44,10 +48,11 @@ class _SongRowState extends State<SongRow> {
               return SizedBox();
             }
 
-            return snapshot.data!.audio.audio.metas.extra?['songId'] ==
-                    widget.song.id
-                ? ThumbnailWithPlayingIcon(song: widget.song)
-                : SongThumbnail(song: widget.song);
+            bool playing = snapshot.data!.audio.audio.metas.extra?['songId'] ==
+                    widget.song.id &&
+                _state == PlayerState.play;
+
+            return SongThumbnail(song: widget.song, playing: playing);
           },
         ),
         title: Text(widget.song.title, overflow: TextOverflow.ellipsis),
@@ -118,47 +123,6 @@ class _SongRowState extends State<SongRow> {
       ],
       position: RelativeRect.fromLTRB(
           details.globalPosition.dx, details.globalPosition.dy, 20, 16),
-    );
-  }
-}
-
-class ThumbnailWithPlayingIcon extends StatelessWidget {
-  final Song song;
-
-  const ThumbnailWithPlayingIcon({
-    Key? key,
-    required this.song,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 48,
-      height: 48,
-      child: Stack(
-        children: [
-          SongThumbnail(song: song),
-          SizedBox(
-            width: double.infinity,
-            height: double.infinity,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(.7),
-              ),
-            ),
-          ),
-          Align(
-            alignment: Alignment.center,
-            child: SizedBox(
-              child: Image.asset(
-                'assets/images/loading-animation.gif',
-              ),
-              width: 16,
-              height: 16,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

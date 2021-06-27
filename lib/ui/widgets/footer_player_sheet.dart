@@ -20,11 +20,20 @@ class FooterPlayerSheet extends StatefulWidget {
 class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
   late AudioPlayerProvider audio;
   late SongProvider songProvider;
+  PlayerState _currentState = PlayerState.stop;
+
+  @override
+  void initState() {
+    super.initState();
+    audio = context.read<AudioPlayerProvider>();
+    audio.player.playerState.listen((PlayerState state) {
+      setState(() => _currentState = state);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     songProvider = context.watch<SongProvider>();
-    audio = context.watch<AudioPlayerProvider>();
 
     return StreamBuilder<Playing?>(
       stream: audio.player.current,
@@ -44,7 +53,10 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    SongThumbnail(song: songProvider.byId(songId)),
+                    SongThumbnail(
+                      song: songProvider.byId(songId),
+                      playing: _currentState == PlayerState.play,
+                    ),
                     Expanded(
                       child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16),
