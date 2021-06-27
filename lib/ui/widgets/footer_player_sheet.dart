@@ -40,7 +40,7 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
             child: BackdropFilter(
               filter: new ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
               child: InkWell(
-                onTap: () => _openQueue(context),
+                onTap: () => _openNowPlayingSheet(context),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[

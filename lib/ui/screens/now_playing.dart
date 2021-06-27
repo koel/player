@@ -302,6 +302,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                           likeButton(song),
                         ],
                       ),
+                      SizedBox(height: 8),
                       progress(),
                     ],
                   ),

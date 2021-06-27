@@ -41,7 +41,7 @@ class PlayingControls extends StatelessWidget {
         IconButton(
           onPressed: onNext,
           icon: Icon(
-            Icons.skip_next,
+            Icons.fast_forward_rounded,
             size: 32,
           ),
         ),

@@ -28,39 +28,42 @@ class _SongRowState extends State<SongRow> {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: widget.padding,
-      shape: widget.bordered
-          ? Border(
-              bottom: BorderSide(color: Colors.grey.shade800, width: 0.5),
-            )
-          : null,
-      leading: StreamBuilder<Playing?>(
-        stream: audio.player.current,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return SizedBox();
-          }
+    return InkWell(
+      onTap: () async => await audio.play(song: widget.song),
+      child: ListTile(
+        contentPadding: widget.padding,
+        shape: widget.bordered
+            ? Border(
+                bottom: BorderSide(color: Colors.grey.shade800, width: 0.5),
+              )
+            : null,
+        leading: StreamBuilder<Playing?>(
+          stream: audio.player.current,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return SizedBox();
+            }
 
-          return snapshot.data!.audio.audio.metas.extra?['songId'] ==
-                  widget.song.id
-              ? ThumbnailWithPlayingIcon(song: widget.song)
-              : SongThumbnail(song: widget.song);
-        },
-      ),
-      title: Text(widget.song.title, overflow: TextOverflow.ellipsis),
-      subtitle: Text(
-        widget.song.album.name,
-        overflow: TextOverflow.ellipsis,
-      ),
-      trailing: GestureDetector(
-        onTapDown: (TapDownDetails details) => _openContextMenu(
-          context,
-          details,
-          widget.song,
+            return snapshot.data!.audio.audio.metas.extra?['songId'] ==
+                    widget.song.id
+                ? ThumbnailWithPlayingIcon(song: widget.song)
+                : SongThumbnail(song: widget.song);
+          },
         ),
-        child: Icon(
-          Icons.more_horiz,
+        title: Text(widget.song.title, overflow: TextOverflow.ellipsis),
+        subtitle: Text(
+          widget.song.album.name,
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: GestureDetector(
+          onTapDown: (TapDownDetails details) => _openContextMenu(
+            context,
+            details,
+            widget.song,
+          ),
+          child: Icon(
+            Icons.more_horiz,
+          ),
         ),
       ),
     );
