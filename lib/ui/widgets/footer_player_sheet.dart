@@ -125,23 +125,14 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
         onPressed: AudioService.skipToNext,
       );
 
-  Future<void> _openQueue(BuildContext context) async {
+  Future<void> _openNowPlayingSheet(BuildContext context) async {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      // backgroundColor: Theme.of(context).primaryColor,
       backgroundColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(8),
-          topRight: Radius.circular(8),
-        ),
-      ),
       builder: (BuildContext context) {
-        var padding = MediaQuery.of(context).padding;
         return Container(
-          height:
-              MediaQuery.of(context).size.height - padding.top - padding.bottom,
+          height: MediaQuery.of(context).size.height,
           child: NowPlayingScreen(),
         );
       },

@@ -259,10 +259,34 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
         if (songId == null) return SizedBox.shrink();
         Song song = songProvider.byId(songId);
 
-        return ClipRect(
-          child: BackdropFilter(
-            filter: new ImageFilter.blur(sigmaX: 60.0, sigmaY: 60.0),
-            child: Padding(
+        return Stack(
+          children: <Widget>[
+            Container(color: Colors.black),
+            SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+              child: ClipRRect(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(38.5),
+                  topRight: Radius.circular(38.5),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: ImageFiltered(
+                  imageFilter: ImageFilter.blur(sigmaX: 80.0, sigmaY: 80.0),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: song.image,
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Container(color: Colors.black.withOpacity(.7)),
+            Padding(
               padding: EdgeInsets.all(24),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -290,8 +314,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                   )
                 ],
               ),
-            ),
-          ),
+            )
+          ],
         );
       },
     );
