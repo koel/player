@@ -67,9 +67,12 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        SongThumbnail(
-                          song: songProvider.byId(songId),
-                          playing: _currentState == PlayerState.play,
+                        Hero(
+                          tag: 'hero-now-playing-thumbnail',
+                          child: SongThumbnail(
+                            song: songProvider.byId(songId),
+                            playing: _currentState == PlayerState.play,
+                          ),
                         ),
                         Expanded(
                           child: Padding(

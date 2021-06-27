@@ -75,7 +75,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
   Widget hero(Song song) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 24),
-      child: SongThumbnail(song: song, size: ThumbnailSize.extraLarge),
+      child: Hero(
+        tag: 'hero-now-playing-thumbnail',
+        child: SongThumbnail(song: song, size: ThumbnailSize.extraLarge),
+      ),
     );
   }
 
