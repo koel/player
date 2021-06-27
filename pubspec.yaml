@@ -31,10 +31,6 @@ dependencies:
   provider: ^5.0.0
   http: ^0.13.3
   shared_preferences: ^2.0.6
-  just_audio: ^0.7.5
-  audio_video_progress_bar: ^0.4.0
-  audio_service: ^0.17.1
-  audio_session: ^0.1.5
   assets_audio_player: ^3.0.3+3
 
 dev_dependencies:

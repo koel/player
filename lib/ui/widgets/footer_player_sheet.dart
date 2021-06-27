@@ -8,7 +8,6 @@ import 'package:app/ui/screens/now_playing.dart';
 import 'package:app/ui/widgets/player/playing_controls.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -118,24 +117,6 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
       },
     );
   }
-
-  IconButton playButton() => IconButton(
-        icon: Icon(Icons.play_arrow),
-        iconSize: 32.0,
-        onPressed: AudioService.play,
-      );
-
-  IconButton pauseButton() => IconButton(
-        icon: Icon(Icons.pause),
-        iconSize: 32.0,
-        onPressed: AudioService.pause,
-      );
-
-  IconButton nextButton() => IconButton(
-        icon: Icon(Icons.skip_next),
-        iconSize: 32.0,
-        onPressed: AudioService.skipToNext,
-      );
 
   Future<void> _openNowPlayingSheet(BuildContext context) async {
     showModalBottomSheet(
