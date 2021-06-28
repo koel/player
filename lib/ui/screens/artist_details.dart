@@ -116,11 +116,13 @@ class ArtistDetailsScreen extends StatelessWidget {
                 children: <Widget>[
                   DetailsScreenButton(
                     icon: CupertinoIcons.play_fill,
+                    label: 'Play All',
                     onPressed: () async => await audio.replaceQueue(_songs),
                   ),
                   SizedBox(width: 12),
                   DetailsScreenButton(
                     icon: CupertinoIcons.shuffle,
+                    label: 'Shuffle All',
                     onPressed: () async =>
                         await audio.replaceQueue(_songs, shuffle: true),
                   ),

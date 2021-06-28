@@ -103,11 +103,13 @@ class AlbumDetailsScreen extends StatelessWidget {
                 children: <Widget>[
                   DetailsScreenButton(
                     icon: CupertinoIcons.play_fill,
+                    label: 'Play All',
                     onPressed: () async => await audio.replaceQueue(songs),
                   ),
                   SizedBox(width: 12),
                   DetailsScreenButton(
                     icon: CupertinoIcons.shuffle,
+                    label: 'Shuffle All',
                     onPressed: () async =>
                         await audio.replaceQueue(songs, shuffle: true),
                   ),
@@ -126,11 +128,13 @@ class DetailsScreenButton extends StatelessWidget {
   late final AudioPlayerProvider audio;
   final VoidCallback onPressed;
   final IconData icon;
+  final String label;
 
   DetailsScreenButton({
     Key? key,
     required this.onPressed,
     required this.icon,
+    required this.label
   }) : super(key: key);
 
   final ButtonStyle _buttonStyle = ElevatedButton.styleFrom(
@@ -162,10 +166,7 @@ class DetailsScreenButton extends StatelessWidget {
             children: <Widget>[
               Icon(icon, size: 20),
               Expanded(
-                child: Text(
-                  'Play All',
-                  textAlign: TextAlign.center,
-                ),
+                child: Text(label, textAlign: TextAlign.center),
               ),
             ],
           ),
