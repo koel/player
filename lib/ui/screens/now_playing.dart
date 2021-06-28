@@ -327,7 +327,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          songInfo(song),
+                          Flexible(child: songInfo(song)),
                           likeButton(song),
                         ],
                       ),
