@@ -134,7 +134,6 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
                 ),
               ),
             ),
-            Divider(height: .5, color: Colors.white.withOpacity(.2)),
           ],
         );
       },

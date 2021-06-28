@@ -6,6 +6,7 @@ import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/album_details.dart';
+import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
@@ -131,6 +132,7 @@ class ArtistDetailsScreen extends StatelessWidget {
             ),
           ),
           SongList(songs: _songs),
+          SliverToBoxAdapter(child: bottomSpace()),
         ],
       ),
     );

@@ -7,7 +7,13 @@ import 'package:app/ui/screens/home.dart';
 import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/screens/search.dart';
 import 'package:app/ui/widgets/footer_player_sheet.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter/cupertino.dart'
+    show
+        CupertinoIcons,
+        CupertinoPageScaffold,
+        CupertinoTabBar,
+        CupertinoTabScaffold,
+        CupertinoTabView;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -22,6 +28,7 @@ class _StartScreenState extends State<StartScreen> {
   late Future futureData;
   int _selectedIndex = 0;
   late AudioPlayerProvider audio;
+  late final _tabBarKey = GlobalKey();
 
   static const List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
@@ -60,21 +67,26 @@ class _StartScreenState extends State<StartScreen> {
           case ConnectionState.waiting:
             return loadingWidget;
           default:
-            return Container(
-              alignment: Alignment.center,
-              child: Scaffold(
-                body: Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: AppDimens.horizontalPadding),
-                  child: _widgetOptions.elementAt(_selectedIndex),
-                ),
-                bottomSheet: FooterPlayerSheet(),
-                bottomNavigationBar: ClipRect(
-                  child: BackdropFilter(
-                    filter: new ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
-                    child: BottomNavigationBar(
-                      backgroundColor: Colors.transparent,
-                      elevation: 0,
+            return Scaffold(
+              body: Stack(
+                children: [
+                  CupertinoTabScaffold(
+                    tabBuilder: (context, index) {
+                      return CupertinoTabView(builder: (context) {
+                        return _widgetOptions[index];
+                      });
+                    },
+                    tabBar: CupertinoTabBar(
+                      key: _tabBarKey,
+                      backgroundColor: Colors.grey.withOpacity(.1),
+                      iconSize: 24,
+                      activeColor: Colors.white,
+                      border: Border(
+                        top: BorderSide(
+                          color: Colors.white.withOpacity(.2),
+                          width: 0.0, // One physical pixel.
+                        ),
+                      ),
                       items: const <BottomNavigationBarItem>[
                         BottomNavigationBarItem(
                           icon: Icon(CupertinoIcons.house_fill),
@@ -90,11 +102,16 @@ class _StartScreenState extends State<StartScreen> {
                         ),
                       ],
                       currentIndex: _selectedIndex,
-                      selectedItemColor: Colors.white,
                       onTap: _onItemTapped,
                     ),
                   ),
-                ),
+                  Positioned(
+                    // 50 is the standard iOS (10) tab bar height.
+                    bottom: 50 + MediaQuery.of(context).padding.bottom,
+                    width: MediaQuery.of(context).size.width,
+                    child: FooterPlayerSheet(),
+                  ),
+                ],
               ),
             );
         }

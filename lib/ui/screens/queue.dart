@@ -1,5 +1,6 @@
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
+import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -31,6 +32,7 @@ class _QueueState extends State<QueueScreen> {
                   child: Center(child: Text('No songs queued.')),
                 )
               : SongList(songs: songs),
+          SliverToBoxAdapter(child: bottomSpace()),
         ],
       ),
     );

@@ -1,6 +1,4 @@
-import 'package:app/models/album.dart';
-import 'package:app/models/artist.dart';
-import 'package:app/models/song.dart';
+import 'package:app/constants/dimens.dart';
 import 'package:app/models/user.dart';
 import 'package:app/providers/album_provider.dart';
 import 'package:app/providers/artist_provider.dart';
@@ -8,6 +6,7 @@ import 'package:app/providers/song_provider.dart';
 import 'package:app/providers/user_provider.dart';
 import 'package:app/ui/widgets/album_card.dart';
 import 'package:app/ui/widgets/artist_card.dart';
+import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/headings.dart';
 import 'package:app/ui/widgets/song_card.dart';
 import 'package:app/ui/widgets/song_row.dart';
@@ -31,15 +30,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Heading1(text: 'Most played songs'),
+        Padding(
+          padding: EdgeInsets.only(left: AppDimens.horizontalPadding),
+          child: Heading1(text: 'Most played songs'),
+        ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
             children: <Widget>[
               ...songProvider.mostPlayed().expand(
                     (song) => [
+                      SizedBox(width: AppDimens.horizontalPadding),
                       SongCard(song: song),
-                      SizedBox(width: 12),
                     ],
                   ),
             ],
@@ -53,15 +55,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Heading1(text: 'Give these a try'),
+        Padding(
+          padding: EdgeInsets.only(left: AppDimens.horizontalPadding),
+          child: Heading1(text: 'Give these a try'),
+        ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
             children: <Widget>[
               ...songProvider.leastPlayed().expand(
                     (song) => <Widget>[
+                      SizedBox(width: AppDimens.horizontalPadding),
                       SongCard(song: song),
-                      SizedBox(width: 12),
                     ],
                   ),
             ],
@@ -75,15 +80,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Heading1(text: 'Top albums'),
+        Padding(
+          padding: EdgeInsets.only(left: AppDimens.horizontalPadding),
+          child: Heading1(text: 'Top albums'),
+        ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
             children: <Widget>[
               ...albumProvider.mostPlayed().expand(
                     (album) => <Widget>[
+                      SizedBox(width: AppDimens.horizontalPadding),
                       AlbumCard(album: album),
-                      SizedBox(width: 12),
                     ],
                   ),
             ],
@@ -97,15 +105,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Heading1(text: 'Top artists'),
+        Padding(
+          padding: EdgeInsets.only(left: AppDimens.horizontalPadding),
+          child: Heading1(text: 'Top artists'),
+        ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
               ...artistProvider.mostPlayed().expand(
                     (artist) => <Widget>[
+                      SizedBox(width: AppDimens.horizontalPadding),
                       ArtistCard(artist: artist),
-                      SizedBox(width: 12),
                     ],
                   ),
             ],
@@ -138,9 +149,21 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              SizedBox(height: 24),
-              Heading1(text: "Howdy, ${_authUser.name}!"),
-              recentlyAdded(),
+              SizedBox(
+                height: AppDimens.horizontalPadding,
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppDimens.horizontalPadding,
+                ),
+                child: Heading1(text: "Howdy, ${_authUser.name}!"),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppDimens.horizontalPadding,
+                ),
+                child: recentlyAdded(),
+              ),
               SizedBox(height: 32),
               mostPlayedSongs(),
               SizedBox(height: 32),
@@ -149,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
               topArtists(),
               SizedBox(height: 32),
               leastPlayedSongs(),
-              SizedBox(height: 128), // cheap bottom padding
+              bottomSpace(),
             ],
           ),
         ),

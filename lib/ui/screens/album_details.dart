@@ -5,6 +5,7 @@ import 'package:app/models/album.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
+import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
@@ -118,6 +119,7 @@ class AlbumDetailsScreen extends StatelessWidget {
             ),
           ),
           SongList(songs: songs),
+          SliverToBoxAdapter(child: bottomSpace()),
         ],
       ),
     );
@@ -130,12 +132,12 @@ class DetailsScreenButton extends StatelessWidget {
   final IconData icon;
   final String label;
 
-  DetailsScreenButton({
-    Key? key,
-    required this.onPressed,
-    required this.icon,
-    required this.label
-  }) : super(key: key);
+  DetailsScreenButton(
+      {Key? key,
+      required this.onPressed,
+      required this.icon,
+      required this.label})
+      : super(key: key);
 
   final ButtonStyle _buttonStyle = ElevatedButton.styleFrom(
     shape: RoundedRectangleBorder(
