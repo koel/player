@@ -100,10 +100,17 @@ class AudioPlayerProvider with ChangeNotifier {
 
     SongProvider songProvider = context.read<SongProvider>();
 
-    return _player.playlist!.audios
-        .map((audio) => songProvider.byId(audio.metas.extra!['songId']))
-        .toList();
+    try {
+      return _player.playlist!.audios
+          .map((audio) => songProvider.byId(audio.metas.extra!['songId']))
+          .toList();
+    } catch (err) {
+      print(err);
+      return [];
+    }
   }
 
   AssetsAudioPlayer get player => _player;
+
+  void clearQueue() => _player.playlist!.audios.clear();
 }

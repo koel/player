@@ -84,7 +84,7 @@ class _StartScreenState extends State<StartScreen> {
                       border: Border(
                         top: BorderSide(
                           color: Colors.white.withOpacity(.2),
-                          width: 0.0, // One physical pixel.
+                          width: 0.5, // One physical pixel.
                         ),
                       ),
                       items: const <BottomNavigationBarItem>[

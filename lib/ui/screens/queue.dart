@@ -13,25 +13,51 @@ class QueueScreen extends StatefulWidget {
 }
 
 class _QueueState extends State<QueueScreen> {
+  late AudioPlayerProvider audio;
+  List<Song> _songs = [];
+
+  @override
+  void initState() {
+    super.initState();
+    audio = context.read<AudioPlayerProvider>();
+    setState(() => _songs = audio.getQueuedSongs(context));
+  }
+
   @override
   Widget build(BuildContext context) {
-    AudioPlayerProvider audio = context.watch<AudioPlayerProvider>();
-    List<Song> songs = audio.getQueuedSongs(context);
-
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
             pinned: true,
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  audio.clearQueue();
+                  setState(() => _songs = []);
+                },
+                child: Text('Clear', style: TextStyle(color: Colors.redAccent)),
+              ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               title: Text('Current Queue'),
             ),
           ),
-          songs.length == 0
+          _songs.length == 0
               ? SliverToBoxAdapter(
-                  child: Center(child: Text('No songs queued.')),
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(height: 128),
+                      Center(
+                        child: Opacity(
+                          opacity: .5,
+                          child: Text('No songs queued.'),
+                        ),
+                      ),
+                    ],
+                  ),
                 )
-              : SongList(songs: songs),
+              : SongList(songs: _songs),
           SliverToBoxAdapter(child: bottomSpace()),
         ],
       ),
