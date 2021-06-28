@@ -30,6 +30,7 @@ class SongRow extends StatefulWidget {
 class _SongRowState extends State<SongRow> {
   late AudioPlayerProvider audio;
   PlayerState _state = PlayerState.stop;
+  bool _isCurrentSong = false;
   List<StreamSubscription> _subscriptions = [];
 
   @override
@@ -39,6 +40,10 @@ class _SongRowState extends State<SongRow> {
     _subscriptions.add(audio.player.playerState.listen((PlayerState state) {
       setState(() => _state = state);
     }));
+    _subscriptions.add(audio.player.current.listen((Playing? current) {
+      setState(() => _isCurrentSong =
+          current?.audio.audio.metas.extra?['songId'] == widget.song.id);
+    }));
   }
 
   @override
@@ -47,29 +52,21 @@ class _SongRowState extends State<SongRow> {
     super.dispose();
   }
 
-  Widget _item() {
+  @override
+  Widget build(BuildContext context) {
     return InkWell(
       onTap: () async => await audio.play(song: widget.song),
       child: ListTile(
+        key: UniqueKey(),
         contentPadding: widget.padding,
         shape: widget.bordered
             ? Border(
                 bottom: BorderSide(color: Colors.grey.shade800, width: 0.5),
               )
             : null,
-        leading: StreamBuilder<Playing?>(
-          stream: audio.player.current,
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return SizedBox();
-            }
-
-            bool playing = snapshot.data!.audio.audio.metas.extra?['songId'] ==
-                    widget.song.id &&
-                _state == PlayerState.play;
-
-            return SongThumbnail(song: widget.song, playing: playing);
-          },
+        leading: SongThumbnail(
+          song: widget.song,
+          playing: _state == PlayerState.play && _isCurrentSong,
         ),
         title: Text(widget.song.title, overflow: TextOverflow.ellipsis),
         subtitle: Text(
@@ -86,20 +83,6 @@ class _SongRowState extends State<SongRow> {
         ),
       ),
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    Widget item = _item();
-    return widget.behavior == SongListBehavior.queue
-        ? Dismissible(
-            key: GlobalKey(),
-            child: item,
-            onDismissed: (DismissDirection direction) =>
-                audio.removeFromQueue(widget.song),
-            background: Container(color: Colors.red),
-          )
-        : item;
   }
 
   Future<void> _openContextMenu(

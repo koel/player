@@ -17,16 +17,14 @@ class _QueueState extends State<QueueScreen> {
   List<Song> _songs = [];
 
   @override
-  void initState() {
-    super.initState();
-    audio = context.read<AudioPlayerProvider>();
-    setState(() => _songs = audio.getQueuedSongs(context));
-  }
-
-  @override
   Widget build(BuildContext context) {
+    audio = context.watch<AudioPlayerProvider>();
+    setState(() => _songs = audio.getQueuedSongs(context));
+    final scrollController = ScrollController();
+
     return Scaffold(
       body: CustomScrollView(
+        controller: scrollController,
         slivers: <Widget>[
           SliverAppBar(
             pinned: true,
@@ -57,7 +55,13 @@ class _QueueState extends State<QueueScreen> {
                     ],
                   ),
                 )
-              : SongList(songs: _songs, behavior: SongListBehavior.queue),
+              : SliverToBoxAdapter(
+                  child: SongList(
+                    songs: _songs,
+                    behavior: SongListBehavior.queue,
+                    controller: scrollController,
+                  ),
+                ),
           SliverToBoxAdapter(child: bottomSpace()),
         ],
       ),

@@ -114,6 +114,20 @@ class AudioPlayerProvider with ChangeNotifier {
 
   void clearQueue() => _player.playlist!.audios.clear();
 
-  Future<void> removeFromQueue(Song song) async =>
-      _player.playlist!.audios.remove(await song.asAudio());
+  Future<void> removeFromQueue(Song song) async {
+    _player.playlist!.audios.remove(await song.asAudio());
+    notifyListeners();
+  }
+
+  void reorderQueue(int oldIndex, int newIndex) {
+    if (oldIndex < newIndex) {
+      // removing the item at oldIndex will shorten the list by 1.
+      newIndex -= 1;
+    }
+
+    Audio audio = _player.playlist!.audios[oldIndex];
+    _player.playlist!.remove(audio);
+    _player.playlist!.insert(newIndex, audio);
+    notifyListeners();
+  }
 }

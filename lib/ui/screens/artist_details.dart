@@ -23,20 +23,11 @@ class ArtistDetailsScreen extends StatelessWidget {
     List<Song> _songs = context.watch<SongProvider>().byArtist(artist)
       ..sort((a, b) => a.title.compareTo(b.title));
 
-    ButtonStyle _buttonStyle = ElevatedButton.styleFrom(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      primary: Colors.grey.shade900,
-      onPrimary: Colors.red,
-      textStyle: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
-      ),
-    );
+    final scrollController = ScrollController();
 
     return Scaffold(
       body: CustomScrollView(
+        controller: scrollController,
         slivers: <Widget>[
           SliverAppBar(
             pinned: true,
@@ -131,7 +122,9 @@ class ArtistDetailsScreen extends StatelessWidget {
               ),
             ),
           ),
-          SongList(songs: _songs),
+          SliverToBoxAdapter(
+            child: SongList(songs: _songs, controller: scrollController),
+          ),
           SliverToBoxAdapter(child: bottomSpace()),
         ],
       ),

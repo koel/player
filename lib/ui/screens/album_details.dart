@@ -22,8 +22,11 @@ class AlbumDetailsScreen extends StatelessWidget {
     List<Song> songs = context.watch<SongProvider>().byAlbum(album)
       ..sort((a, b) => a.title.compareTo(b.title));
 
+    final scrollController = ScrollController();
+
     return Scaffold(
       body: CustomScrollView(
+        controller: scrollController,
         slivers: <Widget>[
           SliverAppBar(
             pinned: true,
@@ -118,7 +121,8 @@ class AlbumDetailsScreen extends StatelessWidget {
               ),
             ),
           ),
-          SongList(songs: songs),
+          SliverToBoxAdapter(
+              child: SongList(songs: songs, controller: scrollController)),
           SliverToBoxAdapter(child: bottomSpace()),
         ],
       ),
