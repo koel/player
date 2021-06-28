@@ -36,7 +36,7 @@ class _QueueState extends State<QueueScreen> {
                   audio.clearQueue();
                   setState(() => _songs = []);
                 },
-                child: Text('Clear', style: TextStyle(color: Colors.redAccent)),
+                child: Text('Clear', style: TextStyle(color: Colors.red)),
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
@@ -57,7 +57,7 @@ class _QueueState extends State<QueueScreen> {
                     ],
                   ),
                 )
-              : SongList(songs: _songs),
+              : SongList(songs: _songs, behavior: SongListBehavior.queue),
           SliverToBoxAdapter(child: bottomSpace()),
         ],
       ),

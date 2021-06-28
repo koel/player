@@ -1,6 +1,3 @@
-import 'dart:ui';
-
-import 'package:app/constants/dimens.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/ui/screens/home.dart';
@@ -10,7 +7,6 @@ import 'package:app/ui/widgets/footer_player_sheet.dart';
 import 'package:flutter/cupertino.dart'
     show
         CupertinoIcons,
-        CupertinoPageScaffold,
         CupertinoTabBar,
         CupertinoTabScaffold,
         CupertinoTabView;
@@ -28,7 +24,6 @@ class _StartScreenState extends State<StartScreen> {
   late Future futureData;
   int _selectedIndex = 0;
   late AudioPlayerProvider audio;
-  late final _tabBarKey = GlobalKey();
 
   static const List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
@@ -77,7 +72,6 @@ class _StartScreenState extends State<StartScreen> {
                       });
                     },
                     tabBar: CupertinoTabBar(
-                      key: _tabBarKey,
                       backgroundColor: Colors.grey.withOpacity(.1),
                       iconSize: 24,
                       activeColor: Colors.white,

@@ -113,4 +113,7 @@ class AudioPlayerProvider with ChangeNotifier {
   AssetsAudioPlayer get player => _player;
 
   void clearQueue() => _player.playlist!.audios.clear();
+
+  Future<void> removeFromQueue(Song song) async =>
+      _player.playlist!.audios.remove(await song.asAudio());
 }

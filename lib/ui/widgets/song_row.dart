@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
+import 'package:app/ui/widgets/song_list.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart';
@@ -12,9 +13,15 @@ class SongRow extends StatefulWidget {
   final Song song;
   final bool bordered;
   final EdgeInsetsGeometry? padding;
+  final SongListBehavior behavior;
 
-  SongRow({Key? key, required this.song, this.bordered = true, this.padding})
-      : super(key: key);
+  SongRow({
+    Key? key,
+    required this.song,
+    this.bordered = true,
+    this.padding,
+    this.behavior = SongListBehavior.none,
+  }) : super(key: key);
 
   @override
   _SongRowState createState() => _SongRowState();
@@ -40,8 +47,7 @@ class _SongRowState extends State<SongRow> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _item() {
     return InkWell(
       onTap: () async => await audio.play(song: widget.song),
       child: ListTile(
@@ -80,6 +86,20 @@ class _SongRowState extends State<SongRow> {
         ),
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget item = _item();
+    return widget.behavior == SongListBehavior.queue
+        ? Dismissible(
+            key: GlobalKey(),
+            child: item,
+            onDismissed: (DismissDirection direction) =>
+                audio.removeFromQueue(widget.song),
+            background: Container(color: Colors.red),
+          )
+        : item;
   }
 
   Future<void> _openContextMenu(
