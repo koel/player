@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:app/extensions/assets_audio_player.dart';
+import 'package:app/extensions/duration.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
-import 'package:app/extensions/duration.dart';
-import 'package:app/extensions/assets_audio_player.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/queue.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
@@ -350,4 +350,18 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
       },
     );
   }
+}
+
+Future<void> openNowPlayingScreen(BuildContext context) async {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (BuildContext context) {
+      return Container(
+        height: MediaQuery.of(context).size.height,
+        child: NowPlayingScreen(),
+      );
+    },
+  );
 }

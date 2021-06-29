@@ -63,7 +63,7 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
                 child: BackdropFilter(
                   filter: new ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
                   child: InkWell(
-                    onTap: () => _openNowPlayingSheet(context),
+                    onTap: () => openNowPlayingScreen(context),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
@@ -135,20 +135,6 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
               ),
             ),
           ],
-        );
-      },
-    );
-  }
-
-  Future<void> _openNowPlayingSheet(BuildContext context) async {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return Container(
-          height: MediaQuery.of(context).size.height,
-          child: NowPlayingScreen(),
         );
       },
     );

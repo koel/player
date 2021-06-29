@@ -17,9 +17,14 @@ class _QueueState extends State<QueueScreen> {
   List<Song> _songs = [];
 
   @override
-  Widget build(BuildContext context) {
-    audio = context.watch<AudioPlayerProvider>();
+  void initState() {
+    super.initState();
+    audio = context.read<AudioPlayerProvider>();
     setState(() => _songs = audio.getQueuedSongs(context));
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final scrollController = ScrollController();
 
     return Scaffold(
