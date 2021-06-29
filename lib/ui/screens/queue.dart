@@ -20,7 +20,9 @@ class _QueueState extends State<QueueScreen> {
   void initState() {
     super.initState();
     audio = context.read<AudioPlayerProvider>();
-    setState(() => _songs = audio.getQueuedSongs(context));
+    audio.queueModifiedStream.listen((_) {
+      setState(() => _songs = audio.getQueuedSongs(context));
+    });
   }
 
   @override

@@ -32,6 +32,7 @@ dependencies:
   http: ^0.13.3
   shared_preferences: ^2.0.6
   assets_audio_player: ^3.0.3+3
+  rxdart: ^0.26.0
 
 dev_dependencies:
   flutter_test:

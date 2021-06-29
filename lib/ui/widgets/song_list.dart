@@ -26,8 +26,13 @@ class _SongListState extends State<SongList> {
   late AudioPlayerProvider audio;
 
   @override
+  void initState() {
+    super.initState();
+    audio = context.read<AudioPlayerProvider>();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    audio = context.watch<AudioPlayerProvider>();
     return widget.behavior == SongListBehavior.queue
         ? queue()
         : ListView.builder(

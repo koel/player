@@ -1,13 +1,17 @@
+import 'dart:async';
+
 import 'package:app/models/song.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 
 class AudioPlayerProvider with ChangeNotifier {
   late AssetsAudioPlayer _player;
-  late Playlist _queue;
+  BehaviorSubject<bool> _queueModifiedStream = BehaviorSubject();
+  ValueStream<bool> get queueModifiedStream => _queueModifiedStream.stream;
   Audio? _currentAudio;
 
   Future<void> init() async {
@@ -17,20 +21,20 @@ class AudioPlayerProvider with ChangeNotifier {
       _currentAudio = playing?.audio.audio;
     });
 
-    _queue = Playlist(
-      audios: <Audio>[
-        // Set a blank audio to ensure the playlist is initialized
-        // (Assets Audio Player will set playlist to NULL if the list is empty).
-        Audio('assets/audio/blank.mp3'),
-      ],
-      startIndex: 0,
-    );
-
     await _player.open(
-      _queue,
+      Playlist(
+        audios: <Audio>[
+          // Set a blank audio to ensure the playlist is initialized
+          // (Assets Audio Player will set playlist to NULL if the list is empty).
+          Audio('assets/audio/blank.mp3'),
+        ],
+        startIndex: 0,
+      ),
       showNotification: true,
       autoStart: false,
     );
+
+    _queueModifiedStream.add(true);
   }
 
   Future<bool> queued(Song song) async => await indexInQueue(song) != -1;
@@ -71,11 +75,13 @@ class AudioPlayerProvider with ChangeNotifier {
 
   Future<int> queueToTop(Song song) async {
     _player.playlist!.insert(0, await song.asAudio());
+    _queueModifiedStream.add(true);
     return 0;
   }
 
   Future<int> queueToBottom(Song song) async {
     _player.playlist!.add(await song.asAudio());
+    _queueModifiedStream.add(true);
     return _player.playlist!.numberOfItems;
   }
 
@@ -92,6 +98,7 @@ class AudioPlayerProvider with ChangeNotifier {
 
     await _player.stop();
     audios.forEach((audio) => _player.playlist?.add(audio));
+    _queueModifiedStream.add(true);
     _player.play();
   }
 
@@ -116,7 +123,7 @@ class AudioPlayerProvider with ChangeNotifier {
 
   Future<void> removeFromQueue(Song song) async {
     _player.playlist!.audios.remove(await song.asAudio());
-    notifyListeners();
+    _queueModifiedStream.add(true);
   }
 
   void reorderQueue(int oldIndex, int newIndex) {
@@ -128,6 +135,12 @@ class AudioPlayerProvider with ChangeNotifier {
     Audio audio = _player.playlist!.audios[oldIndex];
     _player.playlist!.remove(audio);
     _player.playlist!.insert(newIndex, audio);
-    notifyListeners();
+    _queueModifiedStream.add(true);
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _queueModifiedStream.close();
+    super.dispose();
   }
 }
