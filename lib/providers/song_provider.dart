@@ -68,4 +68,8 @@ class SongProvider with ChangeNotifier {
 
   List<Song> byAlbum(Album album) =>
       _songs.where((song) => song.album == album).toList();
+
+  void toggleLike(Song song) {
+    song.liked = !song.liked;
+  }
 }

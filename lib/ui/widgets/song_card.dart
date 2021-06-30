@@ -31,7 +31,7 @@ class _SongCardState extends State<SongCard> {
         opacity: _opacity,
         child: Column(
           children: [
-            SongThumbnail(song: widget.song, size: ThumbnailSize.large),
+            SongThumbnail(song: widget.song, size: ThumbnailSize.md),
             SizedBox(height: 12),
             SizedBox(
               width: 144,

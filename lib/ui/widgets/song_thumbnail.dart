@@ -1,19 +1,19 @@
 import 'package:app/models/song.dart';
 import 'package:flutter/material.dart';
 
-enum ThumbnailSize { small, large, extraLarge }
+enum ThumbnailSize { sm, md, lg, xl }
 
 class SongThumbnail extends StatelessWidget {
   final Song song;
   final ThumbnailSize size;
   final bool playing;
 
-  const SongThumbnail(
-      {Key? key,
-      required this.song,
-      this.size = ThumbnailSize.small,
-      this.playing = false})
-      : super(key: key);
+  const SongThumbnail({
+    Key? key,
+    required this.song,
+    this.size = ThumbnailSize.sm,
+    this.playing = false,
+  }) : super(key: key);
 
   Widget simpleThumbnail() {
     return SizedBox(
@@ -67,9 +67,11 @@ class SongThumbnail extends StatelessWidget {
 
   double get width {
     switch (size) {
-      case ThumbnailSize.large:
+      case ThumbnailSize.lg:
+        return 192;
+      case ThumbnailSize.md:
         return 144;
-      case ThumbnailSize.extraLarge:
+      case ThumbnailSize.xl:
         return 256;
       default:
         return 48;
@@ -78,9 +80,11 @@ class SongThumbnail extends StatelessWidget {
 
   double get borderRadius {
     switch (size) {
-      case ThumbnailSize.large:
+      case ThumbnailSize.md:
+        return 12;
+      case ThumbnailSize.lg:
         return 16;
-      case ThumbnailSize.extraLarge:
+      case ThumbnailSize.xl:
         return 20;
       default:
         return 8;

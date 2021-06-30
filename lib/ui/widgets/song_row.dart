@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
+import 'package:app/providers/song_provider.dart';
+import 'package:app/ui/screens/song_action_sheet.dart';
 import 'package:app/ui/widgets/song_list.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
@@ -29,6 +31,7 @@ class SongRow extends StatefulWidget {
 
 class _SongRowState extends State<SongRow> {
   late AudioPlayerProvider audio;
+  late SongProvider songProvider;
   PlayerState _state = PlayerState.stop;
   bool _isCurrentSong = false;
   List<StreamSubscription> _subscriptions = [];
@@ -44,6 +47,7 @@ class _SongRowState extends State<SongRow> {
       setState(() => _isCurrentSong =
           current?.audio.audio.metas.extra?['songId'] == widget.song.id);
     }));
+    songProvider = context.read<SongProvider>();
   }
 
   @override
@@ -73,71 +77,16 @@ class _SongRowState extends State<SongRow> {
           widget.song.album.name,
           overflow: TextOverflow.ellipsis,
         ),
-        trailing: GestureDetector(
-          onTapDown: (TapDownDetails details) => _openContextMenu(
-            context,
-            details,
-            widget.song,
-          ),
-          child: Icon(CupertinoIcons.ellipsis, size: 20),
+        trailing: IconButton(
+          icon: Icon(CupertinoIcons.ellipsis, size: 20),
+          onPressed: () {
+            showActionSheet(
+              context: context,
+              song: widget.song,
+            );
+          },
         ),
       ),
-    );
-  }
-
-  Future<void> _openContextMenu(
-    BuildContext context,
-    TapDownDetails details,
-    Song song,
-  ) async {
-    await showMenu(
-      context: context,
-      items: <PopupMenuEntry>[
-        PopupMenuItem(
-          padding: EdgeInsets.all(0),
-          child: ListTile(
-            title: Text('Play Now'),
-            trailing: Icon(CupertinoIcons.play_circle),
-            onTap: () async => await audio.play(song: song),
-          ),
-        ),
-        PopupMenuItem(
-          padding: EdgeInsets.all(0),
-          child: ListTile(
-            title: Text('Play Next'),
-            trailing: Icon(Icons.queue_music),
-          ),
-        ),
-        PopupMenuItem(
-          padding: EdgeInsets.all(0),
-          child: ListTile(
-            title: Text('Add to Queue'),
-            trailing: Icon(Icons.queue_music),
-            // onTap: () async =>
-            //     await AudioService.addQueueItem(await song.asMediaItem()),
-          ),
-        ),
-        PopupMenuItem(
-          padding: EdgeInsets.all(0),
-          child: ListTile(
-            title: Text('Add to a Playlist…'),
-            trailing: Icon(CupertinoIcons.text_badge_plus),
-          ),
-        ),
-        PopupMenuItem(
-          padding: EdgeInsets.all(0),
-          child: ListTile(
-            title: Text(song.liked ? 'Unlove' : 'Love'),
-            trailing: Icon(
-              song.liked
-                  ? CupertinoIcons.heart_slash
-                  : CupertinoIcons.heart_solid,
-            ),
-          ),
-        ),
-      ],
-      position: RelativeRect.fromLTRB(
-          details.globalPosition.dx, details.globalPosition.dy, 20, 16),
     );
   }
 }

@@ -7,6 +7,7 @@ import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/queue.dart';
+import 'package:app/ui/screens/song_action_sheet.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
@@ -24,7 +25,6 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
   Duration _duration = new Duration();
   Duration _position = new Duration();
   double _volume = 0.7;
-  bool _liked = false;
   LoopMode _loopMode = LoopMode.none;
   List<StreamSubscription> _subscriptions = [];
 
@@ -53,8 +53,6 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
 
       String? songId = playing.audio.audio.metas.extra?['songId'];
       if (songId == null) return;
-
-      setState(() => _liked = songProvider.byId(songId).liked);
     }));
 
     _subscriptions.add(audio.player.volume.listen((volume) {
@@ -77,7 +75,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
       padding: EdgeInsets.symmetric(vertical: 24),
       child: Hero(
         tag: 'hero-now-playing-thumbnail',
-        child: SongThumbnail(song: song, size: ThumbnailSize.extraLarge),
+        child: SongThumbnail(song: song, size: ThumbnailSize.xl),
       ),
     );
   }
@@ -243,35 +241,29 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
       opacity: .5,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
+        children: <Widget>[
           loopModeButton(),
           IconButton(
             onPressed: () {},
-            icon: Icon(CupertinoIcons.text_badge_plus),
+            icon: Icon(CupertinoIcons.info_circle_fill),
           ),
           IconButton(
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (BuildContext context) => QueueScreen(),
-                ),
+                MaterialPageRoute<void>(builder: (_) => QueueScreen()),
               );
             },
-            icon: Icon(CupertinoIcons.music_note_list),
+            icon: Icon(CupertinoIcons.list_number),
           ),
         ],
       ),
     );
   }
 
-  Widget likeButton(Song song) {
+  Widget actionButton(Song song) {
     return IconButton(
-      onPressed: () {
-        setState(() => _liked = !_liked);
-      },
-      icon: Icon(
-        _liked ? CupertinoIcons.heart_solid : CupertinoIcons.heart,
-      ),
+      onPressed: () => showActionSheet(context: context, song: song),
+      icon: Icon(CupertinoIcons.ellipsis),
     );
   }
 
@@ -322,13 +314,13 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                 children: <Widget>[
                   hero(song),
                   Column(
-                    children: [
+                    children: <Widget>[
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                        children: <Widget>[
                           Flexible(child: songInfo(song)),
-                          likeButton(song),
+                          actionButton(song),
                         ],
                       ),
                       SizedBox(height: 8),
@@ -337,7 +329,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                   ),
                   audioControls(),
                   Column(
-                    children: [
+                    children: <Widget>[
                       volumeSlider(),
                       extraControls(song),
                     ],
