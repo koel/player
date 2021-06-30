@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
+import 'package:app/ui/screens/album_details.dart';
+import 'package:app/ui/screens/artist_details.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -25,15 +27,18 @@ Future<void> showActionSheet({
       Widget _button({
         required String text,
         required Icon icon,
-        required Function onPressed,
+        required Function onTap,
+        bool hideSheetOnTap = true,
       }) {
         return ListTile(
           leading: Opacity(opacity: .3, child: icon),
           minLeadingWidth: 16,
           title: Text(text),
           onTap: () {
-            onPressed();
-            Navigator.pop(context);
+            onTap();
+            if (hideSheetOnTap) {
+              Navigator.pop(context);
+            }
           },
         );
       }
@@ -45,14 +50,14 @@ Future<void> showActionSheet({
           _button(
             text: 'Play Next',
             icon: Icon(CupertinoIcons.arrow_right_circle_fill),
-            onPressed: () => audio.queueAfterCurrent(song),
+            onTap: () => audio.queueAfterCurrent(song),
           ),
         );
         menuItems.add(
           _button(
             text: 'Play Last',
             icon: Icon(CupertinoIcons.arrow_down_right_circle_fill),
-            onPressed: () => audio.queueToBottom(song),
+            onTap: () => audio.queueToBottom(song),
           ),
         );
       }
@@ -62,7 +67,7 @@ Future<void> showActionSheet({
           _button(
             text: 'Remove from Queue',
             icon: Icon(CupertinoIcons.text_badge_minus),
-            onPressed: () => audio.removeFromQueue(song),
+            onTap: () => audio.removeFromQueue(song),
           ),
         );
       }
@@ -73,7 +78,7 @@ Future<void> showActionSheet({
           icon: Icon(song.liked
               ? CupertinoIcons.heart_slash
               : CupertinoIcons.heart_fill),
-          onPressed: () => songProvider.toggleLike(song),
+          onTap: () => songProvider.toggleLike(song),
         ),
       );
 
@@ -86,7 +91,13 @@ Future<void> showActionSheet({
         _button(
           text: 'Go to Album',
           icon: Icon(CupertinoIcons.music_albums_fill),
-          onPressed: () => {},
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.of(context).push(MaterialPageRoute<void>(
+              builder: (_) => AlbumDetailsScreen(album: song.album),
+            ));
+          },
+          hideSheetOnTap: false,
         ),
       );
 
@@ -94,7 +105,13 @@ Future<void> showActionSheet({
         _button(
           text: 'Go to Artist',
           icon: Icon(CupertinoIcons.music_mic),
-          onPressed: () => {},
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.of(context).push(MaterialPageRoute<void>(
+              builder: (_) => ArtistDetailsScreen(artist: song.artist),
+            ));
+          },
+          hideSheetOnTap: false,
         ),
       );
 
