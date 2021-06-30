@@ -21,7 +21,7 @@ class _QueueState extends State<QueueScreen> {
     super.initState();
     audio = context.read<AudioPlayerProvider>();
     audio.queueModifiedStream.listen((_) {
-      setState(() => _songs = audio.getQueuedSongs(context));
+      setState(() => _songs = audio.queuedSongs);
     });
   }
 
@@ -37,10 +37,7 @@ class _QueueState extends State<QueueScreen> {
             pinned: true,
             actions: <Widget>[
               TextButton(
-                onPressed: () {
-                  audio.clearQueue();
-                  setState(() => _songs = []);
-                },
+                onPressed: () => audio.clearQueue(),
                 child: Text('Clear', style: TextStyle(color: Colors.red)),
               ),
             ],
