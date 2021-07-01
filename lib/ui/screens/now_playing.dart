@@ -286,12 +286,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
             SizedBox(
               width: double.infinity,
               height: double.infinity,
-              child: ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(38.5),
-                  topRight: Radius.circular(38.5),
-                ),
-                clipBehavior: Clip.antiAlias,
+              child: ClipRect(
                 child: ImageFiltered(
                   imageFilter: ImageFilter.blur(sigmaX: 80.0, sigmaY: 80.0),
                   child: DecoratedBox(
