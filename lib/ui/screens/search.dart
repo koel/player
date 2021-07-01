@@ -38,7 +38,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   search(String keywords) => EasyDebounce.debounce(
         'search',
-        Duration(microseconds: 200),
+        Duration(microseconds: 500), // typing on a phone isn't that fast
         () async {
           if (keywords.length == 0) return resetSearch();
           if (keywords.length < 2) return;
