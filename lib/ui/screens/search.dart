@@ -40,7 +40,9 @@ class _SearchScreenState extends State<SearchScreen> {
         'search',
         Duration(microseconds: 200),
         () async {
+          if (keywords.length == 0) return resetSearch();
           if (keywords.length < 2) return;
+
           SearchResult result =
               await searchProvider.searchExcerpts(keywords: keywords);
           setState(() {
@@ -62,6 +64,11 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  void resetSearch() {
+    _searchInputController.text = '';
+    this.setState(() => _initial = true);
+  }
+
   Widget get searchField {
     return Container(
       padding: EdgeInsets.all(AppDimens.horizontalPadding),
@@ -75,10 +82,7 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
         placeholder: 'Search your library',
         onChanged: search,
-        onSuffixTap: () {
-          _searchInputController.text = '';
-          this.setState(() => _initial = true);
-        },
+        onSuffixTap: resetSearch,
       ),
     );
   }
