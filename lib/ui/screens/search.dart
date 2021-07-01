@@ -27,11 +27,13 @@ class _SearchScreenState extends State<SearchScreen> {
   List<Album> _albums = [];
 
   late SearchProvider searchProvider;
+  late TextEditingController _searchInputController;
 
   @override
   void initState() {
     super.initState();
     searchProvider = context.read();
+    _searchInputController = TextEditingController(text: '');
   }
 
   search(String keywords) => EasyDebounce.debounce(
@@ -64,26 +66,19 @@ class _SearchScreenState extends State<SearchScreen> {
     return Container(
       padding: EdgeInsets.all(AppDimens.horizontalPadding),
       color: Colors.black,
-      child: CupertinoTextField(
-        autofocus: true,
-        autocorrect: false,
+      child: CupertinoSearchTextField(
+        controller: _searchInputController,
         style: TextStyle(color: Colors.white),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(.1),
           borderRadius: BorderRadius.all(Radius.circular(6)),
         ),
-        prefix: Padding(
-          padding: EdgeInsets.only(left: 6),
-          child: Opacity(
-            opacity: .4,
-            child: Icon(
-              CupertinoIcons.search,
-              size: 20,
-            ),
-          ),
-        ),
         placeholder: 'Search your library',
         onChanged: search,
+        onSuffixTap: () {
+          _searchInputController.text = '';
+          this.setState(() => _initial = true);
+        },
       ),
     );
   }
