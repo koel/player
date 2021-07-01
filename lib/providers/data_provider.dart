@@ -4,17 +4,27 @@ import 'package:app/providers/song_provider.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
 
 class DataProvider with ChangeNotifier {
+  SongProvider _songProvider;
+  AlbumProvider _albumProvider;
+  ArtistProvider _artistProvider;
+
+  DataProvider({
+    required SongProvider songProvider,
+    required AlbumProvider albumProvider,
+    required ArtistProvider artistProvider,
+  })  : _songProvider = songProvider,
+        _albumProvider = albumProvider,
+        _artistProvider = artistProvider;
+
   Future<void> init(BuildContext context) async {
-    final Map<String, dynamic> data = await ApiRequest.get('data');
+    final Map<String, dynamic> data = await get('data');
 
-    await context.read<ArtistProvider>().init(data['artists']);
-    await context.read<AlbumProvider>().init(context, data['albums']);
+    await _artistProvider.init(data['artists']);
+    await _albumProvider.init(data['albums']);
 
-    SongProvider songProvider = context.read<SongProvider>();
-    await songProvider.init(context, data['songs']);
-    songProvider.initInteractions(context, data['interactions']);
+    await _songProvider.init(data['songs']);
+    _songProvider.initInteractions(data['interactions']);
   }
 }

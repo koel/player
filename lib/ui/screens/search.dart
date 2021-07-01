@@ -1,11 +1,171 @@
+import 'package:app/constants/dimens.dart';
+import 'package:app/models/album.dart';
+import 'package:app/models/artist.dart';
+import 'package:app/models/song.dart';
+import 'package:app/providers/search_provider.dart';
+import 'package:app/ui/widgets/album_card.dart';
+import 'package:app/ui/widgets/artist_card.dart';
+import 'package:app/ui/widgets/bottom_space.dart';
+import 'package:app/ui/widgets/headings.dart';
+import 'package:app/ui/widgets/song_list.dart';
+import 'package:easy_debounce/easy_debounce.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() {
-    // TODO: implement createState
-    throw UnimplementedError();
+  _SearchScreenState createState() => _SearchScreenState();
+}
+
+class _SearchScreenState extends State<SearchScreen> {
+  bool _initial = true;
+  List<Song> _songs = [];
+  List<Artist> _artists = [];
+  List<Album> _albums = [];
+
+  late SearchProvider searchProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    searchProvider = context.read();
+  }
+
+  search(String keywords) => EasyDebounce.debounce(
+        'search',
+        Duration(microseconds: 200),
+        () async {
+          if (keywords.length < 2) return;
+          SearchResult result =
+              await searchProvider.searchExcerpts(keywords: keywords);
+          setState(() {
+            _initial = false;
+            _songs = result.songs;
+            _albums = result.albums;
+            _artists = result.artists;
+          });
+        },
+      );
+
+  Widget get noResults {
+    return Opacity(
+      opacity: .4,
+      child: Padding(
+        padding: EdgeInsets.only(left: AppDimens.horizontalPadding),
+        child: Text('None found.'),
+      ),
+    );
+  }
+
+  Widget get searchField {
+    return Container(
+      padding: EdgeInsets.all(AppDimens.horizontalPadding),
+      color: Colors.black,
+      child: CupertinoTextField(
+        autofocus: true,
+        autocorrect: false,
+        style: TextStyle(color: Colors.white),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(.1),
+          borderRadius: BorderRadius.all(Radius.circular(6)),
+        ),
+        prefix: Padding(
+          padding: EdgeInsets.only(left: 6),
+          child: Opacity(
+            opacity: .4,
+            child: Icon(
+              CupertinoIcons.search,
+              size: 20,
+            ),
+          ),
+        ),
+        placeholder: 'Search your library',
+        onChanged: search,
+      ),
+    );
+  }
+
+  Widget get albumResult {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.only(left: AppDimens.horizontalPadding),
+          child: Heading1(text: 'Albums'),
+        ),
+        SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: _albums.isNotEmpty
+                ? Row(
+                    children: <Widget>[
+                      ..._albums.expand(
+                        (album) => <Widget>[
+                          SizedBox(width: AppDimens.horizontalPadding),
+                          AlbumCard(album: album),
+                        ],
+                      ),
+                    ],
+                  )
+                : noResults),
+      ],
+    );
+  }
+
+  Widget get artistResult {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.only(left: AppDimens.horizontalPadding),
+          child: Heading1(text: 'Artists'),
+        ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: _artists.isNotEmpty
+              ? Row(
+                  children: [
+                    ..._artists.expand(
+                      (artist) => <Widget>[
+                        SizedBox(width: AppDimens.horizontalPadding),
+                        ArtistCard(artist: artist),
+                      ],
+                    ),
+                  ],
+                )
+              : noResults,
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Column(
+        children: <Widget>[
+          searchField,
+          _initial
+              ? SizedBox.shrink()
+              : Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SongList(songs: _songs),
+                        SizedBox(height: 32),
+                        albumResult,
+                        SizedBox(height: 32),
+                        artistResult,
+                        bottomSpace(),
+                      ],
+                    ),
+                  ),
+                ),
+        ],
+      ),
+    );
   }
 }

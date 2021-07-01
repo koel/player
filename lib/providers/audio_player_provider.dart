@@ -5,18 +5,20 @@ import 'package:app/providers/song_provider.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 class AudioPlayerProvider with ChangeNotifier {
+  SongProvider _songProvider;
+
   late final AssetsAudioPlayer _player;
-  late final SongProvider _songProvider;
   final BehaviorSubject<bool> _queueModifiedStream = BehaviorSubject();
   ValueStream<bool> get queueModifiedStream => _queueModifiedStream.stream;
   Audio? _currentAudio;
 
-  Future<void> init(BuildContext context) async {
-    _songProvider = context.read<SongProvider>();
+  AudioPlayerProvider({required SongProvider songProvider})
+      : _songProvider = songProvider;
+
+  Future<void> init() async {
     _player = AssetsAudioPlayer.newPlayer();
 
     _player.current.listen((Playing? playing) {

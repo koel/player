@@ -18,7 +18,7 @@ class UserProvider with ChangeNotifier {
       return null;
     }
 
-    this.setAuthUser(User.fromJson(await ApiRequest.get('me')));
+    this.setAuthUser(User.fromJson(await get('me')));
 
     return authUser;
   }

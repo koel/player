@@ -6,7 +6,6 @@ import 'package:app/providers/artist_provider.dart';
 import 'package:app/values/parse_result.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
 
 ParseResult parseSongs(List<dynamic> data) {
   ParseResult result = ParseResult();
@@ -16,24 +15,30 @@ ParseResult parseSongs(List<dynamic> data) {
 }
 
 class SongProvider with ChangeNotifier {
+  ArtistProvider _artistProvider;
+  AlbumProvider _albumProvider;
+
   late List<Song> _songs;
   late Map<String, Song> _index;
 
-  Future<void> init(BuildContext context, List<dynamic> songData) async {
-    ArtistProvider artistProvider = context.read<ArtistProvider>();
-    AlbumProvider albumProvider = context.read<AlbumProvider>();
+  SongProvider({
+    required ArtistProvider artistProvider,
+    required AlbumProvider albumProvider,
+  })  : _artistProvider = artistProvider,
+        _albumProvider = albumProvider;
 
+  Future<void> init(List<dynamic> songData) async {
     ParseResult result = await compute(parseSongs, songData);
     _songs = result.collection.cast();
     _index = result.index.cast();
 
     _songs.forEach((song) {
-      song.artist = artistProvider.byId(song.artistId);
-      song.album = albumProvider.byId(song.albumId);
+      song.artist = _artistProvider.byId(song.artistId);
+      song.album = _albumProvider.byId(song.albumId);
     });
   }
 
-  void initInteractions(BuildContext context, List<dynamic> interactionData) {
+  void initInteractions(List<dynamic> interactionData) {
     interactionData.forEach((element) {
       Song _song = byId(element['song_id']);
       _song.liked = element['liked'];
@@ -62,6 +67,18 @@ class SongProvider with ChangeNotifier {
   }
 
   Song byId(String id) => _index[id]!;
+
+  List<Song> byIds(List<String> ids) {
+    List<Song> songs = [];
+
+    ids.forEach((id) {
+      if (_index.containsKey(id)) {
+        songs.add(_index[id]!);
+      }
+    });
+
+    return songs;
+  }
 
   List<Song> byArtist(Artist artist) =>
       _songs.where((song) => song.artist == artist).toList();

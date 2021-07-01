@@ -24,6 +24,18 @@ class ArtistProvider with ChangeNotifier {
 
   Artist byId(int id) => _index[id]!;
 
+  List<Artist> byIds(List<int> ids) {
+    List<Artist> artists = [];
+
+    ids.forEach((id) {
+      if (_index.containsKey(id)) {
+        artists.add(_index[id]!);
+      }
+    });
+
+    return artists;
+  }
+
   List<Artist> mostPlayed({int limit = 15}) {
     List<Artist> clone = List<Artist>.from(_artists)
         .where((artist) => artist.isStandardArtist)
