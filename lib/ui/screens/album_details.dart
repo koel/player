@@ -6,6 +6,7 @@ import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -110,4 +111,11 @@ class AlbumDetailsScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+void gotoDetailsScreen(BuildContext context, {required Album album}) {
+  Navigator.of(context).push(CupertinoPageRoute<void>(
+    builder: (_) => AlbumDetailsScreen(album: album),
+    title: album.name,
+  ));
 }

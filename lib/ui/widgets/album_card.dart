@@ -21,7 +21,7 @@ class _AlbumCardState extends State<AlbumCard> {
       onTapDown: (_) => setState(() => opacity = .4),
       onTapUp: (_) => setState(() => opacity = 1),
       onTapCancel: () => setState(() => opacity = 1),
-      onTap: () => _gotoAlbumDetailsScreen(context, widget.album),
+      onTap: () => gotoDetailsScreen(context, album: widget.album),
       child: AnimatedOpacity(
         duration: Duration(milliseconds: 100),
         opacity: opacity,
@@ -69,12 +69,5 @@ class _AlbumCardState extends State<AlbumCard> {
         ),
       ),
     );
-  }
-
-  void _gotoAlbumDetailsScreen(BuildContext context, Album album) {
-    Navigator.of(context).push(CupertinoPageRoute<void>(
-      builder: (_) => AlbumDetailsScreen(album: album),
-      title: album.name,
-    ));
   }
 }
