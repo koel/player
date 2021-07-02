@@ -64,9 +64,7 @@ class _SongRowState extends State<SongRow> {
         key: UniqueKey(),
         contentPadding: widget.padding,
         shape: widget.bordered
-            ? Border(
-                bottom: BorderSide(color: Colors.grey.shade800, width: 0.5),
-              )
+            ? Border(bottom: Divider.createBorderSide(context))
             : null,
         leading: SongThumbnail(
           song: widget.song,

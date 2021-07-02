@@ -245,7 +245,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
           loopModeButton(),
           IconButton(
             onPressed: () {},
-            icon: Icon(CupertinoIcons.music_note_list),
+            icon: Icon(CupertinoIcons.text_quote),
           ),
           IconButton(
             onPressed: () {

@@ -2,8 +2,8 @@ import 'package:app/constants/colors.dart';
 import 'package:app/constants/strings.dart';
 import 'package:app/models/user.dart';
 import 'package:app/providers/user_provider.dart';
-import 'package:app/ui/screens/start.dart';
 import 'package:app/ui/screens/login.dart';
+import 'package:app/ui/screens/start.dart';
 import 'package:app/utils/full_width_slider_track_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -31,7 +31,7 @@ class _KoelAppState extends State<KoelApp> {
       title: AppStrings.appName,
       theme: ThemeData(
         brightness: Brightness.dark,
-        dividerColor: Colors.grey.shade600,
+        dividerColor: Colors.white.withOpacity(.3),
         scaffoldBackgroundColor: Colors.black,
         backgroundColor: AppColors.primaryBgr,
         bottomSheetTheme: BottomSheetThemeData(
@@ -56,6 +56,10 @@ class _KoelAppState extends State<KoelApp> {
             enabledThumbRadius: 8,
           ),
         ),
+        textTheme: Theme.of(context).textTheme.apply(
+              bodyColor: Colors.white.withOpacity(.9),
+              displayColor: Colors.white.withOpacity(.6),
+            ),
       ),
       home: FutureBuilder(
         future: futureUser,

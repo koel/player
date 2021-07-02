@@ -89,4 +89,6 @@ class SongProvider with ChangeNotifier {
   void toggleLike(Song song) {
     song.liked = !song.liked;
   }
+
+  List<Song> favorites() => _songs.where((song) => song.liked).toList();
 }
