@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
-import 'package:app/providers/song_provider.dart';
+import 'package:app/providers/interaction_provider.dart';
 import 'package:app/ui/screens/album_details.dart';
 import 'package:app/ui/screens/artist_details.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
@@ -14,8 +14,9 @@ Future<void> showActionSheet({
   required BuildContext context,
   required Song song,
 }) async {
-  SongProvider songProvider = context.read<SongProvider>();
-  AudioPlayerProvider audio = context.read<AudioPlayerProvider>();
+  InteractionProvider interactionProvider = context.read();
+  AudioPlayerProvider audio = context.read();
+
   bool queued = await audio.queued(song);
   bool isCurrent = audio.player.getCurrentAudioextra['songId'] == song.id;
 
@@ -78,7 +79,7 @@ Future<void> showActionSheet({
           icon: Icon(song.liked
               ? CupertinoIcons.heart_slash
               : CupertinoIcons.heart_fill),
-          onTap: () => songProvider.toggleLike(song),
+          onTap: () => interactionProvider.toggleLike(song),
         ),
       );
 
@@ -93,7 +94,7 @@ Future<void> showActionSheet({
           icon: Icon(CupertinoIcons.music_albums_fill),
           onTap: () {
             Navigator.pop(context);
-            Navigator.of(context).push(MaterialPageRoute<void>(
+            Navigator.of(context).push(CupertinoPageRoute<void>(
               builder: (_) => AlbumDetailsScreen(album: song.album),
             ));
           },
@@ -107,8 +108,9 @@ Future<void> showActionSheet({
           icon: Icon(CupertinoIcons.music_mic),
           onTap: () {
             Navigator.pop(context);
-            Navigator.of(context).push(MaterialPageRoute<void>(
+            Navigator.of(context).push(CupertinoPageRoute<void>(
               builder: (_) => ArtistDetailsScreen(artist: song.artist),
+              title: song.artist.name,
             ));
           },
           hideSheetOnTap: false,

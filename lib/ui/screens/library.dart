@@ -1,4 +1,5 @@
 import 'package:app/constants/dimens.dart';
+import 'package:app/ui/screens/favorites.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -36,7 +37,12 @@ class LibraryScreen extends StatelessWidget {
         menuItem(
           icon: CupertinoIcons.heart_fill,
           title: 'Favorites',
-          onTap: () {},
+          onTap: () {
+            Navigator.of(context).push(CupertinoPageRoute<void>(
+              builder: (_) => FavoritesScreen(previousPageTitle: 'Library'),
+              title: 'Favorites',
+            ));
+          },
         ),
         menuItem(
           icon: CupertinoIcons.music_note_list,

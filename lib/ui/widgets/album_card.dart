@@ -1,5 +1,6 @@
 import 'package:app/models/album.dart';
 import 'package:app/ui/screens/album_details.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class AlbumCard extends StatefulWidget {
@@ -71,8 +72,9 @@ class _AlbumCardState extends State<AlbumCard> {
   }
 
   void _gotoAlbumDetailsScreen(BuildContext context, Album album) {
-    Navigator.of(context).push(MaterialPageRoute<void>(
-      builder: (BuildContext context) => AlbumDetailsScreen(album: album),
+    Navigator.of(context).push(CupertinoPageRoute<void>(
+      builder: (_) => AlbumDetailsScreen(album: album),
+      title: album.name,
     ));
   }
 }

@@ -66,8 +66,8 @@ class _StartScreenState extends State<StartScreen> {
               body: Stack(
                 children: [
                   CupertinoTabScaffold(
-                    tabBuilder: (context, index) {
-                      return CupertinoTabView(builder: (context) {
+                    tabBuilder: (_, index) {
+                      return CupertinoTabView(builder: (_) {
                         return _widgetOptions[index];
                       });
                     },

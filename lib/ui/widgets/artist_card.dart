@@ -1,5 +1,6 @@
 import 'package:app/models/artist.dart';
 import 'package:app/ui/screens/artist_details.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ArtistCard extends StatefulWidget {
@@ -63,8 +64,9 @@ class _ArtistCardState extends State<ArtistCard> {
   }
 
   void _gotoArtistDetailsScreen(BuildContext context, Artist artist) {
-    Navigator.of(context).push(MaterialPageRoute<void>(
-      builder: (BuildContext context) => ArtistDetailsScreen(artist: artist),
+    Navigator.of(context).push(CupertinoPageRoute<void>(
+      builder: (_) => ArtistDetailsScreen(artist: artist),
+      title: artist.name,
     ));
   }
 }

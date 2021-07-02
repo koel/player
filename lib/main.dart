@@ -3,6 +3,7 @@ import 'package:app/providers/artist_provider.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/auth_provider.dart';
 import 'package:app/providers/data_provider.dart';
+import 'package:app/providers/interaction_provider.dart';
 import 'package:app/providers/search_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/providers/user_provider.dart';
@@ -32,6 +33,11 @@ void main() {
           create: (context) => SongProvider(
             artistProvider: context.read<ArtistProvider>(),
             albumProvider: context.read<AlbumProvider>(),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => InteractionProvider(
+            songProvider: context.read<SongProvider>(),
           ),
         ),
         ChangeNotifierProvider(
