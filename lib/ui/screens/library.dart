@@ -2,6 +2,7 @@ import 'package:app/constants/dimens.dart';
 import 'package:app/ui/screens/albums.dart';
 import 'package:app/ui/screens/artists.dart';
 import 'package:app/ui/screens/favorites.dart';
+import 'package:app/ui/screens/songs.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -74,7 +75,12 @@ class LibraryScreen extends StatelessWidget {
         menuItem(
           icon: CupertinoIcons.music_note,
           title: 'Songs',
-          onTap: () {},
+          onTap: () {
+            Navigator.of(context).push(CupertinoPageRoute<void>(
+              builder: (_) => SongsScreen(previousPageTitle: 'Library'),
+              title: 'Songs',
+            ));
+          },
         ),
       ],
     ).toList();
