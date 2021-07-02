@@ -2,10 +2,10 @@ import 'dart:ui';
 
 import 'package:app/models/artist.dart';
 import 'package:app/models/song.dart';
-import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,7 +16,6 @@ class ArtistDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AudioPlayerProvider audio = context.watch<AudioPlayerProvider>();
     List<Song> songs = context.watch<SongProvider>().byArtist(artist)
       ..sort((a, b) => a.title.compareTo(b.title));
 
@@ -110,4 +109,11 @@ class ArtistDetailsScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+void gotoDetailsScreen(BuildContext context, {required Artist artist}) {
+  Navigator.of(context).push(CupertinoPageRoute<void>(
+    builder: (_) => ArtistDetailsScreen(artist: artist),
+    title: artist.name,
+  ));
 }

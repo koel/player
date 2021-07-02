@@ -1,4 +1,5 @@
 import 'package:app/constants/dimens.dart';
+import 'package:app/ui/screens/artists.dart';
 import 'package:app/ui/screens/favorites.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -52,7 +53,12 @@ class LibraryScreen extends StatelessWidget {
         menuItem(
           icon: CupertinoIcons.music_mic,
           title: 'Artists',
-          onTap: () {},
+          onTap: () {
+            Navigator.of(context).push(CupertinoPageRoute<void>(
+              builder: (_) => ArtistsScreen(previousPageTitle: 'Library'),
+              title: 'Artists',
+            ));
+          },
         ),
         menuItem(
           icon: CupertinoIcons.music_albums,

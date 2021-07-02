@@ -21,7 +21,7 @@ class _ArtistCardState extends State<ArtistCard> {
       onTapDown: (_) => setState(() => opacity = .4),
       onTapUp: (_) => setState(() => opacity = 1),
       onTapCancel: () => setState(() => opacity = 1),
-      onTap: () => _gotoArtistDetailsScreen(context, widget.artist),
+      onTap: () => gotoDetailsScreen(context, artist: widget.artist),
       child: AnimatedOpacity(
         duration: Duration(milliseconds: 100),
         opacity: opacity,
@@ -61,12 +61,5 @@ class _ArtistCardState extends State<ArtistCard> {
         ),
       ),
     );
-  }
-
-  void _gotoArtistDetailsScreen(BuildContext context, Artist artist) {
-    Navigator.of(context).push(CupertinoPageRoute<void>(
-      builder: (_) => ArtistDetailsScreen(artist: artist),
-      title: artist.name,
-    ));
   }
 }
