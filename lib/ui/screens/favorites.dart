@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app/models/song.dart';
 import 'package:app/providers/interaction_provider.dart';
+import 'package:app/ui/widgets/song_list.dart';
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -61,6 +62,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               style: TextStyle(color: Colors.white),
             ),
           ),
+          SliverToBoxAdapter(child: songListButtons(context, songs: _songs)),
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (_, int index) => SongRow(song: _songs[index]),

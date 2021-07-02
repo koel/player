@@ -1,13 +1,11 @@
 import 'dart:ui';
 
-import 'package:app/constants/dimens.dart';
 import 'package:app/models/album.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -100,83 +98,15 @@ class AlbumDetailsScreen extends StatelessWidget {
               ),
             ),
           ),
+          SliverToBoxAdapter(child: songListButtons(context, songs: songs)),
           SliverToBoxAdapter(
-            child: Container(
-              padding: EdgeInsets.all(AppDimens.horizontalPadding),
-              child: Row(
-                children: <Widget>[
-                  DetailsScreenButton(
-                    icon: CupertinoIcons.play_fill,
-                    label: 'Play All',
-                    onPressed: () async => await audio.replaceQueue(songs),
-                  ),
-                  SizedBox(width: 12),
-                  DetailsScreenButton(
-                    icon: CupertinoIcons.shuffle,
-                    label: 'Shuffle All',
-                    onPressed: () async =>
-                        await audio.replaceQueue(songs, shuffle: true),
-                  ),
-                ],
-              ),
+            child: SongList(
+              songs: songs,
+              controller: scrollController,
             ),
           ),
-          SliverToBoxAdapter(
-              child: SongList(songs: songs, controller: scrollController)),
           SliverToBoxAdapter(child: bottomSpace()),
         ],
-      ),
-    );
-  }
-}
-
-class DetailsScreenButton extends StatelessWidget {
-  late final AudioPlayerProvider audio;
-  final VoidCallback onPressed;
-  final IconData icon;
-  final String label;
-
-  DetailsScreenButton(
-      {Key? key,
-      required this.onPressed,
-      required this.icon,
-      required this.label})
-      : super(key: key);
-
-  final ButtonStyle _buttonStyle = ElevatedButton.styleFrom(
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12.0),
-    ),
-    primary: Colors.grey.shade900,
-    onPrimary: Colors.red,
-    textStyle: TextStyle(
-      fontSize: 16,
-      fontWeight: FontWeight.w500,
-    ),
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    audio = context.watch<AudioPlayerProvider>();
-
-    return Expanded(
-      child: ConstrainedBox(
-        constraints: BoxConstraints.expand(
-          width: double.infinity,
-          height: 48,
-        ),
-        child: ElevatedButton(
-          style: _buttonStyle,
-          onPressed: onPressed,
-          child: Row(
-            children: <Widget>[
-              Icon(icon, size: 20),
-              Expanded(
-                child: Text(label, textAlign: TextAlign.center),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

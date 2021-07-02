@@ -1,14 +1,11 @@
 import 'dart:ui';
 
-import 'package:app/constants/dimens.dart';
 import 'package:app/models/artist.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
-import 'package:app/ui/screens/album_details.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -20,7 +17,7 @@ class ArtistDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AudioPlayerProvider audio = context.watch<AudioPlayerProvider>();
-    List<Song> _songs = context.watch<SongProvider>().byArtist(artist)
+    List<Song> songs = context.watch<SongProvider>().byArtist(artist)
       ..sort((a, b) => a.title.compareTo(b.title));
 
     final scrollController = ScrollController();
@@ -101,29 +98,12 @@ class ArtistDetailsScreen extends StatelessWidget {
               ),
             ),
           ),
+          SliverToBoxAdapter(child: songListButtons(context, songs: songs)),
           SliverToBoxAdapter(
-            child: Container(
-              padding: EdgeInsets.all(AppDimens.horizontalPadding),
-              child: Row(
-                children: <Widget>[
-                  DetailsScreenButton(
-                    icon: CupertinoIcons.play_fill,
-                    label: 'Play All',
-                    onPressed: () async => await audio.replaceQueue(_songs),
-                  ),
-                  SizedBox(width: 12),
-                  DetailsScreenButton(
-                    icon: CupertinoIcons.shuffle,
-                    label: 'Shuffle All',
-                    onPressed: () async =>
-                        await audio.replaceQueue(_songs, shuffle: true),
-                  ),
-                ],
-              ),
+            child: SongList(
+              songs: songs,
+              controller: scrollController,
             ),
-          ),
-          SliverToBoxAdapter(
-            child: SongList(songs: _songs, controller: scrollController),
           ),
           SliverToBoxAdapter(child: bottomSpace()),
         ],
