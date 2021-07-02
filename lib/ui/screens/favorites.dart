@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app/models/song.dart';
 import 'package:app/providers/interaction_provider.dart';
+import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list.dart';
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:flutter/cupertino.dart';
@@ -32,14 +33,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
     setState(() => _songs = interactionProvider.favorites);
 
-    _subscriptions.add(interactionProvider.songLikedStream.listen((song) {
-      // add song to list
-      _songs.add(song);
-    }));
-
-    _subscriptions.add(interactionProvider.songUnlikedStream.listen((song) {
-      // remove song from list
-      _songs.remove(song);
+    _subscriptions.add(interactionProvider.songLikeToggleStream.listen((song) {
+      if (song.liked) {
+        _songs.add(song);
+      } else {
+        _songs.remove(song);
+      }
     }));
   }
 
@@ -66,8 +65,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (_, int index) => SongRow(song: _songs[index]),
+              childCount: _songs.length,
             ),
           ),
+          SliverToBoxAdapter(child: bottomSpace()),
         ],
       ),
     );
