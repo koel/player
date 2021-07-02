@@ -55,32 +55,17 @@ class LibraryScreen extends StatelessWidget {
         menuItem(
           icon: CupertinoIcons.music_mic,
           title: 'Artists',
-          onTap: () {
-            Navigator.of(context).push(CupertinoPageRoute<void>(
-              builder: (_) => ArtistsScreen(previousPageTitle: 'Library'),
-              title: 'Artists',
-            ));
-          },
+          onTap: () => gotoArtistsScreen(context, previousPageTitle: 'Library'),
         ),
         menuItem(
           icon: CupertinoIcons.music_albums,
           title: 'Albums',
-          onTap: () {
-            Navigator.of(context).push(CupertinoPageRoute<void>(
-              builder: (_) => AlbumsScreen(previousPageTitle: 'Library'),
-              title: 'Albums',
-            ));
-          },
+          onTap: () => gotoAlbumsScreen(context, previousPageTitle: 'Library'),
         ),
         menuItem(
           icon: CupertinoIcons.music_note,
           title: 'Songs',
-          onTap: () {
-            Navigator.of(context).push(CupertinoPageRoute<void>(
-              builder: (_) => SongsScreen(previousPageTitle: 'Library'),
-              title: 'Songs',
-            ));
-          },
+          onTap: () => gotoSongsScreen(context, previousPageTitle: 'Library'),
         ),
       ],
     ).toList();
@@ -108,4 +93,25 @@ class LibraryScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+void gotoAlbumsScreen(BuildContext context, {String? previousPageTitle}) {
+  Navigator.of(context).push(CupertinoPageRoute<void>(
+    builder: (_) => AlbumsScreen(previousPageTitle: previousPageTitle),
+    title: 'Albums',
+  ));
+}
+
+void gotoArtistsScreen(BuildContext context, {String? previousPageTitle}) {
+  Navigator.of(context).push(CupertinoPageRoute<void>(
+    builder: (_) => ArtistsScreen(previousPageTitle: previousPageTitle),
+    title: 'Artists',
+  ));
+}
+
+void gotoSongsScreen(BuildContext context, {String? previousPageTitle}) {
+  Navigator.of(context).push(CupertinoPageRoute<void>(
+    builder: (_) => SongsScreen(previousPageTitle: previousPageTitle),
+    title: 'Songs',
+  ));
 }

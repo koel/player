@@ -60,7 +60,7 @@ class SongProvider with ChangeNotifier {
     return clone.sublist(0, limit > clone.length ? clone.length : limit);
   }
 
-  List<Song> leastPlayed({int limit = 5}) {
+  List<Song> leastPlayed({int limit = 15}) {
     List<Song> clone = List<Song>.from(_songs);
     clone.sort((a, b) => a.playCount.compareTo(b.playCount));
     return clone.sublist(0, limit > clone.length ? clone.length : limit);

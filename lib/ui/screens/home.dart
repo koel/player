@@ -4,12 +4,14 @@ import 'package:app/providers/album_provider.dart';
 import 'package:app/providers/artist_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/providers/user_provider.dart';
+import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/widgets/album_card.dart';
 import 'package:app/ui/widgets/artist_card.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/headings.dart';
 import 'package:app/ui/widgets/song_card.dart';
 import 'package:app/ui/widgets/song_row.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -26,6 +28,25 @@ class _HomeScreenState extends State<HomeScreen> {
   late ArtistProvider artistProvider = context.watch<ArtistProvider>();
   late AlbumProvider albumProvider = context.watch<AlbumProvider>();
 
+  Widget placeholderCard({required IconData icon, VoidCallback? onPressed}) {
+    return SizedBox(
+      height: 144,
+      width: 144,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(.1),
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+          border: Border.all(color: Colors.white.withOpacity(.1)),
+        ),
+        child: IconButton(
+          onPressed: onPressed,
+          iconSize: 32,
+          icon: Icon(icon),
+        ),
+      ),
+    );
+  }
+
   Widget mostPlayedSongs() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               ...songProvider.mostPlayed().expand(
                     (song) => [
@@ -44,6 +66,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       SongCard(song: song),
                     ],
                   ),
+              SizedBox(width: AppDimens.horizontalPadding),
+              placeholderCard(
+                icon: CupertinoIcons.music_note,
+                onPressed: () => gotoSongsScreen(context),
+              ),
+              SizedBox(width: AppDimens.horizontalPadding),
             ],
           ),
         ),
@@ -69,6 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       SongCard(song: song),
                     ],
                   ),
+              SizedBox(width: AppDimens.horizontalPadding),
             ],
           ),
         ),
@@ -87,6 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               ...albumProvider.mostPlayed().expand(
                     (album) => <Widget>[
@@ -94,6 +124,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       AlbumCard(album: album),
                     ],
                   ),
+              SizedBox(width: AppDimens.horizontalPadding),
+              placeholderCard(
+                icon: CupertinoIcons.music_albums,
+                onPressed: () => gotoAlbumsScreen(context),
+              ),
+              SizedBox(width: AppDimens.horizontalPadding),
             ],
           ),
         ),
@@ -112,6 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ...artistProvider.mostPlayed().expand(
                     (artist) => <Widget>[
@@ -119,6 +156,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       ArtistCard(artist: artist),
                     ],
                   ),
+              SizedBox(width: AppDimens.horizontalPadding),
+              placeholderCard(
+                icon: CupertinoIcons.music_mic,
+                onPressed: () => gotoArtistsScreen(context),
+              ),
+              SizedBox(width: AppDimens.horizontalPadding),
             ],
           ),
         ),
