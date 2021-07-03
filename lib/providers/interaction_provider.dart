@@ -33,4 +33,10 @@ class InteractionProvider with ChangeNotifier {
   Future<void> toggleLike(Song song) async {
     return song.liked ? unlike(song) : like(song);
   }
+
+  List<Song> getRandomFavorites({int limit = 15}) {
+    List<Song> clone = List.from(favorites);
+    clone.shuffle();
+    return clone.take(limit).toList();
+  }
 }

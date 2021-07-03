@@ -2,6 +2,7 @@ import 'package:app/constants/dimens.dart';
 import 'package:app/models/user.dart';
 import 'package:app/providers/album_provider.dart';
 import 'package:app/providers/artist_provider.dart';
+import 'package:app/providers/interaction_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/providers/user_provider.dart';
 import 'package:app/ui/screens/library.dart';
@@ -24,9 +25,10 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late User _authUser = context.watch<UserProvider>().authUser;
-  late SongProvider songProvider = context.watch<SongProvider>();
-  late ArtistProvider artistProvider = context.watch<ArtistProvider>();
-  late AlbumProvider albumProvider = context.watch<AlbumProvider>();
+  late SongProvider songProvider = context.watch();
+  late ArtistProvider artistProvider = context.watch();
+  late AlbumProvider albumProvider = context.watch();
+  late InteractionProvider interactionProvider = context.watch();
 
   Widget placeholderCard({required IconData icon, VoidCallback? onPressed}) {
     return SizedBox(
@@ -82,25 +84,18 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget leastPlayedSongs() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsets.only(left: AppDimens.horizontalPadding),
-          child: Heading1(text: 'Give these a try'),
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: <Widget>[
-              ...songProvider.leastPlayed().expand(
-                    (song) => <Widget>[
-                      SizedBox(width: AppDimens.horizontalPadding),
-                      SongCard(song: song),
-                    ],
-                  ),
-              SizedBox(width: AppDimens.horizontalPadding),
-            ],
-          ),
-        ),
+      children: [
+        Heading1(text: 'Hidden gems'),
+        ...songProvider
+            .leastPlayed(limit: 6)
+            .map(
+              (song) => SongRow(
+                song: song,
+                bordered: false,
+                padding: EdgeInsets.symmetric(horizontal: 0),
+              ),
+            )
+            .toList(),
       ],
     );
   }
@@ -184,6 +179,25 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget fromYourFavorites() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Heading1(text: 'From your favorites'),
+        ...interactionProvider
+            .getRandomFavorites(limit: 6)
+            .map(
+              (song) => SongRow(
+                song: song,
+                bordered: false,
+                padding: EdgeInsets.symmetric(horizontal: 0),
+              ),
+            )
+            .toList(),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -210,11 +224,23 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: 32),
               mostPlayedSongs(),
               SizedBox(height: 32),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppDimens.horizontalPadding,
+                ),
+                child: fromYourFavorites(),
+              ),
+              SizedBox(height: 32),
               topAlbums(),
               SizedBox(height: 32),
               topArtists(),
               SizedBox(height: 32),
-              leastPlayedSongs(),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppDimens.horizontalPadding,
+                ),
+                child: leastPlayedSongs(),
+              ),
               bottomSpace(),
             ],
           ),
