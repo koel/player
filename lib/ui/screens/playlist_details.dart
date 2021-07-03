@@ -62,6 +62,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
   Widget coverImageStack({required Playlist playlist}) {
     const imageCount = 4;
     List<ImageProvider> images = [];
+
     if (!playlist.isEmpty) {
       images = playlist.songs
           .where((song) {
@@ -70,6 +71,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
           })
           .map((song) => song.image)
           .toList();
+
       images.shuffle();
       images = images.take(imageCount).toList();
     }
@@ -102,80 +104,46 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
     );
   }
 
-  Widget emptyState() {
-    return CustomScrollView(
-      slivers: <Widget>[
-        SliverAppBar(
-          expandedHeight: 290,
-          flexibleSpace: FlexibleSpaceBar(
-            title: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                widget.playlist.name,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            background: Stack(
-              children: <Widget>[
-                SizedBox(
-                  width: double.infinity,
-                  height: double.infinity,
-                  child: ImageFiltered(
-                    imageFilter: ImageFilter.blur(
-                      sigmaX: 20.0,
-                      sigmaY: 20.0,
-                    ),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withAlpha(20),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  height: double.infinity,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black,
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Center(
-                  child: SizedBox(
-                    width: 192,
-                    height: 192,
-                    child: Hero(
-                      tag: "playlist-hero-${widget.playlist.id}",
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(16),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(.3),
-                              blurRadius: 10.0,
-                              offset: Offset(0, 6),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+  Widget appBar({required Playlist playlist}) {
+    return SliverAppBar(
+      pinned: true,
+      expandedHeight: 290,
+      flexibleSpace: FlexibleSpaceBar(
+        title: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            widget.playlist.name,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
-      ],
+        background: Stack(
+          children: <Widget>[
+            SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Center(
+              child: SizedBox(
+                width: 192,
+                height: 192,
+                child: coverImageStack(playlist: playlist),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -186,71 +154,20 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
         future: futurePlaylist,
         builder: (BuildContext context, AsyncSnapshot<Playlist> snapshot) {
           if (!snapshot.hasData || snapshot.hasError) {
-            return emptyState();
+            return CustomScrollView(
+              slivers: <Widget>[appBar(playlist: widget.playlist)],
+            );
           }
 
           Playlist playlist = snapshot.data!;
 
           return CustomScrollView(
             slivers: <Widget>[
-              SliverAppBar(
-                pinned: true,
-                expandedHeight: 290,
-                flexibleSpace: FlexibleSpaceBar(
-                  title: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      playlist.name,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  background: Stack(
-                    children: <Widget>[
-                      SizedBox(
-                        width: double.infinity,
-                        height: double.infinity,
-                        child: ImageFiltered(
-                          imageFilter: ImageFilter.blur(
-                            sigmaX: 20.0,
-                            sigmaY: 20.0,
-                          ),
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: Colors.black.withAlpha(20),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: double.infinity,
-                        height: double.infinity,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                Colors.black,
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Center(
-                        child: coverImageStack(playlist: playlist),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              appBar(playlist: playlist),
               SliverToBoxAdapter(
                 child: playlist.isEmpty
                     ? SizedBox.shrink()
-                    : songListButtons(
-                        context,
-                        songs: playlist.songs,
-                      ),
+                    : songListButtons(context, songs: playlist.songs),
               ),
               playlist.isEmpty
                   ? SliverToBoxAdapter(
