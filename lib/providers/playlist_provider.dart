@@ -4,6 +4,7 @@ import 'package:app/providers/song_provider.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:app/values/parse_result.dart';
 import 'package:flutter/foundation.dart';
+import 'package:rxdart/rxdart.dart';
 
 ParseResult parsePlaylists(List<dynamic> data) {
   ParseResult result = ParseResult();
@@ -15,6 +16,11 @@ ParseResult parsePlaylists(List<dynamic> data) {
 class PlaylistProvider with ChangeNotifier {
   SongProvider _songProvider;
   late List<Playlist> _playlists;
+
+  final BehaviorSubject<Playlist> _playlistPopulated = BehaviorSubject();
+
+  ValueStream<Playlist> get playlistPopulatedStream =>
+      _playlistPopulated.stream;
 
   PlaylistProvider({required SongProvider songProvider})
       : _songProvider = songProvider;
@@ -38,8 +44,13 @@ class PlaylistProvider with ChangeNotifier {
       });
 
       playlist.populated = true;
+      _playlistPopulated.add(playlist);
     }
 
     return playlist;
+  }
+
+  void populateAllPlaylists() {
+    _playlists.forEach((playlist) => populatePlaylist(playlist: playlist));
   }
 }

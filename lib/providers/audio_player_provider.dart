@@ -11,8 +11,8 @@ class AudioPlayerProvider with ChangeNotifier {
   SongProvider _songProvider;
 
   late final AssetsAudioPlayer _player;
-  final BehaviorSubject<bool> _queueModifiedStream = BehaviorSubject();
-  ValueStream<bool> get queueModifiedStream => _queueModifiedStream.stream;
+  final BehaviorSubject<bool> _queueModified = BehaviorSubject();
+  ValueStream<bool> get queueModifiedStream => _queueModified.stream;
   Audio? _currentAudio;
 
   AudioPlayerProvider({required SongProvider songProvider})
@@ -144,11 +144,11 @@ class AudioPlayerProvider with ChangeNotifier {
     _broadcastQueueChangedEvent();
   }
 
-  void _broadcastQueueChangedEvent() => _queueModifiedStream.add(true);
+  void _broadcastQueueChangedEvent() => _queueModified.add(true);
 
   @override
   Future<void> dispose() async {
-    await _queueModifiedStream.close();
+    await _queueModified.close();
     super.dispose();
   }
 }
