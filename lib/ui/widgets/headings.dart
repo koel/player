@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 
 class Heading1 extends StatelessWidget {
-  final String _text;
+  final String text;
 
-  const Heading1({
-    Key? key,
-    required String text,
-  })  : _text = text,
-        super(key: key);
+  const Heading1({Key? key, required this.text}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(_text, style: Theme.of(context).textTheme.headline5),
-        SizedBox(height: 24),
-      ],
+    return Padding(
+      padding: EdgeInsets.only(top: 12, bottom: 24),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.w700,
+        ),
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 }

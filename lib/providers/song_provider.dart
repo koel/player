@@ -51,19 +51,19 @@ class SongProvider with ChangeNotifier {
   List<Song> recentlyAdded({int limit = 5}) {
     List<Song> clone = List<Song>.from(_songs);
     clone.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return clone.sublist(0, limit > clone.length ? clone.length : limit);
+    return clone.take(limit).toList();
   }
 
   List<Song> mostPlayed({int limit = 15}) {
     List<Song> clone = List<Song>.from(_songs);
     clone.sort((a, b) => b.playCount.compareTo(a.playCount));
-    return clone.sublist(0, limit > clone.length ? clone.length : limit);
+    return clone.take(limit).toList();
   }
 
   List<Song> leastPlayed({int limit = 15}) {
     List<Song> clone = List<Song>.from(_songs);
     clone.sort((a, b) => a.playCount.compareTo(b.playCount));
-    return clone.sublist(0, limit > clone.length ? clone.length : limit);
+    return clone.take(limit).toList();
   }
 
   Song byId(String id) => _index[id]!;

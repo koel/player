@@ -1,11 +1,17 @@
 import 'package:app/constants/dimens.dart';
+import 'package:app/models/song.dart';
+import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/albums.dart';
 import 'package:app/ui/screens/artists.dart';
 import 'package:app/ui/screens/favorites.dart';
 import 'package:app/ui/screens/playlists.dart';
 import 'package:app/ui/screens/songs.dart';
+import 'package:app/ui/widgets/bottom_space.dart';
+import 'package:app/ui/widgets/headings.dart';
+import 'package:app/ui/widgets/song_row.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class LibraryScreen extends StatelessWidget {
   const LibraryScreen({Key? key}) : super(key: key);
@@ -35,6 +41,9 @@ class LibraryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final SongProvider songProvider = context.watch();
+    List<Song> mostPlayedSongs = songProvider.mostPlayed(limit: 10);
+
     List<Widget> menuItems = ListTile.divideTiles(
       context: context,
       tiles: <Widget>[
@@ -93,6 +102,25 @@ class LibraryScreen extends StatelessWidget {
               delegate: SliverChildListDelegate(menuItems),
             ),
           ),
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(
+              AppDimens.horizontalPadding,
+              24,
+              AppDimens.horizontalPadding,
+              0,
+            ),
+            sliver: SliverToBoxAdapter(child: Heading1(text: 'Recently Added')),
+          ),
+          mostPlayedSongs.length == 0
+              ? SliverToBoxAdapter(child: SizedBox.shrink())
+              : SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) =>
+                        SongRow(song: mostPlayedSongs[index]),
+                    childCount: mostPlayedSongs.length,
+                  ),
+                ),
+          SliverToBoxAdapter(child: bottomSpace()),
         ],
       ),
     );

@@ -42,6 +42,6 @@ class ArtistProvider with ChangeNotifier {
         .toList()
           ..sort((a, b) => b.playCount.compareTo(a.playCount));
 
-    return clone.sublist(0, limit > clone.length ? clone.length : limit);
+    return clone.take(limit).toList();
   }
 }
