@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:app/models/album.dart';
 import 'package:app/models/song.dart';
-import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list.dart';
@@ -17,7 +16,6 @@ class AlbumDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AudioPlayerProvider audio = context.watch<AudioPlayerProvider>();
     List<Song> songs = context.watch<SongProvider>().byAlbum(album)
       ..sort((a, b) => a.title.compareTo(b.title));
 

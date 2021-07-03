@@ -5,7 +5,7 @@ import 'package:http/http.dart' as Http;
 
 enum HttpMethod { get, post, patch, put, delete }
 
-Future<Map<String, dynamic>> request(
+Future<dynamic> request(
   HttpMethod method,
   String path, {
   Object data = const {},
@@ -65,29 +65,16 @@ Future<Map<String, dynamic>> request(
   }
 }
 
-Future<Map<String, dynamic>> get(String path) async =>
-    request(HttpMethod.get, path);
+Future<dynamic> get(String path) async => request(HttpMethod.get, path);
 
-Future<Map<String, dynamic>> post(
-  String path, {
-  Object data = const {},
-}) async =>
+Future<dynamic> post(String path, {Object data = const {}}) async =>
     request(HttpMethod.post, path, data: data);
 
-Future<Map<String, dynamic>> patch(
-  String path, {
-  Object data = const {},
-}) async =>
+Future<dynamic> patch(String path, {Object data = const {}}) async =>
     request(HttpMethod.patch, path, data: data);
 
-Future<Map<String, dynamic>> put(
-  String path, {
-  Object data = const {},
-}) async =>
+Future<dynamic> put(String path, {Object data = const {}}) async =>
     request(HttpMethod.put, path, data: data);
 
-Future<Map<String, dynamic>> delete(
-  String path, {
-  Object data = const {},
-}) async =>
+Future<dynamic> delete(String path, {Object data = const {}}) async =>
     request(HttpMethod.delete, path, data: data);

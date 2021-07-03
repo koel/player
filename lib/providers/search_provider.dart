@@ -29,8 +29,8 @@ class SearchProvider with ChangeNotifier {
     required artistProvider,
     required albumProvider,
   })  : _songProvider = songProvider,
-        _albumProvider = albumProvider,
-        _artistProvider = artistProvider;
+        _artistProvider = artistProvider,
+        _albumProvider = albumProvider;
 
   Future<SearchResult> searchExcerpts({required String keywords}) async {
     var results = await get('search?q=$keywords');

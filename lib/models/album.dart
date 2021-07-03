@@ -1,6 +1,5 @@
+import 'package:app/models/artist.dart';
 import 'package:flutter/material.dart';
-
-import 'artist.dart';
 
 class Album {
   int id;
@@ -13,15 +12,21 @@ class Album {
 
   ImageProvider? _image;
 
-  Album(this.id, this.name, this.cover, this.isCompilation, this.artistId);
+  Album({
+    required this.id,
+    required this.name,
+    required this.cover,
+    required this.isCompilation,
+    required this.artistId,
+  });
 
   factory Album.fromJson(Map<String, dynamic> json) {
     return Album(
-      json['id'],
-      json['name'],
-      json['cover'],
-      json['is_compilation'],
-      json['artist_id'],
+      id: json['id'],
+      name: json['name'],
+      cover: json['cover'],
+      isCompilation: json['is_compilation'],
+      artistId: json['artist_id'],
     );
   }
 

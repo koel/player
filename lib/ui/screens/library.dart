@@ -2,6 +2,7 @@ import 'package:app/constants/dimens.dart';
 import 'package:app/ui/screens/albums.dart';
 import 'package:app/ui/screens/artists.dart';
 import 'package:app/ui/screens/favorites.dart';
+import 'package:app/ui/screens/playlists.dart';
 import 'package:app/ui/screens/songs.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +51,10 @@ class LibraryScreen extends StatelessWidget {
         menuItem(
           icon: CupertinoIcons.music_note_list,
           title: 'Playlists',
-          onTap: () {},
+          onTap: () => gotoPlaylistsScreen(
+            context,
+            previousPageTitle: 'Library',
+          ),
         ),
         menuItem(
           icon: CupertinoIcons.music_mic,
@@ -113,5 +117,12 @@ void gotoSongsScreen(BuildContext context, {String? previousPageTitle}) {
   Navigator.of(context).push(CupertinoPageRoute<void>(
     builder: (_) => SongsScreen(previousPageTitle: previousPageTitle),
     title: 'Songs',
+  ));
+}
+
+void gotoPlaylistsScreen(BuildContext context, {String? previousPageTitle}) {
+  Navigator.of(context).push(CupertinoPageRoute<void>(
+    builder: (_) => PlaylistsScreen(previousPageTitle: previousPageTitle),
+    title: 'Playlists',
   ));
 }

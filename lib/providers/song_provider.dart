@@ -68,6 +68,8 @@ class SongProvider with ChangeNotifier {
 
   Song byId(String id) => _index[id]!;
 
+  Song? tryById(String id) => _index[id];
+
   List<Song> byIds(List<String> ids) {
     List<Song> songs = [];
 
