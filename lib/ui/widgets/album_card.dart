@@ -1,5 +1,6 @@
 import 'package:app/models/album.dart';
 import 'package:app/ui/screens/album_details.dart';
+import 'package:app/ui/widgets/album_thumbnail.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -27,21 +28,10 @@ class _AlbumCardState extends State<AlbumCard> {
         opacity: opacity,
         child: Column(
           children: <Widget>[
-            SizedBox(
-              width: 144,
-              height: 144,
-              child: Hero(
-                tag: "album-hero-${widget.album.id}",
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: widget.album.image,
-                      fit: BoxFit.cover,
-                    ),
-                    borderRadius: BorderRadius.all(Radius.circular(16)),
-                  ),
-                ),
-              ),
+            AlbumThumbnail(
+              album: widget.album,
+              size: ThumbnailSize.lg,
+              asHero: true,
             ),
             SizedBox(height: 8),
             SizedBox(

@@ -1,5 +1,6 @@
 import 'package:app/models/artist.dart';
 import 'package:app/ui/screens/artist_details.dart';
+import 'package:app/ui/widgets/artist_thumbnail.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -27,21 +28,10 @@ class _ArtistCardState extends State<ArtistCard> {
         opacity: opacity,
         child: Column(
           children: <Widget>[
-            SizedBox(
-              width: 144,
-              height: 144,
-              child: Hero(
-                tag: "artist-hero-${widget.artist.id}",
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: widget.artist.image,
-                      fit: BoxFit.cover,
-                    ),
-                    borderRadius: BorderRadius.all(Radius.circular(16)),
-                  ),
-                ),
-              ),
+            ArtistThumbnail(
+              artist: widget.artist,
+              size: ThumbnailSize.md,
+              asHero: true,
             ),
             SizedBox(height: 8),
             SizedBox(

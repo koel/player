@@ -6,6 +6,7 @@ import 'package:app/extensions/duration.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
+import 'package:app/ui/screens/info.dart';
 import 'package:app/ui/screens/queue.dart';
 import 'package:app/ui/screens/song_action_sheet.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
@@ -244,7 +245,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
         children: <Widget>[
           loopModeButton(),
           IconButton(
-            onPressed: () {},
+            onPressed: () => showInfoSheet(context, song: song),
             icon: Icon(CupertinoIcons.text_quote),
           ),
           IconButton(

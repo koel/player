@@ -4,6 +4,7 @@ import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/auth_provider.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/interaction_provider.dart';
+import 'package:app/providers/media_info_provider.dart';
 import 'package:app/providers/playlist_provider.dart';
 import 'package:app/providers/search_provider.dart';
 import 'package:app/providers/song_provider.dart';
@@ -25,6 +26,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => ArtistProvider()),
+        Provider(create: (_) => MediaInfoProvider()),
         ChangeNotifierProvider(
           create: (context) => AlbumProvider(
             artistProvider: context.read<ArtistProvider>(),
