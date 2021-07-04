@@ -41,7 +41,7 @@ class SongThumbnail extends StatelessWidget {
             child: DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
-                color: Colors.black.withOpacity(.7),
+                color: Colors.black.withOpacity(.5),
               ),
             ),
           ),
