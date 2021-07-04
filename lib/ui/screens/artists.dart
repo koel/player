@@ -1,5 +1,6 @@
 import 'package:app/models/artist.dart';
 import 'package:app/providers/artist_provider.dart';
+import 'package:app/ui/widgets/artist_thumbnail.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -51,18 +52,9 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
                   onTap: () => gotoDetailsScreen(context, artist: artist),
                   child: ListTile(
                     shape: Border(bottom: Divider.createBorderSide(context)),
-                    leading: SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: artist.image,
-                            fit: BoxFit.cover,
-                          ),
-                          borderRadius: BorderRadius.all(Radius.circular(20)),
-                        ),
-                      ),
+                    leading: ArtistThumbnail(
+                      artist: artist,
+                      size: ThumbnailSize.sm,
                     ),
                     title: Text(artist.name, overflow: TextOverflow.ellipsis),
                   ),

@@ -1,6 +1,7 @@
 import 'package:app/models/album.dart';
 import 'package:app/providers/album_provider.dart';
 import 'package:app/ui/screens/album_details.dart';
+import 'package:app/ui/widgets/album_thumbnail.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -47,19 +48,7 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                   onTap: () => gotoDetailsScreen(context, album: album),
                   child: ListTile(
                     shape: Border(bottom: Divider.createBorderSide(context)),
-                    leading: SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: album.image,
-                            fit: BoxFit.cover,
-                          ),
-                          borderRadius: BorderRadius.all(Radius.circular(6)),
-                        ),
-                      ),
-                    ),
+                    leading: AlbumThumbnail(album: album),
                     title: Text(album.name, overflow: TextOverflow.ellipsis),
                     subtitle: Text(
                       album.artist.name,
