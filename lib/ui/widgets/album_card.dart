@@ -30,7 +30,7 @@ class _AlbumCardState extends State<AlbumCard> {
           children: <Widget>[
             AlbumThumbnail(
               album: widget.album,
-              size: ThumbnailSize.lg,
+              size: ThumbnailSize.md,
               asHero: true,
             ),
             SizedBox(height: 8),
