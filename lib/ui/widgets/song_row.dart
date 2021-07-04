@@ -17,12 +17,16 @@ class SongRow extends StatefulWidget {
   final EdgeInsetsGeometry? padding;
   final SongListBehavior behavior;
 
+  /// The index of the row in a list, important for (Sliver) orderable lists.
+  final int index;
+
   SongRow({
     Key? key,
     required this.song,
     this.bordered = true,
     this.padding,
     this.behavior = SongListBehavior.none,
+    this.index = 0,
   }) : super(key: key);
 
   @override
@@ -58,8 +62,25 @@ class _SongRowState extends State<SongRow> {
 
   @override
   Widget build(BuildContext context) {
+    final trailingControl = widget.behavior == SongListBehavior.queue
+        // In a queue, the trailing control is the Drag icon
+        // In other "standard" queues, it's the Actions menu trigger
+        ? ReorderableDragStartListener(
+            index: widget.index,
+            child: Icon(
+              CupertinoIcons.bars,
+              color: Colors.white.withOpacity(.5),
+            ),
+          )
+        : IconButton(
+            icon: const Icon(CupertinoIcons.ellipsis, size: 20),
+            onPressed: () =>
+                showActionSheet(context: context, song: widget.song),
+          );
+
     return InkWell(
       onTap: () async => await audio.play(song: widget.song),
+      onLongPress: () => showActionSheet(context: context, song: widget.song),
       child: ListTile(
         key: UniqueKey(),
         contentPadding: widget.padding,
@@ -75,15 +96,7 @@ class _SongRowState extends State<SongRow> {
           widget.song.album.name,
           overflow: TextOverflow.ellipsis,
         ),
-        trailing: IconButton(
-          icon: Icon(CupertinoIcons.ellipsis, size: 20),
-          onPressed: () {
-            showActionSheet(
-              context: context,
-              song: widget.song,
-            );
-          },
-        ),
+        trailing: trailingControl,
       ),
     );
   }

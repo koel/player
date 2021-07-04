@@ -27,7 +27,8 @@ class _SongCardState extends State<SongCard> {
         setState(() => _opacity = 1);
         await audio.play(song: widget.song);
       },
-      child: Opacity(
+      child: AnimatedOpacity(
+        duration: const Duration(microseconds: 500),
         opacity: _opacity,
         child: Column(
           children: [

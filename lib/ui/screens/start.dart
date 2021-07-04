@@ -7,7 +7,6 @@ import 'package:app/ui/widgets/footer_player_sheet.dart';
 import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/cupertino.dart'
     show
-        CupertinoActivityIndicator,
         CupertinoIcons,
         CupertinoTabBar,
         CupertinoTabScaffold,

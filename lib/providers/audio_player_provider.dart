@@ -12,11 +12,16 @@ class AudioPlayerProvider with ChangeNotifier {
 
   late final AssetsAudioPlayer _player;
   final BehaviorSubject<bool> _queueModified = BehaviorSubject();
+
   ValueStream<bool> get queueModifiedStream => _queueModified.stream;
   Audio? _currentAudio;
 
   AudioPlayerProvider({required SongProvider songProvider})
       : _songProvider = songProvider;
+
+  // Set a blank audio to ensure the playlist is initialized
+  // (Assets Audio Player will set playlist to NULL if the list is empty).
+  final Audio seededAudio = Audio('assets/audio/blank.mp3');
 
   Future<void> init() async {
     _player = AssetsAudioPlayer.newPlayer();
@@ -26,31 +31,25 @@ class AudioPlayerProvider with ChangeNotifier {
     });
 
     await _player.open(
-      Playlist(
-        audios: <Audio>[
-          // Set a blank audio to ensure the playlist is initialized
-          // (Assets Audio Player will set playlist to NULL if the list is empty).
-          Audio('assets/audio/blank.mp3'),
-        ],
-        startIndex: 0,
-      ),
+      Playlist(audios: [seededAudio]),
       showNotification: true,
       autoStart: false,
     );
 
+    _player.playlist?.remove(seededAudio);
     _broadcastQueueChangedEvent();
   }
 
   Future<bool> queued(Song song) async => await indexInQueue(song) != -1;
 
   Future<int> indexInQueue(Song song) async {
-    return _player.playlist!.audios.indexOf(await song.asAudio());
+    return _player.playlist?.audios.indexOf(await song.asAudio()) ?? -1;
   }
 
   Future<int> queueAfterCurrent(Song song) async {
     Audio audio = await song.asAudio();
-    int index = _player.playlist!.audios.indexOf(_currentAudio!) + 1;
-    _player.playlist!.insert(index, audio);
+    int index = _player.playlist?.audios.indexOf(_currentAudio!) ?? 0 + 1;
+    _player.playlist?.insert(index, audio);
     _broadcastQueueChangedEvent();
 
     return index;
@@ -79,15 +78,15 @@ class AudioPlayerProvider with ChangeNotifier {
   Future<void> stop() async => await _player.stop();
 
   Future<int> queueToTop(Song song) async {
-    _player.playlist!.insert(0, await song.asAudio());
+    _player.playlist?.insert(0, await song.asAudio());
     _broadcastQueueChangedEvent();
     return 0;
   }
 
   Future<int> queueToBottom(Song song) async {
-    _player.playlist!.add(await song.asAudio());
+    _player.playlist?.add(await song.asAudio());
     _broadcastQueueChangedEvent();
-    return _player.playlist!.numberOfItems;
+    return _player.playlist?.numberOfItems ?? -1;
   }
 
   Future<void> replaceQueue(List<Song> songs, {shuffle = false}) async {
@@ -110,25 +109,22 @@ class AudioPlayerProvider with ChangeNotifier {
   List<Song> get queuedSongs {
     if (_player.playlist == null) return [];
 
-    try {
-      return _player.playlist!.audios
-          .map((audio) => _songProvider.byId(audio.metas.extra!['songId']))
-          .toList();
-    } catch (err) {
-      print(err);
-      return [];
-    }
+    return _player.playlist?.audios
+            .where((element) => element.path != 'assets/audio/blank.mp3')
+            .map((audio) => _songProvider.byId(audio.metas.extra!['songId']))
+            .toList() ??
+        [];
   }
 
   AssetsAudioPlayer get player => _player;
 
   void clearQueue() {
-    _player.playlist!.audios.clear();
+    _player.playlist?.audios.clear();
     _broadcastQueueChangedEvent();
   }
 
   Future<void> removeFromQueue(Song song) async {
-    _player.playlist!.audios.remove(await song.asAudio());
+    _player.playlist?.audios.remove(await song.asAudio());
     _broadcastQueueChangedEvent();
   }
 
@@ -138,10 +134,13 @@ class AudioPlayerProvider with ChangeNotifier {
       newIndex -= 1;
     }
 
-    Audio audio = _player.playlist!.audios[oldIndex];
-    _player.playlist!.remove(audio);
-    _player.playlist!.insert(newIndex, audio);
-    _broadcastQueueChangedEvent();
+    Audio? audio = _player.playlist?.audios[oldIndex];
+
+    if (audio != null) {
+      _player.playlist?.remove(audio);
+      _player.playlist?.insert(newIndex, audio);
+      _broadcastQueueChangedEvent();
+    }
   }
 
   void _broadcastQueueChangedEvent() => _queueModified.add(true);

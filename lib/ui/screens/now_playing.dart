@@ -95,23 +95,23 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
           overflow: TextOverflow.ellipsis,
         ),
         SizedBox(height: 4),
-        Opacity(
-          opacity: .8,
-          child: Text(
-            song.artist.name,
-            style: TextStyle(
-              color: Theme.of(context).textTheme.caption?.color,
-              fontSize: mainFontSize - 2,
-            ),
-            overflow: TextOverflow.ellipsis,
+        Text(
+          song.artist.name,
+          style: TextStyle(
+            color: Theme.of(context).textTheme.caption?.color,
+            fontSize: mainFontSize - 2,
           ),
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
   }
 
   Widget progress() {
-    TextStyle style = TextStyle(fontSize: 12);
+    TextStyle timeStampStyle = TextStyle(
+      fontSize: 12,
+      color: Colors.white.withOpacity(.5),
+    );
 
     return Column(
       children: [
@@ -123,18 +123,15 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
             audio.player.seek(new Duration(seconds: value.toInt()));
           },
         ),
-        Opacity(
-          opacity: .4,
-          child: Container(
-            // move the timestamps up a bit
-            transform: Matrix4.translationValues(0.0, -4.0, 0.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(_position.toMs(), style: style),
-                Text('-' + (_duration - _position).toMs(), style: style),
-              ],
-            ),
+        Container(
+          // move the timestamps up a bit
+          transform: Matrix4.translationValues(0.0, -4.0, 0.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(_position.toMs(), style: timeStampStyle),
+              Text('-' + (_duration - _position).toMs(), style: timeStampStyle),
+            ],
           ),
         ),
       ],
@@ -216,7 +213,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
   Widget loopModeButton() {
     return IconButton(
       color: _loopMode == LoopMode.none
-          ? Colors.white.withOpacity(.5)
+          ? Colors.white.withOpacity(.2)
           : Colors.white,
       onPressed: () {
         late LoopMode newMode;
@@ -238,26 +235,24 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
   }
 
   Widget extraControls(Song song) {
-    return Opacity(
-      opacity: .5,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          loopModeButton(),
-          IconButton(
-            onPressed: () => showInfoSheet(context, song: song),
-            icon: Icon(CupertinoIcons.text_quote),
-          ),
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => QueueScreen()),
-              );
-            },
-            icon: Icon(CupertinoIcons.list_number),
-          ),
-        ],
-      ),
+    Color iconColor = Colors.white.withOpacity(.5);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        loopModeButton(),
+        IconButton(
+          onPressed: () => showInfoSheet(context, song: song),
+          icon: Icon(CupertinoIcons.text_quote, color: iconColor),
+        ),
+        IconButton(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => QueueScreen()),
+            );
+          },
+          icon: Icon(CupertinoIcons.list_number, color: iconColor),
+        ),
+      ],
     );
   }
 

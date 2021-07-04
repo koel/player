@@ -25,14 +25,12 @@ class LibraryScreen extends StatelessWidget {
       child: ListTile(
         contentPadding: EdgeInsets.zero,
         horizontalTitleGap: 0,
-        leading: Opacity(opacity: .5, child: Icon(icon)),
+        leading: Icon(icon, color: Colors.white.withOpacity(.5)),
         title: Text(title, style: TextStyle(fontSize: 20)),
-        trailing: Opacity(
-          opacity: .3,
-          child: Icon(
-            CupertinoIcons.chevron_right,
-            size: 18,
-          ),
+        trailing: Icon(
+          CupertinoIcons.chevron_right,
+          size: 18,
+          color: Colors.white.withOpacity(.3),
         ),
       ),
       onTap: onTap,

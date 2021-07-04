@@ -55,11 +55,11 @@ class _SearchScreenState extends State<SearchScreen> {
       );
 
   Widget get noResults {
-    return Opacity(
-      opacity: .4,
-      child: Padding(
-        padding: EdgeInsets.only(left: AppDimens.horizontalPadding),
-        child: Text('None found.'),
+    return Padding(
+      padding: EdgeInsets.only(left: AppDimens.horizontalPadding),
+      child: Text(
+        'None found.',
+        style: TextStyle(color: Colors.white.withOpacity(.5)),
       ),
     );
   }

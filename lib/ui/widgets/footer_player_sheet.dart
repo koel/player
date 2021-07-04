@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:ui';
 
 import 'package:app/models/song.dart';
@@ -19,22 +18,11 @@ class FooterPlayerSheet extends StatefulWidget {
 class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
   late AudioPlayerProvider audio;
   late SongProvider songProvider;
-  PlayerState _currentState = PlayerState.stop;
-  List<StreamSubscription> _subscriptions = [];
 
   @override
   void initState() {
     super.initState();
     audio = context.read<AudioPlayerProvider>();
-    _subscriptions.add(audio.player.playerState.listen((PlayerState state) {
-      setState(() => _currentState = state);
-    }));
-  }
-
-  @override
-  void dispose() {
-    _subscriptions.forEach((element) => element.cancel());
-    super.dispose();
   }
 
   @override
@@ -71,7 +59,6 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
                           tag: 'hero-now-playing-thumbnail',
                           child: SongThumbnail(
                             song: songProvider.byId(songId),
-                            playing: _currentState == PlayerState.play,
                           ),
                         ),
                         Expanded(
@@ -103,29 +90,30 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
                         audio.player.builderLoopMode(
                           builder: (context, loopMode) {
                             return PlayerBuilder.isPlaying(
-                                player: audio.player,
-                                builder: (context, isPlaying) {
-                                  return PlayingControls(
-                                    loopMode: loopMode,
-                                    isPlaying: isPlaying,
-                                    isPlaylist: true,
-                                    onStop: () {
-                                      audio.player.stop();
-                                    },
-                                    toggleLoop: () {
-                                      audio.player.toggleLoop();
-                                    },
-                                    onPlay: () {
-                                      audio.player.playOrPause();
-                                    },
-                                    onNext: () {
-                                      audio.player.next();
-                                    },
-                                    onPrevious: () {
-                                      audio.player.previous();
-                                    },
-                                  );
-                                });
+                              player: audio.player,
+                              builder: (context, isPlaying) {
+                                return PlayingControls(
+                                  loopMode: loopMode,
+                                  isPlaying: isPlaying,
+                                  isPlaylist: true,
+                                  onStop: () {
+                                    audio.player.stop();
+                                  },
+                                  toggleLoop: () {
+                                    audio.player.toggleLoop();
+                                  },
+                                  onPlay: () {
+                                    audio.player.playOrPause();
+                                  },
+                                  onNext: () {
+                                    audio.player.next();
+                                  },
+                                  onPrevious: () {
+                                    audio.player.previous();
+                                  },
+                                );
+                              },
+                            );
                           },
                         ),
                       ],
