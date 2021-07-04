@@ -72,11 +72,18 @@ class _QueueState extends State<QueueScreen> {
               : SliverReorderableList(
                   itemCount: _songs.length,
                   itemBuilder: (BuildContext context, int index) {
-                    return SongRow(
-                      index: index,
+                    return Dismissible(
+                      onDismissed: (DismissDirection direction) {
+                        audio.removeFromQueue(_songs[index]);
+                      },
+                      background: Container(color: Colors.red),
                       key: ValueKey(_songs[index]),
-                      song: _songs[index],
-                      behavior: SongListBehavior.queue,
+                      child: SongRow(
+                        index: index,
+                        key: ValueKey(_songs[index]),
+                        song: _songs[index],
+                        behavior: SongListBehavior.queue,
+                      ),
                     );
                   },
                   onReorder: (int oldIndex, int newIndex) {
