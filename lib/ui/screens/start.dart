@@ -4,8 +4,10 @@ import 'package:app/ui/screens/home.dart';
 import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/screens/search.dart';
 import 'package:app/ui/widgets/footer_player_sheet.dart';
+import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/cupertino.dart'
     show
+        CupertinoActivityIndicator,
         CupertinoIcons,
         CupertinoTabBar,
         CupertinoTabScaffold,
@@ -25,7 +27,7 @@ class _StartScreenState extends State<StartScreen> {
   int _selectedIndex = 0;
   late AudioPlayerProvider audio;
 
-  static const List<Widget> _widgetOptions = <Widget>[
+  static const List<Widget> _widgetOptions = [
     HomeScreen(),
     SearchScreen(),
     LibraryScreen(),
@@ -45,22 +47,13 @@ class _StartScreenState extends State<StartScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Container loadingWidget = Container(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Center(child: CircularProgressIndicator()),
-        ],
-      ),
-    );
-
     return FutureBuilder(
       future: futureData,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.none:
           case ConnectionState.waiting:
-            return loadingWidget;
+            return containerWithSpinner();
           default:
             return Scaffold(
               body: Stack(

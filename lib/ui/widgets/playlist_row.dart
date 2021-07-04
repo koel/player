@@ -77,7 +77,7 @@ class _PlaylistRowState extends State<PlaylistRow> {
     );
   }
 
-  void _defaultOnTap () => gotoDetailsScreen(context, playlist: _playlist);
+  void _defaultOnTap() => gotoDetailsScreen(context, playlist: _playlist);
 
   @override
   Widget build(BuildContext context) {

@@ -5,6 +5,7 @@ import 'package:app/models/song.dart';
 import 'package:app/providers/media_info_provider.dart';
 import 'package:app/ui/widgets/album_thumbnail.dart';
 import 'package:app/ui/widgets/artist_thumbnail.dart';
+import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -153,7 +154,7 @@ class _InfoSheetState extends State<InfoSheet> {
               }
 
               if (snapshot.connectionState != ConnectionState.done) {
-                return Text('Fetching information…');
+                return containerWithSpinner();
               }
 
               return Column(

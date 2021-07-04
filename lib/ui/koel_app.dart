@@ -4,7 +4,9 @@ import 'package:app/models/user.dart';
 import 'package:app/providers/user_provider.dart';
 import 'package:app/ui/screens/login.dart';
 import 'package:app/ui/screens/start.dart';
+import 'package:app/ui/widgets/spinner.dart';
 import 'package:app/utils/full_width_slider_track_shape.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -67,12 +69,7 @@ class _KoelAppState extends State<KoelApp> {
           switch (snapshot.connectionState) {
             case ConnectionState.none:
             case ConnectionState.waiting:
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Center(child: CircularProgressIndicator()),
-                ],
-              );
+              return containerWithSpinner();
             default:
               return snapshot.data == null ? LoginScreen() : StartScreen();
           }

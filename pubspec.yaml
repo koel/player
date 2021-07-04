@@ -35,6 +35,7 @@ dependencies:
   rxdart: ^0.26.0
   easy_debounce: ^2.0.0
   flutter_html: ^2.1.0
+  flutter_spinkit: ^5.0.0
 
 dev_dependencies:
   flutter_test:
