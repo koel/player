@@ -4,9 +4,9 @@ import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/now_playing.dart';
-import 'package:app/ui/widgets/player/playing_controls.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -87,32 +87,27 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
                             ),
                           ),
                         ),
-                        audio.player.builderLoopMode(
-                          builder: (context, loopMode) {
-                            return PlayerBuilder.isPlaying(
-                              player: audio.player,
-                              builder: (context, isPlaying) {
-                                return PlayingControls(
-                                  loopMode: loopMode,
-                                  isPlaying: isPlaying,
-                                  isPlaylist: true,
-                                  onStop: () {
-                                    audio.player.stop();
-                                  },
-                                  toggleLoop: () {
-                                    audio.player.toggleLoop();
-                                  },
-                                  onPlay: () {
-                                    audio.player.playOrPause();
-                                  },
-                                  onNext: () {
-                                    audio.player.next();
-                                  },
-                                  onPrevious: () {
-                                    audio.player.previous();
-                                  },
-                                );
-                              },
+                        audio.player.builderIsPlaying(
+                          builder: (context, isPlaying) {
+                            return Row(
+                              children: <Widget>[
+                                IconButton(
+                                  onPressed: () => audio.player.playOrPause(),
+                                  icon: Icon(
+                                    isPlaying
+                                        ? CupertinoIcons.pause_fill
+                                        : CupertinoIcons.play_fill,
+                                    size: 24,
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () => audio.player.next(),
+                                  icon: Icon(
+                                    CupertinoIcons.forward_fill,
+                                    size: 24,
+                                  ),
+                                ),
+                              ],
                             );
                           },
                         ),
