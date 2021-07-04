@@ -12,6 +12,7 @@ class AudioPlayerProvider with ChangeNotifier {
 
   late final AssetsAudioPlayer _player;
   final BehaviorSubject<bool> _queueModified = BehaviorSubject();
+
   ValueStream<bool> get queueModifiedStream => _queueModified.stream;
   Audio? _currentAudio;
 
@@ -110,14 +111,9 @@ class AudioPlayerProvider with ChangeNotifier {
   List<Song> get queuedSongs {
     if (_player.playlist == null) return [];
 
-    try {
-      return _player.playlist!.audios
-          .map((audio) => _songProvider.byId(audio.metas.extra!['songId']))
-          .toList();
-    } catch (err) {
-      print(err);
-      return [];
-    }
+    return _player.playlist!.audios
+        .map((audio) => _songProvider.byId(audio.metas.extra!['songId']))
+        .toList();
   }
 
   AssetsAudioPlayer get player => _player;

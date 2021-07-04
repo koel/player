@@ -33,7 +33,7 @@ Future<void> showActionSheet({
         bool hideSheetOnTap = true,
       }) {
         return ListTile(
-          leading: Opacity(opacity: .3, child: icon),
+          leading: icon,
           minLeadingWidth: 16,
           title: Text(text),
           onTap: () {
@@ -51,14 +51,20 @@ Future<void> showActionSheet({
         menuItems.add(
           _button(
             text: 'Play Next',
-            icon: Icon(CupertinoIcons.arrow_right_circle_fill),
+            icon: Icon(
+              CupertinoIcons.arrow_right_circle_fill,
+              color: Colors.white.withOpacity(.3),
+            ),
             onTap: () => audio.queueAfterCurrent(song),
           ),
         );
         menuItems.add(
           _button(
             text: 'Play Last',
-            icon: Icon(CupertinoIcons.arrow_down_right_circle_fill),
+            icon: Icon(
+              CupertinoIcons.arrow_down_right_circle_fill,
+              color: Colors.white.withOpacity(.3),
+            ),
             onTap: () => audio.queueToBottom(song),
           ),
         );
@@ -68,7 +74,10 @@ Future<void> showActionSheet({
         menuItems.add(
           _button(
             text: 'Remove from Queue',
-            icon: Icon(CupertinoIcons.text_badge_minus),
+            icon: Icon(
+              CupertinoIcons.text_badge_minus,
+              color: Colors.white.withOpacity(.3),
+            ),
             onTap: () => audio.removeFromQueue(song),
           ),
         );
@@ -77,9 +86,10 @@ Future<void> showActionSheet({
       menuItems.add(
         _button(
           text: song.liked ? 'Unlike' : 'Like',
-          icon: Icon(song.liked
-              ? CupertinoIcons.heart_slash
-              : CupertinoIcons.heart_fill),
+          icon: Icon(
+            song.liked ? CupertinoIcons.heart_slash : CupertinoIcons.heart_fill,
+            color: Colors.white.withOpacity(.3),
+          ),
           onTap: () => interactionProvider.toggleLike(song),
         ),
       );
@@ -92,7 +102,10 @@ Future<void> showActionSheet({
       menuItems.add(
         _button(
           text: 'Go to Album',
-          icon: Icon(CupertinoIcons.music_albums_fill),
+          icon: Icon(
+            CupertinoIcons.music_albums_fill,
+            color: Colors.white.withOpacity(.3),
+          ),
           onTap: () {
             Navigator.pop(context);
             Navigator.of(context).push(CupertinoPageRoute<void>(
@@ -106,7 +119,10 @@ Future<void> showActionSheet({
       menuItems.add(
         _button(
           text: 'Go to Artist',
-          icon: Icon(CupertinoIcons.music_mic),
+          icon: Icon(
+            CupertinoIcons.music_mic,
+            color: Colors.white.withOpacity(.3),
+          ),
           onTap: () {
             Navigator.pop(context);
             Navigator.of(context).push(CupertinoPageRoute<void>(
@@ -126,7 +142,10 @@ Future<void> showActionSheet({
       menuItems.add(
         _button(
           text: 'Add to a Playlist…',
-          icon: Icon(CupertinoIcons.text_badge_plus),
+          icon: Icon(
+            CupertinoIcons.text_badge_plus,
+            color: Colors.white.withOpacity(.3),
+          ),
           onTap: () {
             Navigator.pop(context);
             Navigator.of(context).push(CupertinoPageRoute<void>(
@@ -163,13 +182,11 @@ Future<void> showActionSheet({
                       overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 4),
-                    Opacity(
-                      opacity: .5,
-                      child: Text(
-                        '${song.artist.name} • ${song.album.name}',
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    )
+                    Text(
+                      '${song.artist.name} • ${song.album.name}',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: Colors.white.withOpacity(.5)),
+                    ),
                   ],
                 ),
                 ListView(

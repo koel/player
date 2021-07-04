@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list.dart';
+import 'package:app/ui/widgets/song_row.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -15,14 +19,21 @@ class QueueScreen extends StatefulWidget {
 class _QueueState extends State<QueueScreen> {
   late AudioPlayerProvider audio;
   List<Song> _songs = [];
+  List<StreamSubscription> subscriptions = [];
 
   @override
   void initState() {
     super.initState();
     audio = context.read<AudioPlayerProvider>();
-    audio.queueModifiedStream.listen((_) {
+    subscriptions.add(audio.queueModifiedStream.listen((_) {
       setState(() => _songs = audio.queuedSongs);
-    });
+    }));
+  }
+
+  @override
+  void dispose() {
+    subscriptions.forEach((sub) => sub.cancel());
+    super.dispose();
   }
 
   @override
@@ -33,16 +44,15 @@ class _QueueState extends State<QueueScreen> {
       body: CustomScrollView(
         controller: scrollController,
         slivers: <Widget>[
-          SliverAppBar(
-            pinned: true,
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => audio.clearQueue(),
-                child: Text('Clear', style: TextStyle(color: Colors.red)),
-              ),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text('Current Queue'),
+          CupertinoSliverNavigationBar(
+            backgroundColor: Colors.black,
+            largeTitle: Text(
+              'Current Queue',
+              style: TextStyle(color: Colors.white),
+            ),
+            trailing: TextButton(
+              onPressed: () => audio.clearQueue(),
+              child: Text('Clear', style: TextStyle(color: Colors.red)),
             ),
           ),
           _songs.length == 0
@@ -51,20 +61,27 @@ class _QueueState extends State<QueueScreen> {
                     children: <Widget>[
                       SizedBox(height: 128),
                       Center(
-                        child: Opacity(
-                          opacity: .5,
-                          child: Text('No songs queued.'),
+                        child: Text(
+                          'No songs queued.',
+                          style: TextStyle(color: Colors.white.withOpacity(.5)),
                         ),
                       ),
                     ],
                   ),
                 )
-              : SliverToBoxAdapter(
-                  child: SongList(
-                    songs: _songs,
-                    behavior: SongListBehavior.queue,
-                    controller: scrollController,
-                  ),
+              : SliverReorderableList(
+                  itemCount: _songs.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return SongRow(
+                      index: index,
+                      key: ValueKey(_songs[index]),
+                      song: _songs[index],
+                      behavior: SongListBehavior.queue,
+                    );
+                  },
+                  onReorder: (int oldIndex, int newIndex) {
+                    audio.reorderQueue(oldIndex, newIndex);
+                  },
                 ),
           SliverToBoxAdapter(child: bottomSpace()),
         ],

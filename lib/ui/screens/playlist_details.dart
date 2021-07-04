@@ -173,10 +173,12 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                   ? SliverToBoxAdapter(
                       child: Padding(
                         padding: EdgeInsets.only(top: 32),
-                        child: Opacity(
-                          opacity: .5,
-                          child: Center(
-                            child: Text('The playlist is empty.'),
+                        child: Center(
+                          child: Text(
+                            'The playlist is empty.',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(.5),
+                            ),
                           ),
                         ),
                       ),

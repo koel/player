@@ -69,9 +69,9 @@ class _PlaylistRowState extends State<PlaylistRow> {
         ),
         child: _playlist.populated
             ? SizedBox.shrink()
-            : Opacity(
-                opacity: .5,
-                child: Icon(CupertinoIcons.music_note_list),
+            : Icon(
+                CupertinoIcons.music_note_list,
+                color: Colors.white.withOpacity(.5),
               ),
       ),
     );

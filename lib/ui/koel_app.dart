@@ -28,52 +28,55 @@ class _KoelAppState extends State<KoelApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: AppStrings.appName,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        dividerColor: Colors.white.withOpacity(.3),
-        scaffoldBackgroundColor: Colors.black,
-        backgroundColor: AppColors.primaryBgr,
-        bottomSheetTheme: BottomSheetThemeData(
-          backgroundColor: AppColors.primaryBgr.withOpacity(.8),
-          elevation: 0,
-        ),
-        popupMenuTheme: PopupMenuThemeData(
-          elevation: 2,
-          color: Colors.grey.shade900,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(8)),
+    return Material(
+      color: Colors.transparent,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: AppStrings.appName,
+        theme: ThemeData(
+          brightness: Brightness.dark,
+          dividerColor: Colors.white.withOpacity(.3),
+          scaffoldBackgroundColor: Colors.black,
+          backgroundColor: AppColors.primaryBgr,
+          bottomSheetTheme: BottomSheetThemeData(
+            backgroundColor: AppColors.primaryBgr.withOpacity(.8),
+            elevation: 0,
           ),
-        ),
-        sliderTheme: SliderThemeData(
-          activeTrackColor: Colors.white.withOpacity(.8),
-          inactiveTrackColor: Colors.white.withOpacity(.3),
-          thumbColor: Colors.white,
-          trackHeight: 3,
-          overlayColor: Colors.white.withAlpha(32),
-          trackShape: FullWidthSliderTrackShape(),
-          thumbShape: RoundSliderThumbShape(
-            enabledThumbRadius: 8,
-          ),
-        ),
-        textTheme: Theme.of(context).textTheme.apply(
-              bodyColor: Colors.white.withOpacity(.9),
-              displayColor: Colors.white.withOpacity(.6),
+          popupMenuTheme: PopupMenuThemeData(
+            elevation: 2,
+            color: Colors.grey.shade900,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8)),
             ),
-      ),
-      home: FutureBuilder(
-        future: futureUser,
-        builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.none:
-            case ConnectionState.waiting:
-              return containerWithSpinner();
-            default:
-              return snapshot.data == null ? LoginScreen() : StartScreen();
-          }
-        },
+          ),
+          sliderTheme: SliderThemeData(
+            activeTrackColor: Colors.white.withOpacity(.8),
+            inactiveTrackColor: Colors.white.withOpacity(.3),
+            thumbColor: Colors.white,
+            trackHeight: 3,
+            overlayColor: Colors.white.withAlpha(32),
+            trackShape: FullWidthSliderTrackShape(),
+            thumbShape: RoundSliderThumbShape(
+              enabledThumbRadius: 8,
+            ),
+          ),
+          textTheme: Theme.of(context).textTheme.apply(
+                bodyColor: Colors.white.withOpacity(.9),
+                displayColor: Colors.white.withOpacity(.6),
+              ),
+        ),
+        home: FutureBuilder(
+          future: futureUser,
+          builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.none:
+              case ConnectionState.waiting:
+                return containerWithSpinner();
+              default:
+                return snapshot.data == null ? LoginScreen() : StartScreen();
+            }
+          },
+        ),
       ),
     );
   }
