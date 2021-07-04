@@ -10,6 +10,7 @@ import 'package:app/ui/screens/info.dart';
 import 'package:app/ui/screens/queue.dart';
 import 'package:app/ui/screens/song_action_sheet.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
+import 'package:app/utils/preferences.dart' as preferences;
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
@@ -23,10 +24,10 @@ class NowPlayingScreen extends StatefulWidget {
 class _NowPlayingScreenState extends State<NowPlayingScreen> {
   late AudioPlayerProvider audio;
   late SongProvider songProvider;
-  Duration _duration = new Duration();
-  Duration _position = new Duration();
-  double _volume = 0.7;
-  LoopMode _loopMode = LoopMode.none;
+  Duration _duration = Duration();
+  Duration _position = Duration();
+  late double _volume;
+  late LoopMode _loopMode;
   List<StreamSubscription> _subscriptions = [];
 
   @override
@@ -42,6 +43,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
 
     songProvider = context.read<SongProvider>();
     audio = context.read<AudioPlayerProvider>();
+
+    tryLoadAudioPreferences();
 
     _subscriptions.add(audio.player.currentPosition.listen((position) {
       setState(() => _position = position);
@@ -128,7 +131,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
           transform: Matrix4.translationValues(0.0, -4.0, 0.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
+            children: <Widget>[
               Text(_position.toMs(), style: timeStampStyle),
               Text('-' + (_duration - _position).toMs(), style: timeStampStyle),
             ],
@@ -196,7 +199,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                 min: 0.0,
                 max: 1.0,
                 value: _volume,
-                onChanged: (value) => audio.player.setVolume(value),
+                onChanged: (value) {
+                  audio.player.setVolume(value);
+                  preferences.setVolume(value);
+                },
               ),
             ),
           ),
@@ -215,7 +221,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
       color: _loopMode == LoopMode.none
           ? Colors.white.withOpacity(.2)
           : Colors.white,
-      onPressed: () {
+      onPressed: () async {
         late LoopMode newMode;
         if (_loopMode == LoopMode.none)
           newMode = LoopMode.playlist;
@@ -224,6 +230,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
         else
           newMode = LoopMode.none;
         audio.player.setLoopMode(newMode);
+        await preferences.setLoopMode(newMode);
         setState(() => _loopMode = newMode);
       },
       icon: Icon(
@@ -332,6 +339,16 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
         );
       },
     );
+  }
+
+  Future<void> tryLoadAudioPreferences() async {
+    LoopMode mode = await preferences.loopMode;
+    double volume = await preferences.volume;
+
+    setState(() {
+      _loopMode = mode;
+      _volume = volume;
+    });
   }
 }
 

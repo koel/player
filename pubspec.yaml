@@ -36,6 +36,7 @@ dependencies:
   easy_debounce: ^2.0.0
   flutter_html: ^2.1.0
   flutter_spinkit: ^5.0.0
+  enum_to_string: ^2.0.1
 
 dev_dependencies:
   flutter_test:

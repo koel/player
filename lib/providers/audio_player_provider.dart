@@ -27,7 +27,9 @@ class AudioPlayerProvider with ChangeNotifier {
     _player = AssetsAudioPlayer.newPlayer();
 
     _player.current.listen((Playing? playing) {
-      _currentAudio = playing?.audio.audio;
+      if (playing?.audio.audio != seededAudio) {
+        _currentAudio = playing?.audio.audio;
+      }
     });
 
     await _player.open(
@@ -36,7 +38,12 @@ class AudioPlayerProvider with ChangeNotifier {
       autoStart: false,
     );
 
-    _player.playlist?.remove(seededAudio);
+    try {
+      _player.playlist?.removeAtIndex(0);
+    } catch (err) {
+      // AssetAudioPlayer throws a "Unhandled Exception: RangeError (index): Invalid value: Valid value range is empty: 0"
+      // error here.
+    }
     _broadcastQueueChangedEvent();
   }
 
