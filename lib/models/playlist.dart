@@ -18,4 +18,5 @@ class Playlist {
   }
 
   bool get isEmpty => songs.length == 0;
+  bool get isStandard => !isSmart;
 }
