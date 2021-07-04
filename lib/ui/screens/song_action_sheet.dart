@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/interaction_provider.dart';
+import 'package:app/ui/screens/add_to_playlist.dart';
 import 'package:app/ui/screens/album_details.dart';
 import 'package:app/ui/screens/artist_details.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
@@ -111,6 +112,26 @@ Future<void> showActionSheet({
             Navigator.of(context).push(CupertinoPageRoute<void>(
               builder: (_) => ArtistDetailsScreen(artist: song.artist),
               title: song.artist.name,
+            ));
+          },
+          hideSheetOnTap: false,
+        ),
+      );
+
+      menuItems.add(Divider(
+        indent: 16,
+        endIndent: 16,
+      ));
+
+      menuItems.add(
+        _button(
+          text: 'Add to a Playlist…',
+          icon: Icon(CupertinoIcons.text_badge_plus),
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.of(context).push(CupertinoPageRoute<void>(
+              builder: (_) => AddToPlaylistScreen(song: song),
+              title: 'Add to a Playlist',
             ));
           },
           hideSheetOnTap: false,

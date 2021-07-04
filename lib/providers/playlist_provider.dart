@@ -32,6 +32,9 @@ class PlaylistProvider with ChangeNotifier {
 
   List<Playlist> get playlists => _playlists;
 
+  List<Playlist> get standardPlaylist =>
+      _playlists.where((playlist) => playlist.isStandard).toList();
+
   Future<Playlist> populatePlaylist({required Playlist playlist}) async {
     if (!playlist.populated) {
       List<dynamic> response = await get('playlist/${playlist.id}/songs');
@@ -52,5 +55,30 @@ class PlaylistProvider with ChangeNotifier {
 
   void populateAllPlaylists() {
     _playlists.forEach((playlist) => populatePlaylist(playlist: playlist));
+  }
+
+  Future<void> addSongToPlaylist({
+    required Song song,
+    required Playlist playlist,
+  }) async {
+    assert(!playlist.isSmart, 'Cannot manually add songs to smart playlists.');
+    if (!playlist.populated) {
+      await populatePlaylist(playlist: playlist);
+    }
+
+    if (playlist.songs.contains(song)) return;
+
+    try {
+      playlist.songs.add(song);
+
+      await put('playlist/${playlist.id}/sync', data: {
+        'songs': playlist.songs.map((song) => song.id).toList(),
+      });
+
+      _playlistPopulated.add(playlist);
+    } catch (err) {
+      print(err);
+      // not the end of the world
+    }
   }
 }
