@@ -1,6 +1,9 @@
 import 'package:app/constants/dimens.dart';
 import 'package:app/providers/auth_provider.dart';
+import 'package:app/ui/screens/start.dart';
+import 'package:app/ui/widgets/spinner.dart';
 import 'package:app/utils/preferences.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -10,54 +13,144 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool _authenticating = false;
   final formKey = new GlobalKey<FormState>();
 
-  late String _email, _password;
+  String? _email = '';
+  String? _password = '';
+  String? _hostUrl = '';
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Try looking for stored values in local storage
+    hostUrl.then((value) => setState(() => _hostUrl = value));
+    userEmail.then((value) => setState(() => _email = value));
+  }
+
+  showErrorDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => CupertinoAlertDialog(
+        title: const Text('Error'),
+        content: const Text(
+          'There was a problem logging in. Please try again.',
+        ),
+        actions: <Widget>[
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: Text('OK'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     AuthProvider auth = context.watch<AuthProvider>();
 
-    var _attemptLogin = () {
+    Future<void> attemptLogin() async {
       final form = formKey.currentState!;
 
-      if (form.validate()) {
-        form.save();
-        auth.login(_email, _password);
-      }
-    };
+      if (!form.validate()) return;
 
-    final koelHostField = TextFormField(
+      form.save();
+      setState(() => _authenticating = true);
+
+      bool result = await auth.login(email: _email!, password: _password!);
+      setState(() => _authenticating = false);
+
+      if (result) {
+        // Store the email into local storage for easy login next time
+        await setUserEmail(_email!);
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => StartScreen()),
+        );
+      } else {
+        showErrorDialog(context);
+      }
+    }
+
+    InputDecoration decoration({String? label, String? hint}) {
+      return InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.white.withOpacity(.9)),
+        hintText: hint,
+        contentPadding: EdgeInsets.symmetric(vertical: 2, horizontal: 12),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.transparent),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        fillColor: Colors.white.withOpacity(.1),
+        filled: true,
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.white.withOpacity(.2)),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.red),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.red),
+          borderRadius: BorderRadius.circular(6),
+        ),
+      );
+    }
+
+    String? requireValue(value) {
+      if (value == null || value.isEmpty) {
+        return 'This field is required';
+      }
+      return null;
+    }
+
+    Widget hostField = TextFormField(
       keyboardType: TextInputType.url,
+      autocorrect: false,
       onSaved: (value) => setHostUrl(value!),
-      decoration: InputDecoration(hintText: "Koel's Host URL"),
+      decoration: decoration(
+        label: 'Host URL',
+        hint: 'https://www.koel.music',
+      ),
+      controller: TextEditingController(text: _hostUrl),
+      validator: requireValue,
     );
 
     final emailField = TextFormField(
       keyboardType: TextInputType.emailAddress,
+      autocorrect: false,
       onSaved: (value) => _email = value ?? '',
-      decoration: InputDecoration(hintText: 'Email'),
+      decoration: decoration(label: 'Email', hint: 'you@koel.music'),
+      controller: TextEditingController(text: _email),
+      validator: requireValue,
     );
 
     final passwordField = TextFormField(
       obscureText: true,
       keyboardType: TextInputType.visiblePassword,
       onSaved: (value) => _password = value ?? '',
-      decoration: InputDecoration(hintText: 'Password'),
+      decoration: decoration(label: 'Password'),
+      validator: requireValue,
     );
 
     final submitButton = ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(6.0),
+        ),
+        primary: Colors.grey.shade900,
+        textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        padding: EdgeInsets.symmetric(vertical: 12),
+      ),
       child: Text('Log In'),
-      onPressed: _attemptLogin,
+      onPressed: attemptLogin,
     );
 
-    final loading = Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        CircularProgressIndicator(),
-        Text(" Authenticating. Please wait…"),
-      ],
-    );
+    final spinnerWidget = Center(child: spinner(size: 24));
 
     return SafeArea(
       child: Scaffold(
@@ -67,26 +160,18 @@ class _LoginScreenState extends State<LoginScreen> {
             key: formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+              children: <Widget>[
                 ...[
-                  Image.asset(
-                    'assets/images/logo.png',
-                    width: 192,
-                  ),
-                  koelHostField,
+                  Image.asset('assets/images/logo.png', width: 160),
+                  hostField,
                   emailField,
                   passwordField,
                   SizedBox(
                     width: double.infinity,
-                    child: auth.loggedInStatus == Status.Authenticating
-                        ? loading
-                        : submitButton,
+                    child: _authenticating ? spinnerWidget : submitButton,
                   )
                 ].expand(
-                  (element) => [
-                    element,
-                    SizedBox(height: 16),
-                  ],
+                  (element) => [element, SizedBox(height: 12)],
                 ),
               ],
             ),

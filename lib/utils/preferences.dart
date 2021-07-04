@@ -26,6 +26,14 @@ Future<void> setApiToken(String token) async {
   (await sharedPef).setString('apiToken', token);
 }
 
+Future<void> setUserEmail(String token) async {
+  (await sharedPef).setString('email', token);
+}
+
+Future<String?> get userEmail async {
+  return (await sharedPef).getString('email');
+}
+
 Future<String?> get apiToken async {
   return (await sharedPef).getString('apiToken');
 }
