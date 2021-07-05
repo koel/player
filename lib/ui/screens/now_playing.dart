@@ -55,8 +55,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
 
       setState(() => _duration = playing.audio.duration);
 
-      String? songId = playing.audio.audio.metas.extra?['songId'];
-      if (songId == null) return;
+      if (audio.player.songId == null) return;
     }));
 
     _subscriptions.add(audio.player.volume.listen((volume) {
@@ -88,7 +87,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
     double mainFontSize = Theme.of(context).textTheme.headline6?.fontSize ?? 20;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         Text(
           song.title,
           style: TextStyle(
@@ -117,7 +116,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
     );
 
     return Column(
-      children: [
+      children: <Widget>[
         Slider(
           value: _position.inSeconds.toDouble(),
           min: 0.0,
@@ -144,7 +143,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
   Widget audioControls() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
+      children: <Widget>[
         IconButton(
           onPressed: () {
             if (_position.inSeconds > 5) {
@@ -181,7 +180,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
 
   Widget volumeSlider() {
     return Row(
-      children: [
+      children: <Widget>[
         Icon(
           CupertinoIcons.volume_mute,
           size: 16,
@@ -279,7 +278,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
           return SizedBox.shrink();
         }
 
-        String? songId = snapshot.data?.audio.audio.metas.extra?['songId'];
+        String? songId = audio.player.songId;
         if (songId == null) return SizedBox.shrink();
         Song song = songProvider.byId(songId);
 

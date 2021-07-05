@@ -137,7 +137,7 @@ class AudioPlayerProvider with ChangeNotifier {
 
     return _player.playlist?.audios
             .where((element) => element.path != 'assets/audio/blank.mp3')
-            .map((audio) => _songProvider.byId(audio.metas.extra!['songId']))
+            .map((audio) => _songProvider.byId(audio.songId!))
             .toList() ??
         [];
   }
@@ -174,6 +174,7 @@ class AudioPlayerProvider with ChangeNotifier {
   @override
   Future<void> dispose() async {
     await _queueModified.close();
+    _subscriptions.forEach((sub) => sub.cancel());
     super.dispose();
   }
 }

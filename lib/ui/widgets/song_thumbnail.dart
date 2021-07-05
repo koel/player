@@ -33,7 +33,7 @@ class SongThumbnail extends StatelessWidget {
       width: width,
       height: height,
       child: Stack(
-        children: [
+        children: <Widget>[
           SongThumbnail(song: song),
           SizedBox(
             width: double.infinity,

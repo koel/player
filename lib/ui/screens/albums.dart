@@ -31,7 +31,7 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       child: CustomScrollView(
-        slivers: [
+        slivers: <Widget>[
           CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
             previousPageTitle: widget.previousPageTitle,

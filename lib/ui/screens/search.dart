@@ -96,19 +96,20 @@ class _SearchScreenState extends State<SearchScreen> {
           child: Heading1(text: 'Albums'),
         ),
         SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: _albums.isNotEmpty
-                ? Row(
-                    children: <Widget>[
-                      ..._albums.expand(
-                        (album) => <Widget>[
-                          SizedBox(width: AppDimens.horizontalPadding),
-                          AlbumCard(album: album),
-                        ],
-                      ),
-                    ],
-                  )
-                : noResults),
+          scrollDirection: Axis.horizontal,
+          child: _albums.isNotEmpty
+              ? Row(
+                  children: <Widget>[
+                    ..._albums.expand(
+                      (album) => <Widget>[
+                        SizedBox(width: AppDimens.horizontalPadding),
+                        AlbumCard(album: album),
+                      ],
+                    ),
+                  ],
+                )
+              : noResults,
+        ),
       ],
     );
   }
@@ -152,7 +153,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   child: SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                      children: <Widget>[
                         SongList(songs: _songs),
                         SizedBox(height: 32),
                         albumResult,

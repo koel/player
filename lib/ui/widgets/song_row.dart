@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app/extensions/assets_audio_player.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
@@ -48,8 +49,7 @@ class _SongRowState extends State<SongRow> {
       setState(() => _state = state);
     }));
     _subscriptions.add(audio.player.current.listen((Playing? current) {
-      setState(() => _isCurrentSong =
-          current?.audio.audio.metas.extra?['songId'] == widget.song.id);
+      setState(() => _isCurrentSong = audio.player.songId == widget.song.id);
     }));
     songProvider = context.read<SongProvider>();
   }

@@ -83,7 +83,7 @@ class LibraryScreen extends StatelessWidget {
 
     return CupertinoPageScaffold(
       child: CustomScrollView(
-        slivers: [
+        slivers: <Widget>[
           CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
             largeTitle: Text(

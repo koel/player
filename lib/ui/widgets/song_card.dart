@@ -31,14 +31,14 @@ class _SongCardState extends State<SongCard> {
         duration: const Duration(microseconds: 500),
         opacity: _opacity,
         child: Column(
-          children: [
+          children: <Widget>[
             SongThumbnail(song: widget.song, size: ThumbnailSize.md),
             SizedBox(height: 12),
             SizedBox(
               width: 144,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: <Widget>[
                   Text(
                     widget.song.title,
                     style: TextStyle(fontWeight: FontWeight.bold),

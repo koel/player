@@ -145,10 +145,7 @@ class _InfoSheetState extends State<InfoSheet> {
           filter: new ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
           child: FutureBuilder<MediaInfo>(
             future: futureInfo,
-            builder: (
-              BuildContext context,
-              AsyncSnapshot<MediaInfo?> snapshot,
-            ) {
+            builder: (_, AsyncSnapshot<MediaInfo?> snapshot) {
               if (snapshot.hasError) {
                 return Text('Failed to fetch information. Please try again.');
               }

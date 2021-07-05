@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:app/extensions/assets_audio_player.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
@@ -22,7 +23,7 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
   @override
   void initState() {
     super.initState();
-    audio = context.read<AudioPlayerProvider>();
+    audio = context.read();
   }
 
   @override
@@ -32,14 +33,14 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
     return StreamBuilder<Playing?>(
       stream: audio.player.current,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
-        String? songId = snapshot.data?.audio.audio.metas.extra?['songId'];
+        String? songId = audio.player.songId;
         if (songId == null) return SizedBox.shrink();
 
         Song current = songProvider.byId(songId);
 
         return Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
+          children: <Widget>[
             ClipRect(
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -67,7 +68,7 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
+                              children: <Widget>[
                                 Text(
                                   current.title,
                                   overflow: TextOverflow.ellipsis,

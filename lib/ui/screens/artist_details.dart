@@ -59,7 +59,7 @@ class ArtistDetailsScreen extends StatelessWidget {
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [
+                          colors: <Color>[
                             Colors.transparent,
                             Colors.black,
                           ],
@@ -81,7 +81,7 @@ class ArtistDetailsScreen extends StatelessWidget {
                               alignment: Alignment.topCenter,
                             ),
                             borderRadius: BorderRadius.all(Radius.circular(16)),
-                            boxShadow: [
+                            boxShadow: <BoxShadow>[
                               BoxShadow(
                                 color: Colors.black.withOpacity(.3),
                                 blurRadius: 10.0,

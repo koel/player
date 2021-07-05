@@ -4,4 +4,6 @@ extension AssetsAudioPlayerExtension on AssetsAudioPlayer {
   Future<void> restart() async {
     this.seek(new Duration(seconds: 0), force: true);
   }
+
+  String? get songId => getCurrentAudioextra['songId'];
 }
