@@ -73,10 +73,17 @@ class _QueueState extends State<QueueScreen> {
                   itemCount: _songs.length,
                   itemBuilder: (BuildContext context, int index) {
                     return Dismissible(
-                      onDismissed: (DismissDirection direction) {
-                        audio.removeFromQueue(_songs[index]);
-                      },
-                      background: Container(color: Colors.red),
+                      direction: DismissDirection.endToStart,
+                      onDismissed: (DismissDirection direction) =>
+                          audio.removeFromQueue(song: _songs[index]),
+                      background: Container(
+                        alignment: AlignmentDirectional.centerEnd,
+                        color: Colors.red,
+                        child: Padding(
+                          padding: EdgeInsets.only(right: 16),
+                          child: Icon(CupertinoIcons.delete_simple),
+                        ),
+                      ),
                       key: ValueKey(_songs[index]),
                       child: SongRow(
                         index: index,

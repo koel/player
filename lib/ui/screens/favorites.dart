@@ -64,7 +64,26 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           SliverToBoxAdapter(child: songListButtons(context, songs: _songs)),
           SliverList(
             delegate: SliverChildBuilderDelegate(
-              (_, int index) => SongRow(song: _songs[index]),
+              (_, int index) {
+                return Dismissible(
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (DismissDirection direction) =>
+                      interactionProvider.unlike(song: _songs[index]),
+                  background: Container(
+                    alignment: AlignmentDirectional.centerEnd,
+                    color: Colors.red,
+                    child: Padding(
+                      padding: EdgeInsets.only(right: 32),
+                      child: Icon(CupertinoIcons.heart_slash),
+                    ),
+                  ),
+                  key: ValueKey(_songs[index]),
+                  child: SongRow(
+                    index: index,
+                    song: _songs[index],
+                  ),
+                );
+              },
               childCount: _songs.length,
             ),
           ),

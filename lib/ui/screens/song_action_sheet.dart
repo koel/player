@@ -56,7 +56,7 @@ Future<void> showActionSheet({
               CupertinoIcons.arrow_right_circle_fill,
               color: Colors.white.withOpacity(.3),
             ),
-            onTap: () => audio.queueAfterCurrent(song),
+            onTap: () => audio.queueAfterCurrent(song: song),
           ),
         );
         menuItems.add(
@@ -66,7 +66,7 @@ Future<void> showActionSheet({
               CupertinoIcons.arrow_down_right_circle_fill,
               color: Colors.white.withOpacity(.3),
             ),
-            onTap: () => audio.queueToBottom(song),
+            onTap: () => audio.queueToBottom(song: song),
           ),
         );
       }
@@ -79,7 +79,7 @@ Future<void> showActionSheet({
               CupertinoIcons.text_badge_minus,
               color: Colors.white.withOpacity(.3),
             ),
-            onTap: () => audio.removeFromQueue(song),
+            onTap: () => audio.removeFromQueue(song: song),
           ),
         );
       }
@@ -91,7 +91,7 @@ Future<void> showActionSheet({
             song.liked ? CupertinoIcons.heart_slash : CupertinoIcons.heart_fill,
             color: Colors.white.withOpacity(.3),
           ),
-          onTap: () => interactionProvider.toggleLike(song),
+          onTap: () => interactionProvider.toggleLike(song: song),
         ),
       );
 

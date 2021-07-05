@@ -17,22 +17,22 @@ class InteractionProvider with ChangeNotifier {
   List<Song> get favorites =>
       _songProvider.songs.where((song) => song.liked).toList();
 
-  Future<void> like(Song song) async {
+  Future<void> like({required Song song}) async {
     // broadcast the event first regardless
     song.liked = true;
     _songLikeToggled.add(song);
     await post('interaction/like', data: {'song': song.id});
   }
 
-  Future<void> unlike(Song song) async {
+  Future<void> unlike({required Song song}) async {
     // broadcast the event first regardless
     song.liked = false;
     _songLikeToggled.add(song);
     await post('interaction/like', data: {'song': song.id});
   }
 
-  Future<void> toggleLike(Song song) async {
-    return song.liked ? unlike(song) : like(song);
+  Future<void> toggleLike({required Song song}) async {
+    return song.liked ? unlike(song: song) : like(song: song);
   }
 
   List<Song> getRandomFavorites({int limit = 15}) {

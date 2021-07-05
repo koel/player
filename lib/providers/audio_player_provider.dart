@@ -72,7 +72,7 @@ class AudioPlayerProvider with ChangeNotifier {
     return _player.playlist?.audios.indexOf(await song.asAudio()) ?? -1;
   }
 
-  Future<int> queueAfterCurrent(Song song) async {
+  Future<int> queueAfterCurrent({required Song song}) async {
     Audio audio = await song.asAudio();
     int index = _player.playlist?.audios.indexOf(_currentAudio!) ?? 0 + 1;
     _player.playlist?.insert(index, audio);
@@ -93,8 +93,8 @@ class AudioPlayerProvider with ChangeNotifier {
     } else {
       await _player.playlistPlayAtIndex(
         _currentAudio == null
-            ? await queueToTop(song)
-            : await queueAfterCurrent(song),
+            ? await queueToTop(song: song)
+            : await queueAfterCurrent(song: song),
       );
     }
 
@@ -103,13 +103,13 @@ class AudioPlayerProvider with ChangeNotifier {
 
   Future<void> stop() async => await _player.stop();
 
-  Future<int> queueToTop(Song song) async {
+  Future<int> queueToTop({required Song song}) async {
     _player.playlist?.insert(0, await song.asAudio());
     _broadcastQueueChangedEvent();
     return 0;
   }
 
-  Future<int> queueToBottom(Song song) async {
+  Future<int> queueToBottom({required Song song}) async {
     _player.playlist?.add(await song.asAudio());
     _broadcastQueueChangedEvent();
     return _player.playlist?.numberOfItems ?? -1;
@@ -149,7 +149,7 @@ class AudioPlayerProvider with ChangeNotifier {
     _broadcastQueueChangedEvent();
   }
 
-  Future<void> removeFromQueue(Song song) async {
+  Future<void> removeFromQueue({required Song song}) async {
     _player.playlist?.audios.remove(await song.asAudio());
     _broadcastQueueChangedEvent();
   }
