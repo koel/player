@@ -35,9 +35,9 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
           CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
             previousPageTitle: widget.previousPageTitle,
-            largeTitle: Text(
+            largeTitle: const Text(
               'Albums',
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
           ),
           SliverList(

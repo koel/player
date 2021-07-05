@@ -74,16 +74,16 @@ class _StartScreenState extends State<StartScreen> {
                         ),
                       ),
                       items: const <BottomNavigationBarItem>[
-                        BottomNavigationBarItem(
-                          icon: Icon(CupertinoIcons.house_fill),
+                        const BottomNavigationBarItem(
+                          icon: const Icon(CupertinoIcons.house_fill),
                           label: 'Home',
                         ),
-                        BottomNavigationBarItem(
-                          icon: Icon(CupertinoIcons.search),
+                        const BottomNavigationBarItem(
+                          icon: const Icon(CupertinoIcons.search),
                           label: 'Search',
                         ),
-                        BottomNavigationBarItem(
-                          icon: Icon(CupertinoIcons.music_albums_fill),
+                        const BottomNavigationBarItem(
+                          icon: const Icon(CupertinoIcons.music_albums_fill),
                           label: 'Library',
                         ),
                       ],

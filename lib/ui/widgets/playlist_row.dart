@@ -68,7 +68,7 @@ class _PlaylistRowState extends State<PlaylistRow> {
               : null,
         ),
         child: _playlist.populated
-            ? SizedBox.shrink()
+            ? const SizedBox.shrink()
             : Icon(
                 CupertinoIcons.music_note_list,
                 color: Colors.white.withOpacity(.5),

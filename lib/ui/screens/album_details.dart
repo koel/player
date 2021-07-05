@@ -19,7 +19,7 @@ class AlbumDetailsScreen extends StatelessWidget {
     List<Song> songs = context.watch<SongProvider>().byAlbum(album)
       ..sort((a, b) => a.title.compareTo(b.title));
 
-    final scrollController = ScrollController();
+    final ScrollController scrollController = ScrollController();
 
     return Scaffold(
       body: CustomScrollView(
@@ -30,7 +30,7 @@ class AlbumDetailsScreen extends StatelessWidget {
             expandedHeight: 290,
             flexibleSpace: FlexibleSpaceBar(
               title: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(album.name, overflow: TextOverflow.ellipsis),
               ),
               background: Stack(
@@ -51,12 +51,12 @@ class AlbumDetailsScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: double.infinity,
                     height: double.infinity,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
+                    child: const DecoratedBox(
+                      decoration: const BoxDecoration(
+                        gradient: const LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: <Color>[
@@ -80,12 +80,14 @@ class AlbumDetailsScreen extends StatelessWidget {
                               fit: BoxFit.cover,
                               alignment: Alignment.topCenter,
                             ),
-                            borderRadius: BorderRadius.all(Radius.circular(16)),
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(16),
+                            ),
                             boxShadow: <BoxShadow>[
                               BoxShadow(
                                 color: Colors.black.withOpacity(.3),
                                 blurRadius: 10.0,
-                                offset: Offset(0, 6),
+                                offset: const Offset(0, 6),
                               ),
                             ],
                           ),

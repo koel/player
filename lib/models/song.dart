@@ -22,31 +22,29 @@ class Song {
 
   bool playCountRegistered = false;
 
-  Song(
-    this.id,
-    this.title,
-    this.length,
-    this.track,
-    this.createdAt,
-    this.artistId,
-    this.albumId,
-  );
+  Song({
+    required this.id,
+    required this.title,
+    required this.length,
+    required this.track,
+    required this.createdAt,
+    required this.artistId,
+    required this.albumId,
+  });
 
   factory Song.fromJson(Map<String, dynamic> json) {
     return Song(
-      json['id'],
-      json['title'],
-      json['length'],
-      json['track'] ?? 0,
-      DateTime.parse(json['created_at']),
-      json['artist_id'],
-      json['album_id'],
+      id: json['id'],
+      title: json['title'],
+      length: json['length'],
+      track: json['track'] ?? 0,
+      createdAt: DateTime.parse(json['created_at']),
+      artistId: json['artist_id'],
+      albumId: json['album_id'],
     );
   }
 
-  ImageProvider get image {
-    return this.album.image;
-  }
+  ImageProvider get image => this.album.image;
 
   Future<String> get sourceUrl async {
     if (_sourceUrl == null) {

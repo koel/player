@@ -34,9 +34,9 @@ class _AddToPlaylistScreenState extends State<AddToPlaylistScreen> {
         slivers: <Widget>[
           CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
-            largeTitle: Text(
+            largeTitle: const Text(
               'Add to a Playlist',
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
           ),
           SliverList(

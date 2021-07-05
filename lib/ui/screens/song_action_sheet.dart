@@ -46,10 +46,8 @@ Future<void> showActionSheet({
         );
       }
 
-      List<Widget> menuItems = [];
-
-      if (!isCurrent) {
-        menuItems.add(
+      List<Widget> menuItems = [
+        if (!isCurrent)
           _button(
             text: 'Play Next',
             icon: Icon(
@@ -58,8 +56,7 @@ Future<void> showActionSheet({
             ),
             onTap: () => audio.queueAfterCurrent(song: song),
           ),
-        );
-        menuItems.add(
+        if (!isCurrent)
           _button(
             text: 'Play Last',
             icon: Icon(
@@ -68,11 +65,7 @@ Future<void> showActionSheet({
             ),
             onTap: () => audio.queueToBottom(song: song),
           ),
-        );
-      }
-
-      if (queued) {
-        menuItems.add(
+        if (queued)
           _button(
             text: 'Remove from Queue',
             icon: Icon(
@@ -81,26 +74,15 @@ Future<void> showActionSheet({
             ),
             onTap: () => audio.removeFromQueue(song: song),
           ),
-        );
-      }
-
-      menuItems.add(
         _button(
           text: song.liked ? 'Unlike' : 'Like',
           icon: Icon(
-            song.liked ? CupertinoIcons.heart_slash : CupertinoIcons.heart_fill,
+            song.liked ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
             color: Colors.white.withOpacity(.3),
           ),
           onTap: () => interactionProvider.toggleLike(song: song),
         ),
-      );
-
-      menuItems.add(Divider(
-        indent: 16,
-        endIndent: 16,
-      ));
-
-      menuItems.add(
+        const Divider(indent: 16, endIndent: 16),
         _button(
           text: 'Go to Album',
           icon: Icon(
@@ -115,9 +97,6 @@ Future<void> showActionSheet({
           },
           hideSheetOnTap: false,
         ),
-      );
-
-      menuItems.add(
         _button(
           text: 'Go to Artist',
           icon: Icon(
@@ -133,14 +112,7 @@ Future<void> showActionSheet({
           },
           hideSheetOnTap: false,
         ),
-      );
-
-      menuItems.add(Divider(
-        indent: 16,
-        endIndent: 16,
-      ));
-
-      menuItems.add(
+        const Divider(indent: 16, endIndent: 16),
         _button(
           text: 'Add to a Playlist…',
           icon: Icon(
@@ -156,24 +128,24 @@ Future<void> showActionSheet({
           },
           hideSheetOnTap: false,
         ),
-      );
+      ];
 
       return ClipRect(
         child: Container(
           padding: EdgeInsets.only(bottom: 8),
           child: BackdropFilter(
-            filter: new ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
+            filter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                SizedBox.shrink(), // to properly align the thumbnail area
+                const SizedBox.shrink(), // to properly align the thumbnail area
                 Column(
                   children: [
                     SongThumbnail(
                       song: song,
                       size: ThumbnailSize.lg,
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Text(
                       song.title,
                       style: TextStyle(
@@ -182,7 +154,7 @@ Future<void> showActionSheet({
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
                       '${song.artist.name} • ${song.album.name}',
                       overflow: TextOverflow.ellipsis,

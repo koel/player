@@ -43,14 +43,17 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
           children: <Widget>[
             ClipRect(
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: const BoxDecoration(
                   border: Border(
                     bottom: BorderSide(color: Colors.white, width: 0.5),
                   ),
                 ),
                 child: BackdropFilter(
-                  filter: new ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+                  filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
                   child: InkWell(
                     onTap: () => openNowPlayingScreen(context),
                     child: Row(
@@ -64,7 +67,7 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
                         ),
                         Expanded(
                           child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,7 +76,7 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
                                   current.title,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                SizedBox(height: 4),
+                                const SizedBox(height: 4),
                                 Text(
                                   current.artist.name,
                                   overflow: TextOverflow.ellipsis,
@@ -103,7 +106,7 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
                                 ),
                                 IconButton(
                                   onPressed: () => audio.player.next(),
-                                  icon: Icon(
+                                  icon: const Icon(
                                     CupertinoIcons.forward_fill,
                                     size: 24,
                                   ),

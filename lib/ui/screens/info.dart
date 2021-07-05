@@ -25,9 +25,9 @@ class _InfoSheetState extends State<InfoSheet> {
   late Future<MediaInfo> futureInfo;
   int _activeIndex = 0;
   final Map<int, Widget> tabs = const {
-    0: Text('Lyrics'),
-    1: Text('Artist'),
-    2: Text('Album'),
+    0: const Text('Lyrics'),
+    1: const Text('Artist'),
+    2: const Text('Album'),
   };
 
   late Map<int, Widget> panes;
@@ -35,7 +35,6 @@ class _InfoSheetState extends State<InfoSheet> {
   @override
   initState() {
     super.initState();
-
     infoProvider = context.read();
     futureInfo = infoProvider.fetch(song: widget.song);
   }
@@ -76,15 +75,15 @@ class _InfoSheetState extends State<InfoSheet> {
     return Column(
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               ArtistThumbnail(artist: widget.song.artist),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Text(
                 widget.song.artist.name,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
                 ),
@@ -106,12 +105,12 @@ class _InfoSheetState extends State<InfoSheet> {
     return Column(
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               AlbumThumbnail(album: widget.song.album),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Flexible(
                 child: Text(
                   widget.song.album.name,
@@ -137,17 +136,19 @@ class _InfoSheetState extends State<InfoSheet> {
   Widget build(BuildContext context) {
     return ClipRect(
       child: SafeArea(
-        minimum: EdgeInsets.symmetric(
+        minimum: const EdgeInsets.symmetric(
           vertical: 60,
           horizontal: AppDimens.horizontalPadding,
         ),
         child: BackdropFilter(
-          filter: new ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
+          filter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
           child: FutureBuilder<MediaInfo>(
             future: futureInfo,
             builder: (_, AsyncSnapshot<MediaInfo?> snapshot) {
               if (snapshot.hasError) {
-                return Text('Failed to fetch information. Please try again.');
+                return const Text(
+                  'Failed to fetch information. Please try again.',
+                );
               }
 
               if (snapshot.connectionState != ConnectionState.done) {
@@ -166,7 +167,7 @@ class _InfoSheetState extends State<InfoSheet> {
                       },
                     ),
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Expanded(
                     child: SingleChildScrollView(
                       child: getActivePane(info: snapshot.data!),

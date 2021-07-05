@@ -19,7 +19,7 @@ class ArtistDetailsScreen extends StatelessWidget {
     List<Song> songs = context.watch<SongProvider>().byArtist(artist)
       ..sort((a, b) => a.title.compareTo(b.title));
 
-    final scrollController = ScrollController();
+    final ScrollController scrollController = ScrollController();
 
     return Scaffold(
       body: CustomScrollView(
@@ -30,7 +30,7 @@ class ArtistDetailsScreen extends StatelessWidget {
             expandedHeight: 290,
             flexibleSpace: FlexibleSpaceBar(
               title: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(artist.name, overflow: TextOverflow.ellipsis),
               ),
               background: Stack(
@@ -51,12 +51,12 @@ class ArtistDetailsScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: double.infinity,
                     height: double.infinity,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
+                    child: const DecoratedBox(
+                      decoration: const BoxDecoration(
+                        gradient: const LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: <Color>[

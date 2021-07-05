@@ -167,13 +167,13 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
               appBar(playlist: playlist),
               SliverToBoxAdapter(
                 child: playlist.isEmpty
-                    ? SizedBox.shrink()
+                    ? const SizedBox.shrink()
                     : songListButtons(context, songs: playlist.songs),
               ),
               playlist.isEmpty
                   ? SliverToBoxAdapter(
                       child: Padding(
-                        padding: EdgeInsets.only(top: 32),
+                        padding: const EdgeInsets.only(top: 32),
                         child: Center(
                           child: Text(
                             'The playlist is empty.',
@@ -203,7 +203,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                             background: Container(
                               alignment: AlignmentDirectional.centerEnd,
                               color: Colors.red,
-                              child: Padding(
+                              child: const Padding(
                                 padding: EdgeInsets.only(right: 28),
                                 child: Icon(CupertinoIcons.delete_simple),
                               ),

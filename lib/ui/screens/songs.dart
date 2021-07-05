@@ -35,9 +35,9 @@ class _SongsScreenState extends State<SongsScreen> {
           CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
             previousPageTitle: widget.previousPageTitle,
-            largeTitle: Text(
+            largeTitle: const Text(
               'Songs',
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
           ),
           SliverToBoxAdapter(child: songListButtons(context, songs: _songs)),

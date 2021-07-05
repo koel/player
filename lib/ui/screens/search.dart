@@ -38,7 +38,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   search(String keywords) => EasyDebounce.debounce(
         'search',
-        Duration(microseconds: 500), // typing on a phone isn't that fast
+        const Duration(microseconds: 500), // typing on a phone isn't that fast
         () async {
           if (keywords.length == 0) return resetSearch();
           if (keywords.length < 2) return;
@@ -56,7 +56,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget get noResults {
     return Padding(
-      padding: EdgeInsets.only(left: AppDimens.horizontalPadding),
+      padding: const EdgeInsets.only(left: AppDimens.horizontalPadding),
       child: Text(
         'None found.',
         style: TextStyle(color: Colors.white.withOpacity(.5)),
@@ -71,11 +71,11 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget get searchField {
     return Container(
-      padding: EdgeInsets.all(AppDimens.horizontalPadding),
+      padding: const EdgeInsets.all(AppDimens.horizontalPadding),
       color: Colors.black,
       child: CupertinoSearchTextField(
         controller: _searchInputController,
-        style: TextStyle(color: Colors.white),
+        style: const TextStyle(color: Colors.white),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(.1),
           borderRadius: BorderRadius.all(Radius.circular(6)),
@@ -92,8 +92,8 @@ class _SearchScreenState extends State<SearchScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.only(left: AppDimens.horizontalPadding),
-          child: Heading1(text: 'Albums'),
+          padding: const EdgeInsets.only(left: AppDimens.horizontalPadding),
+          child: heading1(text: 'Albums'),
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -120,7 +120,7 @@ class _SearchScreenState extends State<SearchScreen> {
       children: <Widget>[
         Padding(
           padding: EdgeInsets.only(left: AppDimens.horizontalPadding),
-          child: Heading1(text: 'Artists'),
+          child: heading1(text: 'Artists'),
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,

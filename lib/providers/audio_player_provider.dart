@@ -163,8 +163,9 @@ class AudioPlayerProvider with ChangeNotifier {
     Audio? audio = _player.playlist?.audios[oldIndex];
 
     if (audio != null) {
-      _player.playlist?.remove(audio);
-      _player.playlist?.insert(newIndex, audio);
+      _player.playlist
+        ?..remove(audio)
+        ..insert(newIndex, audio);
       _broadcastQueueChangedEvent();
     }
   }

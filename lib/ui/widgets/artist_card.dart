@@ -24,7 +24,7 @@ class _ArtistCardState extends State<ArtistCard> {
       onTapCancel: () => setState(() => opacity = 1),
       onTap: () => gotoDetailsScreen(context, artist: widget.artist),
       child: AnimatedOpacity(
-        duration: Duration(milliseconds: 100),
+        duration: const Duration(milliseconds: 100),
         opacity: opacity,
         child: Column(
           children: <Widget>[
@@ -33,7 +33,7 @@ class _ArtistCardState extends State<ArtistCard> {
               size: ThumbnailSize.md,
               asHero: true,
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             SizedBox(
               width: 144,
               child: Column(
@@ -41,7 +41,7 @@ class _ArtistCardState extends State<ArtistCard> {
                 children: <Widget>[
                   Text(
                     widget.artist.name,
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],

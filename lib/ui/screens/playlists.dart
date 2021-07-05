@@ -38,9 +38,9 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
           CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
             previousPageTitle: widget.previousPageTitle,
-            largeTitle: Text(
+            largeTitle: const Text(
               'Playlists',
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
           ),
           SliverList(

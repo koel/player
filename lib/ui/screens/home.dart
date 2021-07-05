@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(.1),
-          borderRadius: BorderRadius.all(Radius.circular(12)),
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
           border: Border.all(color: Colors.white.withOpacity(.1)),
         ),
         child: IconButton(
@@ -54,8 +54,8 @@ class _HomeScreenState extends State<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.only(left: AppDimens.horizontalPadding),
-          child: Heading1(text: 'Most played songs'),
+          padding: const EdgeInsets.only(left: AppDimens.horizontalPadding),
+          child: heading1(text: 'Most played songs'),
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -64,16 +64,16 @@ class _HomeScreenState extends State<HomeScreen> {
             children: <Widget>[
               ...songProvider.mostPlayed().expand(
                     (song) => [
-                      SizedBox(width: AppDimens.horizontalPadding),
+                      const SizedBox(width: AppDimens.horizontalPadding),
                       SongCard(song: song),
                     ],
                   ),
-              SizedBox(width: AppDimens.horizontalPadding),
+              const SizedBox(width: AppDimens.horizontalPadding),
               placeholderCard(
                 icon: CupertinoIcons.music_note,
                 onPressed: () => gotoSongsScreen(context),
               ),
-              SizedBox(width: AppDimens.horizontalPadding),
+              const SizedBox(width: AppDimens.horizontalPadding),
             ],
           ),
         ),
@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Heading1(text: 'Hidden gems'),
+        heading1(text: 'Hidden gems'),
         ...songProvider
             .leastPlayed(limit: 6)
             .map(
@@ -105,8 +105,8 @@ class _HomeScreenState extends State<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.only(left: AppDimens.horizontalPadding),
-          child: Heading1(text: 'Top albums'),
+          padding: const EdgeInsets.only(left: AppDimens.horizontalPadding),
+          child: heading1(text: 'Top albums'),
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -115,16 +115,16 @@ class _HomeScreenState extends State<HomeScreen> {
             children: <Widget>[
               ...albumProvider.mostPlayed().expand(
                     (album) => <Widget>[
-                      SizedBox(width: AppDimens.horizontalPadding),
+                      const SizedBox(width: AppDimens.horizontalPadding),
                       AlbumCard(album: album),
                     ],
                   ),
-              SizedBox(width: AppDimens.horizontalPadding),
+              const SizedBox(width: AppDimens.horizontalPadding),
               placeholderCard(
                 icon: CupertinoIcons.music_albums,
                 onPressed: () => gotoAlbumsScreen(context),
               ),
-              SizedBox(width: AppDimens.horizontalPadding),
+              const SizedBox(width: AppDimens.horizontalPadding),
             ],
           ),
         ),
@@ -138,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
       children: <Widget>[
         Padding(
           padding: EdgeInsets.only(left: AppDimens.horizontalPadding),
-          child: Heading1(text: 'Top artists'),
+          child: heading1(text: 'Top artists'),
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -172,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
             (song) => SongRow(
               song: song,
               bordered: false,
-              padding: EdgeInsets.symmetric(horizontal: 0),
+              padding: const EdgeInsets.symmetric(horizontal: 0),
             ),
           )
           .toList(),
@@ -183,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Heading1(text: 'From your favorites'),
+        heading1(text: 'From your favorites'),
         ...interactionProvider
             .getRandomFavorites(limit: 6)
             .map(
@@ -213,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: EdgeInsets.symmetric(
                   horizontal: AppDimens.horizontalPadding,
                 ),
-                child: Heading1(text: "Howdy, ${_authUser.name}!"),
+                child: heading1(text: "Howdy, ${_authUser.name}!"),
               ),
               Padding(
                 padding: EdgeInsets.symmetric(

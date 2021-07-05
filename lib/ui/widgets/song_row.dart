@@ -44,19 +44,23 @@ class _SongRowState extends State<SongRow> {
   @override
   void initState() {
     super.initState();
-    audio = context.read<AudioPlayerProvider>();
+
+    audio = context.read();
+
     _subscriptions.add(audio.player.playerState.listen((PlayerState state) {
       setState(() => _state = state);
     }));
+
     _subscriptions.add(audio.player.current.listen((Playing? current) {
       setState(() => _isCurrentSong = audio.player.songId == widget.song.id);
     }));
-    songProvider = context.read<SongProvider>();
+
+    songProvider = context.read();
   }
 
   @override
   void dispose() {
-    _subscriptions.forEach((element) => element.cancel());
+    _subscriptions.forEach((sub) => sub.cancel());
     super.dispose();
   }
 
@@ -74,8 +78,10 @@ class _SongRowState extends State<SongRow> {
           )
         : IconButton(
             icon: const Icon(CupertinoIcons.ellipsis, size: 20),
-            onPressed: () =>
-                showActionSheet(context: context, song: widget.song),
+            onPressed: () => showActionSheet(
+              context: context,
+              song: widget.song,
+            ),
           );
 
     return InkWell(

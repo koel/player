@@ -1,6 +1,6 @@
 import 'package:app/models/user.dart';
 import 'package:app/utils/api_request.dart';
-import 'package:app/utils/preferences.dart';
+import 'package:app/utils/preferences.dart' as preferences;
 import 'package:flutter/foundation.dart';
 
 class UserProvider with ChangeNotifier {
@@ -14,7 +14,7 @@ class UserProvider with ChangeNotifier {
   }
 
   Future<User?> tryGetAuthUser() async {
-    if (await apiToken == null) {
+    if (await preferences.apiToken == null) {
       return null;
     }
 

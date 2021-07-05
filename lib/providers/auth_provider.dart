@@ -1,5 +1,5 @@
 import 'package:app/utils/api_request.dart';
-import 'package:app/utils/preferences.dart';
+import 'package:app/utils/preferences.dart' as preferences;
 import 'package:flutter/foundation.dart';
 
 class AuthProvider with ChangeNotifier {
@@ -11,7 +11,7 @@ class AuthProvider with ChangeNotifier {
 
     try {
       final responseData = await post('me', data: loginData);
-      await setApiToken(responseData['token']);
+      await preferences.setApiToken(responseData['token']);
       return true;
     } catch (err) {
       print(err);

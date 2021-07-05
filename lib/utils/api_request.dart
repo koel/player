@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:app/utils/preferences.dart';
+import 'package:app/utils/preferences.dart' as preferences;
 import 'package:http/http.dart' as Http;
 
 enum HttpMethod { get, post, patch, put, delete }
@@ -12,14 +12,14 @@ Future<dynamic> request(
 }) async {
   late Http.Response response;
 
-  Uri uri = Uri.parse("${await apiBaseUrl}/$path");
+  Uri uri = Uri.parse("${await preferences.apiBaseUrl}/$path");
 
   Map<String, String> headers = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   };
 
-  String? token = await apiToken;
+  String? token = await preferences.apiToken;
 
   if (token != null) {
     headers['Authorization'] = "Bearer $token";

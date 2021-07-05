@@ -39,9 +39,9 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
           CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
             previousPageTitle: widget.previousPageTitle,
-            largeTitle: Text(
+            largeTitle: const Text(
               'Artists',
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
           ),
           SliverList(

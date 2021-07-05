@@ -122,7 +122,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
           min: 0.0,
           max: _duration.inSeconds.toDouble(),
           onChanged: (double value) {
-            audio.player.seek(new Duration(seconds: value.toInt()));
+            audio.player.seek(Duration(seconds: value.toInt()));
           },
         ),
         Container(
@@ -171,7 +171,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
         ),
         IconButton(
           onPressed: () => audio.player.next(),
-          icon: Icon(CupertinoIcons.forward_fill),
+          icon: const Icon(CupertinoIcons.forward_fill),
           iconSize: 48,
         ),
       ],
@@ -188,11 +188,13 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
         ),
         Expanded(
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: SliderTheme(
               data: Theme.of(context).sliderTheme.copyWith(
                     trackHeight: 2,
-                    thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
+                    thumbShape: const RoundSliderThumbShape(
+                      enabledThumbRadius: 6,
+                    ),
                   ),
               child: Slider(
                 min: 0.0,
@@ -265,7 +267,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
   Widget actionButton(Song song) {
     return IconButton(
       onPressed: () => showActionSheet(context: context, song: song),
-      icon: Icon(CupertinoIcons.ellipsis),
+      icon: const Icon(CupertinoIcons.ellipsis),
     );
   }
 
@@ -275,11 +277,11 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
       stream: audio.player.current,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (!snapshot.hasData) {
-          return SizedBox.shrink();
+          return const SizedBox.shrink();
         }
 
         String? songId = audio.player.songId;
-        if (songId == null) return SizedBox.shrink();
+        if (songId == null) return const SizedBox.shrink();
         Song song = songProvider.byId(songId);
 
         return Stack(
@@ -305,7 +307,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
             ),
             Container(color: Colors.black.withOpacity(.7)),
             Padding(
-              padding: EdgeInsets.all(24),
+              padding: const EdgeInsets.all(24),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
@@ -320,7 +322,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                           actionButton(song),
                         ],
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       progress(),
                     ],
                   ),

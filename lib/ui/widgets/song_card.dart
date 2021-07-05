@@ -33,7 +33,7 @@ class _SongCardState extends State<SongCard> {
         child: Column(
           children: <Widget>[
             SongThumbnail(song: widget.song, size: ThumbnailSize.md),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             SizedBox(
               width: 144,
               child: Column(
@@ -44,7 +44,7 @@ class _SongCardState extends State<SongCard> {
                     style: TextStyle(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     widget.song.artist.name,
                     style: TextStyle(

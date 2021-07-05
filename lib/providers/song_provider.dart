@@ -33,18 +33,20 @@ class SongProvider with ChangeNotifier {
     _index = result.index.cast();
 
     _songs.forEach((song) {
-      song.artist = _artistProvider.byId(song.artistId);
-      song.album = _albumProvider.byId(song.albumId);
+      song
+        ..artist = _artistProvider.byId(song.artistId)
+        ..album = _albumProvider.byId(song.albumId);
     });
   }
 
   void initInteractions(List<dynamic> interactionData) {
-    interactionData.forEach((element) {
-      Song _song = byId(element['song_id']);
-      _song.liked = element['liked'];
-      _song.playCount = element['play_count'];
-      _song.artist.playCount += _song.playCount;
-      _song.album.playCount += _song.playCount;
+    interactionData.forEach((interaction) {
+      Song _song = byId(interaction['song_id']);
+      _song
+        ..liked = interaction['liked']
+        ..playCount = interaction['play_count']
+        ..artist.playCount += _song.playCount
+        ..album.playCount += _song.playCount;
     });
   }
 

@@ -56,9 +56,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
             previousPageTitle: widget.previousPageTitle,
-            largeTitle: Text(
+            largeTitle: const Text(
               'Favorites',
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
           ),
           SliverToBoxAdapter(child: songListButtons(context, songs: _songs)),
@@ -72,9 +72,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   background: Container(
                     alignment: AlignmentDirectional.centerEnd,
                     color: Colors.red,
-                    child: Padding(
-                      padding: EdgeInsets.only(right: 28),
-                      child: Icon(CupertinoIcons.heart_slash),
+                    child: const Padding(
+                      padding: const EdgeInsets.only(right: 28),
+                      child: const Icon(CupertinoIcons.heart_slash),
                     ),
                   ),
                   key: ValueKey(_songs[index]),

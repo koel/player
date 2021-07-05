@@ -52,7 +52,7 @@ Widget _songListButton({
 }) {
   return Expanded(
     child: ConstrainedBox(
-      constraints: BoxConstraints.expand(
+      constraints: const BoxConstraints.expand(
         width: double.infinity,
         height: 48,
       ),
@@ -62,7 +62,7 @@ Widget _songListButton({
             borderRadius: BorderRadius.circular(12.0),
           ),
           primary: Colors.grey.shade900,
-          textStyle: TextStyle(
+          textStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
@@ -92,7 +92,7 @@ Widget songListButtons(BuildContext context, {required List<Song> songs}) {
           label: 'Play All',
           onPressed: () async => await audio.replaceQueue(songs),
         ),
-        SizedBox(width: 12),
+        const SizedBox(width: 12),
         _songListButton(
           icon: CupertinoIcons.shuffle,
           label: 'Shuffle All',

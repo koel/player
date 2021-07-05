@@ -48,9 +48,7 @@ class SongThumbnail extends StatelessWidget {
           Align(
             alignment: Alignment.center,
             child: SizedBox(
-              child: Image.asset(
-                'assets/images/loading-animation.gif',
-              ),
+              child: Image.asset('assets/images/loading-animation.gif'),
               width: 16,
               height: 16,
             ),

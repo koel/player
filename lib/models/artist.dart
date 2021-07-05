@@ -7,13 +7,13 @@ class Artist {
   int playCount = 0;
   ImageProvider? _image;
 
-  Artist(this.id, this.name, this.imageUrl);
+  Artist({required this.id, required this.name, required this.imageUrl});
 
   factory Artist.fromJson(Map<String, dynamic> json) {
     return Artist(
-      json['id'],
-      json['name'],
-      json['image'],
+      id: json['id'],
+      name: json['name'],
+      imageUrl: json['image'],
     );
   }
 

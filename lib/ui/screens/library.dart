@@ -84,15 +84,15 @@ class LibraryScreen extends StatelessWidget {
     return CupertinoPageScaffold(
       child: CustomScrollView(
         slivers: <Widget>[
-          CupertinoSliverNavigationBar(
+          const CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
-            largeTitle: Text(
+            largeTitle: const Text(
               'Library',
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
           ),
           SliverPadding(
-            padding: EdgeInsets.symmetric(
+            padding: const EdgeInsets.symmetric(
               horizontal: AppDimens.horizontalPadding,
             ),
             sliver: SliverList(
@@ -100,20 +100,19 @@ class LibraryScreen extends StatelessWidget {
             ),
           ),
           SliverPadding(
-            padding: EdgeInsets.fromLTRB(
+            padding: const EdgeInsets.fromLTRB(
               AppDimens.horizontalPadding,
               24,
               AppDimens.horizontalPadding,
               0,
             ),
-            sliver: SliverToBoxAdapter(child: Heading1(text: 'Recently Added')),
+            sliver: SliverToBoxAdapter(child: heading1(text: 'Recently Added')),
           ),
           mostPlayedSongs.length == 0
-              ? SliverToBoxAdapter(child: SizedBox.shrink())
+              ? const SliverToBoxAdapter(child: SizedBox.shrink())
               : SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) =>
-                        SongRow(song: mostPlayedSongs[index]),
+                    (_, int index) => SongRow(song: mostPlayedSongs[index]),
                     childCount: mostPlayedSongs.length,
                   ),
                 ),

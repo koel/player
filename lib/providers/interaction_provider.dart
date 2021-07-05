@@ -9,6 +9,7 @@ class InteractionProvider with ChangeNotifier {
   SongProvider _songProvider;
 
   final BehaviorSubject<Song> _songLikeToggled = BehaviorSubject();
+
   ValueStream<Song> get songLikeToggleStream => _songLikeToggled.stream;
 
   InteractionProvider({required SongProvider songProvider})
@@ -51,11 +52,11 @@ class InteractionProvider with ChangeNotifier {
     // Use the data from the server to make sure we don't miss a play from another device.
     Interaction interaction = Interaction.fromJson(json);
     int oldCount = song.playCount;
-    song.playCount = interaction.playCount;
-    song.album.playCount += song.playCount - oldCount;
-    song.artist.playCount += song.playCount - oldCount;
-
-    // might as well
-    song.liked = interaction.liked;
+    song
+      ..playCount = interaction.playCount
+      ..album.playCount += song.playCount - oldCount
+      ..artist.playCount += song.playCount - oldCount
+      // might as well
+      ..liked = interaction.liked;
   }
 }

@@ -46,20 +46,23 @@ class _QueueState extends State<QueueScreen> {
         slivers: <Widget>[
           CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
-            largeTitle: Text(
+            largeTitle: const Text(
               'Current Queue',
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
             trailing: TextButton(
               onPressed: () => audio.clearQueue(),
-              child: Text('Clear', style: TextStyle(color: Colors.red)),
+              child: const Text(
+                'Clear',
+                style: const TextStyle(color: Colors.red),
+              ),
             ),
           ),
           _songs.length == 0
               ? SliverToBoxAdapter(
                   child: Column(
                     children: <Widget>[
-                      SizedBox(height: 128),
+                      const SizedBox(height: 128),
                       Center(
                         child: Text(
                           'No songs queued.',
@@ -79,9 +82,9 @@ class _QueueState extends State<QueueScreen> {
                       background: Container(
                         alignment: AlignmentDirectional.centerEnd,
                         color: Colors.red,
-                        child: Padding(
-                          padding: EdgeInsets.only(right: 16),
-                          child: Icon(CupertinoIcons.delete_simple),
+                        child: const Padding(
+                          padding: const EdgeInsets.only(right: 16),
+                          child: const Icon(CupertinoIcons.delete_simple),
                         ),
                       ),
                       key: ValueKey(_songs[index]),
