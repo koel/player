@@ -3,6 +3,7 @@ import 'package:app/models/artist.dart';
 import 'package:app/utils/preferences.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class Song {
   late Album album;
@@ -17,7 +18,6 @@ class Song {
   bool liked = false;
   int playCount = 0;
 
-  Audio? _audio;
   String? _sourceUrl;
 
   bool playCountRegistered = false;
@@ -57,23 +57,32 @@ class Song {
   }
 
   Future<Audio> asAudio() async {
-    if (_audio == null) {
-      _audio = Audio.network(
-        await sourceUrl,
-        metas: Metas(
-          title: title,
-          album: album.name,
-          artist: artist.name,
-          image: album.image is NetworkImage
-              ? MetasImage.network((album.image as NetworkImage).url)
-              : MetasImage.asset((album.image as AssetImage).assetName),
-          extra: {'songId': id},
-        ),
-      );
-    }
+    Metas metas = Metas(
+      title: title,
+      album: album.name,
+      artist: artist.name,
+      image: album.image is NetworkImage
+          ? MetasImage.network((album.image as NetworkImage).url)
+          : MetasImage.asset((album.image as AssetImage).assetName),
+      extra: {'songId': id},
+    );
 
-    return _audio!;
+    FileInfo? cache = await DefaultCacheManager().getFileFromCache(cacheKey);
+
+    return cache == null
+        ? Audio.network(await sourceUrl, metas: metas)
+        : Audio.file(cache.file.path, metas: metas);
   }
+
+  Future<FileInfo> cacheSourceFile() async {
+    return DefaultCacheManager().downloadFile(
+      await sourceUrl,
+      key: cacheKey,
+      force: true,
+    );
+  }
+
+  String get cacheKey => 'CACHE_$id';
 
   @override
   bool operator ==(Object other) => other is Song && other.id == id;

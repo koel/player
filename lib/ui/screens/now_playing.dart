@@ -9,6 +9,7 @@ import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/info.dart';
 import 'package:app/ui/screens/queue.dart';
 import 'package:app/ui/screens/song_action_sheet.dart';
+import 'package:app/ui/widgets/song_cache_icon.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:assets_audio_player/assets_audio_player.dart';
@@ -316,9 +317,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                     children: <Widget>[
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          Flexible(child: songInfo(song)),
+                          Expanded(child: songInfo(song)),
+                          SongCacheIcon(song: song),
                           actionButton(song),
                         ],
                       ),

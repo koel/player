@@ -5,6 +5,7 @@ import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/song_action_sheet.dart';
+import 'package:app/ui/widgets/song_cache_icon.dart';
 import 'package:app/ui/widgets/song_list.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
@@ -66,23 +67,29 @@ class _SongRowState extends State<SongRow> {
 
   @override
   Widget build(BuildContext context) {
-    final trailingControl = widget.behavior == SongListBehavior.queue
-        // In a queue, the trailing control is the Drag icon
-        // In other "standard" queues, it's the Actions menu trigger
-        ? ReorderableDragStartListener(
-            index: widget.index,
-            child: Icon(
-              CupertinoIcons.bars,
-              color: Colors.white.withOpacity(.5),
-            ),
-          )
-        : IconButton(
-            icon: const Icon(CupertinoIcons.ellipsis, size: 20),
-            onPressed: () => showActionSheet(
-              context: context,
-              song: widget.song,
-            ),
-          );
+    final trailingControl = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        SongCacheIcon(song: widget.song),
+        widget.behavior == SongListBehavior.queue
+            // In a queue, the trailing control is the Drag icon
+            // In other "standard" queues, it's the Actions menu trigger
+            ? ReorderableDragStartListener(
+                index: widget.index,
+                child: Icon(
+                  CupertinoIcons.bars,
+                  color: Colors.white.withOpacity(.5),
+                ),
+              )
+            : IconButton(
+                icon: const Icon(CupertinoIcons.ellipsis, size: 20),
+                onPressed: () => showActionSheet(
+                  context: context,
+                  song: widget.song,
+                ),
+              ),
+      ],
+    );
 
     return InkWell(
       onTap: () async => await audio.play(song: widget.song),
