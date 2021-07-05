@@ -86,7 +86,6 @@ class LibraryScreen extends StatelessWidget {
         slivers: [
           CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
-            trailing: Text('Home', style: TextStyle(color: Colors.white)),
             largeTitle: Text(
               'Library',
               style: TextStyle(color: Colors.white),

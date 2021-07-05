@@ -51,7 +51,6 @@ class MediaInfo {
   MediaInfo({required this.lyrics, this.albumInfo, this.artistInfo});
 
   factory MediaInfo.fromJson(json) {
-    print(json['artist_info']['bio']);
     return MediaInfo(
       lyrics: json['lyrics'],
       albumInfo: json['album_info'] == null
