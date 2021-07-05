@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:app/extensions/audio.dart';
 import 'package:app/models/song.dart';
+import 'package:app/providers/interaction_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/foundation.dart';
@@ -9,15 +11,21 @@ import 'package:rxdart/rxdart.dart';
 
 class AudioPlayerProvider with ChangeNotifier {
   SongProvider _songProvider;
+  InteractionProvider _interactionProvider;
 
   late final AssetsAudioPlayer _player;
   final BehaviorSubject<bool> _queueModified = BehaviorSubject();
+  final List<StreamSubscription> _subscriptions = [];
 
   ValueStream<bool> get queueModifiedStream => _queueModified.stream;
   Audio? _currentAudio;
+  Song? _currentSong;
 
-  AudioPlayerProvider({required SongProvider songProvider})
-      : _songProvider = songProvider;
+  AudioPlayerProvider({
+    required SongProvider songProvider,
+    required InteractionProvider interactionProvider,
+  })  : _songProvider = songProvider,
+        _interactionProvider = interactionProvider;
 
   // Set a blank audio to ensure the playlist is initialized
   // (Assets Audio Player will set playlist to NULL if the list is empty).
@@ -26,11 +34,22 @@ class AudioPlayerProvider with ChangeNotifier {
   Future<void> init() async {
     _player = AssetsAudioPlayer.newPlayer();
 
-    _player.current.listen((Playing? playing) {
-      if (playing?.audio.audio != seededAudio) {
-        _currentAudio = playing?.audio.audio;
-      }
-    });
+    _subscriptions
+      ..add(_player.current.listen((Playing? playing) {
+        if (playing?.audio.audio != seededAudio) {
+          _currentAudio = playing!.audio.audio;
+          _currentSong = _songProvider.byId(_currentAudio!.songId!);
+          _currentSong!.playCountRegistered = false;
+        }
+      }))
+      ..add(_player.currentPosition.listen((Duration position) {
+        if (_currentSong == null) return;
+
+        // If we've passed 25% of the song duration, register a play count
+        if (position.inSeconds / _currentSong!.length.toDouble() > .25) {
+          _interactionProvider.registerPlayCount(song: _currentSong!);
+        }
+      }));
 
     await _player.open(
       Playlist(audios: [seededAudio]),

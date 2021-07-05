@@ -29,7 +29,7 @@ class Artist {
 
   bool get isStandardArtist => !isUnknownArtist && !isVariousArtist;
 
-  bool get isUnknownArtist => id == 2;
+  bool get isUnknownArtist => id == 1;
 
   bool get isVariousArtist => id == 2;
 }

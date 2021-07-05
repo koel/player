@@ -1,3 +1,4 @@
+import 'package:app/models/interaction.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/utils/api_request.dart';
@@ -38,5 +39,20 @@ class InteractionProvider with ChangeNotifier {
     List<Song> clone = List.from(favorites);
     clone.shuffle();
     return clone.take(limit).toList();
+  }
+
+  Future<void> registerPlayCount({required Song song}) async {
+    if (song.playCountRegistered) return;
+
+    // prevent continuous calls to this function
+    song.playCountRegistered = true;
+    dynamic json = await post('interaction/play', data: {'song': song.id});
+
+    // Use the data from the server to make sure we don't miss a play from another device.
+    Interaction interaction = Interaction.fromJson(json);
+    int oldCount = song.playCount;
+    song.playCount = interaction.playCount;
+    song.album.playCount += song.playCount - oldCount;
+    song.artist.playCount += song.playCount - oldCount;
   }
 }

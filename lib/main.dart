@@ -51,6 +51,7 @@ void main() {
         ChangeNotifierProvider(
           create: (context) => AudioPlayerProvider(
             songProvider: context.read<SongProvider>(),
+            interactionProvider: context.read<InteractionProvider>(),
           ),
         ),
         ChangeNotifierProvider(

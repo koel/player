@@ -20,6 +20,8 @@ class Song {
   Audio? _audio;
   String? _sourceUrl;
 
+  bool playCountRegistered = false;
+
   Song(
     this.id,
     this.title,
