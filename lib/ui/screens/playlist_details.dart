@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:app/models/playlist.dart';
+import 'package:app/models/song.dart';
 import 'package:app/providers/playlist_provider.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list.dart';
@@ -185,7 +186,35 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                     )
                   : SliverList(
                       delegate: SliverChildBuilderDelegate(
-                        (_, int index) => SongRow(song: playlist.songs[index]),
+                        (_, int index) {
+                          final bool dismissible = widget.playlist.isSmart;
+                          final Song song = widget.playlist.songs[index];
+                          return Dismissible(
+                            direction: dismissible
+                                ? DismissDirection.none
+                                : DismissDirection.endToStart,
+                            onDismissed: dismissible
+                                ? null
+                                : (DismissDirection direction) =>
+                                    playlistProvider.removeSongFromPlaylist(
+                                      song: song,
+                                      playlist: widget.playlist,
+                                    ),
+                            background: Container(
+                              alignment: AlignmentDirectional.centerEnd,
+                              color: Colors.red,
+                              child: Padding(
+                                padding: EdgeInsets.only(right: 28),
+                                child: Icon(CupertinoIcons.delete_simple),
+                              ),
+                            ),
+                            key: ValueKey(song),
+                            child: SongRow(
+                              key: ValueKey(song),
+                              song: song,
+                            ),
+                          );
+                        },
                         childCount: playlist.songs.length,
                       ),
                     ),

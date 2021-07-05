@@ -61,7 +61,7 @@ class PlaylistProvider with ChangeNotifier {
     required Song song,
     required Playlist playlist,
   }) async {
-    assert(!playlist.isSmart, 'Cannot manually add songs to smart playlists.');
+    assert(!playlist.isSmart, 'Cannot manually mutate smart playlists.');
     if (!playlist.populated) {
       await populatePlaylist(playlist: playlist);
     }
@@ -69,16 +69,34 @@ class PlaylistProvider with ChangeNotifier {
     if (playlist.songs.contains(song)) return;
 
     try {
-      playlist.songs.add(song);
-
-      await put('playlist/${playlist.id}/sync', data: {
-        'songs': playlist.songs.map((song) => song.id).toList(),
-      });
-
-      _playlistPopulated.add(playlist);
+      await _syncPlaylist(playlist: playlist..songs.add(song));
     } catch (err) {
       print(err);
       // not the end of the world
     }
+  }
+
+  Future<void> removeSongFromPlaylist({
+    required Song song,
+    required Playlist playlist,
+  }) async {
+    assert(!playlist.isSmart, 'Cannot manually mutate smart playlists.');
+
+    if (!playlist.songs.contains(song)) return;
+
+    try {
+      await _syncPlaylist(playlist: playlist..songs.remove(song));
+    } catch (err) {
+      print(err);
+      // not the end of the world
+    }
+  }
+
+  Future<void> _syncPlaylist({required Playlist playlist}) async {
+    await put('playlist/${playlist.id}/sync', data: {
+      'songs': playlist.songs.map((song) => song.id).toList(),
+    });
+
+    _playlistPopulated.add(playlist);
   }
 }

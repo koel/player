@@ -73,15 +73,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     alignment: AlignmentDirectional.centerEnd,
                     color: Colors.red,
                     child: Padding(
-                      padding: EdgeInsets.only(right: 32),
+                      padding: EdgeInsets.only(right: 28),
                       child: Icon(CupertinoIcons.heart_slash),
                     ),
                   ),
                   key: ValueKey(_songs[index]),
-                  child: SongRow(
-                    index: index,
-                    song: _songs[index],
-                  ),
+                  child: SongRow(song: _songs[index]),
                 );
               },
               childCount: _songs.length,
