@@ -37,6 +37,51 @@ class SongRow extends StatefulWidget {
 
 class _SongRowState extends State<SongRow> {
   late AudioPlayerProvider audio;
+
+  @override
+  void initState() {
+    super.initState();
+    audio = context.read();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () async => await audio.play(song: widget.song),
+      onLongPress: () => showActionSheet(context: context, song: widget.song),
+      child: ListTile(
+        key: UniqueKey(),
+        contentPadding: widget.padding,
+        shape: widget.bordered
+            ? Border(bottom: Divider.createBorderSide(context))
+            : null,
+        leading: SongRowThumbnail(song: widget.song),
+        title: Text(widget.song.title, overflow: TextOverflow.ellipsis),
+        subtitle: Text(
+          widget.song.album.name,
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: SongRowTrailingActions(
+          song: widget.song,
+          behavior: widget.behavior,
+          index: widget.index,
+        ),
+      ),
+    );
+  }
+}
+
+class SongRowThumbnail extends StatefulWidget {
+  final Song song;
+
+  const SongRowThumbnail({Key? key, required this.song}) : super(key: key);
+
+  @override
+  _SongRowThumbnailState createState() => _SongRowThumbnailState();
+}
+
+class _SongRowThumbnailState extends State<SongRowThumbnail> {
+  late AudioPlayerProvider audio;
   late SongProvider songProvider;
   PlayerState _state = PlayerState.stop;
   bool _isCurrentSong = false;
@@ -61,46 +106,25 @@ class _SongRowState extends State<SongRow> {
 
   @override
   void dispose() {
-    _subscriptions.forEach((sub) => sub.cancel());
     super.dispose();
+    _subscriptions.forEach((sub) => sub.cancel());
   }
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () async => await audio.play(song: widget.song),
-      onLongPress: () => showActionSheet(context: context, song: widget.song),
-      child: ListTile(
-        key: UniqueKey(),
-        contentPadding: widget.padding,
-        shape: widget.bordered
-            ? Border(bottom: Divider.createBorderSide(context))
-            : null,
-        leading: SongThumbnail(
-          song: widget.song,
-          playing: _state == PlayerState.play && _isCurrentSong,
-        ),
-        title: Text(widget.song.title, overflow: TextOverflow.ellipsis),
-        subtitle: Text(
-          widget.song.album.name,
-          overflow: TextOverflow.ellipsis,
-        ),
-        trailing: SongRowTrailingControl(
-          song: widget.song,
-          behavior: widget.behavior,
-          index: widget.index,
-        ),
-      ),
+    return SongThumbnail(
+      song: widget.song,
+      playing: _state == PlayerState.play && _isCurrentSong,
     );
   }
 }
 
-class SongRowTrailingControl extends StatelessWidget {
+class SongRowTrailingActions extends StatelessWidget {
   final SongListBehavior behavior;
   final Song song;
   final int index;
 
-  const SongRowTrailingControl({
+  const SongRowTrailingActions({
     Key? key,
     required this.song,
     required this.behavior,
@@ -109,8 +133,6 @@ class SongRowTrailingControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('rebuilding ${song.title}');
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
