@@ -1,4 +1,5 @@
 import 'package:app/constants/dimens.dart';
+import 'package:app/models/song.dart';
 import 'package:app/models/user.dart';
 import 'package:app/providers/album_provider.dart';
 import 'package:app/providers/artist_provider.dart';
@@ -10,66 +11,145 @@ import 'package:app/ui/widgets/album_card.dart';
 import 'package:app/ui/widgets/artist_card.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/headings.dart';
+import 'package:app/ui/widgets/horizontal_card_scroller.dart';
+import 'package:app/ui/widgets/simple_song_list.dart';
 import 'package:app/ui/widgets/song_card.dart';
-import 'package:app/ui/widgets/song_row.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
+  Widget build(BuildContext context) {
+    late User _authUser = context.watch<UserProvider>().authUser;
+    late SongProvider songProvider = context.watch();
+    late ArtistProvider artistProvider = context.watch();
+    late AlbumProvider albumProvider = context.watch();
+    late InteractionProvider interactionProvider = context.watch();
 
-class _HomeScreenState extends State<HomeScreen> {
-  late User _authUser = context.watch<UserProvider>().authUser;
-  late SongProvider songProvider = context.watch();
-  late ArtistProvider artistProvider = context.watch();
-  late AlbumProvider albumProvider = context.watch();
-  late InteractionProvider interactionProvider = context.watch();
-
-  Widget placeholderCard({required IconData icon, VoidCallback? onPressed}) {
-    return SizedBox(
-      height: 144,
-      width: 144,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(.1),
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
-          border: Border.all(color: Colors.white.withOpacity(.1)),
-        ),
-        child: IconButton(
-          onPressed: onPressed,
-          iconSize: 32,
-          icon: Icon(icon),
+    return SafeArea(
+      child: Container(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              const SizedBox(height: AppDimens.horizontalPadding),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimens.horizontalPadding,
+                ),
+                child: heading1(text: "Howdy, ${_authUser.name}!"),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimens.horizontalPadding,
+                ),
+                child: SimpleSongList(
+                  songs: songProvider.recentlyAdded(),
+                ),
+              ),
+              const SizedBox(height: 32),
+              HorizontalCardScroller(
+                headingText: 'Most played songs',
+                cards: <Widget>[
+                  ...songProvider
+                      .mostPlayed()
+                      .map((song) => SongCard(song: song)),
+                  PlaceholderCard(
+                    icon: CupertinoIcons.music_note,
+                    onPressed: () => gotoSongsScreen(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimens.horizontalPadding,
+                ),
+                child: SimpleSongList(
+                  songs: interactionProvider.getRandomFavorites(limit: 5),
+                  headingText: 'From your favorites',
+                ),
+              ),
+              const SizedBox(height: 32),
+              HorizontalCardScroller(
+                headingText: 'Top albums',
+                cards: <Widget>[
+                  ...albumProvider
+                      .mostPlayed()
+                      .map((album) => AlbumCard(album: album)),
+                  PlaceholderCard(
+                    icon: CupertinoIcons.music_albums,
+                    onPressed: () => gotoAlbumsScreen(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+              HorizontalCardScroller(
+                headingText: 'Top artists',
+                cards: <Widget>[
+                  ...artistProvider
+                      .mostPlayed()
+                      .map((artist) => ArtistCard(artist: artist)),
+                  PlaceholderCard(
+                    icon: CupertinoIcons.music_mic,
+                    onPressed: () => gotoArtistsScreen(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimens.horizontalPadding,
+                ),
+                child: SimpleSongList(
+                  songs: songProvider.leastPlayed(limit: 5),
+                  headingText: 'Hidden gems',
+                ),
+              ),
+              bottomSpace(),
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget mostPlayedSongs() {
+class MostPlayedSongs extends StatelessWidget {
+  final List<Song> songs;
+  final BuildContext context;
+
+  const MostPlayedSongs({
+    Key? key,
+    required this.songs,
+    required this.context,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.only(left: AppDimens.horizontalPadding),
-          child: heading1(text: 'Most played songs'),
+          child: heading1(text: 'Most played'),
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              ...songProvider.mostPlayed().expand(
-                    (song) => [
-                      const SizedBox(width: AppDimens.horizontalPadding),
-                      SongCard(song: song),
-                    ],
-                  ),
+              ...songs.expand(
+                (song) => [
+                  const SizedBox(width: AppDimens.horizontalPadding),
+                  SongCard(song: song),
+                ],
+              ),
               const SizedBox(width: AppDimens.horizontalPadding),
-              placeholderCard(
+              PlaceholderCard(
                 icon: CupertinoIcons.music_note,
                 onPressed: () => gotoSongsScreen(context),
               ),
@@ -78,174 +158,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget leastPlayedSongs() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        heading1(text: 'Hidden gems'),
-        ...songProvider
-            .leastPlayed(limit: 6)
-            .map(
-              (song) => SongRow(
-                song: song,
-                bordered: false,
-                padding: EdgeInsets.symmetric(horizontal: 0),
-              ),
-            )
-            .toList(),
-      ],
-    );
-  }
-
-  Widget topAlbums() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(left: AppDimens.horizontalPadding),
-          child: heading1(text: 'Top albums'),
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              ...albumProvider.mostPlayed().expand(
-                    (album) => <Widget>[
-                      const SizedBox(width: AppDimens.horizontalPadding),
-                      AlbumCard(album: album),
-                    ],
-                  ),
-              const SizedBox(width: AppDimens.horizontalPadding),
-              placeholderCard(
-                icon: CupertinoIcons.music_albums,
-                onPressed: () => gotoAlbumsScreen(context),
-              ),
-              const SizedBox(width: AppDimens.horizontalPadding),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget topArtists() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsets.only(left: AppDimens.horizontalPadding),
-          child: heading1(text: 'Top artists'),
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ...artistProvider.mostPlayed().expand(
-                    (artist) => <Widget>[
-                      SizedBox(width: AppDimens.horizontalPadding),
-                      ArtistCard(artist: artist),
-                    ],
-                  ),
-              SizedBox(width: AppDimens.horizontalPadding),
-              placeholderCard(
-                icon: CupertinoIcons.music_mic,
-                onPressed: () => gotoArtistsScreen(context),
-              ),
-              SizedBox(width: AppDimens.horizontalPadding),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget recentlyAdded() {
-    return Column(
-      children: songProvider
-          .recentlyAdded()
-          .map(
-            (song) => SongRow(
-              song: song,
-              bordered: false,
-              padding: const EdgeInsets.symmetric(horizontal: 0),
-            ),
-          )
-          .toList(),
-    );
-  }
-
-  Widget fromYourFavorites() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        heading1(text: 'From your favorites'),
-        ...interactionProvider
-            .getRandomFavorites(limit: 6)
-            .map(
-              (song) => SongRow(
-                song: song,
-                bordered: false,
-                padding: EdgeInsets.symmetric(horizontal: 0),
-              ),
-            )
-            .toList(),
-      ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              SizedBox(
-                height: AppDimens.horizontalPadding,
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppDimens.horizontalPadding,
-                ),
-                child: heading1(text: "Howdy, ${_authUser.name}!"),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppDimens.horizontalPadding,
-                ),
-                child: recentlyAdded(),
-              ),
-              SizedBox(height: 32),
-              mostPlayedSongs(),
-              SizedBox(height: 32),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppDimens.horizontalPadding,
-                ),
-                child: fromYourFavorites(),
-              ),
-              SizedBox(height: 32),
-              topAlbums(),
-              SizedBox(height: 32),
-              topArtists(),
-              SizedBox(height: 32),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppDimens.horizontalPadding,
-                ),
-                child: leastPlayedSongs(),
-              ),
-              bottomSpace(),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

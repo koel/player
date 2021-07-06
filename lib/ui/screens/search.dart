@@ -7,7 +7,8 @@ import 'package:app/ui/widgets/album_card.dart';
 import 'package:app/ui/widgets/artist_card.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/headings.dart';
-import 'package:app/ui/widgets/song_list.dart';
+import 'package:app/ui/widgets/horizontal_card_scroller.dart';
+import 'package:app/ui/widgets/simple_song_list.dart';
 import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +46,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
           SearchResult result =
               await searchProvider.searchExcerpts(keywords: keywords);
+
           setState(() {
             _initial = false;
             _songs = result.songs;
@@ -87,83 +89,55 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget get albumResult {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(left: AppDimens.horizontalPadding),
-          child: heading1(text: 'Albums'),
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: _albums.isNotEmpty
-              ? Row(
-                  children: <Widget>[
-                    ..._albums.expand(
-                      (album) => <Widget>[
-                        SizedBox(width: AppDimens.horizontalPadding),
-                        AlbumCard(album: album),
-                      ],
-                    ),
-                  ],
-                )
-              : noResults,
-        ),
-      ],
-    );
-  }
-
-  Widget get artistResult {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsets.only(left: AppDimens.horizontalPadding),
-          child: heading1(text: 'Artists'),
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: _artists.isNotEmpty
-              ? Row(
-                  children: [
-                    ..._artists.expand(
-                      (artist) => <Widget>[
-                        SizedBox(width: AppDimens.horizontalPadding),
-                        ArtistCard(artist: artist),
-                      ],
-                    ),
-                  ],
-                )
-              : noResults,
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Column(
         children: <Widget>[
           searchField,
-          _initial
-              ? SizedBox.shrink()
-              : Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        SongList(songs: _songs),
-                        SizedBox(height: 32),
-                        albumResult,
-                        SizedBox(height: 32),
-                        artistResult,
-                        bottomSpace(),
-                      ],
+          if (_initial)
+            SizedBox.shrink()
+          else
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppDimens.horizontalPadding,
+                      ),
+                      child: SimpleSongList(songs: _songs),
                     ),
-                  ),
+                    SizedBox(height: 32),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: AppDimens.horizontalPadding),
+                      child: heading1(text: 'Albums'),
+                    ),
+                    _albums.length == 0
+                        ? noResults
+                        : HorizontalCardScroller(
+                            cards:
+                                _albums.map((album) => AlbumCard(album: album)),
+                          ),
+                    SizedBox(height: 32),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: AppDimens.horizontalPadding),
+                      child: heading1(text: 'Artists'),
+                    ),
+                    _artists.length == 0
+                        ? noResults
+                        : HorizontalCardScroller(
+                            cards: _artists
+                                .map((artist) => ArtistCard(artist: artist)),
+                          ),
+                    bottomSpace(),
+                  ],
                 ),
+              ),
+            ),
         ],
       ),
     );

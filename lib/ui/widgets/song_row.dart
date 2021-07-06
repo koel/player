@@ -67,30 +67,6 @@ class _SongRowState extends State<SongRow> {
 
   @override
   Widget build(BuildContext context) {
-    final trailingControl = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        SongCacheIcon(song: widget.song),
-        widget.behavior == SongListBehavior.queue
-            // In a queue, the trailing control is the Drag icon
-            // In other "standard" queues, it's the Actions menu trigger
-            ? ReorderableDragStartListener(
-                index: widget.index,
-                child: Icon(
-                  CupertinoIcons.bars,
-                  color: Colors.white.withOpacity(.5),
-                ),
-              )
-            : IconButton(
-                icon: const Icon(CupertinoIcons.ellipsis, size: 20),
-                onPressed: () => showActionSheet(
-                  context: context,
-                  song: widget.song,
-                ),
-              ),
-      ],
-    );
-
     return InkWell(
       onTap: () async => await audio.play(song: widget.song),
       onLongPress: () => showActionSheet(context: context, song: widget.song),
@@ -109,8 +85,54 @@ class _SongRowState extends State<SongRow> {
           widget.song.album.name,
           overflow: TextOverflow.ellipsis,
         ),
-        trailing: trailingControl,
+        trailing: SongRowTrailingControl(
+          song: widget.song,
+          behavior: widget.behavior,
+          index: widget.index,
+        ),
       ),
+    );
+  }
+}
+
+class SongRowTrailingControl extends StatelessWidget {
+  final SongListBehavior behavior;
+  final Song song;
+  final int index;
+
+  const SongRowTrailingControl({
+    Key? key,
+    required this.song,
+    required this.behavior,
+    required this.index,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    print('rebuilding ${song.title}');
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        SongCacheIcon(song: song),
+        behavior == SongListBehavior.queue
+            // In a queue, the trailing control is the Drag icon
+            // In other "standard" queues, it's the Actions menu trigger
+            ? ReorderableDragStartListener(
+                index: index,
+                child: Icon(
+                  CupertinoIcons.bars,
+                  color: Colors.white.withOpacity(.5),
+                ),
+              )
+            : IconButton(
+                icon: const Icon(CupertinoIcons.ellipsis, size: 20),
+                onPressed: () => showActionSheet(
+                  context: context,
+                  song: song,
+                ),
+              ),
+      ],
     );
   }
 }

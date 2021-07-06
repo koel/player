@@ -32,86 +32,13 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
     );
   }
 
-  Widget coverImage({required ImageProvider image, double overlayOpacity = 0}) {
-    return SizedBox(
-      width: 160,
-      height: 160,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(overlayOpacity),
-              BlendMode.srcOver,
-            ),
-            image: image,
-            fit: BoxFit.cover,
-            alignment: Alignment.topCenter,
-          ),
-          borderRadius: BorderRadius.all(Radius.circular(8)),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: Colors.black.withOpacity(.3),
-              blurRadius: 10.0,
-              offset: Offset(0, 6),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget coverImageStack({required Playlist playlist}) {
-    const imageCount = 4;
-    List<ImageProvider> images = [];
-
-    if (!playlist.isEmpty) {
-      images = playlist.songs
-          .where((song) {
-            return song.image is NetworkImage &&
-                !(song.image as NetworkImage).url.endsWith('unknown-album.png');
-          })
-          .map((song) => song.image)
-          .toList();
-
-      images.shuffle();
-      images = images.take(imageCount).toList();
-    }
-
-    // fill up to 4 images
-    for (int i = images.length; i < imageCount; ++i) {
-      images.insert(0, AssetImage('assets/images/unknown-album.png'));
-    }
-
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Positioned(
-          left: -16,
-          top: -24,
-          child: coverImage(image: images[0], overlayOpacity: .8),
-        ),
-        Positioned(
-          left: 32,
-          top: -16,
-          child: coverImage(image: images[1], overlayOpacity: .6),
-        ),
-        Positioned(
-          left: 14,
-          top: 20,
-          child: coverImage(image: images[2], overlayOpacity: .4),
-        ),
-        coverImage(image: images[3]),
-      ],
-    );
-  }
-
   Widget appBar({required Playlist playlist}) {
     return SliverAppBar(
       pinned: true,
       expandedHeight: 290,
       flexibleSpace: FlexibleSpaceBar(
         title: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             widget.playlist.name,
             overflow: TextOverflow.ellipsis,
@@ -119,12 +46,12 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
         ),
         background: Stack(
           children: <Widget>[
-            SizedBox(
+            const SizedBox(
               width: double.infinity,
               height: double.infinity,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
+              child: const DecoratedBox(
+                decoration: const BoxDecoration(
+                  gradient: const LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
@@ -139,7 +66,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
               child: SizedBox(
                 width: 192,
                 height: 192,
-                child: coverImageStack(playlist: playlist),
+                child: PlaylistCoverImageStack(playlist: playlist),
               ),
             ),
           ],
@@ -222,6 +149,99 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class PlaylistCoverImageStack extends StatelessWidget {
+  final Playlist playlist;
+
+  const PlaylistCoverImageStack({Key? key, required this.playlist})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    const imageCount = 4;
+    List<ImageProvider> images = [];
+
+    if (!playlist.isEmpty) {
+      images = playlist.songs
+          .where((song) {
+            return song.image is NetworkImage &&
+                !(song.image as NetworkImage).url.endsWith('unknown-album.png');
+          })
+          .map((song) => song.image)
+          .toList();
+
+      images.shuffle();
+      images = images.take(imageCount).toList();
+    }
+
+    // fill up to 4 images
+    for (int i = images.length; i < imageCount; ++i) {
+      images.insert(0, AssetImage('assets/images/unknown-album.png'));
+    }
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: <Widget>[
+        Positioned(
+          left: -16,
+          top: -24,
+          child: PlaylistCoverImage(image: images[0], overlayOpacity: .8),
+        ),
+        Positioned(
+          left: 32,
+          top: -16,
+          child: PlaylistCoverImage(image: images[1], overlayOpacity: .6),
+        ),
+        Positioned(
+          left: 14,
+          top: 20,
+          child: PlaylistCoverImage(image: images[2], overlayOpacity: .4),
+        ),
+        PlaylistCoverImage(image: images[3]),
+      ],
+    );
+  }
+}
+
+class PlaylistCoverImage extends StatelessWidget {
+  final double overlayOpacity;
+  final ImageProvider<Object> image;
+
+  const PlaylistCoverImage({
+    Key? key,
+    required this.image,
+    this.overlayOpacity = 0.0,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 160,
+      height: 160,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            colorFilter: ColorFilter.mode(
+              Colors.black.withOpacity(overlayOpacity),
+              BlendMode.srcOver,
+            ),
+            image: image,
+            fit: BoxFit.cover,
+            alignment: Alignment.topCenter,
+          ),
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: Colors.black.withOpacity(.3),
+              blurRadius: 10.0,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
       ),
     );
   }

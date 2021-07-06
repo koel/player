@@ -1,4 +1,5 @@
 import 'package:app/models/album.dart';
+import 'package:app/ui/widgets/decorated_image_box.dart';
 import 'package:flutter/material.dart';
 
 enum ThumbnailSize { sm, md, lg, xl }
@@ -15,29 +16,21 @@ class AlbumThumbnail extends StatelessWidget {
     this.asHero = false,
   }) : super(key: key);
 
-  Widget imageBox() {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: album.image,
-          fit: BoxFit.cover,
-        ),
-        borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    Widget imageBox = DecoratedImageBox(
+      image: album.image,
+      borderRadius: borderRadius,
+    );
     return SizedBox(
       width: width,
       height: height,
       child: asHero
           ? Hero(
               tag: 'album-hero-${album.id}',
-              child: imageBox(),
+              child: imageBox,
             )
-          : imageBox(),
+          : imageBox,
     );
   }
 

@@ -14,18 +14,18 @@ class ArtistCard extends StatefulWidget {
 }
 
 class _ArtistCardState extends State<ArtistCard> {
-  double opacity = 1;
+  double _opacity = 1;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => setState(() => opacity = .4),
-      onTapUp: (_) => setState(() => opacity = 1),
-      onTapCancel: () => setState(() => opacity = 1),
+      onTapDown: (_) => setState(() => _opacity = .4),
+      onTapUp: (_) => setState(() => _opacity = 1),
+      onTapCancel: () => setState(() => _opacity = 1),
       onTap: () => gotoDetailsScreen(context, artist: widget.artist),
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 100),
-        opacity: opacity,
+        opacity: _opacity,
         child: Column(
           children: <Widget>[
             ArtistThumbnail(

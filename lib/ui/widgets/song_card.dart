@@ -18,7 +18,7 @@ class _SongCardState extends State<SongCard> {
 
   @override
   Widget build(BuildContext context) {
-    AudioPlayerProvider audio = context.watch<AudioPlayerProvider>();
+    AudioPlayerProvider audio = context.watch();
 
     return GestureDetector(
       onTapDown: (_) => setState(() => _opacity = .7),
@@ -28,7 +28,7 @@ class _SongCardState extends State<SongCard> {
         await audio.play(song: widget.song);
       },
       child: AnimatedOpacity(
-        duration: const Duration(microseconds: 500),
+        duration: const Duration(microseconds: 100),
         opacity: _opacity,
         child: Column(
           children: <Widget>[

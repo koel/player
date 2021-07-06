@@ -14,18 +14,18 @@ class AlbumCard extends StatefulWidget {
 }
 
 class _AlbumCardState extends State<AlbumCard> {
-  double opacity = 1;
+  double _opacity = 1;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => setState(() => opacity = .4),
-      onTapUp: (_) => setState(() => opacity = 1),
-      onTapCancel: () => setState(() => opacity = 1),
+      onTapDown: (_) => setState(() => _opacity = .4),
+      onTapUp: (_) => setState(() => _opacity = 1),
+      onTapCancel: () => setState(() => _opacity = 1),
       onTap: () => gotoDetailsScreen(context, album: widget.album),
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 100),
-        opacity: opacity,
+        opacity: _opacity,
         child: Column(
           children: <Widget>[
             AlbumThumbnail(
@@ -44,7 +44,7 @@ class _AlbumCardState extends State<AlbumCard> {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     widget.album.artist.name,
                     style: TextStyle(
