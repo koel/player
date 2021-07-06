@@ -142,9 +142,12 @@ class SongRowTrailingActions extends StatelessWidget {
             // In other "standard" queues, it's the Actions menu trigger
             ? ReorderableDragStartListener(
                 index: index,
-                child: Icon(
-                  CupertinoIcons.bars,
-                  color: Colors.white.withOpacity(.5),
+                child: Container(
+                  padding: EdgeInsets.only(left: 12),
+                  child: Icon(
+                    CupertinoIcons.bars,
+                    color: Colors.white.withOpacity(.5),
+                  ),
                 ),
               )
             : IconButton(

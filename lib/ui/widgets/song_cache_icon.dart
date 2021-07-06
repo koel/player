@@ -44,7 +44,7 @@ class _SongCacheIconState extends State<SongCacheIcon> {
         }
 
         return _downloading
-            ? CupertinoActivityIndicator()
+            ? CupertinoActivityIndicator(radius: 9)
             : GestureDetector(
                 onTap: () async {
                   setState(() => _downloading = true);

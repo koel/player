@@ -19,7 +19,7 @@ class SimpleSongList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        if (headingText != null) heading1(text: headingText!),
+        if (headingText != null) Heading1(text: headingText!),
         ...songs.map(
           (song) => SongRow(
             song: song,

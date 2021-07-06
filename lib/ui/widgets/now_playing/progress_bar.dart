@@ -55,6 +55,7 @@ class _ProgressBarState extends State<ProgressBar> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Slider(
           value: _position.inSeconds.toDouble(),

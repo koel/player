@@ -152,7 +152,7 @@ class _InfoSheetState extends State<InfoSheet> {
               }
 
               if (snapshot.connectionState != ConnectionState.done) {
-                return containerWithSpinner();
+                return ContainerWithSpinner();
               }
 
               return Column(

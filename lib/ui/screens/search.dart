@@ -113,7 +113,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     Padding(
                       padding: const EdgeInsets.only(
                           left: AppDimens.horizontalPadding),
-                      child: heading1(text: 'Albums'),
+                      child: Heading1(text: 'Albums'),
                     ),
                     _albums.length == 0
                         ? noResults
@@ -125,7 +125,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     Padding(
                       padding: const EdgeInsets.only(
                           left: AppDimens.horizontalPadding),
-                      child: heading1(text: 'Artists'),
+                      child: Heading1(text: 'Artists'),
                     ),
                     _artists.length == 0
                         ? noResults

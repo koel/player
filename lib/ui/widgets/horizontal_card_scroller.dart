@@ -21,7 +21,7 @@ class HorizontalCardScroller extends StatelessWidget {
         if (headingText != null)
           Padding(
             padding: const EdgeInsets.only(left: AppDimens.horizontalPadding),
-            child: heading1(text: headingText!),
+            child: Heading1(text: headingText!),
           ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,

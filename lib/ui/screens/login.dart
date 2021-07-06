@@ -146,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
       onPressed: attemptLogin,
     );
 
-    final spinnerWidget = Center(child: spinner(size: 24));
+    final spinnerWidget = Center(child: Spinner(size: 24));
 
     return SafeArea(
       child: Scaffold(

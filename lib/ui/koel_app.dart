@@ -71,7 +71,7 @@ class _KoelAppState extends State<KoelApp> {
             switch (snapshot.connectionState) {
               case ConnectionState.none:
               case ConnectionState.waiting:
-                return containerWithSpinner();
+                return ContainerWithSpinner();
               default:
                 return snapshot.data == null ? LoginScreen() : StartScreen();
             }

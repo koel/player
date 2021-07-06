@@ -40,7 +40,7 @@ class HomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppDimens.horizontalPadding,
                 ),
-                child: heading1(text: "Howdy, ${_authUser.name}!"),
+                child: Heading1(text: "Howdy, ${_authUser.name}!"),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -135,7 +135,7 @@ class MostPlayedSongs extends StatelessWidget {
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.only(left: AppDimens.horizontalPadding),
-          child: heading1(text: 'Most played'),
+          child: Heading1(text: 'Most played'),
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,

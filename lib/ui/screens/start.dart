@@ -52,7 +52,7 @@ class _StartScreenState extends State<StartScreen> {
         switch (snapshot.connectionState) {
           case ConnectionState.none:
           case ConnectionState.waiting:
-            return containerWithSpinner();
+            return ContainerWithSpinner();
           default:
             return Scaffold(
               body: Stack(
