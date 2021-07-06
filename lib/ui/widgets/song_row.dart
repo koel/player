@@ -1,6 +1,5 @@
-import 'dart:async';
-
 import 'package:app/extensions/assets_audio_player.dart';
+import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
@@ -80,12 +79,12 @@ class SongRowThumbnail extends StatefulWidget {
   _SongRowThumbnailState createState() => _SongRowThumbnailState();
 }
 
-class _SongRowThumbnailState extends State<SongRowThumbnail> {
+class _SongRowThumbnailState extends State<SongRowThumbnail>
+    with StreamSubscriber {
   late AudioPlayerProvider audio;
   late SongProvider songProvider;
   PlayerState _state = PlayerState.stop;
   bool _isCurrentSong = false;
-  List<StreamSubscription> _subscriptions = [];
 
   @override
   void initState() {
@@ -93,11 +92,11 @@ class _SongRowThumbnailState extends State<SongRowThumbnail> {
 
     audio = context.read();
 
-    _subscriptions.add(audio.player.playerState.listen((PlayerState state) {
+    subscribe(audio.player.playerState.listen((PlayerState state) {
       setState(() => _state = state);
     }));
 
-    _subscriptions.add(audio.player.current.listen((Playing? current) {
+    subscribe(audio.player.current.listen((Playing? current) {
       setState(() => _isCurrentSong = audio.player.songId == widget.song.id);
     }));
 
@@ -106,8 +105,8 @@ class _SongRowThumbnailState extends State<SongRowThumbnail> {
 
   @override
   void dispose() {
+    unsubscribeAll();
     super.dispose();
-    _subscriptions.forEach((sub) => sub.cancel());
   }
 
   @override
@@ -137,26 +136,27 @@ class SongRowTrailingActions extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         SongCacheIcon(song: song),
-        behavior == SongListBehavior.queue
-            // In a queue, the trailing control is the Drag icon
-            // In other "standard" queues, it's the Actions menu trigger
-            ? ReorderableDragStartListener(
-                index: index,
-                child: Container(
-                  padding: EdgeInsets.only(left: 12),
-                  child: Icon(
-                    CupertinoIcons.bars,
-                    color: Colors.white.withOpacity(.5),
-                  ),
-                ),
-              )
-            : IconButton(
-                icon: const Icon(CupertinoIcons.ellipsis, size: 20),
-                onPressed: () => showActionSheet(
-                  context: context,
-                  song: song,
-                ),
+        if (behavior == SongListBehavior.queue)
+          // In a queue, the trailing control is the Drag icon
+          // In other "standard" queues, it's the Actions menu trigger
+          ReorderableDragStartListener(
+            index: index,
+            child: Container(
+              padding: EdgeInsets.only(left: 12),
+              child: Icon(
+                CupertinoIcons.bars,
+                color: Colors.white.withOpacity(.5),
               ),
+            ),
+          )
+        else
+          IconButton(
+            icon: const Icon(CupertinoIcons.ellipsis, size: 20),
+            onPressed: () => showActionSheet(
+              context: context,
+              song: song,
+            ),
+          ),
       ],
     );
   }

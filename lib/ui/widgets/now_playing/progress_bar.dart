@@ -1,7 +1,6 @@
-import 'dart:async';
-
 import 'package:app/extensions/assets_audio_player.dart';
 import 'package:app/extensions/duration.dart';
+import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:flutter/material.dart';
@@ -15,11 +14,9 @@ class ProgressBar extends StatefulWidget {
   _ProgressBarState createState() => _ProgressBarState();
 }
 
-class _ProgressBarState extends State<ProgressBar> {
+class _ProgressBarState extends State<ProgressBar> with StreamSubscriber {
   late final AudioPlayerProvider audio;
   late final SongProvider songProvider;
-
-  List<StreamSubscription> _subscriptions = [];
 
   Duration _duration = Duration();
   Duration _position = Duration();
@@ -41,14 +38,14 @@ class _ProgressBarState extends State<ProgressBar> {
       );
     });
 
-    _subscriptions.add(audio.player.currentPosition.listen((position) {
+    subscribe(audio.player.currentPosition.listen((position) {
       setState(() => _position = position);
     }));
   }
 
   @override
   void dispose() {
-    _subscriptions.forEach((sub) => sub.cancel());
+    unsubscribeAll();
     super.dispose();
   }
 
@@ -59,7 +56,6 @@ class _ProgressBarState extends State<ProgressBar> {
       children: <Widget>[
         Slider(
           value: _position.inSeconds.toDouble(),
-          min: 0.0,
           max: _duration.inSeconds.toDouble(),
           onChanged: (double value) {
             audio.player.seek(Duration(seconds: value.toInt()));

@@ -1,5 +1,4 @@
-import 'dart:async';
-
+import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/playlist.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/playlist_provider.dart';
@@ -18,9 +17,8 @@ class PlaylistRow extends StatefulWidget {
   _PlaylistRowState createState() => _PlaylistRowState();
 }
 
-class _PlaylistRowState extends State<PlaylistRow> {
+class _PlaylistRowState extends State<PlaylistRow> with StreamSubscriber {
   late final PlaylistProvider playlistProvider;
-  List<StreamSubscription> _subscriptions = [];
   late Playlist _playlist;
 
   @override
@@ -29,7 +27,7 @@ class _PlaylistRowState extends State<PlaylistRow> {
     playlistProvider = context.read();
     setState(() => _playlist = widget.playlist);
 
-    _subscriptions.add(
+    subscribe(
       playlistProvider.playlistPopulatedStream.listen((playlist) {
         if (playlist.id == _playlist.id) {
           setState(() => _playlist = playlist);
@@ -38,8 +36,9 @@ class _PlaylistRowState extends State<PlaylistRow> {
     );
   }
 
+  @override
   dispose() {
-    _subscriptions.forEach((subscription) => subscription.cancel());
+    unsubscribeAll();
     super.dispose();
   }
 

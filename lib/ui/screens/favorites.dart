@@ -1,5 +1,4 @@
-import 'dart:async';
-
+import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/interaction_provider.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
@@ -21,9 +20,9 @@ class FavoritesScreen extends StatefulWidget {
   _FavoritesScreenState createState() => _FavoritesScreenState();
 }
 
-class _FavoritesScreenState extends State<FavoritesScreen> {
+class _FavoritesScreenState extends State<FavoritesScreen>
+    with StreamSubscriber {
   late final InteractionProvider interactionProvider;
-  final List<StreamSubscription> _subscriptions = [];
   late List<Song> _songs = [];
 
   @override
@@ -33,18 +32,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
     setState(() => _songs = interactionProvider.favorites);
 
-    _subscriptions.add(interactionProvider.songLikeToggleStream.listen((song) {
-      if (song.liked) {
-        _songs.add(song);
-      } else {
-        _songs.remove(song);
-      }
+    subscribe(interactionProvider.songLikeToggleStream.listen((song) {
+      song.liked ? _songs.add(song) : _songs.remove(song);
     }));
   }
 
   @override
   void dispose() {
-    _subscriptions.forEach((subscription) => subscription.cancel());
+    unsubscribeAll();
     super.dispose();
   }
 

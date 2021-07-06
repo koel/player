@@ -1,5 +1,4 @@
-import 'dart:async';
-
+import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:assets_audio_player/assets_audio_player.dart';
@@ -14,9 +13,8 @@ class LoopModeButton extends StatefulWidget {
   _LoopModeButtonState createState() => _LoopModeButtonState();
 }
 
-class _LoopModeButtonState extends State<LoopModeButton> {
-  late LoopMode _loopMode;
-  List<StreamSubscription> _subscriptions = [];
+class _LoopModeButtonState extends State<LoopModeButton> with StreamSubscriber {
+  LoopMode _loopMode = LoopMode.none;
   late AudioPlayerProvider audio;
 
   @override
@@ -24,16 +22,21 @@ class _LoopModeButtonState extends State<LoopModeButton> {
     super.initState();
     audio = context.read();
 
-    preferences.loopMode.then((value) => setState(() => _loopMode = value));
+    loadSavedLoopMode();
 
-    _subscriptions.add(audio.player.loopMode.listen((loopMode) {
+    subscribe(audio.player.loopMode.listen((loopMode) {
       setState(() => _loopMode = loopMode);
     }));
   }
 
+  Future<void> loadSavedLoopMode() async {
+    LoopMode savedMode = await preferences.loopMode;
+    setState(() => _loopMode = savedMode);
+  }
+
   @override
   void dispose() {
-    _subscriptions.forEach((sub) => sub.cancel());
+    unsubscribeAll();
     super.dispose();
   }
 
@@ -45,14 +48,16 @@ class _LoopModeButtonState extends State<LoopModeButton> {
           : Colors.white,
       onPressed: () async {
         late LoopMode newMode;
-        if (_loopMode == LoopMode.none)
+
+        if (_loopMode == LoopMode.none) {
           newMode = LoopMode.playlist;
-        else if (_loopMode == LoopMode.playlist)
+        } else if (_loopMode == LoopMode.playlist) {
           newMode = LoopMode.single;
-        else
+        } else {
           newMode = LoopMode.none;
+        }
+
         audio.player.setLoopMode(newMode);
-        await preferences.setLoopMode(newMode);
       },
       icon: Icon(
         _loopMode == LoopMode.single
