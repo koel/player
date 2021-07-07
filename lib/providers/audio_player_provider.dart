@@ -30,12 +30,18 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
   Future<void> init() async {
     _player = AssetsAudioPlayer.newPlayer();
 
-    subscribe(_player.current.listen((Playing? playing) {
+    subscribe(_player.current.listen((_) {
+      // Everytime a new song is played (including those on Single loop mode)
+      // we reset its playCountRegistered flag so that the play count is
+      // registered properly.
       _songProvider.byId(_player.songId!).playCountRegistered = false;
     }));
 
     subscribe(_player.currentPosition.listen((Duration position) {
       Song currentSong = _songProvider.byId(_player.songId!);
+
+      if (currentSong.playCountRegistered) return;
+
       // If we've passed 25% of the song duration, register a play count
       if (position.inSeconds / currentSong.length.toDouble() > .25) {
         _interactionProvider.registerPlayCount(song: currentSong);

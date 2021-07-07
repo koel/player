@@ -19,14 +19,14 @@ class InteractionProvider with ChangeNotifier {
       _songProvider.songs.where((song) => song.liked).toList();
 
   Future<void> like({required Song song}) async {
-    // broadcast the event first regardless
+    // Broadcast the event first regardless
     song.liked = true;
     _songLikeToggled.add(song);
     await post('interaction/like', data: {'song': song.id});
   }
 
   Future<void> unlike({required Song song}) async {
-    // broadcast the event first regardless
+    // Broadcast the event first regardless
     song.liked = false;
     _songLikeToggled.add(song);
     await post('interaction/like', data: {'song': song.id});
@@ -43,9 +43,7 @@ class InteractionProvider with ChangeNotifier {
   }
 
   Future<void> registerPlayCount({required Song song}) async {
-    if (song.playCountRegistered) return;
-
-    // prevent continuous calls to this function
+    // Prevent continuous calls to this function
     song.playCountRegistered = true;
     dynamic json = await post('interaction/play', data: {'song': song.id});
 
