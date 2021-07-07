@@ -10,7 +10,7 @@ class InteractionProvider with ChangeNotifier {
 
   final BehaviorSubject<Song> _songLikeToggled = BehaviorSubject();
 
-  ValueStream<Song> get songLikeToggleStream => _songLikeToggled.stream;
+  ValueStream<Song> get songLikeToggledStream => _songLikeToggled.stream;
 
   InteractionProvider({required SongProvider songProvider})
       : _songProvider = songProvider;
