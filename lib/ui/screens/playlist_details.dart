@@ -1,13 +1,12 @@
-import 'dart:ui';
-
 import 'package:app/models/playlist.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/playlist_provider.dart';
+import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list.dart';
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
 class PlaylistDetailsScreen extends StatefulWidget {
@@ -41,7 +40,14 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
         builder: (BuildContext context, AsyncSnapshot<Playlist> snapshot) {
           if (!snapshot.hasData || snapshot.hasError) {
             return CustomScrollView(
-              slivers: <Widget>[PlaylistAppBar(playlist: widget.playlist)],
+              slivers: <Widget>[
+                AppBar(
+                  headingText: widget.playlist.name,
+                  coverImage: CoverImageStack(
+                    songs: widget.playlist.songs,
+                  ),
+                ),
+              ],
             );
           }
 
@@ -49,7 +55,12 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
 
           return CustomScrollView(
             slivers: <Widget>[
-              PlaylistAppBar(playlist: playlist),
+              AppBar(
+                headingText: widget.playlist.name,
+                coverImage: CoverImageStack(
+                  songs: widget.playlist.songs,
+                ),
+              ),
               SliverToBoxAdapter(
                 child: playlist.isEmpty
                     ? const SizedBox.shrink()
@@ -108,149 +119,6 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
             ],
           );
         },
-      ),
-    );
-  }
-}
-
-class PlaylistAppBar extends StatelessWidget {
-  final Playlist playlist;
-
-  const PlaylistAppBar({Key? key, required this.playlist}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SliverAppBar(
-      pinned: true,
-      expandedHeight: 290,
-      flexibleSpace: FlexibleSpaceBar(
-        title: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            playlist.name,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        background: Stack(
-          children: <Widget>[
-            const SizedBox(
-              width: double.infinity,
-              height: double.infinity,
-              child: const DecoratedBox(
-                decoration: const BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Center(
-              child: SizedBox(
-                width: 192,
-                height: 192,
-                child: PlaylistCoverImageStack(playlist: playlist),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class PlaylistCoverImageStack extends StatelessWidget {
-  final Playlist playlist;
-
-  const PlaylistCoverImageStack({Key? key, required this.playlist})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    const imageCount = 4;
-    List<ImageProvider> images = [];
-
-    if (!playlist.isEmpty) {
-      images = playlist.songs
-          .where((song) {
-            return song.image is NetworkImage &&
-                !(song.image as NetworkImage).url.endsWith('unknown-album.png');
-          })
-          .map((song) => song.image)
-          .toList();
-
-      images.shuffle();
-      images = images.take(imageCount).toList();
-    }
-
-    // fill up to 4 images
-    for (int i = images.length; i < imageCount; ++i) {
-      images.insert(0, AssetImage('assets/images/unknown-album.png'));
-    }
-
-    return Stack(
-      clipBehavior: Clip.none,
-      children: <Widget>[
-        Positioned(
-          left: -16,
-          top: -24,
-          child: PlaylistCoverImage(image: images[0], overlayOpacity: .8),
-        ),
-        Positioned(
-          left: 32,
-          top: -16,
-          child: PlaylistCoverImage(image: images[1], overlayOpacity: .6),
-        ),
-        Positioned(
-          left: 14,
-          top: 20,
-          child: PlaylistCoverImage(image: images[2], overlayOpacity: .4),
-        ),
-        PlaylistCoverImage(image: images[3]),
-      ],
-    );
-  }
-}
-
-class PlaylistCoverImage extends StatelessWidget {
-  final double overlayOpacity;
-  final ImageProvider<Object> image;
-
-  const PlaylistCoverImage({
-    Key? key,
-    required this.image,
-    this.overlayOpacity = 0.0,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 160,
-      height: 160,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(overlayOpacity),
-              BlendMode.srcOver,
-            ),
-            image: image,
-            fit: BoxFit.cover,
-            alignment: Alignment.topCenter,
-          ),
-          borderRadius: BorderRadius.all(Radius.circular(8)),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: Colors.black.withOpacity(.3),
-              blurRadius: 10.0,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -1,11 +1,12 @@
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/interaction_provider.dart';
+import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list.dart';
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
 class FavoritesScreen extends StatefulWidget {
@@ -45,13 +46,9 @@ class _FavoritesScreenState extends State<FavoritesScreen>
     return CupertinoPageScaffold(
       child: CustomScrollView(
         slivers: <Widget>[
-          CupertinoSliverNavigationBar(
-            backgroundColor: Colors.black,
-            previousPageTitle: widget.previousPageTitle,
-            largeTitle: const Text(
-              'Favorites',
-              style: const TextStyle(color: Colors.white),
-            ),
+          AppBar(
+            headingText: 'Favorites',
+            coverImage: CoverImageStack(songs: _songs),
           ),
           SliverToBoxAdapter(child: SongListButtons(songs: _songs)),
           SliverList(

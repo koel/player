@@ -11,8 +11,9 @@ import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/favorites.dart';
 import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/screens/login.dart';
+import 'package:app/ui/widgets/app_bar.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide AppBar;
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -31,72 +32,43 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
-          SliverAppBar(
-            pinned: true,
-            expandedHeight: 290,
-            flexibleSpace: FlexibleSpaceBar(
-              title: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(user.name, overflow: TextOverflow.ellipsis),
+          AppBar(
+            headingText: user.name,
+            coverImage: SizedBox(
+              width: 192,
+              height: 192,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: user.avatar,
+                    fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
+                  ),
+                  borderRadius: BorderRadius.all(Radius.circular(96)),
+                  boxShadow: <BoxShadow>[
+                    const BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10.0,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
               ),
-              background: Stack(
-                children: <Widget>[
-                  SizedBox(
-                    width: double.infinity,
-                    height: double.infinity,
-                    child: ImageFiltered(
-                      imageFilter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: user.avatar,
-                            fit: BoxFit.cover,
-                            alignment: Alignment.topCenter,
-                          ),
-                        ),
-                      ),
+            ),
+            backgroundImage: SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: user.avatar,
+                      fit: BoxFit.cover,
+                      alignment: Alignment.topCenter,
                     ),
                   ),
-                  const SizedBox(
-                    width: double.infinity,
-                    height: double.infinity,
-                    child: const DecoratedBox(
-                      decoration: const BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: <Color>[
-                            Colors.transparent,
-                            Colors.black,
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Center(
-                    child: SizedBox(
-                      width: 192,
-                      height: 192,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: user.avatar,
-                            fit: BoxFit.cover,
-                            alignment: Alignment.topCenter,
-                          ),
-                          borderRadius: BorderRadius.all(Radius.circular(96)),
-                          boxShadow: <BoxShadow>[
-                            const BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 10.0,
-                              offset: const Offset(0, 6),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),

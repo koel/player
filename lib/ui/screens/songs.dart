@@ -1,10 +1,11 @@
 import 'package:app/models/song.dart';
 import 'package:app/providers/song_provider.dart';
+import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list.dart';
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
 class SongsScreen extends StatefulWidget {
@@ -32,13 +33,9 @@ class _SongsScreenState extends State<SongsScreen> {
     return CupertinoPageScaffold(
       child: CustomScrollView(
         slivers: [
-          CupertinoSliverNavigationBar(
-            backgroundColor: Colors.black,
-            previousPageTitle: widget.previousPageTitle,
-            largeTitle: const Text(
-              'Songs',
-              style: const TextStyle(color: Colors.white),
-            ),
+          AppBar(
+            headingText: 'All songs',
+            coverImage: CoverImageStack(songs: _songs),
           ),
           SliverToBoxAdapter(child: SongListButtons(songs: _songs)),
           SliverList(
