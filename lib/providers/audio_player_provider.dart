@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app/extensions/assets_audio_player.dart';
 import 'package:app/extensions/audio.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/song.dart';
@@ -17,9 +18,8 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
   late final AssetsAudioPlayer _player;
   final BehaviorSubject<bool> _queueModified = BehaviorSubject();
 
+  AssetsAudioPlayer get player => _player;
   ValueStream<bool> get queueModifiedStream => _queueModified.stream;
-  Audio? _currentAudio;
-  Song? _currentSong;
 
   AudioPlayerProvider({
     required SongProvider songProvider,
@@ -27,58 +27,39 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
   })  : _songProvider = songProvider,
         _interactionProvider = interactionProvider;
 
-  // Set a blank audio to ensure the playlist is initialized
-  // (Assets Audio Player will set playlist to NULL if the list is empty).
-  final Audio seededAudio = Audio('assets/audio/blank.mp3');
-
   Future<void> init() async {
     _player = AssetsAudioPlayer.newPlayer();
 
     subscribe(_player.current.listen((Playing? playing) {
-      if (playing?.audio.audio != seededAudio) {
-        _currentAudio = playing!.audio.audio;
-        _currentSong = _songProvider.byId(_currentAudio!.songId!);
-        _currentSong!.playCountRegistered = false;
-      }
+      _songProvider.byId(_player.songId!).playCountRegistered = false;
     }));
 
     subscribe(_player.currentPosition.listen((Duration position) {
-      if (_currentSong == null) return;
-
+      Song currentSong = _songProvider.byId(_player.songId!);
       // If we've passed 25% of the song duration, register a play count
-      if (position.inSeconds / _currentSong!.length.toDouble() > .25) {
-        _interactionProvider.registerPlayCount(song: _currentSong!);
+      if (position.inSeconds / currentSong.length.toDouble() > .25) {
+        _interactionProvider.registerPlayCount(song: currentSong);
       }
     }));
+  }
+
+  Future<void> _openPlayer(audioResource) async {
+    assert(audioResource is Audio || audioResource is List<Audio>,
+        'audioResource must be of either Audio or List<Audio> type.');
 
     await _player.open(
-      Playlist(audios: [seededAudio]),
+      Playlist(
+        audios: audioResource is Audio ? [audioResource] : audioResource,
+      ),
       showNotification: true,
       autoStart: false,
     );
-
-    try {
-      _player.playlist?.removeAtIndex(0);
-    } catch (err) {
-      // AssetAudioPlayer throws a "Unhandled Exception: RangeError (index): Invalid value: Valid value range is empty: 0"
-      // error here.
-    }
-    _broadcastQueueChangedEvent();
   }
 
   Future<bool> queued(Song song) async => await indexInQueue(song) != -1;
 
   Future<int> indexInQueue(Song song) async {
     return _player.playlist?.audios.indexOf(await song.asAudio()) ?? -1;
-  }
-
-  Future<int> queueAfterCurrent({required Song song}) async {
-    Audio audio = await song.asAudio();
-    int index = _player.playlist?.audios.indexOf(_currentAudio!) ?? 0 + 1;
-    _player.playlist?.insert(index, audio);
-    _broadcastQueueChangedEvent();
-
-    return index;
   }
 
   Future<void> play({Song? song}) async {
@@ -92,7 +73,7 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
       await _player.playlistPlayAtIndex(index);
     } else {
       await _player.playlistPlayAtIndex(
-        _currentAudio == null
+        _player.current.hasValue
             ? await queueToTop(song: song)
             : await queueAfterCurrent(song: song),
       );
@@ -104,15 +85,37 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
   Future<void> stop() async => await _player.stop();
 
   Future<int> queueToTop({required Song song}) async {
-    _player.playlist?.insert(0, await song.asAudio());
+    if (_player.playlist == null) {
+      await _openPlayer(await song.asAudio());
+    }
+
+    _player.playlist!.insert(0, await song.asAudio());
     _broadcastQueueChangedEvent();
     return 0;
   }
 
   Future<int> queueToBottom({required Song song}) async {
-    _player.playlist?.add(await song.asAudio());
+    if (_player.playlist == null) {
+      await _openPlayer(await song.asAudio());
+    }
+
+    _player.playlist!.add(await song.asAudio());
     _broadcastQueueChangedEvent();
-    return _player.playlist?.numberOfItems ?? -1;
+
+    return _player.playlist!.numberOfItems - 1;
+  }
+
+  Future<int> queueAfterCurrent({required Song song}) async {
+    if (_player.playlist == null) {
+      await _openPlayer(await song.asAudio());
+    }
+
+    Audio audio = await song.asAudio();
+    int currentIndex = _player.current.value?.index ?? 0;
+    _player.playlist!.insert(currentIndex + 1, audio);
+    _broadcastQueueChangedEvent();
+
+    return currentIndex;
   }
 
   Future<void> replaceQueue(List<Song> songs, {shuffle = false}) async {
@@ -125,24 +128,21 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
     }
 
     _player.playlist?.audios.clear();
-
     await _player.stop();
-    audios.forEach((audio) => _player.playlist?.add(audio));
+
+    // Just reopen the player with the new audios
+    await _openPlayer(audios);
+
     _player.play();
     _broadcastQueueChangedEvent();
   }
 
   List<Song> get queuedSongs {
-    if (_player.playlist == null) return [];
-
     return _player.playlist?.audios
-            .where((element) => element.path != 'assets/audio/blank.mp3')
             .map((audio) => _songProvider.byId(audio.songId!))
             .toList() ??
         [];
   }
-
-  AssetsAudioPlayer get player => _player;
 
   void clearQueue() {
     _player.playlist?.audios.clear();
