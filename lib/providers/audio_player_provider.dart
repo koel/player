@@ -61,6 +61,8 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
       showNotification: true,
       autoStart: false,
     );
+
+    _broadcastQueueChangedEvent();
   }
 
   Future<bool> queued(Song song) async => await indexInQueue(song) != -1;
@@ -94,6 +96,7 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
   Future<int> queueToTop({required Song song}) async {
     if (_player.playlist == null) {
       await _openPlayer(await song.asAudio());
+      return 0;
     }
 
     _player.playlist!.insert(0, await song.asAudio());
@@ -104,17 +107,18 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
   Future<int> queueToBottom({required Song song}) async {
     if (_player.playlist == null) {
       await _openPlayer(await song.asAudio());
+      return 0;
     }
 
     _player.playlist!.add(await song.asAudio());
     _broadcastQueueChangedEvent();
-
     return _player.playlist!.numberOfItems - 1;
   }
 
   Future<int> queueAfterCurrent({required Song song}) async {
     if (_player.playlist == null) {
       await _openPlayer(await song.asAudio());
+      return 0;
     }
 
     Audio audio = await song.asAudio();
@@ -139,9 +143,7 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
 
     // Just reopen the player with the new audios
     await _openPlayer(audios);
-
     _player.play();
-    _broadcastQueueChangedEvent();
   }
 
   List<Song> get queuedSongs {
