@@ -8,6 +8,8 @@ import 'package:app/providers/cache_provider.dart';
 import 'package:app/providers/interaction_provider.dart';
 import 'package:app/providers/playlist_provider.dart';
 import 'package:app/providers/song_provider.dart';
+import 'package:app/ui/screens/favorites.dart';
+import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/screens/login.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +24,6 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     AuthProvider authProvider = context.watch();
     SongProvider songProvider = context.watch();
-    InteractionProvider interactionProvider = context.watch();
     PlaylistProvider playlistProvider = context.watch();
 
     User user = authProvider.authUser;
@@ -110,15 +111,24 @@ class ProfileScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
-                      MetricBlock(
-                        number: songProvider.songs.length,
-                        label: 'songs',
+                      GestureDetector(
+                        child: MetricBlock(
+                          number: songProvider.songs.length,
+                          label: 'songs',
+                        ),
+                        onTap: () => gotoSongsScreen(context),
                       ),
-                      MetricBlock(
-                        number: playlistProvider.playlists.length,
-                        label: 'playlists',
+                      GestureDetector(
+                        child: MetricBlock(
+                          number: playlistProvider.playlists.length,
+                          label: 'playlists',
+                        ),
+                        onTap: () => gotoPlaylistsScreen(context),
                       ),
-                      const FavoriteMetricBlock(),
+                      GestureDetector(
+                        child: const FavoriteMetricBlock(),
+                        onTap: () => gotoFavoritesScreen(context),
+                      ),
                     ],
                   ),
                   SizedBox(height: 32),

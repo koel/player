@@ -82,3 +82,13 @@ class _FavoritesScreenState extends State<FavoritesScreen>
     );
   }
 }
+
+void gotoFavoritesScreen(BuildContext context, {String? previousPageTitle}) {
+  Navigator.of(context).push(
+    CupertinoPageRoute(
+      builder: (_) => FavoritesScreen(
+        previousPageTitle: previousPageTitle,
+      ),
+    ),
+  );
+}

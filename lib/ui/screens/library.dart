@@ -155,7 +155,7 @@ void gotoArtistsScreen(BuildContext context, {String? previousPageTitle}) {
 
 void gotoSongsScreen(BuildContext context, {String? previousPageTitle}) {
   Navigator.of(context).push(CupertinoPageRoute<void>(
-    builder: (_) => SongsScreen(previousPageTitle: previousPageTitle),
+    builder: (_) => SongsScreen(),
     title: 'Songs',
   ));
 }
