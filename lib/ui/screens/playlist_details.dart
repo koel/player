@@ -114,19 +114,19 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                   : SliverList(
                       delegate: SliverChildBuilderDelegate(
                         (_, int index) {
-                          final bool dismissible = widget.playlist.isSmart;
+                          final bool dismissible = widget.playlist.isStandard;
                           final Song song = widget.playlist.songs[index];
                           return Dismissible(
                             direction: dismissible
-                                ? DismissDirection.none
-                                : DismissDirection.endToStart,
+                                ? DismissDirection.endToStart
+                                : DismissDirection.none,
                             onDismissed: dismissible
-                                ? null
-                                : (DismissDirection direction) =>
+                                ? (DismissDirection direction) =>
                                     playlistProvider.removeSongFromPlaylist(
                                       song: song,
                                       playlist: widget.playlist,
-                                    ),
+                                    )
+                                : null,
                             background: Container(
                               alignment: AlignmentDirectional.centerEnd,
                               color: Colors.red,
