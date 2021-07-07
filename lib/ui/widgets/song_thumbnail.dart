@@ -90,7 +90,7 @@ class PlayingSongThumbnail extends StatelessWidget {
             child: DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
-                color: Colors.black.withOpacity(.5),
+                color: Colors.black54,
               ),
             ),
           ),

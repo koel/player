@@ -21,7 +21,7 @@ class _ProgressBarState extends State<ProgressBar> with StreamSubscriber {
 
   TextStyle timeStampStyle = TextStyle(
     fontSize: 12,
-    color: Colors.white.withOpacity(.5),
+    color: Colors.white54,
   );
 
   @override

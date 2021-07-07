@@ -145,7 +145,7 @@ class SongRowTrailingActions extends StatelessWidget {
               padding: EdgeInsets.only(left: 12),
               child: Icon(
                 CupertinoIcons.bars,
-                color: Colors.white.withOpacity(.5),
+                color: Colors.white54,
               ),
             ),
           )

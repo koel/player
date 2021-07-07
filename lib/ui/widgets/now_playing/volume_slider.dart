@@ -41,7 +41,7 @@ class _VolumeSliderState extends State<VolumeSlider> with StreamSubscriber {
         Icon(
           CupertinoIcons.volume_mute,
           size: 16,
-          color: Colors.white.withOpacity(.5),
+          color: Colors.white54,
         ),
         Expanded(
           child: Padding(
@@ -68,7 +68,7 @@ class _VolumeSliderState extends State<VolumeSlider> with StreamSubscriber {
         Icon(
           CupertinoIcons.volume_up,
           size: 16,
-          color: Colors.white.withOpacity(.5),
+          color: Colors.white54,
         ),
       ],
     );

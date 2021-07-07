@@ -60,9 +60,9 @@ class PlaceholderCard extends StatelessWidget {
       width: 144,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(.1),
+          color: Colors.white10,
           borderRadius: const BorderRadius.all(Radius.circular(12)),
-          border: Border.all(color: Colors.white.withOpacity(.1)),
+          border: Border.all(color: Colors.white10),
         ),
         child: IconButton(
           onPressed: onPressed,

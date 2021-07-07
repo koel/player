@@ -43,9 +43,7 @@ class _LoopModeButtonState extends State<LoopModeButton> with StreamSubscriber {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      color: _loopMode == LoopMode.none
-          ? Colors.white.withOpacity(.2)
-          : Colors.white,
+      color: _loopMode == LoopMode.none ? Colors.white24 : Colors.white,
       onPressed: () async {
         late LoopMode newMode;
 

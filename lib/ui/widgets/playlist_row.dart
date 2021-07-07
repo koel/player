@@ -71,7 +71,7 @@ class _PlaylistRowState extends State<PlaylistRow> with StreamSubscriber {
             ? const SizedBox.shrink()
             : Icon(
                 CupertinoIcons.music_note_list,
-                color: Colors.white.withOpacity(.5),
+                color: Colors.white54,
               ),
       ),
     );

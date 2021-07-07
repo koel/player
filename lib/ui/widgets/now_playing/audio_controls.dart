@@ -16,10 +16,11 @@ class AudioControls extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
         IconButton(
-          onPressed:
-              audio.player.currentPosition.valueWrapper!.value.inSeconds > 5
-                  ? audio.player.restart
-                  : audio.player.previous,
+          onPressed: () {
+            audio.player.currentPosition.valueWrapper!.value.inSeconds > 5
+                ? audio.player.restart()
+                : audio.player.previous();
+          },
           icon: const Icon(CupertinoIcons.backward_fill),
           iconSize: 48,
         ),

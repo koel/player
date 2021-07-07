@@ -28,7 +28,7 @@ class NowPlayingScreen extends StatelessWidget {
     final AudioPlayerProvider audio = context.watch();
     final SongProvider songProvider = context.watch();
 
-    Color bottomIconColor = Colors.white.withOpacity(.5);
+    Color bottomIconColor = Colors.white54;
 
     return StreamBuilder<Playing?>(
       stream: audio.player.current,
@@ -93,7 +93,7 @@ class NowPlayingScreen extends StatelessWidget {
           children: <Widget>[
             Container(color: Colors.black),
             frostGlassBackground,
-            Container(color: Colors.black.withOpacity(.7)),
+            Container(color: Colors.black54),
             Padding(
               padding: const EdgeInsets.all(24),
               child: Column(

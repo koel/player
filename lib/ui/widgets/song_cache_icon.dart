@@ -53,7 +53,7 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
           return Icon(
             CupertinoIcons.checkmark_alt_circle_fill,
             size: 18,
-            color: Colors.white.withOpacity(.2),
+            color: Colors.white24,
           );
         }
 

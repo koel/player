@@ -35,7 +35,7 @@ class _KoelAppState extends State<KoelApp> {
         title: AppStrings.appName,
         theme: ThemeData(
           brightness: Brightness.dark,
-          dividerColor: Colors.white.withOpacity(.3),
+          dividerColor: Colors.white30,
           scaffoldBackgroundColor: Colors.black,
           backgroundColor: AppColors.primaryBgr,
           bottomSheetTheme: BottomSheetThemeData(
@@ -50,11 +50,11 @@ class _KoelAppState extends State<KoelApp> {
             ),
           ),
           sliderTheme: SliderThemeData(
-            activeTrackColor: Colors.white.withOpacity(.8),
-            inactiveTrackColor: Colors.white.withOpacity(.3),
+            activeTrackColor: Colors.white70,
+            inactiveTrackColor: Colors.white30,
             thumbColor: Colors.white,
             trackHeight: 3,
-            overlayColor: Colors.white.withAlpha(32),
+            overlayColor: Colors.white30,
             trackShape: FullWidthSliderTrackShape(),
             thumbShape: RoundSliderThumbShape(
               enabledThumbRadius: 8,
@@ -62,7 +62,7 @@ class _KoelAppState extends State<KoelApp> {
           ),
           textTheme: Theme.of(context).textTheme.apply(
                 bodyColor: Colors.white.withOpacity(.9),
-                displayColor: Colors.white.withOpacity(.6),
+                displayColor: Colors.white60,
               ),
         ),
         home: FutureBuilder(

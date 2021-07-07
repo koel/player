@@ -74,7 +74,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                       child: Text(
                         'The playlist is empty.',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(.5),
+                          color: Colors.white54,
                         ),
                       ),
                     ),

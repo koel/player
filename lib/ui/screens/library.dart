@@ -124,14 +124,12 @@ class LibraryMenuItem extends StatelessWidget {
       child: ListTile(
         contentPadding: EdgeInsets.zero,
         horizontalTitleGap: 0,
-        leading: icon is IconData
-            ? Icon(icon, color: Colors.white.withOpacity(.5))
-            : icon,
-        title: Text(label, style: TextStyle(fontSize: 20)),
-        trailing: Icon(
+        leading: icon is IconData ? Icon(icon, color: Colors.white54) : icon,
+        title: Text(label, style: const TextStyle(fontSize: 20)),
+        trailing: const Icon(
           CupertinoIcons.chevron_right,
           size: 18,
-          color: Colors.white.withOpacity(.3),
+          color: Colors.white30,
         ),
       ),
       onTap: onTap,

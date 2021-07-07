@@ -62,7 +62,7 @@ class _SearchScreenState extends State<SearchScreen> {
       padding: const EdgeInsets.only(left: AppDimens.horizontalPadding),
       child: Text(
         'None found.',
-        style: TextStyle(color: Colors.white.withOpacity(.5)),
+        style: TextStyle(color: Colors.white54),
       ),
     );
   }
@@ -80,7 +80,7 @@ class _SearchScreenState extends State<SearchScreen> {
         controller: _searchInputController,
         style: const TextStyle(color: Colors.white),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(.1),
+          color: Colors.white10,
           borderRadius: BorderRadius.all(Radius.circular(6)),
         ),
         placeholder: 'Search your library',

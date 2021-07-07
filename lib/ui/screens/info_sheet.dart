@@ -149,7 +149,7 @@ class LyricsPane extends StatelessWidget {
             padding: EdgeInsets.only(top: 16),
             child: Text(
               'No lyrics available.',
-              style: TextStyle(color: Colors.white.withOpacity(.5)),
+              style: TextStyle(color: Colors.white54),
             ),
           )
         : InfoHtml(
@@ -189,11 +189,11 @@ class ArtistInfoPane extends StatelessWidget {
           ),
         ),
         if (info == null || info!.biography == '')
-          Padding(
-            padding: EdgeInsets.only(top: 16),
-            child: Text(
+          const Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: const Text(
               'No artist information available.',
-              style: TextStyle(color: Colors.white.withOpacity(.5)),
+              style: const TextStyle(color: Colors.white54),
             ),
           )
         else
@@ -237,7 +237,7 @@ class AlbumInfoPane extends StatelessWidget {
             padding: EdgeInsets.only(top: 16),
             child: Text(
               'No album information available.',
-              style: TextStyle(color: Colors.white.withOpacity(.5)),
+              style: TextStyle(color: Colors.white54),
             ),
           )
         else

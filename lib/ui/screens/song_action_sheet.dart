@@ -50,27 +50,27 @@ Future<void> showActionSheet({
         if (!isCurrent)
           _button(
             text: 'Play Next',
-            icon: Icon(
+            icon: const Icon(
               CupertinoIcons.arrow_right_circle_fill,
-              color: Colors.white.withOpacity(.3),
+              color: Colors.white30,
             ),
             onTap: () => audio.queueAfterCurrent(song: song),
           ),
         if (!isCurrent)
           _button(
             text: 'Play Last',
-            icon: Icon(
+            icon: const Icon(
               CupertinoIcons.arrow_down_right_circle_fill,
-              color: Colors.white.withOpacity(.3),
+              color: Colors.white30,
             ),
             onTap: () => audio.queueToBottom(song: song),
           ),
         if (queued)
           _button(
             text: 'Remove from Queue',
-            icon: Icon(
+            icon: const Icon(
               CupertinoIcons.text_badge_minus,
-              color: Colors.white.withOpacity(.3),
+              color: Colors.white30,
             ),
             onTap: () => audio.removeFromQueue(song: song),
           ),
@@ -78,16 +78,16 @@ Future<void> showActionSheet({
           text: song.liked ? 'Unlike' : 'Like',
           icon: Icon(
             song.liked ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
-            color: Colors.white.withOpacity(.3),
+            color: Colors.white30,
           ),
           onTap: () => interactionProvider.toggleLike(song: song),
         ),
         const Divider(indent: 16, endIndent: 16),
         _button(
           text: 'Go to Album',
-          icon: Icon(
+          icon: const Icon(
             CupertinoIcons.music_albums_fill,
-            color: Colors.white.withOpacity(.3),
+            color: Colors.white30,
           ),
           onTap: () {
             Navigator.pop(context);
@@ -99,9 +99,9 @@ Future<void> showActionSheet({
         ),
         _button(
           text: 'Go to Artist',
-          icon: Icon(
+          icon: const Icon(
             CupertinoIcons.music_mic,
-            color: Colors.white.withOpacity(.3),
+            color: Colors.white30,
           ),
           onTap: () {
             Navigator.pop(context);
@@ -115,9 +115,9 @@ Future<void> showActionSheet({
         const Divider(indent: 16, endIndent: 16),
         _button(
           text: 'Add to a Playlist…',
-          icon: Icon(
+          icon: const Icon(
             CupertinoIcons.text_badge_plus,
-            color: Colors.white.withOpacity(.3),
+            color: Colors.white30,
           ),
           onTap: () {
             Navigator.pop(context);
@@ -158,7 +158,7 @@ Future<void> showActionSheet({
                     Text(
                       '${song.artist.name} • ${song.album.name}',
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: Colors.white.withOpacity(.5)),
+                      style: TextStyle(color: Colors.white54),
                     ),
                   ],
                 ),

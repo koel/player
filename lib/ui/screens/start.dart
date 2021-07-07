@@ -64,12 +64,12 @@ class _StartScreenState extends State<StartScreen> {
                       });
                     },
                     tabBar: CupertinoTabBar(
-                      backgroundColor: Colors.grey.withOpacity(.1),
+                      backgroundColor: Colors.black12,
                       iconSize: 24,
                       activeColor: Colors.white,
-                      border: Border(
-                        top: BorderSide(
-                          color: Colors.white.withOpacity(.2),
+                      border: const Border(
+                        top: const BorderSide(
+                          color: Colors.white24,
                           width: 0.5, // One physical pixel.
                         ),
                       ),
