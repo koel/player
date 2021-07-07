@@ -2,13 +2,13 @@ import 'package:app/providers/album_provider.dart';
 import 'package:app/providers/artist_provider.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/auth_provider.dart';
+import 'package:app/providers/cache_provider.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/interaction_provider.dart';
 import 'package:app/providers/media_info_provider.dart';
 import 'package:app/providers/playlist_provider.dart';
 import 'package:app/providers/search_provider.dart';
 import 'package:app/providers/song_provider.dart';
-import 'package:app/providers/user_provider.dart';
 import 'package:app/ui/koel_app.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
@@ -24,9 +24,9 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => ArtistProvider()),
         Provider(create: (_) => MediaInfoProvider()),
+        Provider(create: (_) => CacheProvider()),
         ChangeNotifierProvider(
           create: (context) => AlbumProvider(
             artistProvider: context.read<ArtistProvider>(),

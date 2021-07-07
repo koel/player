@@ -2,12 +2,15 @@ import 'dart:ui';
 
 import 'package:app/constants/dimens.dart';
 import 'package:app/models/user.dart';
+import 'package:app/providers/auth_provider.dart';
+import 'package:app/providers/cache_provider.dart';
 import 'package:app/providers/interaction_provider.dart';
 import 'package:app/providers/playlist_provider.dart';
 import 'package:app/providers/song_provider.dart';
-import 'package:app/providers/user_provider.dart';
+import 'package:app/ui/screens/login.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -16,12 +19,12 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    UserProvider userProvider = context.watch();
+    AuthProvider authProvider = context.watch();
     SongProvider songProvider = context.watch();
     InteractionProvider interactionProvider = context.watch();
     PlaylistProvider playlistProvider = context.watch();
 
-    User user = userProvider.authUser;
+    User user = authProvider.authUser;
 
     return Scaffold(
       body: CustomScrollView(
@@ -123,47 +126,9 @@ class ProfileScreen extends StatelessWidget {
                   SizedBox(height: 32),
                   Row(
                     children: <Widget>[
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(vertical: 10),
-                            shape: RoundedRectangleBorder(
-                              side: BorderSide(color: Colors.red),
-                              borderRadius: BorderRadius.circular(6.0),
-                            ),
-                            onPrimary: Colors.red,
-                            primary: Colors.transparent,
-                            textStyle: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          onPressed: () {},
-                          child: Text('Log Out', textAlign: TextAlign.center),
-                        ),
-                      ),
+                      LogOutButton(),
                       const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(vertical: 10),
-                            shape: RoundedRectangleBorder(
-                              side: BorderSide(color: Colors.white60),
-                              borderRadius: BorderRadius.circular(6.0),
-                            ),
-                            onPrimary: Colors.white60,
-                            primary: Colors.transparent,
-                            textStyle: const TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                          onPressed: () {},
-                          child: Text(
-                            'Clear Cache',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
+                      ClearCacheButton(),
                     ],
                   ),
                 ],
@@ -171,6 +136,132 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class LogOutButton extends StatelessWidget {
+  const LogOutButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    AuthProvider auth = context.watch();
+
+    return Expanded(
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.symmetric(vertical: 10),
+          shape: RoundedRectangleBorder(
+            side: BorderSide(color: Colors.red),
+            borderRadius: BorderRadius.circular(6.0),
+          ),
+          onPrimary: Colors.red,
+          primary: Colors.transparent,
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        onPressed: () {
+          showCupertinoDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return CupertinoAlertDialog(
+                title: Text('Log out?'),
+                actions: <Widget>[
+                  CupertinoDialogAction(
+                    child: Text('Cancel'),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  CupertinoDialogAction(
+                    child: Text('Confirm'),
+                    isDestructiveAction: true,
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                      await auth.logout();
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                        (Route route) => false,
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        child: Text('Log Out', textAlign: TextAlign.center),
+      ),
+    );
+  }
+}
+
+class ClearCacheButton extends StatelessWidget {
+  const ClearCacheButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    CacheProvider cache = context.watch();
+
+    return Expanded(
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.symmetric(vertical: 10),
+          shape: RoundedRectangleBorder(
+            side: BorderSide(color: Colors.white60),
+            borderRadius: BorderRadius.circular(6.0),
+          ),
+          onPrimary: Colors.white60,
+          primary: Colors.transparent,
+          textStyle: const TextStyle(
+            fontSize: 16,
+          ),
+        ),
+        onPressed: () async {
+          showCupertinoDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return CupertinoAlertDialog(
+                title: Text('Clear all media cache?'),
+                content: Text('You cannot undo this action.'),
+                actions: <Widget>[
+                  CupertinoDialogAction(
+                    child: Text('Cancel'),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  CupertinoDialogAction(
+                    child: Text('Confirm'),
+                    isDestructiveAction: true,
+                    onPressed: () async {
+                      await cache.clear();
+                      Navigator.of(context).pop();
+                      showCupertinoDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return CupertinoAlertDialog(
+                            content: Text('Media cache cleared.'),
+                            actions: <Widget>[
+                              CupertinoDialogAction(
+                                child: Text('OK'),
+                                onPressed: () => Navigator.of(context).pop(),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+          await DefaultCacheManager().emptyCache();
+        },
+        child: Text(
+          'Clear Cache',
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }
