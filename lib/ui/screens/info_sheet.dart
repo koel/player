@@ -52,9 +52,11 @@ class _InfoSheetState extends State<InfoSheet> {
   Widget build(BuildContext context) {
     return ClipRect(
       child: SafeArea(
-        minimum: const EdgeInsets.symmetric(
-          vertical: 60,
-          horizontal: AppDimens.horizontalPadding,
+        minimum: EdgeInsets.fromLTRB(
+          AppDimens.horizontalPadding,
+          60,
+          AppDimens.horizontalPadding,
+          MediaQuery.of(context).padding.bottom,
         ),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
@@ -88,6 +90,16 @@ class _InfoSheetState extends State<InfoSheet> {
                   Expanded(
                     child: SingleChildScrollView(
                       child: getActivePane(info: snapshot.data!),
+                    ),
+                  ),
+                  Center(
+                    child: IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(
+                        CupertinoIcons.multiply_circle,
+                        size: 32,
+                        color: Colors.white54,
+                      ),
                     ),
                   ),
                 ],
