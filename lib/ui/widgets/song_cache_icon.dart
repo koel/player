@@ -43,6 +43,10 @@ class _SongCacheIconState extends State<SongCacheIcon> {
           );
         }
 
+        if (snapshot.connectionState != ConnectionState.done) {
+          return SizedBox.shrink();
+        }
+
         return _downloading
             ? CupertinoActivityIndicator(radius: 9)
             : GestureDetector(
