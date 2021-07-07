@@ -1,7 +1,7 @@
 import 'package:app/constants/colors.dart';
 import 'package:app/constants/strings.dart';
 import 'package:app/models/user.dart';
-import 'package:app/providers/user_provider.dart';
+import 'package:app/providers/auth_provider.dart';
 import 'package:app/ui/screens/login.dart';
 import 'package:app/ui/screens/start.dart';
 import 'package:app/ui/widgets/spinner.dart';
@@ -23,7 +23,7 @@ class _KoelAppState extends State<KoelApp> {
   @override
   void initState() {
     super.initState();
-    futureUser = context.read<UserProvider>().tryGetAuthUser();
+    futureUser = context.read<AuthProvider>().tryGetAuthUser();
   }
 
   @override

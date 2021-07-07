@@ -58,10 +58,13 @@ Future<dynamic> request(
       throw ArgumentError.value(method);
   }
 
-  if (response.statusCode == 200) {
-    return json.decode(response.body);
-  } else {
-    throw Exception(response);
+  switch (response.statusCode) {
+    case 200:
+      return json.decode(response.body);
+    case 204:
+      return;
+    default:
+      throw Exception(response);
   }
 }
 

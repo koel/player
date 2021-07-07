@@ -41,7 +41,7 @@ class _StartScreenState extends State<StartScreen> {
     super.initState();
 
     futureData = context.read<DataProvider>().init(context);
-    audio = context.read<AudioPlayerProvider>()..init();
+    audio = context.read()..init();
   }
 
   @override

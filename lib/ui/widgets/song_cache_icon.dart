@@ -1,7 +1,10 @@
+import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/song.dart';
+import 'package:app/providers/cache_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:provider/provider.dart';
 
 class SongCacheIcon extends StatefulWidget {
   final Song song;
@@ -12,7 +15,8 @@ class SongCacheIcon extends StatefulWidget {
   _SongCacheIconState createState() => _SongCacheIconState();
 }
 
-class _SongCacheIconState extends State<SongCacheIcon> {
+class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
+  late CacheProvider cache;
   late Future<FileInfo?> _futureCachedFile;
   bool _downloading = false;
 
@@ -27,7 +31,17 @@ class _SongCacheIconState extends State<SongCacheIcon> {
   @override
   void initState() {
     super.initState();
+    cache = context.read();
+
+    subscribe(cache.cacheClearedStream.listen((_) => triggerCacheState()));
+
     triggerCacheState();
+  }
+
+  @override
+  void dispose() {
+    unsubscribeAll();
+    super.dispose();
   }
 
   @override
@@ -53,6 +67,7 @@ class _SongCacheIconState extends State<SongCacheIcon> {
                 onTap: () async {
                   setState(() => _downloading = true);
                   await widget.song.cacheSourceFile();
+                  setState(() => _downloading = false);
                   // trigger getting cache to re-determine _futureCachedFile's status
                   // and rebuild the widget
                   triggerCacheState();

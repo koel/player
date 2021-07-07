@@ -15,7 +15,7 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
   SongProvider _songProvider;
   InteractionProvider _interactionProvider;
 
-  late final AssetsAudioPlayer _player;
+  late AssetsAudioPlayer _player;
   final BehaviorSubject<bool> _queueModified = BehaviorSubject();
 
   AssetsAudioPlayer get player => _player;
@@ -39,6 +39,8 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
     }));
 
     subscribe(_player.currentPosition.listen((Duration position) {
+      if (player.songId == null) return;
+
       Song currentSong = _songProvider.byId(_player.songId!);
 
       if (currentSong.playCountRegistered) return;

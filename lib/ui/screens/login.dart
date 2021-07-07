@@ -52,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    AuthProvider auth = context.watch<AuthProvider>();
+    AuthProvider auth = context.watch();
 
     Future<void> attemptLogin() async {
       final form = formKey.currentState!;
@@ -68,8 +68,10 @@ class _LoginScreenState extends State<LoginScreen> {
       if (result) {
         // Store the email into local storage for easy login next time
         await preferences.setUserEmail(_email!);
+        await auth.tryGetAuthUser();
+
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => StartScreen()),
+          MaterialPageRoute(builder: (_) => const StartScreen()),
         );
       } else {
         showErrorDialog(context);
@@ -79,17 +81,18 @@ class _LoginScreenState extends State<LoginScreen> {
     InputDecoration decoration({String? label, String? hint}) {
       return InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: Colors.white.withOpacity(.9)),
+        labelStyle: const TextStyle(color: Colors.white70),
         hintText: hint,
+        hintStyle: const TextStyle(color: Colors.white),
         contentPadding: const EdgeInsets.symmetric(vertical: 2, horizontal: 12),
         enabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: Colors.transparent),
           borderRadius: BorderRadius.circular(6),
         ),
-        fillColor: Colors.white.withOpacity(.1),
+        fillColor: Colors.white12,
         filled: true,
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.white.withOpacity(.2)),
+          borderSide: const BorderSide(color: Colors.white24),
           borderRadius: BorderRadius.circular(6),
         ),
         errorBorder: OutlineInputBorder(
@@ -148,7 +151,12 @@ class _LoginScreenState extends State<LoginScreen> {
       onPressed: attemptLogin,
     );
 
-    final spinnerWidget = Center(child: const Spinner(size: 24));
+    final spinnerWidget = Center(
+      child: Padding(
+        padding: EdgeInsets.only(top: 12),
+        child: const Spinner(size: 16),
+      ),
+    );
 
     return SafeArea(
       child: Scaffold(
