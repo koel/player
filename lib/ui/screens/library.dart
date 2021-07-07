@@ -16,27 +16,6 @@ import 'package:provider/provider.dart';
 class LibraryScreen extends StatelessWidget {
   const LibraryScreen({Key? key}) : super(key: key);
 
-  Widget menuItem({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      child: ListTile(
-        contentPadding: EdgeInsets.zero,
-        horizontalTitleGap: 0,
-        leading: Icon(icon, color: Colors.white.withOpacity(.5)),
-        title: Text(title, style: TextStyle(fontSize: 20)),
-        trailing: Icon(
-          CupertinoIcons.chevron_right,
-          size: 18,
-          color: Colors.white.withOpacity(.3),
-        ),
-      ),
-      onTap: onTap,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final SongProvider songProvider = context.watch();
@@ -45,9 +24,9 @@ class LibraryScreen extends StatelessWidget {
     List<Widget> menuItems = ListTile.divideTiles(
       context: context,
       tiles: <Widget>[
-        menuItem(
-          icon: CupertinoIcons.heart_fill,
-          title: 'Favorites',
+        LibraryMenuItem(
+          icon: Icon(CupertinoIcons.heart_fill, color: Colors.pink),
+          label: 'Favorites',
           onTap: () {
             Navigator.of(context).push(CupertinoPageRoute<void>(
               builder: (_) => FavoritesScreen(previousPageTitle: 'Library'),
@@ -55,27 +34,27 @@ class LibraryScreen extends StatelessWidget {
             ));
           },
         ),
-        menuItem(
+        LibraryMenuItem(
           icon: CupertinoIcons.music_note_list,
-          title: 'Playlists',
+          label: 'Playlists',
           onTap: () => gotoPlaylistsScreen(
             context,
             previousPageTitle: 'Library',
           ),
         ),
-        menuItem(
+        LibraryMenuItem(
           icon: CupertinoIcons.music_mic,
-          title: 'Artists',
+          label: 'Artists',
           onTap: () => gotoArtistsScreen(context, previousPageTitle: 'Library'),
         ),
-        menuItem(
+        LibraryMenuItem(
           icon: CupertinoIcons.music_albums,
-          title: 'Albums',
+          label: 'Albums',
           onTap: () => gotoAlbumsScreen(context, previousPageTitle: 'Library'),
         ),
-        menuItem(
+        LibraryMenuItem(
           icon: CupertinoIcons.music_note,
-          title: 'Songs',
+          label: 'Songs',
           onTap: () => gotoSongsScreen(context, previousPageTitle: 'Library'),
         ),
       ],
@@ -119,6 +98,43 @@ class LibraryScreen extends StatelessWidget {
           SliverToBoxAdapter(child: bottomSpace()),
         ],
       ),
+    );
+  }
+}
+
+class LibraryMenuItem extends StatelessWidget {
+  final dynamic icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const LibraryMenuItem({
+    Key? key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  })  : assert(
+          icon is IconData || icon is Widget,
+          'icon must be of either IconData or Widget type.',
+        ),
+        super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      child: ListTile(
+        contentPadding: EdgeInsets.zero,
+        horizontalTitleGap: 0,
+        leading: icon is IconData
+            ? Icon(icon, color: Colors.white.withOpacity(.5))
+            : icon,
+        title: Text(label, style: TextStyle(fontSize: 20)),
+        trailing: Icon(
+          CupertinoIcons.chevron_right,
+          size: 18,
+          color: Colors.white.withOpacity(.3),
+        ),
+      ),
+      onTap: onTap,
     );
   }
 }
