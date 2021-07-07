@@ -38,6 +38,8 @@ dependencies:
   flutter_spinkit: ^5.0.0
   enum_to_string: ^2.0.1
   flutter_cache_manager: ^3.1.2
+  crypto: ^3.0.1
+  intl: ^0.17.0
 
 dev_dependencies:
   flutter_test:

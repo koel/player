@@ -5,6 +5,7 @@ import 'package:app/providers/artist_provider.dart';
 import 'package:app/providers/interaction_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/library.dart';
+import 'package:app/ui/screens/profile.dart';
 import 'package:app/ui/widgets/album_card.dart';
 import 'package:app/ui/widgets/artist_card.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
@@ -96,11 +97,19 @@ class HomeScreen extends StatelessWidget {
     return CupertinoPageScaffold(
       child: CustomScrollView(
         slivers: <Widget>[
-          const CupertinoSliverNavigationBar(
+          CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
             largeTitle: const Text(
               'Home',
               style: const TextStyle(color: Colors.white),
+            ),
+            trailing: IconButton(
+              onPressed: () => gotoProfileScreen(context),
+              icon: const Icon(
+                CupertinoIcons.person_alt_circle,
+                size: 24,
+                color: Colors.white60,
+              ),
             ),
           ),
           SliverList(delegate: SliverChildListDelegate.fixed(homeBlocks)),
