@@ -95,7 +95,7 @@ class ArtistDetailsScreen extends StatelessWidget {
               ),
             ),
           ),
-          SliverToBoxAdapter(child: songListButtons(context, songs: songs)),
+          SliverToBoxAdapter(child: SongListButtons(songs: songs)),
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (_, int index) => SongRow(song: songs[index]),

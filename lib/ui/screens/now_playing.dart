@@ -103,37 +103,36 @@ class NowPlayingScreen extends StatelessWidget {
                   thumbnail,
                   infoPane,
                   AudioControls(),
-                    Column(
-                      children: <Widget>[
-                        VolumeSlider(),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            LoopModeButton(),
-                            IconButton(
-                              onPressed: () =>
-                                  showInfoSheet(context, song: song),
-                              icon: Icon(
-                                CupertinoIcons.text_quote,
-                                color: bottomIconColor,
-                              ),
+                  Column(
+                    children: <Widget>[
+                      VolumeSlider(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          LoopModeButton(),
+                          IconButton(
+                            onPressed: () => showInfoSheet(context, song: song),
+                            icon: Icon(
+                              CupertinoIcons.text_quote,
+                              color: bottomIconColor,
                             ),
-                            IconButton(
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                      builder: (_) => QueueScreen()),
-                                );
-                              },
-                              icon: Icon(
-                                CupertinoIcons.list_number,
-                                color: bottomIconColor,
-                              ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                    builder: (_) => QueueScreen()),
+                              );
+                            },
+                            icon: Icon(
+                              CupertinoIcons.list_number,
+                              color: bottomIconColor,
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

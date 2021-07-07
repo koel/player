@@ -95,7 +95,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
               SliverToBoxAdapter(
                 child: playlist.isEmpty
                     ? const SizedBox.shrink()
-                    : songListButtons(context, songs: playlist.songs),
+                    : SongListButtons(songs: playlist.songs),
               ),
               playlist.isEmpty
                   ? SliverToBoxAdapter(

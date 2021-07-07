@@ -56,7 +56,7 @@ class _FavoritesScreenState extends State<FavoritesScreen>
               style: const TextStyle(color: Colors.white),
             ),
           ),
-          SliverToBoxAdapter(child: songListButtons(context, songs: _songs)),
+          SliverToBoxAdapter(child: SongListButtons(songs: _songs)),
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (_, int index) {

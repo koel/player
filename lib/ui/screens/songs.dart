@@ -40,7 +40,7 @@ class _SongsScreenState extends State<SongsScreen> {
               style: const TextStyle(color: Colors.white),
             ),
           ),
-          SliverToBoxAdapter(child: songListButtons(context, songs: _songs)),
+          SliverToBoxAdapter(child: SongListButtons(songs: _songs)),
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (_, int index) => SongRow(song: _songs[index]),
