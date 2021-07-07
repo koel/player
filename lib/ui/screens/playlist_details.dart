@@ -32,7 +32,93 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
     );
   }
 
-  Widget appBar({required Playlist playlist}) {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: FutureBuilder(
+        future: futurePlaylist,
+        builder: (BuildContext context, AsyncSnapshot<Playlist> snapshot) {
+          if (!snapshot.hasData || snapshot.hasError) {
+            return CustomScrollView(
+              slivers: <Widget>[PlaylistAppBar(playlist: widget.playlist)],
+            );
+          }
+
+          Playlist playlist = snapshot.data!;
+
+          return CustomScrollView(
+            slivers: <Widget>[
+              PlaylistAppBar(playlist: playlist),
+              SliverToBoxAdapter(
+                child: playlist.isEmpty
+                    ? const SizedBox.shrink()
+                    : SongListButtons(songs: playlist.songs),
+              ),
+              if (playlist.isEmpty)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 32),
+                    child: Center(
+                      child: Text(
+                        'The playlist is empty.',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(.5),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              else
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (_, int index) {
+                      final bool dismissible = widget.playlist.isStandard;
+                      final Song song = widget.playlist.songs[index];
+                      return Dismissible(
+                        direction: dismissible
+                            ? DismissDirection.endToStart
+                            : DismissDirection.none,
+                        onDismissed: dismissible
+                            ? (DismissDirection direction) =>
+                                playlistProvider.removeSongFromPlaylist(
+                                  song: song,
+                                  playlist: widget.playlist,
+                                )
+                            : null,
+                        background: Container(
+                          alignment: AlignmentDirectional.centerEnd,
+                          color: Colors.red,
+                          child: const Padding(
+                            padding: EdgeInsets.only(right: 28),
+                            child: Icon(CupertinoIcons.delete_simple),
+                          ),
+                        ),
+                        key: ValueKey(song),
+                        child: SongRow(
+                          key: ValueKey(song),
+                          song: song,
+                        ),
+                      );
+                    },
+                    childCount: playlist.songs.length,
+                  ),
+                ),
+              SliverToBoxAdapter(child: bottomSpace()),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class PlaylistAppBar extends StatelessWidget {
+  final Playlist playlist;
+
+  const PlaylistAppBar({Key? key, required this.playlist}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return SliverAppBar(
       pinned: true,
       expandedHeight: 290,
@@ -40,7 +126,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
         title: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
-            widget.playlist.name,
+            playlist.name,
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -71,84 +157,6 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: FutureBuilder(
-        future: futurePlaylist,
-        builder: (BuildContext context, AsyncSnapshot<Playlist> snapshot) {
-          if (!snapshot.hasData || snapshot.hasError) {
-            return CustomScrollView(
-              slivers: <Widget>[appBar(playlist: widget.playlist)],
-            );
-          }
-
-          Playlist playlist = snapshot.data!;
-
-          return CustomScrollView(
-            slivers: <Widget>[
-              appBar(playlist: playlist),
-              SliverToBoxAdapter(
-                child: playlist.isEmpty
-                    ? const SizedBox.shrink()
-                    : SongListButtons(songs: playlist.songs),
-              ),
-              playlist.isEmpty
-                  ? SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 32),
-                        child: Center(
-                          child: Text(
-                            'The playlist is empty.',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(.5),
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                  : SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (_, int index) {
-                          final bool dismissible = widget.playlist.isStandard;
-                          final Song song = widget.playlist.songs[index];
-                          return Dismissible(
-                            direction: dismissible
-                                ? DismissDirection.endToStart
-                                : DismissDirection.none,
-                            onDismissed: dismissible
-                                ? (DismissDirection direction) =>
-                                    playlistProvider.removeSongFromPlaylist(
-                                      song: song,
-                                      playlist: widget.playlist,
-                                    )
-                                : null,
-                            background: Container(
-                              alignment: AlignmentDirectional.centerEnd,
-                              color: Colors.red,
-                              child: const Padding(
-                                padding: EdgeInsets.only(right: 28),
-                                child: Icon(CupertinoIcons.delete_simple),
-                              ),
-                            ),
-                            key: ValueKey(song),
-                            child: SongRow(
-                              key: ValueKey(song),
-                              song: song,
-                            ),
-                          );
-                        },
-                        childCount: playlist.songs.length,
-                      ),
-                    ),
-              SliverToBoxAdapter(child: bottomSpace()),
-            ],
-          );
-        },
       ),
     );
   }
