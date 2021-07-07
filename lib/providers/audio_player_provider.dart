@@ -19,6 +19,7 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
   final BehaviorSubject<bool> _queueModified = BehaviorSubject();
 
   AssetsAudioPlayer get player => _player;
+
   ValueStream<bool> get queueModifiedStream => _queueModified.stream;
 
   AudioPlayerProvider({
@@ -80,8 +81,8 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
     } else {
       await _player.playlistPlayAtIndex(
         _player.current.hasValue
-            ? await queueToTop(song: song)
-            : await queueAfterCurrent(song: song),
+            ? await queueAfterCurrent(song: song)
+            : await queueToTop(song: song),
       );
     }
 
@@ -117,11 +118,11 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
     }
 
     Audio audio = await song.asAudio();
-    int currentIndex = _player.current.value?.index ?? 0;
-    _player.playlist!.insert(currentIndex + 1, audio);
+    int currentSongIndex = _player.current.value?.index ?? -1;
+    _player.playlist!.insert(currentSongIndex + 1, audio);
     _broadcastQueueChangedEvent();
 
-    return currentIndex;
+    return currentSongIndex + 1;
   }
 
   Future<void> replaceQueue(List<Song> songs, {shuffle = false}) async {
