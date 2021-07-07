@@ -5,6 +5,7 @@ import 'package:app/models/song.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list.dart';
+import 'package:app/ui/widgets/song_row.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -19,11 +20,8 @@ class ArtistDetailsScreen extends StatelessWidget {
     List<Song> songs = context.watch<SongProvider>().byArtist(artist)
       ..sort((a, b) => a.title.compareTo(b.title));
 
-    final ScrollController scrollController = ScrollController();
-
     return Scaffold(
       body: CustomScrollView(
-        controller: scrollController,
         slivers: <Widget>[
           SliverAppBar(
             pinned: true,
@@ -98,10 +96,10 @@ class ArtistDetailsScreen extends StatelessWidget {
             ),
           ),
           SliverToBoxAdapter(child: songListButtons(context, songs: songs)),
-          SliverToBoxAdapter(
-            child: SongList(
-              songs: songs,
-              controller: scrollController,
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (_, int index) => SongRow(song: songs[index]),
+              childCount: songs.length,
             ),
           ),
           SliverToBoxAdapter(child: bottomSpace()),
