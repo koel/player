@@ -36,8 +36,8 @@ class _QueueState extends State<QueueScreen> with StreamSubscriber {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      child: CustomScrollView(
+    return Scaffold(
+      body: CustomScrollView(
         slivers: <Widget>[
           CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
