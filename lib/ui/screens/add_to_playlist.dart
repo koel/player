@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 class AddToPlaylistScreen extends StatefulWidget {
   final Song song;
 
-  AddToPlaylistScreen({Key? key, required this.song}) : super(key: key);
+  const AddToPlaylistScreen({Key? key, required this.song}) : super(key: key);
 
   @override
   _AddToPlaylistScreenState createState() => _AddToPlaylistScreenState();

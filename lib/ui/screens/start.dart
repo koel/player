@@ -3,6 +3,7 @@ import 'package:app/providers/data_provider.dart';
 import 'package:app/ui/screens/home.dart';
 import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/screens/search.dart';
+import 'package:app/ui/screens/settings_screen.dart';
 import 'package:app/ui/widgets/footer_player_sheet.dart';
 import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/cupertino.dart'
@@ -27,9 +28,10 @@ class _StartScreenState extends State<StartScreen> {
   late AudioPlayerProvider audio;
 
   static const List<Widget> _widgetOptions = [
-    HomeScreen(),
-    SearchScreen(),
-    LibraryScreen(),
+    const HomeScreen(),
+    const SearchScreen(),
+    const LibraryScreen(),
+    const SettingsScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -52,7 +54,7 @@ class _StartScreenState extends State<StartScreen> {
         switch (snapshot.connectionState) {
           case ConnectionState.none:
           case ConnectionState.waiting:
-            return ContainerWithSpinner();
+            return const ContainerWithSpinner();
           default:
             return Scaffold(
               body: Stack(
@@ -86,6 +88,10 @@ class _StartScreenState extends State<StartScreen> {
                           icon: const Icon(CupertinoIcons.music_albums_fill),
                           label: 'Library',
                         ),
+                        const BottomNavigationBarItem(
+                          icon: const Icon(CupertinoIcons.settings),
+                          label: 'Settings',
+                        ),
                       ],
                       currentIndex: _selectedIndex,
                       onTap: _onItemTapped,
@@ -95,7 +101,7 @@ class _StartScreenState extends State<StartScreen> {
                     // 50 is the standard iOS (10) tab bar height.
                     bottom: 50 + MediaQuery.of(context).padding.bottom,
                     width: MediaQuery.of(context).size.width,
-                    child: FooterPlayerSheet(),
+                    child: const FooterPlayerSheet(),
                   ),
                 ],
               ),

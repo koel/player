@@ -13,7 +13,8 @@ import 'package:provider/provider.dart';
 class PlaylistDetailsScreen extends StatefulWidget {
   final Playlist playlist;
 
-  PlaylistDetailsScreen({Key? key, required this.playlist}) : super(key: key);
+  const PlaylistDetailsScreen({Key? key, required this.playlist})
+      : super(key: key);
 
   @override
   _PlaylistDetailsScreen createState() => _PlaylistDetailsScreen();

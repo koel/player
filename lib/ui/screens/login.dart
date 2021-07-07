@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({Key? key}) : super(key: key);
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -146,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
       onPressed: attemptLogin,
     );
 
-    final spinnerWidget = Center(child: Spinner(size: 24));
+    final spinnerWidget = Center(child: const Spinner(size: 24));
 
     return SafeArea(
       child: Scaffold(

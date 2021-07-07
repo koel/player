@@ -14,7 +14,7 @@ import 'package:provider/provider.dart';
 class InfoSheet extends StatefulWidget {
   final Song song;
 
-  InfoSheet({Key? key, required this.song}) : super(key: key);
+  const InfoSheet({Key? key, required this.song}) : super(key: key);
 
   @override
   _InfoSheetState createState() => _InfoSheetState();
@@ -68,7 +68,7 @@ class _InfoSheetState extends State<InfoSheet> {
               }
 
               if (snapshot.connectionState != ConnectionState.done) {
-                return ContainerWithSpinner();
+                return const ContainerWithSpinner();
               }
 
               return Column(

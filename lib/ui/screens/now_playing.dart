@@ -21,13 +21,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class NowPlayingScreen extends StatelessWidget {
-  late final AudioPlayerProvider audio;
-  late final SongProvider songProvider;
+  const NowPlayingScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    audio = context.watch();
-    songProvider = context.watch();
+    final AudioPlayerProvider audio = context.watch();
+    final SongProvider songProvider = context.watch();
 
     Color bottomIconColor = Colors.white.withOpacity(.5);
 
@@ -86,7 +85,7 @@ class NowPlayingScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            ProgressBar(),
+            const ProgressBar(),
           ],
         );
 
@@ -102,14 +101,14 @@ class NowPlayingScreen extends StatelessWidget {
                 children: <Widget>[
                   thumbnail,
                   infoPane,
-                  AudioControls(),
+                  const AudioControls(),
                   Column(
                     children: <Widget>[
-                      VolumeSlider(),
+                      const VolumeSlider(),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
-                          LoopModeButton(),
+                          const LoopModeButton(),
                           IconButton(
                             onPressed: () => showInfoSheet(context, song: song),
                             icon: Icon(
@@ -121,7 +120,8 @@ class NowPlayingScreen extends StatelessWidget {
                             onPressed: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute<void>(
-                                    builder: (_) => QueueScreen()),
+                                  builder: (_) => const QueueScreen(),
+                                ),
                               );
                             },
                             icon: Icon(
@@ -151,7 +151,7 @@ Future<void> openNowPlayingScreen(BuildContext context) async {
     builder: (BuildContext context) {
       return Container(
         height: MediaQuery.of(context).size.height,
-        child: NowPlayingScreen(),
+        child: const NowPlayingScreen(),
       );
     },
   );

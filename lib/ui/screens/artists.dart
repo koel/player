@@ -11,10 +11,7 @@ import 'artist_details.dart';
 class ArtistsScreen extends StatefulWidget {
   final String? previousPageTitle;
 
-  const ArtistsScreen({
-    Key? key,
-    this.previousPageTitle,
-  }) : super(key: key);
+  const ArtistsScreen({Key? key, this.previousPageTitle}) : super(key: key);
 
   @override
   _ArtistsScreenState createState() => _ArtistsScreenState();

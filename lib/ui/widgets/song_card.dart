@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 class SongCard extends StatefulWidget {
   final Song song;
 
-  SongCard({Key? key, required this.song}) : super(key: key);
+  const SongCard({Key? key, required this.song}) : super(key: key);
 
   @override
   _SongCardState createState() => _SongCardState();

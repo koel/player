@@ -12,7 +12,8 @@ class PlaylistRow extends StatefulWidget {
 
   final VoidCallback? onTap;
 
-  PlaylistRow({Key? key, required this.playlist, this.onTap}) : super(key: key);
+  const PlaylistRow({Key? key, required this.playlist, this.onTap})
+      : super(key: key);
 
   _PlaylistRowState createState() => _PlaylistRowState();
 }

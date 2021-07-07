@@ -13,7 +13,7 @@ import 'package:provider/provider.dart';
 class AlbumDetailsScreen extends StatelessWidget {
   final Album album;
 
-  AlbumDetailsScreen({Key? key, required this.album}) : super(key: key);
+  const AlbumDetailsScreen({Key? key, required this.album}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

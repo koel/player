@@ -6,7 +6,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 class SongCacheIcon extends StatefulWidget {
   final Song song;
 
-  SongCacheIcon({Key? key, required this.song}) : super(key: key);
+  const SongCacheIcon({Key? key, required this.song}) : super(key: key);
 
   @override
   _SongCacheIconState createState() => _SongCacheIconState();

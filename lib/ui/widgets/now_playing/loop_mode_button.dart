@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class LoopModeButton extends StatefulWidget {
-  LoopModeButton({Key? key}) : super(key: key);
+  const LoopModeButton({Key? key}) : super(key: key);
 
   @override
   _LoopModeButtonState createState() => _LoopModeButtonState();

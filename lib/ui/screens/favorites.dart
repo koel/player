@@ -11,10 +11,7 @@ import 'package:provider/provider.dart';
 class FavoritesScreen extends StatefulWidget {
   final String? previousPageTitle;
 
-  const FavoritesScreen({
-    Key? key,
-    this.previousPageTitle,
-  }) : super(key: key);
+  const FavoritesScreen({Key? key, this.previousPageTitle}) : super(key: key);
 
   @override
   _FavoritesScreenState createState() => _FavoritesScreenState();

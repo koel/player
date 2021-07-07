@@ -44,8 +44,9 @@ class _SearchScreenState extends State<SearchScreen> {
           if (keywords.length == 0) return resetSearch();
           if (keywords.length < 2) return;
 
-          SearchResult result =
-              await searchProvider.searchExcerpts(keywords: keywords);
+          SearchResult result = await searchProvider.searchExcerpts(
+            keywords: keywords,
+          );
 
           setState(() {
             _initial = false;
@@ -95,9 +96,7 @@ class _SearchScreenState extends State<SearchScreen> {
       child: Column(
         children: <Widget>[
           searchField,
-          if (_initial)
-            SizedBox.shrink()
-          else
+          if (!_initial)
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
@@ -109,30 +108,32 @@ class _SearchScreenState extends State<SearchScreen> {
                       ),
                       child: SimpleSongList(songs: _songs),
                     ),
-                    SizedBox(height: 32),
+                    const SizedBox(height: 32),
                     Padding(
                       padding: const EdgeInsets.only(
-                          left: AppDimens.horizontalPadding),
+                        left: AppDimens.horizontalPadding,
+                      ),
                       child: Heading1(text: 'Albums'),
                     ),
-                    _albums.length == 0
-                        ? noResults
-                        : HorizontalCardScroller(
-                            cards:
-                                _albums.map((album) => AlbumCard(album: album)),
-                          ),
-                    SizedBox(height: 32),
+                    if (_albums.length == 0)
+                      noResults
+                    else
+                      HorizontalCardScroller(
+                        cards: _albums.map((album) => AlbumCard(album: album)),
+                      ),
+                    const SizedBox(height: 32),
                     Padding(
                       padding: const EdgeInsets.only(
                           left: AppDimens.horizontalPadding),
                       child: Heading1(text: 'Artists'),
                     ),
-                    _artists.length == 0
-                        ? noResults
-                        : HorizontalCardScroller(
-                            cards: _artists
-                                .map((artist) => ArtistCard(artist: artist)),
-                          ),
+                    if (_artists.length == 0)
+                      noResults
+                    else
+                      HorizontalCardScroller(
+                        cards: _artists
+                            .map((artist) => ArtistCard(artist: artist)),
+                      ),
                     bottomSpace(),
                   ],
                 ),

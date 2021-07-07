@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class FooterPlayerSheet extends StatefulWidget {
+  const FooterPlayerSheet({Key? key}) : super(key: key);
+
   @override
   _FooterPlayerSheetState createState() => _FooterPlayerSheetState();
 }

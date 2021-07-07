@@ -7,9 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ProgressBar extends StatefulWidget {
-  const ProgressBar({
-    Key? key,
-  }) : super(key: key);
+  const ProgressBar({Key? key}) : super(key: key);
 
   _ProgressBarState createState() => _ProgressBarState();
 }
