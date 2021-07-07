@@ -48,7 +48,7 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                   onTap: () => gotoDetailsScreen(context, album: album),
                   child: ListTile(
                     shape: Border(bottom: Divider.createBorderSide(context)),
-                    leading: AlbumThumbnail(album: album),
+                    leading: AlbumThumbnail(album: album, asHero: true),
                     title: Text(album.name, overflow: TextOverflow.ellipsis),
                     subtitle: Text(
                       album.artist.name,

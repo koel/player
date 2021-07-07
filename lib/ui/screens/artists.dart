@@ -49,10 +49,7 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
                   onTap: () => gotoDetailsScreen(context, artist: artist),
                   child: ListTile(
                     shape: Border(bottom: Divider.createBorderSide(context)),
-                    leading: ArtistThumbnail(
-                      artist: artist,
-                      size: ThumbnailSize.sm,
-                    ),
+                    leading: ArtistThumbnail(artist: artist, asHero: true),
                     title: Text(artist.name, overflow: TextOverflow.ellipsis),
                   ),
                 );
