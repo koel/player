@@ -85,7 +85,7 @@ class LibraryScreen extends StatelessWidget {
               AppDimens.horizontalPadding,
               0,
             ),
-            sliver: SliverToBoxAdapter(child: Heading1(text: 'Recently Added')),
+            sliver: SliverToBoxAdapter(child: Heading1(text: 'Recently added')),
           ),
           mostPlayedSongs.length == 0
               ? const SliverToBoxAdapter(child: SizedBox.shrink())
