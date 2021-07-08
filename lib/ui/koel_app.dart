@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class KoelApp extends StatefulWidget {
-  KoelApp({Key? key}) : super(key: key);
+  const KoelApp({Key? key}) : super(key: key);
 
   @override
   _KoelAppState createState() => _KoelAppState();
@@ -56,9 +56,7 @@ class _KoelAppState extends State<KoelApp> {
             trackHeight: 3,
             overlayColor: Colors.white30,
             trackShape: FullWidthSliderTrackShape(),
-            thumbShape: RoundSliderThumbShape(
-              enabledThumbRadius: 8,
-            ),
+            thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8),
           ),
           textTheme: Theme.of(context).textTheme.apply(
                 bodyColor: Colors.white.withOpacity(.9),

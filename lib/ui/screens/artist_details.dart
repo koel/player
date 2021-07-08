@@ -11,21 +11,99 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
-class ArtistDetailsScreen extends StatelessWidget {
+enum OrderBy {
+  AlbumName,
+  SongTitle,
+  RecentlyAdded,
+}
+
+Map<OrderBy, String> _sortOptions = {
+  OrderBy.SongTitle: 'Song title',
+  OrderBy.AlbumName: 'Album',
+  OrderBy.RecentlyAdded: 'Recently added',
+};
+
+OrderBy _currentSortOrder = OrderBy.SongTitle;
+
+class ArtistDetailsScreen extends StatefulWidget {
   final Artist artist;
 
-  ArtistDetailsScreen({Key? key, required this.artist}) : super(key: key);
+  const ArtistDetailsScreen({Key? key, required this.artist}) : super(key: key);
+
+  @override
+  _ArtistDetailsScreenState createState() => _ArtistDetailsScreenState();
+}
+
+class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
+  late List<Song> songs;
+  late SongProvider songProvider;
+  late OrderBy _sortOrder;
+
+  @override
+  void initState() {
+    super.initState();
+
+    songProvider = context.read();
+    songs = songProvider.byArtist(widget.artist);
+    setState(() => _sortOrder = _currentSortOrder);
+  }
+
+  List<Song> sortSongs({required OrderBy orderBy}) {
+    switch (orderBy) {
+      case OrderBy.SongTitle:
+        return songs..sort((a, b) => a.title.compareTo(b.title));
+      case OrderBy.AlbumName:
+        return songs
+          ..sort((a, b) => '${a.album.name}${a.album.id}${a.track}'
+              .compareTo('${b.album.name}${b.album.id}${b.track}'));
+      case OrderBy.RecentlyAdded:
+        return songs..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      default:
+        throw Exception('Invalid order.');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    List<Song> songs = context.watch<SongProvider>().byArtist(artist)
-      ..sort((a, b) => a.title.compareTo(b.title));
+    List<Song> sortedSongs = sortSongs(orderBy: _sortOrder);
 
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
           AppBar(
-            headingText: artist.name,
+            actions: [
+              IconButton(
+                  onPressed: () {
+                    showCupertinoModalPopup(
+                      context: context,
+                      builder: (BuildContext context) => CupertinoActionSheet(
+                        title: Text('Sort by'),
+                        actions: _sortOptions.entries
+                            .map(
+                              (entry) => CupertinoActionSheetAction(
+                                onPressed: () {
+                                  _currentSortOrder = entry.key;
+                                  setState(() => _sortOrder = entry.key);
+                                  Navigator.pop(context);
+                                },
+                                child: Text(
+                                  (entry.key == _currentSortOrder
+                                          ? '✓ '
+                                          : ' ') +
+                                      entry.value,
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    );
+                  },
+                  icon: Icon(CupertinoIcons.sort_down)),
+            ],
+            headingText: widget.artist.name,
             backgroundImage: SizedBox(
               width: double.infinity,
               height: double.infinity,
@@ -34,7 +112,7 @@ class ArtistDetailsScreen extends StatelessWidget {
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: artist.image,
+                      image: widget.artist.image,
                       fit: BoxFit.cover,
                       alignment: Alignment.topCenter,
                     ),
@@ -43,11 +121,11 @@ class ArtistDetailsScreen extends StatelessWidget {
               ),
             ),
             coverImage: Hero(
-              tag: "artist-hero-${artist.id}",
+              tag: "artist-hero-${widget.artist.id}",
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: artist.image,
+                    image: widget.artist.image,
                     fit: BoxFit.cover,
                     alignment: Alignment.topCenter,
                   ),
@@ -65,11 +143,11 @@ class ArtistDetailsScreen extends StatelessWidget {
               ),
             ),
           ),
-          SliverToBoxAdapter(child: SongListButtons(songs: songs)),
+          SliverToBoxAdapter(child: SongListButtons(songs: sortedSongs)),
           SliverList(
             delegate: SliverChildBuilderDelegate(
-              (_, int index) => SongRow(song: songs[index]),
-              childCount: songs.length,
+              (_, int index) => SongRow(song: sortedSongs[index]),
+              childCount: sortedSongs.length,
             ),
           ),
           SliverToBoxAdapter(child: bottomSpace()),

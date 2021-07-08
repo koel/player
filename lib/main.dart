@@ -16,7 +16,6 @@ import 'package:provider/provider.dart';
 
 void main() {
   AssetsAudioPlayer.setupNotificationsOpenAction((notification) {
-    print(notification.audioId);
     return true;
   });
 
