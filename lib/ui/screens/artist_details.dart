@@ -12,18 +12,18 @@ import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
 enum OrderBy {
-  AlbumName,
-  SongTitle,
+  Album,
+  Title,
   RecentlyAdded,
 }
 
 Map<OrderBy, String> _sortOptions = {
-  OrderBy.SongTitle: 'Song title',
-  OrderBy.AlbumName: 'Album',
+  OrderBy.Title: 'Song title',
+  OrderBy.Album: 'Album',
   OrderBy.RecentlyAdded: 'Recently added',
 };
 
-OrderBy _currentSortOrder = OrderBy.SongTitle;
+OrderBy _currentSortOrder = OrderBy.Title;
 
 class ArtistDetailsScreen extends StatefulWidget {
   final Artist artist;
@@ -50,14 +50,14 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
 
   List<Song> sortSongs({required OrderBy orderBy}) {
     switch (orderBy) {
-      case OrderBy.SongTitle:
+      case OrderBy.Title:
         return songs..sort((a, b) => a.title.compareTo(b.title));
-      case OrderBy.AlbumName:
+      case OrderBy.Album:
         return songs
-          ..sort((a, b) => '${a.album.name}${a.album.id}${a.track}'
-              .compareTo('${b.album.name}${b.album.id}${b.track}'));
+          ..sort((a, b) => '${a.album.name}${a.albumId}${a.track}'
+              .compareTo('${b.album.name}${b.albumId}${b.track}'));
       case OrderBy.RecentlyAdded:
-        return songs..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        return songs..sort((a, b) => b.createdAt.compareTo(a.createdAt));
       default:
         throw Exception('Invalid order.');
     }

@@ -13,13 +13,13 @@ import 'package:provider/provider.dart';
 
 enum OrderBy {
   TrackNumber,
-  SongTitle,
+  Title,
   RecentlyAdded,
 }
 
 Map<OrderBy, String> _sortOptions = {
   OrderBy.TrackNumber: 'Track number',
-  OrderBy.SongTitle: 'Song title',
+  OrderBy.Title: 'Song title',
   OrderBy.RecentlyAdded: 'Recently added',
 };
 
@@ -49,14 +49,14 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
 
   List<Song> sortSongs({required OrderBy orderBy}) {
     switch (orderBy) {
-      case OrderBy.SongTitle:
+      case OrderBy.Title:
         return songs..sort((a, b) => a.title.compareTo(b.title));
       case OrderBy.TrackNumber:
         return songs
           ..sort((a, b) =>
               '${a.track}${a.title}'.compareTo('${b.track}${b.title}'));
       case OrderBy.RecentlyAdded:
-        return songs..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        return songs..sort((a, b) => b.createdAt.compareTo(a.createdAt));
       default:
         throw Exception('Invalid order.');
     }
@@ -142,11 +142,11 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
               ),
             ),
           ),
-          SliverToBoxAdapter(child: SongListButtons(songs: songs)),
+          SliverToBoxAdapter(child: SongListButtons(songs: sortedSongs)),
           SliverList(
             delegate: SliverChildBuilderDelegate(
-              (_, int index) => SongRow(song: songs[index]),
-              childCount: songs.length,
+              (_, int index) => SongRow(song: sortedSongs[index]),
+              childCount: sortedSongs.length,
             ),
           ),
           SliverToBoxAdapter(child: bottomSpace()),
