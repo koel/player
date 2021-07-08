@@ -16,7 +16,7 @@ class SongRow extends StatefulWidget {
   final Song song;
   final bool bordered;
   final EdgeInsetsGeometry? padding;
-  final SongListBehavior behavior;
+  final SongListContext listContext;
 
   /// The index of the row in a list, important for (Sliver) orderable lists.
   final int index;
@@ -26,7 +26,7 @@ class SongRow extends StatefulWidget {
     required this.song,
     this.bordered = true,
     this.padding,
-    this.behavior = SongListBehavior.none,
+    this.listContext = SongListContext.other,
     this.index = 0,
   }) : super(key: key);
 
@@ -45,6 +45,18 @@ class _SongRowState extends State<SongRow> {
 
   @override
   Widget build(BuildContext context) {
+    late String subtitle;
+
+    switch (widget.listContext) {
+      case SongListContext.album:
+      case SongListContext.artist:
+        subtitle = widget.song.album.name;
+        break;
+      default:
+        subtitle = widget.song.artist.name;
+        break;
+    }
+
     return InkWell(
       onTap: () async => await audio.play(song: widget.song),
       onLongPress: () => showActionSheet(context: context, song: widget.song),
@@ -56,13 +68,10 @@ class _SongRowState extends State<SongRow> {
             : null,
         leading: SongRowThumbnail(song: widget.song),
         title: Text(widget.song.title, overflow: TextOverflow.ellipsis),
-        subtitle: Text(
-          widget.song.album.name,
-          overflow: TextOverflow.ellipsis,
-        ),
+        subtitle: Text(subtitle, overflow: TextOverflow.ellipsis),
         trailing: SongRowTrailingActions(
           song: widget.song,
-          behavior: widget.behavior,
+          listContext: widget.listContext,
           index: widget.index,
         ),
       ),
@@ -119,14 +128,14 @@ class _SongRowThumbnailState extends State<SongRowThumbnail>
 }
 
 class SongRowTrailingActions extends StatelessWidget {
-  final SongListBehavior behavior;
+  final SongListContext listContext;
   final Song song;
   final int index;
 
   const SongRowTrailingActions({
     Key? key,
     required this.song,
-    required this.behavior,
+    required this.listContext,
     required this.index,
   }) : super(key: key);
 
@@ -136,7 +145,7 @@ class SongRowTrailingActions extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         SongCacheIcon(song: song),
-        if (behavior == SongListBehavior.queue)
+        if (listContext == SongListContext.queue)
           // In a queue, the trailing control is the Drag icon
           // In other "standard" queues, it's the Actions menu trigger
           ReorderableDragStartListener(

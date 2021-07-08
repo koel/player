@@ -89,7 +89,7 @@ class _QueueState extends State<QueueScreen> with StreamSubscriber {
                     index: index,
                     key: ValueKey(_songs[index]),
                     song: _songs[index],
-                    behavior: SongListBehavior.queue,
+                    listContext: SongListContext.queue,
                   ),
                 );
               },

@@ -12,18 +12,18 @@ import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
 enum OrderBy {
-  Album,
-  Title,
-  RecentlyAdded,
+  album,
+  title,
+  recentlyAdded,
 }
 
 Map<OrderBy, String> _sortOptions = {
-  OrderBy.Title: 'Song title',
-  OrderBy.Album: 'Album',
-  OrderBy.RecentlyAdded: 'Recently added',
+  OrderBy.title: 'Song title',
+  OrderBy.album: 'Album',
+  OrderBy.recentlyAdded: 'Recently added',
 };
 
-OrderBy _currentSortOrder = OrderBy.Title;
+OrderBy _currentSortOrder = OrderBy.title;
 
 class ArtistDetailsScreen extends StatefulWidget {
   final Artist artist;
@@ -50,13 +50,13 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
 
   List<Song> sortSongs({required OrderBy orderBy}) {
     switch (orderBy) {
-      case OrderBy.Title:
+      case OrderBy.title:
         return songs..sort((a, b) => a.title.compareTo(b.title));
-      case OrderBy.Album:
+      case OrderBy.album:
         return songs
           ..sort((a, b) => '${a.album.name}${a.albumId}${a.track}'
               .compareTo('${b.album.name}${b.albumId}${b.track}'));
-      case OrderBy.RecentlyAdded:
+      case OrderBy.recentlyAdded:
         return songs..sort((a, b) => b.createdAt.compareTo(a.createdAt));
       default:
         throw Exception('Invalid order.');
@@ -146,7 +146,10 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
           SliverToBoxAdapter(child: SongListButtons(songs: sortedSongs)),
           SliverList(
             delegate: SliverChildBuilderDelegate(
-              (_, int index) => SongRow(song: sortedSongs[index]),
+              (_, int index) => SongRow(
+                song: sortedSongs[index],
+                listContext: SongListContext.artist,
+              ),
               childCount: sortedSongs.length,
             ),
           ),
