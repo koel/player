@@ -11,21 +11,98 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
-class AlbumDetailsScreen extends StatelessWidget {
+enum OrderBy {
+  TrackNumber,
+  SongTitle,
+  RecentlyAdded,
+}
+
+Map<OrderBy, String> _sortOptions = {
+  OrderBy.TrackNumber: 'Track number',
+  OrderBy.SongTitle: 'Song title',
+  OrderBy.RecentlyAdded: 'Recently added',
+};
+
+OrderBy _currentSortOrder = OrderBy.TrackNumber;
+
+class AlbumDetailsScreen extends StatefulWidget {
   final Album album;
 
   const AlbumDetailsScreen({Key? key, required this.album}) : super(key: key);
 
+  _AlbumDetailsScreenState createState() => _AlbumDetailsScreenState();
+}
+
+class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
+  late List<Song> songs;
+  late SongProvider songProvider;
+  late OrderBy _sortOrder;
+
+  @override
+  void initState() {
+    super.initState();
+
+    songProvider = context.read();
+    songs = songProvider.byAlbum(widget.album);
+    setState(() => _sortOrder = _currentSortOrder);
+  }
+
+  List<Song> sortSongs({required OrderBy orderBy}) {
+    switch (orderBy) {
+      case OrderBy.SongTitle:
+        return songs..sort((a, b) => a.title.compareTo(b.title));
+      case OrderBy.TrackNumber:
+        return songs
+          ..sort((a, b) =>
+              '${a.track}${a.title}'.compareTo('${b.track}${b.title}'));
+      case OrderBy.RecentlyAdded:
+        return songs..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      default:
+        throw Exception('Invalid order.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<Song> songs = context.watch<SongProvider>().byAlbum(album)
-      ..sort((a, b) => a.title.compareTo(b.title));
+    List<Song> sortedSongs = sortSongs(orderBy: _sortOrder);
 
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
           AppBar(
-            headingText: album.name,
+            headingText: widget.album.name,
+            actions: [
+              IconButton(
+                  onPressed: () {
+                    showCupertinoModalPopup(
+                      context: context,
+                      builder: (BuildContext context) => CupertinoActionSheet(
+                        title: Text('Sort by'),
+                        actions: _sortOptions.entries
+                            .map(
+                              (entry) => CupertinoActionSheetAction(
+                                onPressed: () {
+                                  _currentSortOrder = entry.key;
+                                  setState(() => _sortOrder = entry.key);
+                                  Navigator.pop(context);
+                                },
+                                child: Text(
+                                  (entry.key == _currentSortOrder
+                                          ? '✓ '
+                                          : ' ') +
+                                      entry.value,
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    );
+                  },
+                  icon: Icon(CupertinoIcons.sort_down)),
+            ],
             backgroundImage: SizedBox(
               width: double.infinity,
               height: double.infinity,
@@ -34,7 +111,7 @@ class AlbumDetailsScreen extends StatelessWidget {
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: album.image,
+                      image: widget.album.image,
                       fit: BoxFit.cover,
                       alignment: Alignment.topCenter,
                     ),
@@ -43,11 +120,11 @@ class AlbumDetailsScreen extends StatelessWidget {
               ),
             ),
             coverImage: Hero(
-              tag: "album-hero-${album.id}",
+              tag: "album-hero-${widget.album.id}",
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: album.image,
+                    image: widget.album.image,
                     fit: BoxFit.cover,
                     alignment: Alignment.topCenter,
                   ),

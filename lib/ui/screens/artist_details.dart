@@ -71,6 +71,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
       body: CustomScrollView(
         slivers: <Widget>[
           AppBar(
+            headingText: widget.artist.name,
             actions: [
               IconButton(
                   onPressed: () {
@@ -103,7 +104,6 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                   },
                   icon: Icon(CupertinoIcons.sort_down)),
             ],
-            headingText: widget.artist.name,
             backgroundImage: SizedBox(
               width: double.infinity,
               height: double.infinity,
