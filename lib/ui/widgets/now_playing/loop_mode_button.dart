@@ -1,4 +1,3 @@
-import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:assets_audio_player/assets_audio_player.dart';
@@ -13,7 +12,7 @@ class LoopModeButton extends StatefulWidget {
   _LoopModeButtonState createState() => _LoopModeButtonState();
 }
 
-class _LoopModeButtonState extends State<LoopModeButton> with StreamSubscriber {
+class _LoopModeButtonState extends State<LoopModeButton> {
   LoopMode _loopMode = LoopMode.none;
   late AudioPlayerProvider audio;
 
@@ -22,22 +21,7 @@ class _LoopModeButtonState extends State<LoopModeButton> with StreamSubscriber {
     super.initState();
     audio = context.read();
 
-    loadSavedLoopMode();
-
-    subscribe(audio.player.loopMode.listen((loopMode) {
-      setState(() => _loopMode = loopMode);
-    }));
-  }
-
-  Future<void> loadSavedLoopMode() async {
-    LoopMode savedMode = await preferences.loopMode;
-    setState(() => _loopMode = savedMode);
-  }
-
-  @override
-  void dispose() {
-    unsubscribeAll();
-    super.dispose();
+    setState(() => _loopMode = preferences.loopMode);
   }
 
   @override
@@ -55,6 +39,8 @@ class _LoopModeButtonState extends State<LoopModeButton> with StreamSubscriber {
           newMode = LoopMode.none;
         }
 
+        setState(() => _loopMode = newMode);
+        preferences.loopMode = newMode;
         audio.player.setLoopMode(newMode);
       },
       icon: Icon(

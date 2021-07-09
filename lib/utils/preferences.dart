@@ -1,49 +1,42 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:enum_to_string/enum_to_string.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get_storage/get_storage.dart';
 
-SharedPreferences? _sharedPref;
+final GetStorage storage = GetStorage();
 
-Future<SharedPreferences> get sharedPref async {
-  if (_sharedPref == null) {
-    _sharedPref = await SharedPreferences.getInstance();
-  }
+void _set(String key, dynamic value) => storage.write(key, value);
 
-  return _sharedPref!;
-}
+T? _get<T>(String key) => storage.read(key);
 
-Future<void> setHostUrl(String url) async =>
-    (await sharedPref).setString('hostUrl', url);
+void _delete(String key) => storage.remove(key);
 
-Future<String?> get hostUrl async => (await sharedPref).getString('hostUrl');
+set hostUrl(String? url) => _set('hostUrl', url);
 
-Future<String?> get apiBaseUrl async => '${await hostUrl}/api';
+String? get hostUrl => _get<String>('hostUrl');
 
-Future<void> setApiToken(String token) async =>
-    (await sharedPref).setString('apiToken', token);
+String? get apiBaseUrl => hostUrl == null ? null : '$hostUrl/api';
 
-Future<void> removeApiToken() async => (await sharedPref).remove('apiToken');
+set apiToken(String? token) =>
+    token == null ? _delete('apiToken') : _set('apiToken', token);
 
-Future<void> setUserEmail(String token) async =>
-    (await sharedPref).setString('email', token);
+String? get apiToken => _get<String>('apiToken');
 
-Future<String?> get userEmail async => (await sharedPref).getString('email');
+set userEmail(String? email) => _set('email', email);
 
-Future<String?> get apiToken async => (await sharedPref).getString('apiToken');
+String? get userEmail => _get<String>('email');
 
-Future<void> setLoopMode(LoopMode mode) async {
-  (await sharedPref).setString('loopMode', EnumToString.convertToString(mode));
-}
+set loopMode(LoopMode mode) => _set(
+      'loopMode',
+      EnumToString.convertToString(mode),
+    );
 
-Future<LoopMode> get loopMode async {
-  String? loopModeAsString = (await sharedPref).getString('loopMode');
+LoopMode get loopMode {
+  String? loopModeAsString = _get('loopMode');
 
   return EnumToString.fromString(LoopMode.values, loopModeAsString ?? '') ??
       LoopMode.none;
 }
 
-Future<void> setVolume(double volume) async =>
-    (await sharedPref).setDouble('volume', volume);
+set volume(double volume) => _set('volume', volume);
 
-Future<double> get volume async =>
-    (await sharedPref).getDouble('volume') ?? 0.7;
+double get volume => _get<double>('volume') ?? 0.7;

@@ -1,4 +1,3 @@
-import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
@@ -12,7 +11,7 @@ class VolumeSlider extends StatefulWidget {
   _VolumeSliderState createState() => _VolumeSliderState();
 }
 
-class _VolumeSliderState extends State<VolumeSlider> with StreamSubscriber {
+class _VolumeSliderState extends State<VolumeSlider> {
   double _volume = .7;
   late AudioPlayerProvider audio;
 
@@ -21,17 +20,7 @@ class _VolumeSliderState extends State<VolumeSlider> with StreamSubscriber {
     super.initState();
     audio = context.read();
 
-    preferences.volume.then((value) => setState(() => _volume = value));
-
-    subscribe(audio.player.volume.listen((volume) {
-      setState(() => _volume = volume);
-    }));
-  }
-
-  @override
-  void dispose() {
-    unsubscribeAll();
-    super.dispose();
+    setState(() => _volume = preferences.volume);
   }
 
   @override
@@ -58,8 +47,9 @@ class _VolumeSliderState extends State<VolumeSlider> with StreamSubscriber {
                 max: 1.0,
                 value: _volume,
                 onChanged: (value) {
+                  setState(() => _volume = value);
                   audio.player.setVolume(value);
-                  preferences.setVolume(value);
+                  preferences.volume = value;
                 },
               ),
             ),

@@ -14,7 +14,7 @@ class UserProvider with ChangeNotifier {
   }
 
   Future<User?> tryGetAuthUser() async {
-    if (await preferences.apiToken == null) {
+    if (preferences.apiToken == null) {
       return null;
     }
 

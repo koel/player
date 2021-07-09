@@ -15,7 +15,7 @@ class AuthProvider with ChangeNotifier {
 
     try {
       final responseData = await post('me', data: loginData);
-      await preferences.setApiToken(responseData['token']);
+      preferences.apiToken = responseData['token'];
       return true;
     } catch (err) {
       print(err);
@@ -29,7 +29,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<User?> tryGetAuthUser() async {
-    if (await preferences.apiToken == null) {
+    if (preferences.apiToken == null) {
       return null;
     }
 
@@ -40,6 +40,6 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> logout() async {
     await delete('me');
-    await preferences.removeApiToken();
+    preferences.apiToken = null;
   }
 }

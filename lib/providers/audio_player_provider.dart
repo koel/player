@@ -6,6 +6,7 @@ import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/interaction_provider.dart';
 import 'package:app/providers/song_provider.dart';
+import 'package:app/utils/preferences.dart' as preferences;
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -63,6 +64,9 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
       showNotification: true,
       autoStart: false,
     );
+
+    _player.setVolume(preferences.volume);
+    _player.setLoopMode(preferences.loopMode);
 
     _broadcastQueueChangedEvent();
   }

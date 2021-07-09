@@ -12,17 +12,15 @@ Future<dynamic> request(
 }) async {
   late Http.Response response;
 
-  Uri uri = Uri.parse("${await preferences.apiBaseUrl}/$path");
+  Uri uri = Uri.parse("${preferences.apiBaseUrl}/$path");
 
   Map<String, String> headers = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   };
 
-  String? token = await preferences.apiToken;
-
-  if (token != null) {
-    headers['Authorization'] = "Bearer $token";
+  if (preferences.apiToken != null) {
+    headers['Authorization'] = "Bearer ${preferences.apiToken}";
   }
 
   switch (method) {

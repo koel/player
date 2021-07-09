@@ -27,8 +27,10 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
 
     // Try looking for stored values in local storage
-    preferences.hostUrl.then((value) => setState(() => _hostUrl = value));
-    preferences.userEmail.then((value) => setState(() => _email = value));
+    setState(() {
+      _hostUrl = preferences.hostUrl;
+      _email = preferences.userEmail;
+    });
   }
 
   showErrorDialog(BuildContext context) {
@@ -67,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (result) {
         // Store the email into local storage for easy login next time
-        await preferences.setUserEmail(_email!);
+        preferences.userEmail = _email;
         await auth.tryGetAuthUser();
 
         Navigator.of(context).pushReplacement(
@@ -112,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
     Widget hostField = TextFormField(
       keyboardType: TextInputType.url,
       autocorrect: false,
-      onSaved: (value) => preferences.setHostUrl(value!),
+      onSaved: (value) => preferences.hostUrl = value,
       decoration: decoration(
         label: 'Host URL',
         hint: 'https://www.koel.music',

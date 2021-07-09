@@ -46,10 +46,10 @@ class Song {
 
   ImageProvider get image => this.album.image;
 
-  Future<String> get sourceUrl async {
+  String get sourceUrl {
     if (_sourceUrl == null) {
       _sourceUrl = Uri.encodeFull(
-        '${await hostUrl}/play/$id?api_token=${await apiToken}',
+        '$hostUrl/play/$id?api_token=$apiToken',
       );
     }
 
@@ -70,13 +70,13 @@ class Song {
     FileInfo? cache = await DefaultCacheManager().getFileFromCache(cacheKey);
 
     return cache == null
-        ? Audio.network(await sourceUrl, metas: metas)
+        ? Audio.network(sourceUrl, metas: metas)
         : Audio.file(cache.file.path, metas: metas);
   }
 
   Future<FileInfo> cacheSourceFile() async {
     return DefaultCacheManager().downloadFile(
-      await sourceUrl,
+      sourceUrl,
       key: cacheKey,
       force: true,
     );
