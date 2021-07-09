@@ -63,10 +63,9 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
       ),
       showNotification: true,
       autoStart: false,
+      loopMode: preferences.loopMode,
+      volume: preferences.volume,
     );
-
-    _player.setVolume(preferences.volume);
-    _player.setLoopMode(preferences.loopMode);
 
     _broadcastQueueChangedEvent();
   }
