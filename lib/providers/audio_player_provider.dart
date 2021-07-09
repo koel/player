@@ -113,11 +113,11 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
   Future<int> queueToBottom({required Song song}) async {
     if (_player.playlist == null) {
       await _openPlayer(await song.asAudio());
-      return 0;
     }
 
     _player.playlist!.add(await song.asAudio());
     _broadcastQueueChangedEvent();
+
     return _player.playlist!.numberOfItems - 1;
   }
 
@@ -149,7 +149,9 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
 
     // Just reopen the player with the new audios
     await _openPlayer(audios);
+
     _player.play();
+    _broadcastQueueChangedEvent();
   }
 
   List<Song> get queuedSongs {
