@@ -3,6 +3,7 @@ import 'package:app/models/artist.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/album_provider.dart';
 import 'package:app/providers/artist_provider.dart';
+import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/values/parse_result.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -17,6 +18,7 @@ ParseResult parseSongs(List<dynamic> data) {
 class SongProvider with ChangeNotifier {
   ArtistProvider _artistProvider;
   AlbumProvider _albumProvider;
+  late CoverImageStack coverImageStack;
 
   late List<Song> _songs;
   late Map<String, Song> _index;
@@ -37,6 +39,8 @@ class SongProvider with ChangeNotifier {
         ..artist = _artistProvider.byId(song.artistId)
         ..album = _albumProvider.byId(song.albumId);
     });
+
+    coverImageStack = CoverImageStack(songs: _songs);
   }
 
   void initInteractions(List<dynamic> interactionData) {

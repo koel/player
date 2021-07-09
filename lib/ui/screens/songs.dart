@@ -94,7 +94,7 @@ class _SongsScreenState extends State<SongsScreen> {
                 icon: Icon(CupertinoIcons.sort_down),
               )
             ],
-            coverImage: CoverImageStack(songs: sortedSongs),
+            coverImage: songProvider.coverImageStack,
           ),
           SliverToBoxAdapter(child: SongListButtons(songs: sortedSongs)),
           SliverList(
