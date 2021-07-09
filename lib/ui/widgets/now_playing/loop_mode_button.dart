@@ -41,7 +41,17 @@ class _LoopModeButtonState extends State<LoopModeButton> {
 
         setState(() => _loopMode = newMode);
         preferences.loopMode = newMode;
-        audio.player.setLoopMode(newMode);
+
+        if (newMode == LoopMode.single &&
+            audio.player.playlist?.numberOfItems == 1) {
+          /// Assets Audio Player has a weird bug (?) where setting Single loop
+          /// mode when there's only one song in the playlist would simply
+          /// crash the app.
+          /// Since the previous mode is Playlist, we can safely skip setting
+          /// Single mode here, as it would have the same effect anyway.
+        } else {
+          audio.player.setLoopMode(newMode);
+        }
       },
       icon: Icon(
         _loopMode == LoopMode.single
