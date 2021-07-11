@@ -71,7 +71,7 @@ class _SongsScreenState extends State<SongsScreen> {
                   showCupertinoModalPopup(
                     context: context,
                     builder: (BuildContext context) => CupertinoActionSheet(
-                      title: Text('Sort by'),
+                      title: const Text('Sort by'),
                       actions: sortOptions.entries
                           .map(
                             (entry) => CupertinoActionSheetAction(
@@ -106,7 +106,7 @@ class _SongsScreenState extends State<SongsScreen> {
               childCount: sortedSongs.length,
             ),
           ),
-          SliverToBoxAdapter(child: bottomSpace()),
+          const SliverToBoxAdapter(child: const BottomSpace()),
         ],
       ),
     );

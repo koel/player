@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:app/constants/dimens.dart';
+import 'package:app/constants/dimensions.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/user.dart';
 import 'package:app/providers/auth_provider.dart';
@@ -75,7 +75,7 @@ class ProfileScreen extends StatelessWidget {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppDimens.horizontalPadding,
+                horizontal: AppDimensions.horizontalPadding,
                 vertical: 16,
               ),
               child: Column(
@@ -106,9 +106,9 @@ class ProfileScreen extends StatelessWidget {
                   SizedBox(height: 32),
                   Row(
                     children: <Widget>[
-                      LogOutButton(),
+                      const LogOutButton(),
                       const SizedBox(width: 12),
-                      ClearCacheButton(),
+                      const ClearCacheButton(),
                     ],
                   ),
                 ],
@@ -129,38 +129,30 @@ class LogOutButton extends StatelessWidget {
     AuthProvider auth = context.watch();
 
     return Expanded(
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.symmetric(vertical: 10),
-          shape: RoundedRectangleBorder(
-            side: BorderSide(color: Colors.red),
-            borderRadius: BorderRadius.circular(6.0),
-          ),
-          onPrimary: Colors.red,
-          primary: Colors.transparent,
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: Colors.red),
+          primary: Colors.red,
         ),
         onPressed: () {
           showCupertinoDialog(
             context: context,
             builder: (BuildContext context) {
               return CupertinoAlertDialog(
-                title: Text('Log out?'),
+                title: const Text('Log out?'),
                 actions: <Widget>[
                   CupertinoDialogAction(
-                    child: Text('Cancel'),
-                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Cancel'),
+                    onPressed: () => Navigator.pop(context),
                   ),
                   CupertinoDialogAction(
-                    child: Text('Confirm'),
+                    child: const Text('Confirm'),
                     isDestructiveAction: true,
                     onPressed: () async {
-                      Navigator.of(context).pop();
+                      Navigator.pop(context);
                       await auth.logout();
-                      Navigator.of(context).pushAndRemoveUntil(
+                      Navigator.pushAndRemoveUntil(
+                        context,
                         MaterialPageRoute(builder: (_) => const LoginScreen()),
                         (Route route) => false,
                       );
@@ -171,7 +163,7 @@ class LogOutButton extends StatelessWidget {
             },
           );
         },
-        child: Text('Log Out', textAlign: TextAlign.center),
+        child: const Text('Log Out', textAlign: TextAlign.center),
       ),
     );
   }
@@ -185,46 +177,35 @@ class ClearCacheButton extends StatelessWidget {
     CacheProvider cache = context.watch();
 
     return Expanded(
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.symmetric(vertical: 10),
-          shape: RoundedRectangleBorder(
-            side: BorderSide(color: Colors.white60),
-            borderRadius: BorderRadius.circular(6.0),
-          ),
-          onPrimary: Colors.white60,
-          primary: Colors.transparent,
-          textStyle: const TextStyle(
-            fontSize: 16,
-          ),
-        ),
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(),
         onPressed: () async {
           showCupertinoDialog(
             context: context,
             builder: (BuildContext context) {
               return CupertinoAlertDialog(
-                title: Text('Clear all media cache?'),
-                content: Text('You cannot undo this action.'),
+                title: const Text('Clear all media cache?'),
+                content: const Text('You cannot undo this action.'),
                 actions: <Widget>[
                   CupertinoDialogAction(
-                    child: Text('Cancel'),
-                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Cancel'),
+                    onPressed: () => Navigator.pop(context),
                   ),
                   CupertinoDialogAction(
-                    child: Text('Confirm'),
+                    child: const Text('Confirm'),
                     isDestructiveAction: true,
                     onPressed: () async {
                       await cache.clear();
-                      Navigator.of(context).pop();
+                      Navigator.pop(context);
                       showCupertinoDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return CupertinoAlertDialog(
-                            content: Text('Media cache cleared.'),
+                            content: const Text('Media cache cleared.'),
                             actions: <Widget>[
                               CupertinoDialogAction(
-                                child: Text('OK'),
-                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text('OK'),
+                                onPressed: () => Navigator.pop(context),
                               ),
                             ],
                           );
@@ -308,7 +289,8 @@ class MetricBlock extends StatelessWidget {
 }
 
 gotoProfileScreen(BuildContext context) {
-  Navigator.of(context).push(
+  Navigator.push(
+    context,
     CupertinoPageRoute<void>(
       builder: (_) => const ProfileScreen(),
       title: 'Profile',

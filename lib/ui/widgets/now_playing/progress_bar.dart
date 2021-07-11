@@ -16,10 +16,9 @@ class _ProgressBarState extends State<ProgressBar> with StreamSubscriber {
   late final AudioPlayerProvider audio;
   late final SongProvider songProvider;
 
-  Duration _duration = Duration();
-  Duration _position = Duration();
+  late Duration _duration, _position;
 
-  TextStyle timeStampStyle = TextStyle(
+  TextStyle timeStampStyle = const TextStyle(
     fontSize: 12,
     color: Colors.white54,
   );

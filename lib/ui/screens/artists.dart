@@ -57,7 +57,7 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
               childCount: _artists.length,
             ),
           ),
-          SliverToBoxAdapter(child: bottomSpace()),
+          const SliverToBoxAdapter(child: const BottomSpace()),
         ],
       ),
     );

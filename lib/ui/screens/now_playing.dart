@@ -118,7 +118,8 @@ class NowPlayingScreen extends StatelessWidget {
                           ),
                           IconButton(
                             onPressed: () {
-                              Navigator.of(context).push(
+                              Navigator.push(
+                                context,
                                 MaterialPageRoute<void>(
                                   builder: (_) => const QueueScreen(),
                                 ),

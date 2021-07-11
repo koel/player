@@ -1,4 +1,4 @@
-import 'package:app/constants/dimens.dart';
+import 'package:app/constants/dimensions.dart';
 import 'package:app/models/album.dart';
 import 'package:app/models/artist.dart';
 import 'package:app/models/song.dart';
@@ -59,7 +59,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget get noResults {
     return Padding(
-      padding: const EdgeInsets.only(left: AppDimens.horizontalPadding),
+      padding: const EdgeInsets.only(left: AppDimensions.horizontalPadding),
       child: Text(
         'None found.',
         style: TextStyle(color: Colors.white54),
@@ -74,14 +74,14 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget get searchField {
     return Container(
-      padding: const EdgeInsets.all(AppDimens.horizontalPadding),
+      padding: const EdgeInsets.all(AppDimensions.horizontalPadding),
       color: Colors.black,
       child: CupertinoSearchTextField(
         controller: _searchInputController,
         style: const TextStyle(color: Colors.white),
         decoration: BoxDecoration(
           color: Colors.white10,
-          borderRadius: BorderRadius.all(Radius.circular(6)),
+          borderRadius: AppDimensions.inputBorderRadius,
         ),
         placeholder: 'Search your library',
         onChanged: search,
@@ -104,16 +104,16 @@ class _SearchScreenState extends State<SearchScreen> {
                   children: <Widget>[
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: AppDimens.horizontalPadding,
+                        horizontal: AppDimensions.horizontalPadding,
                       ),
                       child: SimpleSongList(songs: _songs),
                     ),
                     const SizedBox(height: 32),
                     Padding(
                       padding: const EdgeInsets.only(
-                        left: AppDimens.horizontalPadding,
+                        left: AppDimensions.horizontalPadding,
                       ),
-                      child: Heading1(text: 'Albums'),
+                      child: Heading5(text: 'Albums'),
                     ),
                     if (_albums.length == 0)
                       noResults
@@ -124,8 +124,8 @@ class _SearchScreenState extends State<SearchScreen> {
                     const SizedBox(height: 32),
                     Padding(
                       padding: const EdgeInsets.only(
-                          left: AppDimens.horizontalPadding),
-                      child: Heading1(text: 'Artists'),
+                          left: AppDimensions.horizontalPadding),
+                      child: Heading5(text: 'Artists'),
                     ),
                     if (_artists.length == 0)
                       noResults
@@ -134,7 +134,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         cards: _artists
                             .map((artist) => ArtistCard(artist: artist)),
                       ),
-                    bottomSpace(),
+                    const BottomSpace(),
                   ],
                 ),
               ),

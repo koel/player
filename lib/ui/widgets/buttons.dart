@@ -16,31 +16,15 @@ class FullWidthPrimaryIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints.expand(
-          width: double.infinity,
-          height: 48,
-        ),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.0),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        child: Row(
+          children: <Widget>[
+            Icon(icon, size: 20),
+            Expanded(
+              child: Text(label, textAlign: TextAlign.center),
             ),
-            primary: Colors.grey.shade900,
-            textStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          onPressed: onPressed,
-          child: Row(
-            children: <Widget>[
-              Icon(icon, size: 20),
-              Expanded(
-                child: Text(label, textAlign: TextAlign.center),
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );

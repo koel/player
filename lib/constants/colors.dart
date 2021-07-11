@@ -16,7 +16,7 @@ class AppColors {
   static const red = const Color(0xFFC34848);
   static const orange = const Color(0xFFFF7D2E);
 
-  static const primaryText = Color.fromRGBO(255, 255, 255, .7);
+  static const primaryText = Color.fromRGBO(255, 255, 255, .9);
   static const primaryBgr = AppColors.black;
   static const highlight = AppColors.orange;
 }

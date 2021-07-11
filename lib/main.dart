@@ -9,7 +9,7 @@ import 'package:app/providers/media_info_provider.dart';
 import 'package:app/providers/playlist_provider.dart';
 import 'package:app/providers/search_provider.dart';
 import 'package:app/providers/song_provider.dart';
-import 'package:app/ui/koel_app.dart';
+import 'package:app/ui/app.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
@@ -72,7 +72,7 @@ void main() async {
           ),
         ),
       ],
-      child: KoelApp(),
+      child: App(),
     ),
   );
 }

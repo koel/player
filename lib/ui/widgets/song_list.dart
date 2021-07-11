@@ -1,4 +1,4 @@
-import 'package:app/constants/dimens.dart';
+import 'package:app/constants/dimensions.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/ui/widgets/buttons.dart';
@@ -25,7 +25,7 @@ class SongListButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     AudioPlayerProvider audio = context.read();
     return Container(
-      padding: const EdgeInsets.all(AppDimens.horizontalPadding),
+      padding: const EdgeInsets.all(AppDimensions.horizontalPadding),
       child: Row(
         children: <Widget>[
           FullWidthPrimaryIconButton(

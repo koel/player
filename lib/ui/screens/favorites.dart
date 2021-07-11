@@ -73,7 +73,7 @@ class _FavoritesScreenState extends State<FavoritesScreen>
               childCount: _songs.length,
             ),
           ),
-          SliverToBoxAdapter(child: bottomSpace()),
+          const SliverToBoxAdapter(child: const BottomSpace()),
         ],
       ),
     );
@@ -81,11 +81,10 @@ class _FavoritesScreenState extends State<FavoritesScreen>
 }
 
 void gotoFavoritesScreen(BuildContext context, {String? previousPageTitle}) {
-  Navigator.of(context).push(
+  Navigator.push(
+    context,
     CupertinoPageRoute(
-      builder: (_) => FavoritesScreen(
-        previousPageTitle: previousPageTitle,
-      ),
+      builder: (_) => FavoritesScreen(previousPageTitle: previousPageTitle),
     ),
   );
 }

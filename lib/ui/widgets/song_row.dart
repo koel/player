@@ -68,7 +68,11 @@ class _SongRowState extends State<SongRow> {
             : null,
         leading: SongRowThumbnail(song: widget.song),
         title: Text(widget.song.title, overflow: TextOverflow.ellipsis),
-        subtitle: Text(subtitle, overflow: TextOverflow.ellipsis),
+        subtitle: Text(
+          subtitle,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(color: Colors.white60),
+        ),
         trailing: SongRowTrailingActions(
           song: widget.song,
           listContext: widget.listContext,

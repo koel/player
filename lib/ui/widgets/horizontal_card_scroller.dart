@@ -1,4 +1,4 @@
-import 'package:app/constants/dimens.dart';
+import 'package:app/constants/dimensions.dart';
 import 'package:app/ui/widgets/headings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -20,8 +20,9 @@ class HorizontalCardScroller extends StatelessWidget {
       children: <Widget>[
         if (headingText != null)
           Padding(
-            padding: const EdgeInsets.only(left: AppDimens.horizontalPadding),
-            child: Heading1(text: headingText!),
+            padding:
+                const EdgeInsets.only(left: AppDimensions.horizontalPadding),
+            child: Heading5(text: headingText!),
           ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -30,11 +31,11 @@ class HorizontalCardScroller extends StatelessWidget {
             children: <Widget>[
               ...cards.expand(
                 (card) => <Widget>[
-                  const SizedBox(width: AppDimens.horizontalPadding),
+                  const SizedBox(width: AppDimensions.horizontalPadding),
                   card,
                 ],
               ),
-              const SizedBox(width: AppDimens.horizontalPadding),
+              const SizedBox(width: AppDimensions.horizontalPadding),
             ],
           ),
         ),

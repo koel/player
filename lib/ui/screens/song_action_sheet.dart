@@ -91,9 +91,12 @@ Future<void> showActionSheet({
           ),
           onTap: () {
             Navigator.pop(context);
-            Navigator.of(context).push(CupertinoPageRoute<void>(
-              builder: (_) => AlbumDetailsScreen(album: song.album),
-            ));
+            Navigator.push(
+              context,
+              CupertinoPageRoute<void>(
+                builder: (_) => AlbumDetailsScreen(album: song.album),
+              ),
+            );
           },
           hideSheetOnTap: false,
         ),
@@ -105,10 +108,13 @@ Future<void> showActionSheet({
           ),
           onTap: () {
             Navigator.pop(context);
-            Navigator.of(context).push(CupertinoPageRoute<void>(
-              builder: (_) => ArtistDetailsScreen(artist: song.artist),
-              title: song.artist.name,
-            ));
+            Navigator.push(
+              context,
+              CupertinoPageRoute<void>(
+                builder: (_) => ArtistDetailsScreen(artist: song.artist),
+                title: song.artist.name,
+              ),
+            );
           },
           hideSheetOnTap: false,
         ),
@@ -121,10 +127,13 @@ Future<void> showActionSheet({
           ),
           onTap: () {
             Navigator.pop(context);
-            Navigator.of(context).push(CupertinoPageRoute<void>(
-              builder: (_) => AddToPlaylistScreen(song: song),
-              title: 'Add to a Playlist',
-            ));
+            Navigator.push(
+              context,
+              CupertinoPageRoute<void>(
+                builder: (_) => AddToPlaylistScreen(song: song),
+                title: 'Add to a Playlist',
+              ),
+            );
           },
           hideSheetOnTap: false,
         ),
@@ -132,7 +141,7 @@ Future<void> showActionSheet({
 
       return ClipRect(
         child: Container(
-          padding: EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.only(bottom: 8.0),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
             child: Column(
@@ -148,7 +157,7 @@ Future<void> showActionSheet({
                     const SizedBox(height: 16),
                     Text(
                       song.title,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
                       ),

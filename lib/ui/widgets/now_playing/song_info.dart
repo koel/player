@@ -15,7 +15,7 @@ class SongInfo extends StatelessWidget {
       children: <Widget>[
         Text(
           song.title,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
           ),
@@ -24,8 +24,8 @@ class SongInfo extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           song.artist.name,
-          style: TextStyle(
-            color: Theme.of(context).textTheme.caption?.color,
+          style: const TextStyle(
+            color: Colors.white70,
             fontSize: 18,
           ),
           overflow: TextOverflow.ellipsis,

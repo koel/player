@@ -1,4 +1,5 @@
-import 'package:app/constants/dimens.dart';
+import 'package:app/constants/colors.dart';
+import 'package:app/constants/dimensions.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/albums.dart';
@@ -25,13 +26,16 @@ class LibraryScreen extends StatelessWidget {
       context: context,
       tiles: <Widget>[
         LibraryMenuItem(
-          icon: Icon(CupertinoIcons.heart_fill, color: Colors.pink),
+          icon: const Icon(CupertinoIcons.heart_fill, color: AppColors.red),
           label: 'Favorites',
           onTap: () {
-            Navigator.of(context).push(CupertinoPageRoute<void>(
-              builder: (_) => FavoritesScreen(previousPageTitle: 'Library'),
-              title: 'Favorites',
-            ));
+            Navigator.push(
+              context,
+              CupertinoPageRoute<void>(
+                builder: (_) => FavoritesScreen(previousPageTitle: 'Library'),
+                title: 'Favorites',
+              ),
+            );
           },
         ),
         LibraryMenuItem(
@@ -72,7 +76,7 @@ class LibraryScreen extends StatelessWidget {
           ),
           SliverPadding(
             padding: const EdgeInsets.symmetric(
-              horizontal: AppDimens.horizontalPadding,
+              horizontal: AppDimensions.horizontalPadding,
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate(menuItems),
@@ -80,12 +84,12 @@ class LibraryScreen extends StatelessWidget {
           ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
-              AppDimens.horizontalPadding,
+              AppDimensions.horizontalPadding,
               24,
-              AppDimens.horizontalPadding,
+              AppDimensions.horizontalPadding,
               0,
             ),
-            sliver: SliverToBoxAdapter(child: Heading1(text: 'Recently added')),
+            sliver: SliverToBoxAdapter(child: Heading5(text: 'Recently added')),
           ),
           mostPlayedSongs.length == 0
               ? const SliverToBoxAdapter(child: SizedBox.shrink())
@@ -95,7 +99,7 @@ class LibraryScreen extends StatelessWidget {
                     childCount: mostPlayedSongs.length,
                   ),
                 ),
-          SliverToBoxAdapter(child: bottomSpace()),
+          const SliverToBoxAdapter(child: const BottomSpace()),
         ],
       ),
     );
@@ -138,29 +142,41 @@ class LibraryMenuItem extends StatelessWidget {
 }
 
 void gotoAlbumsScreen(BuildContext context, {String? previousPageTitle}) {
-  Navigator.of(context).push(CupertinoPageRoute<void>(
-    builder: (_) => AlbumsScreen(previousPageTitle: previousPageTitle),
-    title: 'Albums',
-  ));
+  Navigator.push(
+    context,
+    CupertinoPageRoute<void>(
+      builder: (_) => AlbumsScreen(previousPageTitle: previousPageTitle),
+      title: 'Albums',
+    ),
+  );
 }
 
 void gotoArtistsScreen(BuildContext context, {String? previousPageTitle}) {
-  Navigator.of(context).push(CupertinoPageRoute<void>(
-    builder: (_) => ArtistsScreen(previousPageTitle: previousPageTitle),
-    title: 'Artists',
-  ));
+  Navigator.push(
+    context,
+    CupertinoPageRoute<void>(
+      builder: (_) => ArtistsScreen(previousPageTitle: previousPageTitle),
+      title: 'Artists',
+    ),
+  );
 }
 
 void gotoSongsScreen(BuildContext context, {String? previousPageTitle}) {
-  Navigator.of(context).push(CupertinoPageRoute<void>(
-    builder: (_) => SongsScreen(),
-    title: 'Songs',
-  ));
+  Navigator.push(
+    context,
+    CupertinoPageRoute<void>(
+      builder: (_) => SongsScreen(),
+      title: 'Songs',
+    ),
+  );
 }
 
 void gotoPlaylistsScreen(BuildContext context, {String? previousPageTitle}) {
-  Navigator.of(context).push(CupertinoPageRoute<void>(
-    builder: (_) => PlaylistsScreen(previousPageTitle: previousPageTitle),
-    title: 'Playlists',
-  ));
+  Navigator.push(
+    context,
+    CupertinoPageRoute<void>(
+      builder: (_) => PlaylistsScreen(previousPageTitle: previousPageTitle),
+      title: 'Playlists',
+    ),
+  );
 }

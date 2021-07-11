@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:app/constants/dimens.dart';
+import 'package:app/constants/dimensions.dart';
 import 'package:app/models/song.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -45,7 +45,7 @@ class AppBar extends StatelessWidget {
       flexibleSpace: FlexibleSpaceBar(
         title: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: AppDimens.horizontalPadding,
+            horizontal: AppDimensions.horizontalPadding,
           ),
           child: Text(
             headingText,

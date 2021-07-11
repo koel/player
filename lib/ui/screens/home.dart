@@ -1,4 +1,4 @@
-import 'package:app/constants/dimens.dart';
+import 'package:app/constants/dimensions.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/album_provider.dart';
 import 'package:app/providers/artist_provider.dart';
@@ -30,7 +30,7 @@ class HomeScreen extends StatelessWidget {
     List<Widget> homeBlocks = <Widget>[
       Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppDimens.horizontalPadding,
+          horizontal: AppDimensions.horizontalPadding,
         ),
         child: SimpleSongList(songs: songProvider.recentlyAdded()),
       ),
@@ -46,7 +46,7 @@ class HomeScreen extends StatelessWidget {
       ),
       Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppDimens.horizontalPadding,
+          horizontal: AppDimensions.horizontalPadding,
         ),
         child: SimpleSongList(
           songs: interactionProvider.getRandomFavorites(limit: 5),
@@ -77,18 +77,18 @@ class HomeScreen extends StatelessWidget {
       ),
       Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppDimens.horizontalPadding,
+          horizontal: AppDimensions.horizontalPadding,
         ),
         child: SimpleSongList(
           songs: songProvider.leastPlayed(limit: 5),
           headingText: 'Hidden gems',
         ),
       ),
-      bottomSpace(height: 128),
+      const BottomSpace(height: 128),
     ]
         .map(
           (widget) => Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
+            padding: const EdgeInsets.symmetric(vertical: 16),
             child: widget,
           ),
         )
@@ -135,8 +135,8 @@ class MostPlayedSongs extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.only(left: AppDimens.horizontalPadding),
-          child: Heading1(text: 'Most played'),
+          padding: const EdgeInsets.only(left: AppDimensions.horizontalPadding),
+          child: Heading5(text: 'Most played'),
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -145,16 +145,16 @@ class MostPlayedSongs extends StatelessWidget {
             children: <Widget>[
               ...songs.expand(
                 (song) => [
-                  const SizedBox(width: AppDimens.horizontalPadding),
+                  const SizedBox(width: AppDimensions.horizontalPadding),
                   SongCard(song: song),
                 ],
               ),
-              const SizedBox(width: AppDimens.horizontalPadding),
+              const SizedBox(width: AppDimensions.horizontalPadding),
               PlaceholderCard(
                 icon: CupertinoIcons.music_note,
                 onPressed: () => gotoSongsScreen(context),
               ),
-              const SizedBox(width: AppDimens.horizontalPadding),
+              const SizedBox(width: AppDimensions.horizontalPadding),
             ],
           ),
         ),

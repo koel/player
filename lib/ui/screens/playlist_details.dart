@@ -115,7 +115,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                     childCount: playlist.songs.length,
                   ),
                 ),
-              SliverToBoxAdapter(child: bottomSpace()),
+              const SliverToBoxAdapter(child: const BottomSpace()),
             ],
           );
         },
@@ -125,8 +125,11 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
 }
 
 void gotoDetailsScreen(BuildContext context, {required Playlist playlist}) {
-  Navigator.of(context).push(CupertinoPageRoute<void>(
-    builder: (_) => PlaylistDetailsScreen(playlist: playlist),
-    title: playlist.name,
-  ));
+  Navigator.push(
+    context,
+    CupertinoPageRoute<void>(
+      builder: (_) => PlaylistDetailsScreen(playlist: playlist),
+      title: playlist.name,
+    ),
+  );
 }

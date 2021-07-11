@@ -41,15 +41,13 @@ class _SongCardState extends State<SongCard> {
                 children: <Widget>[
                   Text(
                     widget.song.title,
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     widget.song.artist.name,
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.caption?.color,
-                    ),
+                    style: const TextStyle(color: Colors.white54),
                     overflow: TextOverflow.ellipsis,
                   )
                 ],

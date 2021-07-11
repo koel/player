@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:app/constants/dimens.dart';
+import 'package:app/constants/dimensions.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/media_info_provider.dart';
 import 'package:app/ui/widgets/album_thumbnail.dart';
@@ -53,9 +53,9 @@ class _InfoSheetState extends State<InfoSheet> {
     return ClipRect(
       child: SafeArea(
         minimum: EdgeInsets.fromLTRB(
-          AppDimens.horizontalPadding,
+          AppDimensions.horizontalPadding,
           60,
-          AppDimens.horizontalPadding,
+          AppDimensions.horizontalPadding,
           MediaQuery.of(context).padding.bottom,
         ),
         child: BackdropFilter(
@@ -94,7 +94,7 @@ class _InfoSheetState extends State<InfoSheet> {
                   ),
                   Center(
                     child: IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () => Navigator.pop(context),
                       icon: const Icon(
                         CupertinoIcons.multiply_circle,
                         size: 32,
@@ -145,11 +145,11 @@ class LyricsPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return lyrics == null || lyrics == ''
-        ? Padding(
-            padding: EdgeInsets.only(top: 16),
-            child: Text(
+        ? const Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: const Text(
               'No lyrics available.',
-              style: TextStyle(color: Colors.white54),
+              style: const TextStyle(color: Colors.white54),
             ),
           )
         : InfoHtml(
@@ -233,11 +233,11 @@ class AlbumInfoPane extends StatelessWidget {
           ),
         ),
         if (info == null || info!.information == '')
-          Padding(
-            padding: EdgeInsets.only(top: 16),
-            child: Text(
+          const Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: const Text(
               'No album information available.',
-              style: TextStyle(color: Colors.white54),
+              style: const TextStyle(color: Colors.white54),
             ),
           )
         else

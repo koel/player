@@ -78,7 +78,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                     showCupertinoModalPopup(
                       context: context,
                       builder: (BuildContext context) => CupertinoActionSheet(
-                        title: Text('Sort by'),
+                        title: const Text('Sort by'),
                         actions: _sortOptions.entries
                             .map(
                               (entry) => CupertinoActionSheetAction(
@@ -153,7 +153,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
               childCount: sortedSongs.length,
             ),
           ),
-          SliverToBoxAdapter(child: bottomSpace()),
+          const SliverToBoxAdapter(child: const BottomSpace()),
         ],
       ),
     );
@@ -161,8 +161,11 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
 }
 
 void gotoDetailsScreen(BuildContext context, {required Artist artist}) {
-  Navigator.of(context).push(CupertinoPageRoute<void>(
-    builder: (_) => ArtistDetailsScreen(artist: artist),
-    title: artist.name,
-  ));
+  Navigator.push(
+    context,
+    CupertinoPageRoute<void>(
+      builder: (_) => ArtistDetailsScreen(artist: artist),
+      title: artist.name,
+    ),
+  );
 }

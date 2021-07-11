@@ -47,9 +47,7 @@ class _AlbumCardState extends State<AlbumCard> {
                   const SizedBox(height: 4),
                   Text(
                     widget.album.artist.name,
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.caption?.color,
-                    ),
+                    style: const TextStyle(color: Colors.white54),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],

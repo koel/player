@@ -62,7 +62,7 @@ class _QueueState extends State<QueueScreen> with StreamSubscriber {
                   Center(
                     child: const Text(
                       'No songs queued.',
-                      style: TextStyle(color: Colors.white54),
+                      style: const TextStyle(color: Colors.white54),
                     ),
                   ),
                 ],
@@ -97,7 +97,7 @@ class _QueueState extends State<QueueScreen> with StreamSubscriber {
                 audio.reorderQueue(oldIndex, newIndex);
               },
             ),
-          SliverToBoxAdapter(child: bottomSpace()),
+          const SliverToBoxAdapter(child: const BottomSpace()),
         ],
       ),
     );

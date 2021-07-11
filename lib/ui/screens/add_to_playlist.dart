@@ -48,13 +48,13 @@ class _AddToPlaylistScreenState extends State<AddToPlaylistScreen> {
                     song: widget.song,
                     playlist: _playlists[index],
                   );
-                  Navigator.of(context).pop();
+                  Navigator.pop(context);
                 },
               ),
               childCount: _playlists.length,
             ),
           ),
-          SliverToBoxAdapter(child: bottomSpace()),
+          const SliverToBoxAdapter(child: const BottomSpace()),
         ],
       ),
     );

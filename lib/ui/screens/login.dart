@@ -1,4 +1,4 @@
-import 'package:app/constants/dimens.dart';
+import 'package:app/constants/dimensions.dart';
 import 'package:app/providers/auth_provider.dart';
 import 'package:app/ui/screens/start.dart';
 import 'package:app/ui/widgets/spinner.dart';
@@ -45,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
           CupertinoDialogAction(
             isDefaultAction: true,
             child: const Text('OK'),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.pop(context),
           ),
         ],
       ),
@@ -72,7 +72,8 @@ class _LoginScreenState extends State<LoginScreen> {
         preferences.userEmail = _email;
         await auth.tryGetAuthUser();
 
-        Navigator.of(context).pushReplacement(
+        Navigator.pushReplacement(
+          context,
           MaterialPageRoute(builder: (_) => const StartScreen()),
         );
       } else {
@@ -83,28 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
     InputDecoration decoration({String? label, String? hint}) {
       return InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Colors.white70),
         hintText: hint,
-        hintStyle: const TextStyle(color: Colors.white),
-        contentPadding: const EdgeInsets.symmetric(vertical: 2, horizontal: 12),
-        enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.transparent),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        fillColor: Colors.white12,
-        filled: true,
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.white24),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.red),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.red),
-          borderRadius: BorderRadius.circular(6),
-        ),
       );
     }
 
@@ -141,21 +121,13 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     final submitButton = ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(6.0),
-        ),
-        primary: Colors.grey.shade900,
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        padding: const EdgeInsets.symmetric(vertical: 12),
-      ),
       child: const Text('Log In'),
       onPressed: attemptLogin,
     );
 
-    final spinnerWidget = Center(
-      child: Padding(
-        padding: EdgeInsets.only(top: 12),
+    final spinnerWidget = const Center(
+      child: const Padding(
+        padding: const EdgeInsets.only(top: 12),
         child: const Spinner(size: 16),
       ),
     );
@@ -163,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return SafeArea(
       child: Scaffold(
         body: Container(
-          padding: const EdgeInsets.all(AppDimens.horizontalPadding),
+          padding: const EdgeInsets.all(AppDimensions.horizontalPadding),
           child: Form(
             key: formKey,
             child: Column(
