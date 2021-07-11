@@ -6,6 +6,7 @@ import 'package:app/providers/interaction_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/screens/profile.dart';
+import 'package:app/ui/screens/start.dart';
 import 'package:app/ui/widgets/album_card.dart';
 import 'package:app/ui/widgets/artist_card.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
@@ -27,72 +28,118 @@ class HomeScreen extends StatelessWidget {
     late AlbumProvider albumProvider = context.watch();
     late InteractionProvider interactionProvider = context.watch();
 
-    List<Widget> homeBlocks = <Widget>[
-      Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppDimensions.horizontalPadding,
-        ),
-        child: SimpleSongList(songs: songProvider.recentlyAdded()),
-      ),
-      HorizontalCardScroller(
-        headingText: 'Most played songs',
-        cards: <Widget>[
-          ...songProvider.mostPlayed().map((song) => SongCard(song: song)),
-          PlaceholderCard(
-            icon: CupertinoIcons.music_note,
-            onPressed: () => gotoSongsScreen(context),
+    late List<Widget> homeBlocks;
+
+    if (songProvider.songs.isEmpty) {
+      homeBlocks = <Widget>[
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.horizontalPadding,
           ),
-        ],
-      ),
-      Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppDimensions.horizontalPadding,
-        ),
-        child: SimpleSongList(
-          songs: interactionProvider.getRandomFavorites(limit: 5),
-          headingText: 'From your favorites',
-        ),
-      ),
-      HorizontalCardScroller(
-        headingText: 'Top albums',
-        cards: <Widget>[
-          ...albumProvider.mostPlayed().map((album) => AlbumCard(album: album)),
-          PlaceholderCard(
-            icon: CupertinoIcons.music_albums,
-            onPressed: () => gotoAlbumsScreen(context),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 32),
+              Text(
+                'Looks like your library is empty. '
+                'You can add songs using the web interface or via the '
+                'command line.',
+                style: TextStyle(color: Colors.white54),
+              ),
+              SizedBox(height: 32),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.of(
+                          context,
+                          rootNavigator: true,
+                        ).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (_) => const StartScreen(),
+                          ),
+                        );
+                      },
+                      child: Text('Refresh'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
-      ),
-      HorizontalCardScroller(
-        headingText: 'Top artists',
-        cards: <Widget>[
-          ...artistProvider
-              .mostPlayed()
-              .map((artist) => ArtistCard(artist: artist)),
-          PlaceholderCard(
-            icon: CupertinoIcons.music_mic,
-            onPressed: () => gotoArtistsScreen(context),
-          ),
-        ],
-      ),
-      Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppDimensions.horizontalPadding,
         ),
-        child: SimpleSongList(
-          songs: songProvider.leastPlayed(limit: 5),
-          headingText: 'Hidden gems',
-        ),
-      ),
-      const BottomSpace(height: 128),
-    ]
-        .map(
-          (widget) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: widget,
+      ];
+    } else {
+      homeBlocks = <Widget>[
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.horizontalPadding,
           ),
-        )
-        .toList();
+          child: SimpleSongList(songs: songProvider.recentlyAdded()),
+        ),
+        HorizontalCardScroller(
+          headingText: 'Most played songs',
+          cards: <Widget>[
+            ...songProvider.mostPlayed().map((song) => SongCard(song: song)),
+            PlaceholderCard(
+              icon: CupertinoIcons.music_note,
+              onPressed: () => gotoSongsScreen(context),
+            ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.horizontalPadding,
+          ),
+          child: SimpleSongList(
+            songs: interactionProvider.getRandomFavorites(limit: 5),
+            headingText: 'From your favorites',
+          ),
+        ),
+        HorizontalCardScroller(
+          headingText: 'Top albums',
+          cards: <Widget>[
+            ...albumProvider
+                .mostPlayed()
+                .map((album) => AlbumCard(album: album)),
+            PlaceholderCard(
+              icon: CupertinoIcons.music_albums,
+              onPressed: () => gotoAlbumsScreen(context),
+            ),
+          ],
+        ),
+        HorizontalCardScroller(
+          headingText: 'Top artists',
+          cards: <Widget>[
+            ...artistProvider
+                .mostPlayed()
+                .map((artist) => ArtistCard(artist: artist)),
+            PlaceholderCard(
+              icon: CupertinoIcons.music_mic,
+              onPressed: () => gotoArtistsScreen(context),
+            ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.horizontalPadding,
+          ),
+          child: SimpleSongList(
+            songs: songProvider.leastPlayed(limit: 5),
+            headingText: 'Hidden gems',
+          ),
+        ),
+        const BottomSpace(height: 128),
+      ]
+          .map(
+            (widget) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: widget,
+            ),
+          )
+          .toList();
+    }
 
     return CupertinoPageScaffold(
       child: CustomScrollView(
