@@ -32,8 +32,8 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
   Widget build(BuildContext context) {
     songProvider = context.watch<SongProvider>();
 
-    return StreamBuilder<Playing?>(
-      stream: audio.player.current,
+    return StreamBuilder<PlayerState?>(
+      stream: audio.player.playerState,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         String? songId = audio.player.songId;
         if (songId == null) return SizedBox.shrink();
