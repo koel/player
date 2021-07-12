@@ -40,6 +40,7 @@ dependencies:
   crypto: ^3.0.1
   intl: ^0.17.0
   get_storage: ^2.0.2
+  cached_network_image: ^3.0.0
 
 dev_dependencies:
   flutter_test:

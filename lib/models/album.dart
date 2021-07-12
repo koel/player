@@ -1,4 +1,5 @@
 import 'package:app/models/artist.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class Album {
@@ -32,7 +33,8 @@ class Album {
 
   ImageProvider get image {
     if (_image == null) {
-      _image = cover == null ? artist.image : NetworkImage(this.cover!);
+      _image =
+          cover == null ? artist.image : CachedNetworkImageProvider(cover!);
     }
 
     return _image!;

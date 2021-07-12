@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app/exceptions/http_response_exception.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:http/http.dart' as Http;
 
@@ -62,7 +63,7 @@ Future<dynamic> request(
     case 204:
       return;
     default:
-      throw Exception(response);
+      throw HttpResponseException.fromResponse(response);
   }
 }
 

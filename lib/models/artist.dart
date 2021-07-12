@@ -1,4 +1,5 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
 
 class Artist {
   int id;
@@ -20,8 +21,8 @@ class Artist {
   ImageProvider get image {
     if (_image == null) {
       _image = imageUrl == null
-          ? AssetImage('assets/images/unknown-album.png')
-          : NetworkImage(this.imageUrl!) as ImageProvider;
+          ? Image.asset(imageUrl!).image
+          : CachedNetworkImageProvider(this.imageUrl!);
     }
 
     return _image!;

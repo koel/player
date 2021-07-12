@@ -1,7 +1,9 @@
+import 'package:app/exceptions/unsupported_type_exception.dart';
 import 'package:app/models/album.dart';
 import 'package:app/models/artist.dart';
 import 'package:app/utils/preferences.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
@@ -61,9 +63,7 @@ class Song {
       title: title,
       album: album.name,
       artist: artist.name,
-      image: album.image is NetworkImage
-          ? MetasImage.network((album.image as NetworkImage).url)
-          : MetasImage.asset((album.image as AssetImage).assetName),
+      image: _metaImage,
       extra: {'songId': id},
     );
 
@@ -72,6 +72,20 @@ class Song {
     return cache == null
         ? Audio.network(sourceUrl, metas: metas)
         : Audio.file(cache.file.path, metas: metas);
+  }
+
+  MetasImage get _metaImage {
+    if (album.image is CachedNetworkImageProvider) {
+      return MetasImage.network(
+        (album.image as CachedNetworkImageProvider).url,
+      );
+    }
+
+    if (album.image is AssetImage) {
+      return MetasImage.asset((album.image as AssetImage).assetName);
+    }
+
+    throw UnsupportedTypeException.fromObject(album.image);
   }
 
   Future<FileInfo> cacheSourceFile() async {
