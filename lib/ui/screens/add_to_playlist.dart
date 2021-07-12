@@ -3,6 +3,7 @@ import 'package:app/models/song.dart';
 import 'package:app/providers/playlist_provider.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/playlist_row.dart';
+import 'package:app/ui/widgets/typography.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -34,10 +35,7 @@ class _AddToPlaylistScreenState extends State<AddToPlaylistScreen> {
         slivers: <Widget>[
           CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
-            largeTitle: const Text(
-              'Add to a Playlist',
-              style: const TextStyle(color: Colors.white),
-            ),
+            largeTitle: const LargeTitle(text: 'Add to a Playlist'),
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(

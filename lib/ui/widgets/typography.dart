@@ -17,3 +17,17 @@ class Heading5 extends StatelessWidget {
     );
   }
 }
+
+class LargeTitle extends StatelessWidget {
+  final String text;
+
+  const LargeTitle({Key? key, required this.text}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: const TextStyle(color: Colors.white),
+    );
+  }
+}

@@ -2,6 +2,7 @@ import 'package:app/models/artist.dart';
 import 'package:app/providers/artist_provider.dart';
 import 'package:app/ui/widgets/artist_thumbnail.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
+import 'package:app/ui/widgets/typography.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -36,21 +37,23 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
           CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
             previousPageTitle: widget.previousPageTitle,
-            largeTitle: const Text(
-              'Artists',
-              style: const TextStyle(color: Colors.white),
-            ),
+            largeTitle: const LargeTitle(text: 'Artists'),
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
                 Artist artist = _artists[index];
-                return InkWell(
-                  onTap: () => gotoDetailsScreen(context, artist: artist),
-                  child: ListTile(
-                    shape: Border(bottom: Divider.createBorderSide(context)),
-                    leading: ArtistThumbnail(artist: artist, asHero: true),
-                    title: Text(artist.name, overflow: TextOverflow.ellipsis),
+                return Container(
+                  decoration: BoxDecoration(
+                    border: Border(bottom: Divider.createBorderSide(context)),
+                  ),
+                  child: InkWell(
+                    onTap: () => gotoDetailsScreen(context, artist: artist),
+                    child: ListTile(
+                      shape: Border(bottom: Divider.createBorderSide(context)),
+                      leading: ArtistThumbnail(artist: artist, asHero: true),
+                      title: Text(artist.name, overflow: TextOverflow.ellipsis),
+                    ),
                   ),
                 );
               },

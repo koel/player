@@ -8,8 +8,8 @@ import 'package:app/ui/screens/favorites.dart';
 import 'package:app/ui/screens/playlists.dart';
 import 'package:app/ui/screens/songs.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
-import 'package:app/ui/widgets/headings.dart';
 import 'package:app/ui/widgets/song_row.dart';
+import 'package:app/ui/widgets/typography.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -69,10 +69,7 @@ class LibraryScreen extends StatelessWidget {
         slivers: <Widget>[
           const CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
-            largeTitle: const Text(
-              'Library',
-              style: const TextStyle(color: Colors.white),
-            ),
+            largeTitle: const LargeTitle(text: 'Library'),
           ),
           SliverPadding(
             padding: const EdgeInsets.symmetric(

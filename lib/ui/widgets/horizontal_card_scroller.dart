@@ -1,5 +1,5 @@
 import 'package:app/constants/dimensions.dart';
-import 'package:app/ui/widgets/headings.dart';
+import 'package:app/ui/widgets/typography.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 

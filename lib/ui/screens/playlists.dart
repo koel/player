@@ -2,6 +2,7 @@ import 'package:app/models/playlist.dart';
 import 'package:app/providers/playlist_provider.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/playlist_row.dart';
+import 'package:app/ui/widgets/typography.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -38,10 +39,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
           CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
             previousPageTitle: widget.previousPageTitle,
-            largeTitle: const Text(
-              'Playlists',
-              style: const TextStyle(color: Colors.white),
-            ),
+            largeTitle: const LargeTitle(text: 'Playlists'),
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
