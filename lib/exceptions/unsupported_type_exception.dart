@@ -12,7 +12,7 @@ class UnsupportedTypeException implements Exception {
     return UnsupportedTypeException(type: type);
   }
 
-  factory UnsupportedTypeException.fromObject(dynamic object) {
+  factory UnsupportedTypeException.fromObject(Object object) {
     return UnsupportedTypeException(type: object.runtimeType);
   }
 }
