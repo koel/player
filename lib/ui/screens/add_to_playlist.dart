@@ -34,29 +34,34 @@ class _AddToPlaylistScreenState extends State<AddToPlaylistScreen> {
     song = ModalRoute.of(context)!.settings.arguments as Song;
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          CupertinoSliverNavigationBar(
-            backgroundColor: Colors.black,
-            largeTitle: const LargeTitle(text: 'Add to a Playlist'),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) => PlaylistRow(
-                playlist: _playlists[index],
-                onTap: () async {
-                  playlistProvider.addSongToPlaylist(
-                    song: song,
-                    playlist: _playlists[index],
-                  );
-                  Navigator.pop(context);
-                },
-              ),
-              childCount: _playlists.length,
+      body: CupertinoTheme(
+        data: CupertinoThemeData(
+          primaryColor: Colors.white,
+        ),
+        child: CustomScrollView(
+          slivers: <Widget>[
+            CupertinoSliverNavigationBar(
+              backgroundColor: Colors.black,
+              largeTitle: const LargeTitle(text: 'Add to a Playlist'),
             ),
-          ),
-          const SliverToBoxAdapter(child: const BottomSpace()),
-        ],
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) => PlaylistRow(
+                  playlist: _playlists[index],
+                  onTap: () async {
+                    playlistProvider.addSongToPlaylist(
+                      song: song,
+                      playlist: _playlists[index],
+                    );
+                    Navigator.pop(context);
+                  },
+                ),
+                childCount: _playlists.length,
+              ),
+            ),
+            const SliverToBoxAdapter(child: const BottomSpace()),
+          ],
+        ),
       ),
     );
   }

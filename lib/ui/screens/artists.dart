@@ -32,30 +32,35 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          CupertinoSliverNavigationBar(
-            backgroundColor: Colors.black,
-            largeTitle: const LargeTitle(text: 'Artists'),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-                Artist artist = _artists[index];
-                return InkWell(
-                  onTap: () => gotoDetailsScreen(context, artist: artist),
-                  child: ListTile(
-                    shape: Border(bottom: Divider.createBorderSide(context)),
-                    leading: ArtistThumbnail(artist: artist, asHero: true),
-                    title: Text(artist.name, overflow: TextOverflow.ellipsis),
-                  ),
-                );
-              },
-              childCount: _artists.length,
+      body: CupertinoTheme(
+        data: CupertinoThemeData(
+          primaryColor: Colors.white,
+        ),
+        child: CustomScrollView(
+          slivers: [
+            CupertinoSliverNavigationBar(
+              backgroundColor: Colors.black,
+              largeTitle: const LargeTitle(text: 'Artists'),
             ),
-          ),
-          const SliverToBoxAdapter(child: const BottomSpace()),
-        ],
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  Artist artist = _artists[index];
+                  return InkWell(
+                    onTap: () => gotoDetailsScreen(context, artist: artist),
+                    child: ListTile(
+                      shape: Border(bottom: Divider.createBorderSide(context)),
+                      leading: ArtistThumbnail(artist: artist, asHero: true),
+                      title: Text(artist.name, overflow: TextOverflow.ellipsis),
+                    ),
+                  );
+                },
+                childCount: _artists.length,
+              ),
+            ),
+            const SliverToBoxAdapter(child: const BottomSpace()),
+          ],
+        ),
       ),
     );
   }

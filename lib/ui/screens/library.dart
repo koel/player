@@ -61,39 +61,45 @@ class LibraryScreen extends StatelessWidget {
     ).toList();
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          const CupertinoSliverNavigationBar(
-            backgroundColor: Colors.black,
-            largeTitle: const LargeTitle(text: 'Library'),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppDimensions.horizontalPadding,
+      body: CupertinoTheme(
+        data: CupertinoThemeData(
+          primaryColor: Colors.white,
+        ),
+        child: CustomScrollView(
+          slivers: <Widget>[
+            const CupertinoSliverNavigationBar(
+              backgroundColor: Colors.black,
+              largeTitle: const LargeTitle(text: 'Library'),
             ),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate(menuItems),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.horizontalPadding,
+              ),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate(menuItems),
+              ),
             ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
-              AppDimensions.horizontalPadding,
-              24,
-              AppDimensions.horizontalPadding,
-              0,
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                AppDimensions.horizontalPadding,
+                24,
+                AppDimensions.horizontalPadding,
+                0,
+              ),
+              sliver:
+                  SliverToBoxAdapter(child: Heading5(text: 'Recently added')),
             ),
-            sliver: SliverToBoxAdapter(child: Heading5(text: 'Recently added')),
-          ),
-          mostPlayedSongs.length == 0
-              ? const SliverToBoxAdapter(child: SizedBox.shrink())
-              : SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (_, int index) => SongRow(song: mostPlayedSongs[index]),
-                    childCount: mostPlayedSongs.length,
+            mostPlayedSongs.length == 0
+                ? const SliverToBoxAdapter(child: SizedBox.shrink())
+                : SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (_, int index) => SongRow(song: mostPlayedSongs[index]),
+                      childCount: mostPlayedSongs.length,
+                    ),
                   ),
-                ),
-          const SliverToBoxAdapter(child: const BottomSpace()),
-        ],
+            const SliverToBoxAdapter(child: const BottomSpace()),
+          ],
+        ),
       ),
     );
   }

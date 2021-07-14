@@ -149,24 +149,29 @@ class HomeScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          CupertinoSliverNavigationBar(
-            backgroundColor: Colors.black,
-            largeTitle: const LargeTitle(text: 'Home'),
-            trailing: IconButton(
-              onPressed: () => Navigator.of(
-                context,
-                rootNavigator: true,
-              ).pushNamed(ProfileScreen.routeName),
-              icon: const Icon(
-                CupertinoIcons.person_alt_circle,
-                size: 24,
+      body: CupertinoTheme(
+        data: CupertinoThemeData(
+          primaryColor: Colors.white,
+        ),
+        child: CustomScrollView(
+          slivers: <Widget>[
+            CupertinoSliverNavigationBar(
+              backgroundColor: Colors.black,
+              largeTitle: const LargeTitle(text: 'Home'),
+              trailing: IconButton(
+                onPressed: () => Navigator.of(
+                  context,
+                  rootNavigator: true,
+                ).pushNamed(ProfileScreen.routeName),
+                icon: const Icon(
+                  CupertinoIcons.person_alt_circle,
+                  size: 24,
+                ),
               ),
             ),
-          ),
-          SliverList(delegate: SliverChildListDelegate.fixed(homeBlocks)),
-        ],
+            SliverList(delegate: SliverChildListDelegate.fixed(homeBlocks)),
+          ],
+        ),
       ),
     );
   }

@@ -34,21 +34,26 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          CupertinoSliverNavigationBar(
-            backgroundColor: Colors.black,
-            largeTitle: const LargeTitle(text: 'Playlists'),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) =>
-                  PlaylistRow(playlist: _playlists[index]),
-              childCount: _playlists.length,
+      body: CupertinoTheme(
+        data: CupertinoThemeData(
+          primaryColor: Colors.white,
+        ),
+        child: CustomScrollView(
+          slivers: <Widget>[
+            CupertinoSliverNavigationBar(
+              backgroundColor: Colors.black,
+              largeTitle: const LargeTitle(text: 'Playlists'),
             ),
-          ),
-          const SliverToBoxAdapter(child: const BottomSpace()),
-        ],
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) =>
+                    PlaylistRow(playlist: _playlists[index]),
+                childCount: _playlists.length,
+              ),
+            ),
+            const SliverToBoxAdapter(child: const BottomSpace()),
+          ],
+        ),
       ),
     );
   }

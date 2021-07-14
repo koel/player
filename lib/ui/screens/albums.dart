@@ -31,38 +31,44 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          CupertinoSliverNavigationBar(
-            backgroundColor: Colors.black,
-            largeTitle: const LargeTitle(text: 'Albums'),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-                Album album = _albums[index];
-                return Container(
-                  decoration: BoxDecoration(
-                    border: Border(bottom: Divider.createBorderSide(context)),
-                  ),
-                  child: InkWell(
-                    onTap: () => gotoDetailsScreen(context, album: album),
-                    child: ListTile(
-                      leading: AlbumThumbnail(album: album, asHero: true),
-                      title: Text(album.name, overflow: TextOverflow.ellipsis),
-                      subtitle: Text(
-                        album.artist.name,
-                        overflow: TextOverflow.ellipsis,
+      body: CupertinoTheme(
+        data: CupertinoThemeData(
+          primaryColor: Colors.white,
+        ),
+        child: CustomScrollView(
+          slivers: <Widget>[
+            CupertinoSliverNavigationBar(
+              backgroundColor: Colors.black,
+              largeTitle: const LargeTitle(text: 'Albums'),
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  Album album = _albums[index];
+                  return Container(
+                    decoration: BoxDecoration(
+                      border: Border(bottom: Divider.createBorderSide(context)),
+                    ),
+                    child: InkWell(
+                      onTap: () => gotoDetailsScreen(context, album: album),
+                      child: ListTile(
+                        leading: AlbumThumbnail(album: album, asHero: true),
+                        title:
+                            Text(album.name, overflow: TextOverflow.ellipsis),
+                        subtitle: Text(
+                          album.artist.name,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-              childCount: _albums.length,
+                  );
+                },
+                childCount: _albums.length,
+              ),
             ),
-          ),
-          const SliverToBoxAdapter(child: const BottomSpace()),
-        ],
+            const SliverToBoxAdapter(child: const BottomSpace()),
+          ],
+        ),
       ),
     );
   }
