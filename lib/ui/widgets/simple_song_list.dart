@@ -10,9 +10,14 @@ import 'package:flutter/material.dart';
 class SimpleSongList extends StatelessWidget {
   final Iterable<Song> songs;
   final String? headingText;
+  final bool bordered;
 
-  const SimpleSongList({Key? key, required this.songs, this.headingText})
-      : super(key: key);
+  const SimpleSongList({
+    Key? key,
+    required this.songs,
+    this.headingText,
+    this.bordered = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +28,7 @@ class SimpleSongList extends StatelessWidget {
         ...songs.map(
           (song) => SongRow(
             song: song,
-            bordered: false,
+            bordered: bordered,
             padding: const EdgeInsets.symmetric(horizontal: 0),
           ),
         )

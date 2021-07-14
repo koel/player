@@ -10,6 +10,8 @@ import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
 class QueueScreen extends StatefulWidget {
+  static const routeName = '/queue';
+
   const QueueScreen({Key? key}) : super(key: key);
 
   @override

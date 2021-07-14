@@ -10,9 +10,9 @@ import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
 class FavoritesScreen extends StatefulWidget {
-  final String? previousPageTitle;
+  static const routeName = '/favorites';
 
-  const FavoritesScreen({Key? key, this.previousPageTitle}) : super(key: key);
+  const FavoritesScreen({Key? key}) : super(key: key);
 
   @override
   _FavoritesScreenState createState() => _FavoritesScreenState();
@@ -43,8 +43,8 @@ class _FavoritesScreenState extends State<FavoritesScreen>
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      child: CustomScrollView(
+    return Scaffold(
+      body: CustomScrollView(
         slivers: <Widget>[
           AppBar(
             headingText: 'Favorites',
@@ -78,13 +78,4 @@ class _FavoritesScreenState extends State<FavoritesScreen>
       ),
     );
   }
-}
-
-void gotoFavoritesScreen(BuildContext context, {String? previousPageTitle}) {
-  Navigator.push(
-    context,
-    CupertinoPageRoute(
-      builder: (_) => FavoritesScreen(previousPageTitle: previousPageTitle),
-    ),
-  );
 }

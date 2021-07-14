@@ -26,15 +26,16 @@ Map<OrderBy, String> _sortOptions = {
 OrderBy _currentSortOrder = OrderBy.title;
 
 class ArtistDetailsScreen extends StatefulWidget {
-  final Artist artist;
+  static const routeName = '/artist';
 
-  const ArtistDetailsScreen({Key? key, required this.artist}) : super(key: key);
+  const ArtistDetailsScreen({Key? key}) : super(key: key);
 
   @override
   _ArtistDetailsScreenState createState() => _ArtistDetailsScreenState();
 }
 
 class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
+  late Artist artist;
   late List<Song> songs;
   late SongProvider songProvider;
   late OrderBy _sortOrder;
@@ -42,9 +43,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
   @override
   void initState() {
     super.initState();
-
     songProvider = context.read();
-    songs = songProvider.byArtist(widget.artist);
     setState(() => _sortOrder = _currentSortOrder);
   }
 
@@ -65,13 +64,15 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    artist = ModalRoute.of(context)!.settings.arguments as Artist;
+    songs = songProvider.byArtist(artist);
     List<Song> sortedSongs = sortSongs(orderBy: _sortOrder);
 
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
           AppBar(
-            headingText: widget.artist.name,
+            headingText: artist.name,
             actions: [
               IconButton(
                   onPressed: () {
@@ -112,7 +113,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: widget.artist.image,
+                      image: artist.image,
                       fit: BoxFit.cover,
                       alignment: Alignment.topCenter,
                     ),
@@ -121,11 +122,11 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
               ),
             ),
             coverImage: Hero(
-              tag: "artist-hero-${widget.artist.id}",
+              tag: "artist-hero-${artist.id}",
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: widget.artist.image,
+                    image: artist.image,
                     fit: BoxFit.cover,
                     alignment: Alignment.topCenter,
                   ),
@@ -161,11 +162,8 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
 }
 
 void gotoDetailsScreen(BuildContext context, {required Artist artist}) {
-  Navigator.push(
-    context,
-    CupertinoPageRoute<void>(
-      builder: (_) => ArtistDetailsScreen(artist: artist),
-      title: artist.name,
-    ),
+  Navigator.of(context, rootNavigator: true).pushNamed(
+    ArtistDetailsScreen.routeName,
+    arguments: artist,
   );
 }

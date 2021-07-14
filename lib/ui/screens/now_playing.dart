@@ -117,14 +117,9 @@ class NowPlayingScreen extends StatelessWidget {
                             ),
                           ),
                           IconButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute<void>(
-                                  builder: (_) => const QueueScreen(),
-                                ),
-                              );
-                            },
+                            onPressed: () =>
+                                Navigator.of(context, rootNavigator: true)
+                                    .pushNamed(QueueScreen.routeName),
                             icon: Icon(
                               CupertinoIcons.list_number,
                               color: bottomIconColor,

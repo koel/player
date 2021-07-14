@@ -23,9 +23,9 @@ Map<OrderBy, String> sortOptions = {
 OrderBy _currentSortOrder = OrderBy.recentlyAdded;
 
 class SongsScreen extends StatefulWidget {
-  final String? previousPageTitle;
+  static const routeName = '/songs';
 
-  const SongsScreen({Key? key, this.previousPageTitle}) : super(key: key);
+  const SongsScreen({Key? key}) : super(key: key);
 
   @override
   _SongsScreenState createState() => _SongsScreenState();
@@ -60,8 +60,8 @@ class _SongsScreenState extends State<SongsScreen> {
   Widget build(BuildContext context) {
     List<Song> sortedSongs = sortSongs(orderBy: _sortOrder);
 
-    return CupertinoPageScaffold(
-      child: CustomScrollView(
+    return Scaffold(
+      body: CustomScrollView(
         slivers: [
           AppBar(
             headingText: 'All songs',

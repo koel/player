@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
+  static const routeName = '/login';
+
   const LoginScreen({Key? key}) : super(key: key);
 
   @override
@@ -72,10 +74,10 @@ class _LoginScreenState extends State<LoginScreen> {
         preferences.userEmail = _email;
         await auth.tryGetAuthUser();
 
-        Navigator.pushReplacement(
+        Navigator.of(
           context,
-          MaterialPageRoute(builder: (_) => const StartScreen()),
-        );
+          rootNavigator: true,
+        ).pushReplacementNamed(StartScreen.routeName);
       } else {
         showErrorDialog(context);
       }

@@ -10,9 +10,9 @@ import 'package:provider/provider.dart';
 import 'artist_details.dart';
 
 class ArtistsScreen extends StatefulWidget {
-  final String? previousPageTitle;
+  static const routeName = '/artists';
 
-  const ArtistsScreen({Key? key, this.previousPageTitle}) : super(key: key);
+  const ArtistsScreen({Key? key}) : super(key: key);
 
   @override
   _ArtistsScreenState createState() => _ArtistsScreenState();
@@ -31,29 +31,23 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      child: CustomScrollView(
+    return Scaffold(
+      body: CustomScrollView(
         slivers: [
           CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
-            previousPageTitle: widget.previousPageTitle,
             largeTitle: const LargeTitle(text: 'Artists'),
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
                 Artist artist = _artists[index];
-                return Container(
-                  decoration: BoxDecoration(
-                    border: Border(bottom: Divider.createBorderSide(context)),
-                  ),
-                  child: InkWell(
-                    onTap: () => gotoDetailsScreen(context, artist: artist),
-                    child: ListTile(
-                      shape: Border(bottom: Divider.createBorderSide(context)),
-                      leading: ArtistThumbnail(artist: artist, asHero: true),
-                      title: Text(artist.name, overflow: TextOverflow.ellipsis),
-                    ),
+                return InkWell(
+                  onTap: () => gotoDetailsScreen(context, artist: artist),
+                  child: ListTile(
+                    shape: Border(bottom: Divider.createBorderSide(context)),
+                    leading: ArtistThumbnail(artist: artist, asHero: true),
+                    title: Text(artist.name, overflow: TextOverflow.ellipsis),
                   ),
                 );
               },

@@ -3,14 +3,16 @@ import 'dart:ui';
 import 'package:app/constants/dimensions.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/user.dart';
+import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/auth_provider.dart';
 import 'package:app/providers/cache_provider.dart';
 import 'package:app/providers/interaction_provider.dart';
 import 'package:app/providers/playlist_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/favorites.dart';
-import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/screens/login.dart';
+import 'package:app/ui/screens/playlists.dart';
+import 'package:app/ui/screens/songs.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
@@ -19,6 +21,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatelessWidget {
+  static const routeName = '/profile';
+
   const ProfileScreen({Key? key}) : super(key: key);
 
   @override
@@ -88,18 +92,21 @@ class ProfileScreen extends StatelessWidget {
                           number: songProvider.songs.length,
                           label: 'songs',
                         ),
-                        onTap: () => gotoSongsScreen(context),
+                        onTap: () => Navigator.of(context, rootNavigator: true)
+                            .pushNamed(SongsScreen.routeName),
                       ),
                       GestureDetector(
                         child: MetricBlock(
                           number: playlistProvider.playlists.length,
                           label: 'playlists',
                         ),
-                        onTap: () => gotoPlaylistsScreen(context),
+                        onTap: () => Navigator.of(context, rootNavigator: true)
+                            .pushNamed(PlaylistsScreen.routeName),
                       ),
                       GestureDetector(
                         child: const FavoriteMetricBlock(),
-                        onTap: () => gotoFavoritesScreen(context),
+                        onTap: () => Navigator.of(context, rootNavigator: true)
+                            .pushNamed(FavoritesScreen.routeName),
                       ),
                     ],
                   ),
@@ -127,6 +134,7 @@ class LogOutButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AuthProvider auth = context.watch();
+    AudioPlayerProvider audio = context.watch();
 
     return Expanded(
       child: OutlinedButton(
@@ -151,10 +159,13 @@ class LogOutButton extends StatelessWidget {
                     onPressed: () async {
                       Navigator.pop(context);
                       await auth.logout();
-                      Navigator.pushAndRemoveUntil(
+                      await audio.cleanUpUponLogout();
+                      Navigator.of(
                         context,
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
-                        (Route route) => false,
+                        rootNavigator: true,
+                      ).pushNamedAndRemoveUntil(
+                        LoginScreen.routeName,
+                        (_) => false,
                       );
                     },
                   ),
@@ -286,14 +297,4 @@ class MetricBlock extends StatelessWidget {
       ],
     );
   }
-}
-
-gotoProfileScreen(BuildContext context) {
-  Navigator.push(
-    context,
-    CupertinoPageRoute<void>(
-      builder: (_) => const ProfileScreen(),
-      title: 'Profile',
-    ),
-  );
 }

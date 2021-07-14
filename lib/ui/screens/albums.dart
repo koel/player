@@ -9,9 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class AlbumsScreen extends StatefulWidget {
-  final String? previousPageTitle;
+  static const routeName = '/albums';
 
-  const AlbumsScreen({Key? key, this.previousPageTitle}) : super(key: key);
+  const AlbumsScreen({Key? key}) : super(key: key);
 
   @override
   _AlbumsScreenState createState() => _AlbumsScreenState();
@@ -30,12 +30,11 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      child: CustomScrollView(
+    return Scaffold(
+      body: CustomScrollView(
         slivers: <Widget>[
           CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
-            previousPageTitle: widget.previousPageTitle,
             largeTitle: const LargeTitle(text: 'Albums'),
           ),
           SliverList(

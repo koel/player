@@ -15,6 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class LibraryScreen extends StatelessWidget {
+  static const routeName = '/library';
+
   const LibraryScreen({Key? key}) : super(key: key);
 
   @override
@@ -28,44 +30,38 @@ class LibraryScreen extends StatelessWidget {
         LibraryMenuItem(
           icon: const Icon(CupertinoIcons.heart_fill, color: AppColors.red),
           label: 'Favorites',
-          onTap: () {
-            Navigator.push(
-              context,
-              CupertinoPageRoute<void>(
-                builder: (_) => FavoritesScreen(previousPageTitle: 'Library'),
-                title: 'Favorites',
-              ),
-            );
-          },
+          onTap: () => Navigator.of(context, rootNavigator: true)
+              .pushNamed(FavoritesScreen.routeName),
         ),
         LibraryMenuItem(
           icon: CupertinoIcons.music_note_list,
           label: 'Playlists',
-          onTap: () => gotoPlaylistsScreen(
-            context,
-            previousPageTitle: 'Library',
-          ),
+          onTap: () => Navigator.of(context, rootNavigator: true)
+              .pushNamed(PlaylistsScreen.routeName),
         ),
         LibraryMenuItem(
           icon: CupertinoIcons.music_mic,
           label: 'Artists',
-          onTap: () => gotoArtistsScreen(context, previousPageTitle: 'Library'),
+          onTap: () => Navigator.of(context, rootNavigator: true)
+              .pushNamed(ArtistsScreen.routeName),
         ),
         LibraryMenuItem(
           icon: CupertinoIcons.music_albums,
           label: 'Albums',
-          onTap: () => gotoAlbumsScreen(context, previousPageTitle: 'Library'),
+          onTap: () => Navigator.of(context, rootNavigator: true)
+              .pushNamed(AlbumsScreen.routeName),
         ),
         LibraryMenuItem(
           icon: CupertinoIcons.music_note,
           label: 'Songs',
-          onTap: () => gotoSongsScreen(context, previousPageTitle: 'Library'),
+          onTap: () => Navigator.of(context, rootNavigator: true)
+              .pushNamed(SongsScreen.routeName),
         ),
       ],
     ).toList();
 
-    return CupertinoPageScaffold(
-      child: CustomScrollView(
+    return Scaffold(
+      body: CustomScrollView(
         slivers: <Widget>[
           const CupertinoSliverNavigationBar(
             backgroundColor: Colors.black,
@@ -136,44 +132,4 @@ class LibraryMenuItem extends StatelessWidget {
       onTap: onTap,
     );
   }
-}
-
-void gotoAlbumsScreen(BuildContext context, {String? previousPageTitle}) {
-  Navigator.push(
-    context,
-    CupertinoPageRoute<void>(
-      builder: (_) => AlbumsScreen(previousPageTitle: previousPageTitle),
-      title: 'Albums',
-    ),
-  );
-}
-
-void gotoArtistsScreen(BuildContext context, {String? previousPageTitle}) {
-  Navigator.push(
-    context,
-    CupertinoPageRoute<void>(
-      builder: (_) => ArtistsScreen(previousPageTitle: previousPageTitle),
-      title: 'Artists',
-    ),
-  );
-}
-
-void gotoSongsScreen(BuildContext context, {String? previousPageTitle}) {
-  Navigator.push(
-    context,
-    CupertinoPageRoute<void>(
-      builder: (_) => SongsScreen(),
-      title: 'Songs',
-    ),
-  );
-}
-
-void gotoPlaylistsScreen(BuildContext context, {String? previousPageTitle}) {
-  Navigator.push(
-    context,
-    CupertinoPageRoute<void>(
-      builder: (_) => PlaylistsScreen(previousPageTitle: previousPageTitle),
-      title: 'Playlists',
-    ),
-  );
 }

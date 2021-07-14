@@ -10,16 +10,16 @@ import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
 class PlaylistDetailsScreen extends StatefulWidget {
-  final Playlist playlist;
+  static const routeName = '/playlist';
 
-  const PlaylistDetailsScreen({Key? key, required this.playlist})
-      : super(key: key);
+  const PlaylistDetailsScreen({Key? key}) : super(key: key);
 
   @override
   _PlaylistDetailsScreen createState() => _PlaylistDetailsScreen();
 }
 
 class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
+  late Playlist playlist;
   late PlaylistProvider playlistProvider;
   late Future<Playlist> futurePlaylist;
 
@@ -27,13 +27,15 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
   void initState() {
     super.initState();
     playlistProvider = context.read();
-    futurePlaylist = playlistProvider.populatePlaylist(
-      playlist: widget.playlist,
-    );
   }
 
   @override
   Widget build(BuildContext context) {
+    playlist = ModalRoute.of(context)!.settings.arguments as Playlist;
+    futurePlaylist = playlistProvider.populatePlaylist(
+      playlist: playlist,
+    );
+
     return Scaffold(
       body: FutureBuilder(
         future: futurePlaylist,
@@ -42,23 +44,23 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
             return CustomScrollView(
               slivers: <Widget>[
                 AppBar(
-                  headingText: widget.playlist.name,
+                  headingText: playlist.name,
                   coverImage: CoverImageStack(
-                    songs: widget.playlist.songs,
+                    songs: playlist.songs,
                   ),
                 ),
               ],
             );
           }
 
-          Playlist playlist = snapshot.data!;
+          Playlist populatedPlaylist = snapshot.data!;
 
           return CustomScrollView(
             slivers: <Widget>[
               AppBar(
-                headingText: widget.playlist.name,
+                headingText: populatedPlaylist.name,
                 coverImage: CoverImageStack(
-                  songs: widget.playlist.songs,
+                  songs: populatedPlaylist.songs,
                 ),
               ),
               SliverToBoxAdapter(
@@ -84,8 +86,8 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (_, int index) {
-                      final bool dismissible = widget.playlist.isStandard;
-                      final Song song = widget.playlist.songs[index];
+                      final bool dismissible = populatedPlaylist.isStandard;
+                      final Song song = populatedPlaylist.songs[index];
                       return Dismissible(
                         direction: dismissible
                             ? DismissDirection.endToStart
@@ -94,7 +96,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                             ? (DismissDirection direction) =>
                                 playlistProvider.removeSongFromPlaylist(
                                   song: song,
-                                  playlist: widget.playlist,
+                                  playlist: populatedPlaylist,
                                 )
                             : null,
                         background: Container(
@@ -125,11 +127,8 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
 }
 
 void gotoDetailsScreen(BuildContext context, {required Playlist playlist}) {
-  Navigator.push(
-    context,
-    CupertinoPageRoute<void>(
-      builder: (_) => PlaylistDetailsScreen(playlist: playlist),
-      title: playlist.name,
-    ),
+  Navigator.of(context, rootNavigator: true).pushNamed(
+    PlaylistDetailsScreen.routeName,
+    arguments: playlist,
   );
 }

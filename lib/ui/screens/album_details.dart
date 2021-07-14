@@ -26,14 +26,15 @@ Map<OrderBy, String> _sortOptions = {
 OrderBy _currentSortOrder = OrderBy.trackNumber;
 
 class AlbumDetailsScreen extends StatefulWidget {
-  final Album album;
+  static const routeName = '/album';
 
-  const AlbumDetailsScreen({Key? key, required this.album}) : super(key: key);
+  const AlbumDetailsScreen({Key? key}) : super(key: key);
 
   _AlbumDetailsScreenState createState() => _AlbumDetailsScreenState();
 }
 
 class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
+  late Album album;
   late List<Song> songs;
   late SongProvider songProvider;
   late OrderBy _sortOrder;
@@ -41,9 +42,7 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
   @override
   void initState() {
     super.initState();
-
     songProvider = context.read();
-    songs = songProvider.byAlbum(widget.album);
     setState(() => _sortOrder = _currentSortOrder);
   }
 
@@ -62,13 +61,15 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    album = ModalRoute.of(context)!.settings.arguments as Album;
+    songs = songProvider.byAlbum(album);
     List<Song> sortedSongs = sortSongs(orderBy: _sortOrder);
 
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
           AppBar(
-            headingText: widget.album.name,
+            headingText: album.name,
             actions: [
               IconButton(
                   onPressed: () {
@@ -109,7 +110,7 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: widget.album.image,
+                      image: album.image,
                       fit: BoxFit.cover,
                       alignment: Alignment.topCenter,
                     ),
@@ -118,11 +119,11 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
               ),
             ),
             coverImage: Hero(
-              tag: "album-hero-${widget.album.id}",
+              tag: "album-hero-${album.id}",
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: widget.album.image,
+                    image: album.image,
                     fit: BoxFit.cover,
                     alignment: Alignment.topCenter,
                   ),
@@ -158,11 +159,8 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
 }
 
 void gotoDetailsScreen(BuildContext context, {required Album album}) {
-  Navigator.push(
-    context,
-    CupertinoPageRoute<void>(
-      builder: (_) => AlbumDetailsScreen(album: album),
-      title: album.name,
-    ),
+  Navigator.of(context, rootNavigator: true).pushNamed(
+    AlbumDetailsScreen.routeName,
+    arguments: album,
   );
 }

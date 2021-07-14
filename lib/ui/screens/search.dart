@@ -15,6 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class SearchScreen extends StatefulWidget {
+  static const routeName = '/search';
+
   const SearchScreen({Key? key}) : super(key: key);
 
   @override
@@ -92,55 +94,61 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          searchField,
-          if (!_initial)
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppDimensions.horizontalPadding,
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            searchField,
+            if (!_initial)
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppDimensions.horizontalPadding,
+                        ),
+                        child: SimpleSongList(
+                          songs: _songs,
+                          bordered: true,
+                        ),
                       ),
-                      child: SimpleSongList(songs: _songs),
-                    ),
-                    const SizedBox(height: 32),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: AppDimensions.horizontalPadding,
+                      const SizedBox(height: 32),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: AppDimensions.horizontalPadding,
+                        ),
+                        child: Heading5(text: 'Albums'),
                       ),
-                      child: Heading5(text: 'Albums'),
-                    ),
-                    if (_albums.length == 0)
-                      noResults
-                    else
-                      HorizontalCardScroller(
-                        cards: _albums.map((album) => AlbumCard(album: album)),
+                      if (_albums.length == 0)
+                        noResults
+                      else
+                        HorizontalCardScroller(
+                          cards:
+                              _albums.map((album) => AlbumCard(album: album)),
+                        ),
+                      const SizedBox(height: 32),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: AppDimensions.horizontalPadding),
+                        child: Heading5(text: 'Artists'),
                       ),
-                    const SizedBox(height: 32),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          left: AppDimensions.horizontalPadding),
-                      child: Heading5(text: 'Artists'),
-                    ),
-                    if (_artists.length == 0)
-                      noResults
-                    else
-                      HorizontalCardScroller(
-                        cards: _artists
-                            .map((artist) => ArtistCard(artist: artist)),
-                      ),
-                    const BottomSpace(),
-                  ],
+                      if (_artists.length == 0)
+                        noResults
+                      else
+                        HorizontalCardScroller(
+                          cards: _artists
+                              .map((artist) => ArtistCard(artist: artist)),
+                        ),
+                      const BottomSpace(),
+                    ],
+                  ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

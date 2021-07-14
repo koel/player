@@ -5,8 +5,8 @@ import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/interaction_provider.dart';
 import 'package:app/ui/screens/add_to_playlist.dart';
-import 'package:app/ui/screens/album_details.dart';
-import 'package:app/ui/screens/artist_details.dart';
+import 'package:app/ui/screens/album_details.dart' as AlbumDetails;
+import 'package:app/ui/screens/artist_details.dart' as ArtistDetails;
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -91,12 +91,7 @@ Future<void> showActionSheet({
           ),
           onTap: () {
             Navigator.pop(context);
-            Navigator.push(
-              context,
-              CupertinoPageRoute<void>(
-                builder: (_) => AlbumDetailsScreen(album: song.album),
-              ),
-            );
+            AlbumDetails.gotoDetailsScreen(context, album: song.album);
           },
           hideSheetOnTap: false,
         ),
@@ -108,13 +103,7 @@ Future<void> showActionSheet({
           ),
           onTap: () {
             Navigator.pop(context);
-            Navigator.push(
-              context,
-              CupertinoPageRoute<void>(
-                builder: (_) => ArtistDetailsScreen(artist: song.artist),
-                title: song.artist.name,
-              ),
-            );
+            ArtistDetails.gotoDetailsScreen(context, artist: song.artist);
           },
           hideSheetOnTap: false,
         ),
@@ -127,13 +116,7 @@ Future<void> showActionSheet({
           ),
           onTap: () {
             Navigator.pop(context);
-            Navigator.push(
-              context,
-              CupertinoPageRoute<void>(
-                builder: (_) => AddToPlaylistScreen(song: song),
-                title: 'Add to a Playlist',
-              ),
-            );
+            gotoAddToPlaylistScreen(context, song: song);
           },
           hideSheetOnTap: false,
         ),

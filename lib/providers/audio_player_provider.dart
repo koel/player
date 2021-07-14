@@ -188,6 +188,11 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
 
   void _broadcastQueueChangedEvent() => _queueModified.add(true);
 
+  Future<void> cleanUpUponLogout() async {
+    await _player.stop();
+    _player.playlist?.audios.clear();
+  }
+
   @override
   Future<void> dispose() async {
     await _queueModified.close();

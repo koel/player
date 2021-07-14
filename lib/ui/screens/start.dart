@@ -15,6 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class StartScreen extends StatefulWidget {
+  static const routeName = '/start';
+
   const StartScreen({Key? key}) : super(key: key);
 
   @override
