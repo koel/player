@@ -14,8 +14,58 @@ import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:provider/provider.dart';
+import 'package:provider/single_child_widget.dart';
 
-void main() async {
+List<SingleChildWidget> _providers = [
+  ChangeNotifierProvider(create: (_) => AuthProvider()),
+  ChangeNotifierProvider(create: (_) => ArtistProvider()),
+  Provider(create: (_) => MediaInfoProvider()),
+  Provider(create: (_) => CacheProvider()),
+  ChangeNotifierProvider(
+    create: (context) => AlbumProvider(
+      artistProvider: context.read<ArtistProvider>(),
+    ),
+  ),
+  ChangeNotifierProvider(
+    create: (context) => SongProvider(
+      artistProvider: context.read<ArtistProvider>(),
+      albumProvider: context.read<AlbumProvider>(),
+    ),
+  ),
+  ChangeNotifierProvider(
+    create: (context) => InteractionProvider(
+      songProvider: context.read<SongProvider>(),
+    ),
+  ),
+  ChangeNotifierProvider(
+    create: (context) => PlaylistProvider(
+      songProvider: context.read<SongProvider>(),
+    ),
+  ),
+  ChangeNotifierProvider(
+    create: (context) => AudioPlayerProvider(
+      songProvider: context.read<SongProvider>(),
+      interactionProvider: context.read<InteractionProvider>(),
+    ),
+  ),
+  ChangeNotifierProvider(
+    create: (context) => SearchProvider(
+      songProvider: context.read<SongProvider>(),
+      artistProvider: context.read<ArtistProvider>(),
+      albumProvider: context.read<AlbumProvider>(),
+    ),
+  ),
+  ChangeNotifierProvider(
+    create: (context) => DataProvider(
+      songProvider: context.read<SongProvider>(),
+      artistProvider: context.read<ArtistProvider>(),
+      albumProvider: context.read<AlbumProvider>(),
+      playlistProvider: context.read<PlaylistProvider>(),
+    ),
+  ),
+];
+
+Future<void> main() async {
   AssetsAudioPlayer.setupNotificationsOpenAction((notification) {
     return true;
   });
@@ -24,54 +74,7 @@ void main() async {
 
   runApp(
     MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => ArtistProvider()),
-        Provider(create: (_) => MediaInfoProvider()),
-        Provider(create: (_) => CacheProvider()),
-        ChangeNotifierProvider(
-          create: (context) => AlbumProvider(
-            artistProvider: context.read<ArtistProvider>(),
-          ),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => SongProvider(
-            artistProvider: context.read<ArtistProvider>(),
-            albumProvider: context.read<AlbumProvider>(),
-          ),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => InteractionProvider(
-            songProvider: context.read<SongProvider>(),
-          ),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => PlaylistProvider(
-            songProvider: context.read<SongProvider>(),
-          ),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => AudioPlayerProvider(
-            songProvider: context.read<SongProvider>(),
-            interactionProvider: context.read<InteractionProvider>(),
-          ),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => SearchProvider(
-            songProvider: context.read<SongProvider>(),
-            artistProvider: context.read<ArtistProvider>(),
-            albumProvider: context.read<AlbumProvider>(),
-          ),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => DataProvider(
-            songProvider: context.read<SongProvider>(),
-            artistProvider: context.read<ArtistProvider>(),
-            albumProvider: context.read<AlbumProvider>(),
-            playlistProvider: context.read<PlaylistProvider>(),
-          ),
-        ),
-      ],
+      providers: _providers,
       child: App(),
     ),
   );
