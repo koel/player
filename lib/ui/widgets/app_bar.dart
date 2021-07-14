@@ -82,10 +82,7 @@ class CoverImageStack extends StatelessWidget {
 
     if (songs.isNotEmpty) {
       images = songs
-          .where((song) {
-            return song.image is NetworkImage &&
-                !(song.image as NetworkImage).url.endsWith('unknown-album.png');
-          })
+          .where((song) => song.hasCustomImage)
           .map((song) => song.image)
           .toList();
 

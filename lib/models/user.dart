@@ -1,5 +1,5 @@
 import 'package:app/utils/crypto.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class User {
   int id;
@@ -14,10 +14,12 @@ class User {
     required this.isAdmin,
   });
 
-  NetworkImage get avatar {
+  CachedNetworkImageProvider get avatar {
     String hash = md5(name.trim().toLowerCase());
-    return NetworkImage(
-        'https://www.gravatar.com/avatar/$hash?s=512&d=robohash');
+
+    return CachedNetworkImageProvider(
+      'https://www.gravatar.com/avatar/$hash?s=512&d=robohash',
+    );
   }
 
   factory User.fromJson(Map<String, dynamic> json) {

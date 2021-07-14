@@ -46,13 +46,11 @@ class Song {
     );
   }
 
-  ImageProvider get image => this.album.image;
+  ImageProvider get image => album.image;
 
   String get sourceUrl {
     if (_sourceUrl == null) {
-      _sourceUrl = Uri.encodeFull(
-        '$hostUrl/play/$id?api_token=$apiToken',
-      );
+      _sourceUrl = Uri.encodeFull('$hostUrl/play/$id?api_token=$apiToken');
     }
 
     return _sourceUrl!;
@@ -94,6 +92,13 @@ class Song {
       key: cacheKey,
       force: true,
     );
+  }
+
+  bool get hasCustomImage {
+    return image is CachedNetworkImageProvider &&
+        !(image as CachedNetworkImageProvider).url.endsWith(
+              '/unknown-album.png',
+            );
   }
 
   String get cacheKey => 'CACHE_$id';

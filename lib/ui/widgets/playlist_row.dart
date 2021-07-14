@@ -48,8 +48,7 @@ class _PlaylistRowState extends State<PlaylistRow> with StreamSubscriber {
 
     if (!_playlist.isEmpty) {
       Song songWithCustomImage = _playlist.songs.firstWhere((song) {
-        return song.image is NetworkImage &&
-            !(song.image as NetworkImage).url.endsWith('/unknown-album.png');
+        return song.hasCustomImage;
       }, orElse: () => _playlist.songs[0]);
 
       thumbnail = songWithCustomImage.image;
