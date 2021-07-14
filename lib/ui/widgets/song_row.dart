@@ -10,6 +10,7 @@ import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/style.dart';
 import 'package:provider/provider.dart';
 
 class SongRow extends StatefulWidget {
@@ -66,7 +67,10 @@ class _SongRowState extends State<SongRow> {
         shape: widget.bordered
             ? Border(bottom: Divider.createBorderSide(context))
             : null,
-        leading: SongRowThumbnail(song: widget.song),
+        leading: widget.listContext == SongListContext.album
+            ? SongRowTrackNumber(song: widget.song)
+            : SongRowThumbnail(song: widget.song),
+        minLeadingWidth: widget.listContext == SongListContext.album ? 0 : null,
         title: Text(widget.song.title, overflow: TextOverflow.ellipsis),
         subtitle: Text(
           subtitle,
@@ -78,6 +82,26 @@ class _SongRowState extends State<SongRow> {
           listContext: widget.listContext,
           index: widget.index,
         ),
+      ),
+    );
+  }
+}
+
+class SongRowTrackNumber extends StatelessWidget {
+  final Song song;
+
+  const SongRowTrackNumber({Key? key, required this.song}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 24,
+      height: 48,
+      alignment: Alignment.center,
+      child: Text(
+        song.track == 0 ? '' : song.track.toString(),
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(fontSize: FontSize.large.size, color: Colors.white54),
       ),
     );
   }

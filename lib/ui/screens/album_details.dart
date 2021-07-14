@@ -52,9 +52,7 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
       case OrderBy.title:
         return songs..sort((a, b) => a.title.compareTo(b.title));
       case OrderBy.trackNumber:
-        return songs
-          ..sort((a, b) =>
-              '${a.track}${a.title}'.compareTo('${b.track}${b.title}'));
+        return songs..sort((a, b) => a.track.compareTo(b.track));
       case OrderBy.recentlyAdded:
         return songs..sort((a, b) => b.createdAt.compareTo(a.createdAt));
       default:
