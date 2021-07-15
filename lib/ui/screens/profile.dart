@@ -88,6 +88,7 @@ class ProfileScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
                       GestureDetector(
+                        behavior: HitTestBehavior.opaque,
                         child: MetricBlock(
                           number: songProvider.songs.length,
                           label: 'songs',
@@ -96,6 +97,7 @@ class ProfileScreen extends StatelessWidget {
                             .pushNamed(SongsScreen.routeName),
                       ),
                       GestureDetector(
+                        behavior: HitTestBehavior.opaque,
                         child: MetricBlock(
                           number: playlistProvider.playlists.length,
                           label: 'playlists',
@@ -104,6 +106,7 @@ class ProfileScreen extends StatelessWidget {
                             .pushNamed(PlaylistsScreen.routeName),
                       ),
                       GestureDetector(
+                        behavior: HitTestBehavior.opaque,
                         child: const FavoriteMetricBlock(),
                         onTap: () => Navigator.of(context, rootNavigator: true)
                             .pushNamed(FavoritesScreen.routeName),
@@ -157,7 +160,6 @@ class LogOutButton extends StatelessWidget {
                     child: const Text('Confirm'),
                     isDestructiveAction: true,
                     onPressed: () async {
-                      Navigator.pop(context);
                       await auth.logout();
                       await audio.cleanUpUponLogout();
                       Navigator.of(

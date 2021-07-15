@@ -12,7 +12,6 @@ ThemeData themeData(BuildContext context) => ThemeData(
         backgroundColor: AppColors.primaryBgr.withOpacity(.8),
         elevation: 0,
       ),
-
       popupMenuTheme: PopupMenuThemeData(
         elevation: 2,
         color: Colors.grey.shade900,
@@ -20,7 +19,6 @@ ThemeData themeData(BuildContext context) => ThemeData(
           borderRadius: BorderRadius.all(Radius.circular(8)),
         ),
       ),
-
       sliderTheme: SliderThemeData(
         activeTrackColor: Colors.white70,
         inactiveTrackColor: Colors.white30,
@@ -129,7 +127,6 @@ ThemeData themeData(BuildContext context) => ThemeData(
           padding: AppDimensions.inputPadding,
         ),
       ),
-
       inputDecorationTheme: Theme.of(context).inputDecorationTheme.copyWith(
             labelStyle: const TextStyle(color: Colors.white70),
             hintStyle: const TextStyle(color: Colors.white),

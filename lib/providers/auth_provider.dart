@@ -39,7 +39,10 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await delete('me');
+    try {
+      await delete('me');
+    } catch (_) {}
+
     preferences.apiToken = null;
   }
 }

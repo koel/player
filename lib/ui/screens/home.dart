@@ -6,9 +6,9 @@ import 'package:app/providers/interaction_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/albums.dart';
 import 'package:app/ui/screens/artists.dart';
+import 'package:app/ui/screens/main.dart';
 import 'package:app/ui/screens/profile.dart';
 import 'package:app/ui/screens/songs.dart';
-import 'package:app/ui/screens/start.dart';
 import 'package:app/ui/widgets/album_card.dart';
 import 'package:app/ui/widgets/artist_card.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
@@ -61,7 +61,7 @@ class HomeScreen extends StatelessWidget {
                           rootNavigator: true,
                         ).pushReplacement(
                           MaterialPageRoute(
-                            builder: (_) => const StartScreen(),
+                            builder: (_) => const MainScreen(),
                           ),
                         );
                       },
@@ -194,7 +194,7 @@ class MostPlayedSongs extends StatelessWidget {
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.only(left: AppDimensions.horizontalPadding),
-          child: Heading5(text: 'Most played'),
+          child: const Heading5(text: 'Most played'),
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,

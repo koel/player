@@ -1,6 +1,6 @@
 import 'package:app/constants/dimensions.dart';
 import 'package:app/providers/auth_provider.dart';
-import 'package:app/ui/screens/start.dart';
+import 'package:app/ui/screens/data_loading.dart';
 import 'package:app/ui/widgets/spinner.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:flutter/cupertino.dart';
@@ -77,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.of(
           context,
           rootNavigator: true,
-        ).pushReplacementNamed(StartScreen.routeName);
+        ).pushReplacementNamed(DataLoadingScreen.routeName);
       } else {
         showErrorDialog(context);
       }

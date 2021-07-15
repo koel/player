@@ -1,7 +1,7 @@
 import 'package:app/models/user.dart';
 import 'package:app/providers/auth_provider.dart';
+import 'package:app/ui/screens/data_loading.dart';
 import 'package:app/ui/screens/login.dart';
-import 'package:app/ui/screens/start.dart';
 import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -27,12 +27,13 @@ class _InitialScreenState extends State<InitialScreen> {
 
   @override
   Widget build(BuildContext context) {
-    futureUser.then(
-      (user) => Navigator.pushReplacementNamed(
-        context,
-        user == null ? LoginScreen.routeName : StartScreen.routeName,
-      ),
-    );
+    futureUser.then((user) {
+      Navigator.of(context).pushReplacement(PageRouteBuilder(
+        pageBuilder: (_, __, ___) =>
+            user == null ? const LoginScreen() : const DataLoadingScreen(),
+        transitionDuration: Duration.zero,
+      ));
+    });
 
     return const ContainerWithSpinner();
   }
