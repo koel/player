@@ -11,12 +11,14 @@ class SimpleSongList extends StatelessWidget {
   final Iterable<Song> songs;
   final String? headingText;
   final bool bordered;
+  final VoidCallback? onHeaderTap;
 
   const SimpleSongList({
     Key? key,
     required this.songs,
     this.headingText,
     this.bordered = false,
+    this.onHeaderTap,
   }) : super(key: key);
 
   @override
@@ -24,7 +26,12 @@ class SimpleSongList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        if (headingText != null) Heading5(text: headingText!),
+        if (headingText != null)
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onHeaderTap,
+            child: Heading5(text: headingText!),
+          ),
         ...songs.map(
           (song) => SongRow(
             song: song,
