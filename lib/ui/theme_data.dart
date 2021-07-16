@@ -129,7 +129,7 @@ ThemeData themeData(BuildContext context) => ThemeData(
       ),
       inputDecorationTheme: Theme.of(context).inputDecorationTheme.copyWith(
             labelStyle: const TextStyle(color: Colors.white70),
-            hintStyle: const TextStyle(color: Colors.white),
+            hintStyle: const TextStyle(color: Colors.white24),
             contentPadding: AppDimensions.inputPadding,
             enabledBorder: OutlineInputBorder(
               borderSide: const BorderSide(color: Colors.transparent),
