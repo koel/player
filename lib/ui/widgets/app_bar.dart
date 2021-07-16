@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:app/constants/dimensions.dart';
 import 'package:app/models/song.dart';
+import 'package:app/utils/preferences.dart' as preferences;
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -78,12 +80,12 @@ class CoverImageStack extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const imageCount = 4;
-    List<ImageProvider> images = [];
+    List<String?> images = [];
 
     if (songs.isNotEmpty) {
       images = songs
           .where((song) => song.hasCustomImage)
-          .map((song) => song.image)
+          .map((song) => song.imageUrl)
           .toList();
 
       images.shuffle();
@@ -92,7 +94,7 @@ class CoverImageStack extends StatelessWidget {
 
     // fill up to 4 images
     for (int i = images.length; i < imageCount; ++i) {
-      images.insert(0, AssetImage('assets/images/unknown-album.png'));
+      images.insert(0, preferences.defaultImageUrl);
     }
 
     return Stack(
@@ -101,19 +103,19 @@ class CoverImageStack extends StatelessWidget {
         Positioned(
           left: -16,
           top: -24,
-          child: CoverImage(image: images[0], overlayOpacity: .8),
+          child: CoverImage(imageUrl: images[0], overlayOpacity: .8),
         ),
         Positioned(
           left: 32,
           top: -16,
-          child: CoverImage(image: images[1], overlayOpacity: .6),
+          child: CoverImage(imageUrl: images[1], overlayOpacity: .6),
         ),
         Positioned(
           left: 14,
           top: 20,
-          child: CoverImage(image: images[2], overlayOpacity: .4),
+          child: CoverImage(imageUrl: images[2], overlayOpacity: .4),
         ),
-        CoverImage(image: images[3]),
+        CoverImage(imageUrl: images[3]),
       ],
     );
   }
@@ -121,11 +123,11 @@ class CoverImageStack extends StatelessWidget {
 
 class CoverImage extends StatelessWidget {
   final double overlayOpacity;
-  final ImageProvider<Object> image;
+  final String? imageUrl;
 
   const CoverImage({
     Key? key,
-    required this.image,
+    required this.imageUrl,
     this.overlayOpacity = 0.0,
   }) : super(key: key);
 
@@ -141,7 +143,9 @@ class CoverImage extends StatelessWidget {
               Colors.black.withOpacity(overlayOpacity),
               BlendMode.srcOver,
             ),
-            image: image,
+            image: CachedNetworkImageProvider(
+              imageUrl ?? preferences.defaultImageUrl,
+            ),
             fit: BoxFit.cover,
             alignment: Alignment.topCenter,
           ),

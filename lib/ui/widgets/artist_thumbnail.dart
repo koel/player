@@ -1,5 +1,7 @@
+import 'package:app/constants/images.dart';
 import 'package:app/models/artist.dart';
-import 'package:app/ui/widgets/decorated_image_box.dart';
+import 'package:app/utils/preferences.dart' as preferences;
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 enum ThumbnailSize { sm, md, lg, xl }
@@ -18,19 +20,23 @@ class ArtistThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget imageBox = DecoratedImageBox(
-      image: artist.image,
-      borderRadius: borderRadius,
-    );
-    return SizedBox(
+    Widget image = CachedNetworkImage(
+      fit: BoxFit.cover,
       width: width,
       height: height,
+      placeholder: (_, __) => defaultImage,
+      errorWidget: (_, __, ___) => defaultImage,
+      imageUrl: artist.imageUrl ?? preferences.defaultImageUrl,
+    );
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(borderRadius),
       child: asHero
           ? Hero(
               tag: 'artist-hero-${artist.id}',
-              child: imageBox,
+              child: image,
             )
-          : imageBox,
+          : image,
     );
   }
 

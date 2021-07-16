@@ -59,9 +59,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
             slivers: <Widget>[
               AppBar(
                 headingText: populatedPlaylist.name,
-                coverImage: CoverImageStack(
-                  songs: populatedPlaylist.songs,
-                ),
+                coverImage: CoverImageStack(songs: populatedPlaylist.songs),
               ),
               SliverToBoxAdapter(
                 child: playlist.isEmpty
@@ -75,9 +73,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                     child: Center(
                       child: Text(
                         'The playlist is empty.',
-                        style: TextStyle(
-                          color: Colors.white54,
-                        ),
+                        style: TextStyle(color: Colors.white54),
                       ),
                     ),
                   ),
@@ -88,31 +84,30 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                     (_, int index) {
                       final bool dismissible = populatedPlaylist.isStandard;
                       final Song song = populatedPlaylist.songs[index];
-                      return Dismissible(
-                        direction: dismissible
-                            ? DismissDirection.endToStart
-                            : DismissDirection.none,
-                        onDismissed: dismissible
-                            ? (DismissDirection direction) =>
+                      return dismissible
+                          ? Dismissible(
+                              direction: DismissDirection.endToStart,
+                              onDismissed: (DismissDirection direction) {
                                 playlistProvider.removeSongFromPlaylist(
                                   song: song,
                                   playlist: populatedPlaylist,
-                                )
-                            : null,
-                        background: Container(
-                          alignment: AlignmentDirectional.centerEnd,
-                          color: Colors.red,
-                          child: const Padding(
-                            padding: EdgeInsets.only(right: 28),
-                            child: Icon(CupertinoIcons.delete_simple),
-                          ),
-                        ),
-                        key: ValueKey(song),
-                        child: SongRow(
-                          key: ValueKey(song),
-                          song: song,
-                        ),
-                      );
+                                );
+                              },
+                              background: Container(
+                                alignment: AlignmentDirectional.centerEnd,
+                                color: Colors.red,
+                                child: const Padding(
+                                  padding: EdgeInsets.only(right: 28),
+                                  child: Icon(CupertinoIcons.delete_simple),
+                                ),
+                              ),
+                              key: ValueKey(song),
+                              child: SongRow(
+                                key: ValueKey(song),
+                                song: song,
+                              ),
+                            )
+                          : SongRow(song: song);
                     },
                     childCount: playlist.songs.length,
                   ),

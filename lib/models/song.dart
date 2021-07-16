@@ -56,6 +56,8 @@ class Song {
     return _sourceUrl!;
   }
 
+  String? get imageUrl => album.cover ?? artist.imageUrl;
+
   Future<Audio> asAudio() async {
     Metas metas = Metas(
       title: title,

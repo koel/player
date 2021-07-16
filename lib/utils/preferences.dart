@@ -40,3 +40,5 @@ LoopMode get loopMode {
 set volume(double volume) => _set('volume', volume);
 
 double get volume => _get<double>('volume') ?? 0.7;
+
+String get defaultImageUrl => '$hostUrl/images/unknown-album.png';

@@ -1,3 +1,4 @@
+import 'package:app/constants/images.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -21,7 +22,7 @@ class Artist {
   ImageProvider get image {
     if (_image == null) {
       _image = imageUrl == null
-          ? Image.asset(imageUrl!).image
+          ? defaultImage.image
           : CachedNetworkImageProvider(this.imageUrl!);
     }
 

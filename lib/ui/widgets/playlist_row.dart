@@ -1,8 +1,11 @@
+import 'package:app/constants/images.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/playlist.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/playlist_provider.dart';
 import 'package:app/ui/screens/playlist_details.dart';
+import 'package:app/utils/preferences.dart' as preferences;
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -44,36 +47,34 @@ class _PlaylistRowState extends State<PlaylistRow> with StreamSubscriber {
   }
 
   Widget playlistThumbnail() {
-    late ImageProvider thumbnail;
+    late String? thumbnailUrl;
 
     if (!_playlist.isEmpty) {
       Song songWithCustomImage = _playlist.songs.firstWhere((song) {
         return song.hasCustomImage;
       }, orElse: () => _playlist.songs[0]);
 
-      thumbnail = songWithCustomImage.image;
+      thumbnailUrl = songWithCustomImage.imageUrl;
     } else {
-      thumbnail = AssetImage('assets/images/unknown-album.png');
+      thumbnailUrl = preferences.defaultImageUrl;
     }
 
-    return SizedBox(
-      width: 40,
-      height: 40,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(6)),
-          image: _playlist.populated
-              ? DecorationImage(image: thumbnail, fit: BoxFit.cover)
-              : null,
-        ),
-        child: _playlist.populated
-            ? const SizedBox.shrink()
-            : Icon(
-                CupertinoIcons.music_note_list,
-                color: Colors.white54,
-              ),
-      ),
-    );
+    return _playlist.populated
+        ? ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: CachedNetworkImage(
+              fit: BoxFit.cover,
+              width: 40,
+              height: 40,
+              placeholder: (_, __) => defaultImage,
+              errorWidget: (_, __, ___) => defaultImage,
+              imageUrl: thumbnailUrl ?? preferences.defaultImageUrl,
+            ),
+          )
+        : Icon(
+            CupertinoIcons.music_note_list,
+            color: Colors.white54,
+          );
   }
 
   void _defaultOnTap() => gotoDetailsScreen(context, playlist: _playlist);

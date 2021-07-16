@@ -1,5 +1,7 @@
+import 'package:app/constants/images.dart';
 import 'package:app/models/song.dart';
-import 'package:app/ui/widgets/decorated_image_box.dart';
+import 'package:app/utils/preferences.dart' as preferences;
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 enum ThumbnailSize { sm, md, lg, xl }
@@ -25,11 +27,16 @@ class SongThumbnail extends StatelessWidget {
             song: song,
             borderRadius: borderRadius,
           )
-        : SizedBox(
-            width: width,
-            height: height,
-            child: DecoratedImageBox(
-                image: song.image, borderRadius: borderRadius),
+        : ClipRRect(
+            borderRadius: BorderRadius.circular(borderRadius),
+            child: CachedNetworkImage(
+              fit: BoxFit.cover,
+              width: width,
+              height: height,
+              placeholder: (_, __) => defaultImage,
+              errorWidget: (_, __, ___) => defaultImage,
+              imageUrl: song.imageUrl ?? preferences.defaultImageUrl,
+            ),
           );
   }
 
