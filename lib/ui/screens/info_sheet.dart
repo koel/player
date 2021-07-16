@@ -177,13 +177,15 @@ class ArtistInfoPane extends StatelessWidget {
             children: <Widget>[
               ArtistThumbnail(artist: song.artist),
               const SizedBox(width: 12),
-              Text(
-                song.artist.name,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
+              Expanded(
+                child: Text(
+                  song.artist.name,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
@@ -221,13 +223,15 @@ class AlbumInfoPane extends StatelessWidget {
             children: <Widget>[
               AlbumThumbnail(album: song.album),
               const SizedBox(width: 12),
-              Text(
-                song.album.name,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
+              Expanded(
+                child: Text(
+                  song.album.name,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
