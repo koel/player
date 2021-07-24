@@ -2,7 +2,7 @@ import 'package:app/utils/crypto.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class User {
-  int id;
+  dynamic id; // This might be a UUID string in the near future
   String name;
   String email;
   bool isAdmin;

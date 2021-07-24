@@ -1,5 +1,6 @@
 import 'package:app/providers/data_provider.dart';
 import 'package:app/ui/screens/main.dart';
+import 'package:app/ui/widgets/oops_box.dart';
 import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -46,24 +47,8 @@ class _DataLoadingScreen extends State<DataLoadingScreen> {
 
     return Scaffold(
       body: _hasError
-          ? Container(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => setState(() => _hasError = false),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        'Oops!',
-                        style: Theme.of(context).textTheme.headline5,
-                      ),
-                      SizedBox(height: 16),
-                      Text('Failed to load data. Tap anywhere to retry.'),
-                    ],
-                  ),
-                ),
-              ),
+          ? OopsBox(
+              onRetryButtonPressed: () => setState(() => _hasError = false),
             )
           : const ContainerWithSpinner(),
     );

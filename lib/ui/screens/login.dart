@@ -35,8 +35,8 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  showErrorDialog(BuildContext context) {
-    showDialog(
+  Future<void> showErrorDialog(BuildContext context) async {
+    await showDialog(
       context: context,
       builder: (BuildContext context) => CupertinoAlertDialog(
         title: const Text('Error'),
@@ -79,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
           rootNavigator: true,
         ).pushReplacementNamed(DataLoadingScreen.routeName);
       } else {
-        showErrorDialog(context);
+        throw Error();
       }
     }
 
@@ -124,7 +124,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final submitButton = ElevatedButton(
       child: const Text('Log In'),
-      onPressed: attemptLogin,
+      onPressed: () async {
+        try {
+          await attemptLogin();
+        } catch (error) {
+          await showErrorDialog(context);
+        }
+      },
     );
 
     final spinnerWidget = const Center(

@@ -33,6 +33,10 @@ class _InitialScreenState extends State<InitialScreen> {
             user == null ? const LoginScreen() : const DataLoadingScreen(),
         transitionDuration: Duration.zero,
       ));
+    }, onError: (_) async {
+      await Navigator.of(context, rootNavigator: true).pushReplacementNamed(
+        LoginScreen.routeName,
+      );
     });
 
     return const ContainerWithSpinner();

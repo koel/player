@@ -1,7 +1,7 @@
 import 'package:app/models/song.dart';
 
 class Playlist {
-  int id;
+  dynamic id; // This might be a UUID string in the near future
   String name;
   bool isSmart;
   bool populated = false;
