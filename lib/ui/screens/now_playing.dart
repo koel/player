@@ -103,6 +103,7 @@ class NowPlayingScreen extends StatelessWidget {
                   infoPane,
                   const AudioControls(),
                   Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       const VolumeSlider(),
                       Row(

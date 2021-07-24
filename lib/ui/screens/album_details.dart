@@ -157,10 +157,3 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
     );
   }
 }
-
-void gotoDetailsScreen(BuildContext context, {required Album album}) {
-  Navigator.of(context, rootNavigator: true).pushNamed(
-    AlbumDetailsScreen.routeName,
-    arguments: album,
-  );
-}

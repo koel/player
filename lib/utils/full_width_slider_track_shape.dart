@@ -8,7 +8,7 @@ class FullWidthSliderTrackShape extends RoundedRectSliderTrackShape {
     bool isEnabled = false,
     bool isDiscrete = false,
   }) {
-    final double trackHeight = sliderTheme!.trackHeight ?? 3;
+    final double trackHeight = sliderTheme?.trackHeight ?? 3;
     final double trackLeft = offset.dx;
     final double trackTop =
         offset.dy + (parentBox!.size.height - trackHeight) / 2;

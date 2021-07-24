@@ -1,13 +1,18 @@
 import 'package:app/models/album.dart';
-import 'package:app/ui/screens/album_details.dart';
+import 'package:app/router.dart';
 import 'package:app/ui/widgets/album_thumbnail.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class AlbumCard extends StatefulWidget {
   final Album album;
+  final AppRouter router;
 
-  AlbumCard({Key? key, required this.album}) : super(key: key);
+  AlbumCard({
+    Key? key,
+    required this.album,
+    this.router = const AppRouter(),
+  }) : super(key: key);
 
   @override
   _AlbumCardState createState() => _AlbumCardState();
@@ -22,7 +27,10 @@ class _AlbumCardState extends State<AlbumCard> {
       onTapDown: (_) => setState(() => _opacity = .4),
       onTapUp: (_) => setState(() => _opacity = 1),
       onTapCancel: () => setState(() => _opacity = 1),
-      onTap: () => gotoDetailsScreen(context, album: widget.album),
+      onTap: () => widget.router.gotoAlbumDetailsScreen(
+        context,
+        album: widget.album,
+      ),
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 100),
         opacity: _opacity,

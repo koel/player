@@ -4,8 +4,8 @@ import 'package:app/extensions/assets_audio_player.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/interaction_provider.dart';
+import 'package:app/router.dart';
 import 'package:app/ui/screens/add_to_playlist.dart';
-import 'package:app/ui/screens/album_details.dart' as AlbumDetails;
 import 'package:app/ui/screens/artist_details.dart' as ArtistDetails;
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:flutter/cupertino.dart';
@@ -91,7 +91,7 @@ Future<void> showActionSheet({
           ),
           onTap: () {
             Navigator.pop(context);
-            AlbumDetails.gotoDetailsScreen(context, album: song.album);
+            AppRouter().gotoAlbumDetailsScreen(context, album: song.album);
           },
           hideSheetOnTap: false,
         ),

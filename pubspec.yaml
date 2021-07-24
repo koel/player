@@ -41,6 +41,9 @@ dependencies:
   intl: ^0.17.0
   get_storage: ^2.0.2
   cached_network_image: ^3.0.0
+  faker: ^2.0.0
+  mockito: ^5.0.12
+  build_runner: ^2.0.6
 
 dev_dependencies:
   flutter_test:

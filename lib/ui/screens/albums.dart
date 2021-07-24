@@ -1,6 +1,6 @@
 import 'package:app/models/album.dart';
 import 'package:app/providers/album_provider.dart';
-import 'package:app/ui/screens/album_details.dart';
+import 'package:app/router.dart';
 import 'package:app/ui/widgets/album_thumbnail.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/typography.dart';
@@ -11,7 +11,12 @@ import 'package:provider/provider.dart';
 class AlbumsScreen extends StatefulWidget {
   static const routeName = '/albums';
 
-  const AlbumsScreen({Key? key}) : super(key: key);
+  final AppRouter router;
+
+  const AlbumsScreen({
+    Key? key,
+    this.router = const AppRouter(),
+  }) : super(key: key);
 
   @override
   _AlbumsScreenState createState() => _AlbumsScreenState();
@@ -50,7 +55,10 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                       border: Border(bottom: Divider.createBorderSide(context)),
                     ),
                     child: InkWell(
-                      onTap: () => gotoDetailsScreen(context, album: album),
+                      onTap: () => widget.router.gotoAlbumDetailsScreen(
+                        context,
+                        album: album,
+                      ),
                       child: ListTile(
                         leading: AlbumThumbnail(album: album, asHero: true),
                         title:
