@@ -44,6 +44,7 @@ dependencies:
   faker: ^2.0.0
   mockito: ^5.0.12
   build_runner: ^2.0.6
+  uuid: ^3.0.4
 
 dev_dependencies:
   flutter_test:

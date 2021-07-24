@@ -8,9 +8,11 @@ extension WidgetExtension on Widget {
   Widget wrapForTest({Map<String, Widget Function(BuildContext)>? routes}) {
     return MediaQuery(
       data: MediaQueryData(),
-      child: MaterialApp(
-        home: this,
-        routes: routes ?? {},
+      child: Material(
+        child: MaterialApp(
+          home: this,
+          routes: routes ?? {},
+        ),
       ),
     );
   }

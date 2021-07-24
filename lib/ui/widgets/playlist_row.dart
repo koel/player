@@ -1,4 +1,5 @@
 import 'package:app/constants/images.dart';
+import 'package:app/extensions/string.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/playlist.dart';
 import 'package:app/models/song.dart';
@@ -46,20 +47,53 @@ class _PlaylistRowState extends State<PlaylistRow> with StreamSubscriber {
     super.dispose();
   }
 
-  Widget playlistThumbnail() {
+  void _defaultOnTap() => gotoDetailsScreen(context, playlist: _playlist);
+
+  @override
+  Widget build(BuildContext context) {
+    String subtitle =
+        _playlist.isSmart ? 'Smart playlist' : 'Standard playlist';
+
+    if (_playlist.populated) {
+      subtitle += _playlist.isEmpty
+          ? ' • Empty'
+          : ' • ${_playlist.songs.length} song'.pluralize(
+              _playlist.songs.length,
+            );
+    }
+
+    return InkWell(
+      onTap: widget.onTap ?? _defaultOnTap,
+      child: ListTile(
+        shape: Border(bottom: Divider.createBorderSide(context)),
+        leading: PlaylistThumbnail(playlist: _playlist),
+        title: Text(_playlist.name, overflow: TextOverflow.ellipsis),
+        subtitle: Text(subtitle),
+      ),
+    );
+  }
+}
+
+class PlaylistThumbnail extends StatelessWidget {
+  final Playlist playlist;
+
+  const PlaylistThumbnail({Key? key, required this.playlist}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     late String? thumbnailUrl;
 
-    if (!_playlist.isEmpty) {
-      Song songWithCustomImage = _playlist.songs.firstWhere((song) {
+    if (!playlist.isEmpty) {
+      Song songWithCustomImage = playlist.songs.firstWhere((song) {
         return song.hasCustomImage;
-      }, orElse: () => _playlist.songs[0]);
+      }, orElse: () => playlist.songs[0]);
 
       thumbnailUrl = songWithCustomImage.imageUrl;
     } else {
       thumbnailUrl = preferences.defaultImageUrl;
     }
 
-    return _playlist.populated
+    return playlist.populated
         ? ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: CachedNetworkImage(
@@ -71,34 +105,9 @@ class _PlaylistRowState extends State<PlaylistRow> with StreamSubscriber {
               imageUrl: thumbnailUrl ?? preferences.defaultImageUrl,
             ),
           )
-        : Icon(
+        : const Icon(
             CupertinoIcons.music_note_list,
             color: Colors.white54,
           );
-  }
-
-  void _defaultOnTap() => gotoDetailsScreen(context, playlist: _playlist);
-
-  @override
-  Widget build(BuildContext context) {
-    String subtitle =
-        _playlist.isSmart ? 'Smart playlist' : 'Standard playlist';
-
-    if (_playlist.populated) {
-      subtitle += _playlist.isEmpty
-          ? ' • Empty'
-          : ' • ${_playlist.songs.length} song' +
-              (_playlist.songs.length == 1 ? '' : 's');
-    }
-
-    return InkWell(
-      onTap: widget.onTap ?? _defaultOnTap,
-      child: ListTile(
-        shape: Border(bottom: Divider.createBorderSide(context)),
-        leading: playlistThumbnail(),
-        title: Text(_playlist.name, overflow: TextOverflow.ellipsis),
-        subtitle: Text(subtitle),
-      ),
-    );
   }
 }
