@@ -6,18 +6,21 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../extensions/widget_extension.dart';
 
 void main() {
+  Widget mount({void Function()? onPressed}) {
+    return Flex(
+      direction: Axis.vertical,
+      children: <Widget>[
+        FullWidthPrimaryIconButton(
+          icon: CupertinoIcons.phone,
+          label: 'Call Me',
+          onPressed: onPressed,
+        )
+      ],
+    ).wrapForTest();
+  }
+
   testWidgets('renders', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Flex(
-        direction: Axis.vertical,
-        children: <Widget>[
-          FullWidthPrimaryIconButton(
-            icon: CupertinoIcons.phone,
-            label: 'Call Me',
-          )
-        ],
-      ).wrapForTest(),
-    );
+    await tester.pumpWidget(mount());
 
     expect(find.byType(ElevatedButton), findsOneWidget);
     expect(find.byType(Icon), findsOneWidget);
@@ -33,19 +36,7 @@ void main() {
 
   testWidgets('triggers callback', (WidgetTester tester) async {
     var onPressed = MockOnPress();
-
-    await tester.pumpWidget(
-      Flex(
-        direction: Axis.vertical,
-        children: <Widget>[
-          FullWidthPrimaryIconButton(
-            icon: CupertinoIcons.phone,
-            label: 'Call Me',
-            onPressed: onPressed,
-          )
-        ],
-      ).wrapForTest(),
-    );
+    await tester.pumpWidget(mount(onPressed: onPressed));
 
     await tester.tap(find.byType(ElevatedButton));
     expect(onPressed.called, isTrue);
