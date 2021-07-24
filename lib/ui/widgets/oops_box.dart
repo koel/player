@@ -24,15 +24,15 @@ class OopsBox extends StatelessWidget {
               'Oops!',
               style: Theme.of(context).textTheme.headline5,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(message ?? 'Something wrong happened.'),
-            SizedBox(height: 8.0),
+            const SizedBox(height: 8.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 TextButton(
                   onPressed: onRetryButtonPressed,
-                  child: Text('Retry'),
+                  child: const Text('Retry'),
                 ),
                 TextButton(
                   onPressed: () async {
@@ -45,7 +45,10 @@ class OopsBox extends StatelessWidget {
                       (_) => false,
                     );
                   },
-                  child: Text('Log Out', style: TextStyle(color: Colors.red)),
+                  child: const Text(
+                    'Log Out',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ),
               ],
             )

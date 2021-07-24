@@ -1,4 +1,3 @@
-import 'package:app/models/user.dart';
 import 'package:app/providers/auth_provider.dart';
 import 'package:app/ui/screens/data_loading.dart';
 import 'package:app/ui/screens/login.dart';
@@ -17,17 +16,14 @@ class InitialScreen extends StatefulWidget {
 }
 
 class _InitialScreenState extends State<InitialScreen> {
-  late Future<User?> futureUser;
-
   @override
   void initState() {
     super.initState();
-    futureUser = context.read<AuthProvider>().tryGetAuthUser();
+    _resolveAuthenticatedUser();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    futureUser.then((user) {
+  Future<void> _resolveAuthenticatedUser() async {
+    context.read<AuthProvider>().tryGetAuthUser().then((user) {
       Navigator.of(context).pushReplacement(PageRouteBuilder(
         pageBuilder: (_, __, ___) =>
             user == null ? const LoginScreen() : const DataLoadingScreen(),
@@ -38,7 +34,10 @@ class _InitialScreenState extends State<InitialScreen> {
         LoginScreen.routeName,
       );
     });
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return const ContainerWithSpinner();
   }
 }

@@ -16,22 +16,20 @@ class DataLoadingScreen extends StatefulWidget {
 }
 
 class _DataLoadingScreen extends State<DataLoadingScreen> {
-  late Future<void> futureData;
   bool _hasError = false;
 
   @override
   void initState() {
     super.initState();
-    futureData = context.read<DataProvider>().init(context);
+    _loadData();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    futureData.then((data) {
-      Navigator.of(context).pushReplacement(
+  Future<void> _loadData() async {
+    context.read<DataProvider>().init(context).then((_) async {
+      await Navigator.of(context).pushReplacement(
         PageRouteBuilder(
           pageBuilder: (_, __, ___) => const MainScreen(),
-          transitionDuration: Duration(seconds: 2),
+          transitionDuration: const Duration(seconds: 2),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return ZoomPageTransitionsBuilder().buildTransitions(
               null,
@@ -44,7 +42,10 @@ class _DataLoadingScreen extends State<DataLoadingScreen> {
         ),
       );
     }, onError: (_) => setState(() => _hasError = true));
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: _hasError
           ? OopsBox(
