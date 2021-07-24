@@ -6,7 +6,6 @@ import 'package:app/providers/audio_player_provider.dart';
 import 'package:app/providers/interaction_provider.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/screens/add_to_playlist.dart';
-import 'package:app/ui/screens/artist_details.dart' as ArtistDetails;
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -103,7 +102,7 @@ Future<void> showActionSheet({
           ),
           onTap: () {
             Navigator.pop(context);
-            ArtistDetails.gotoDetailsScreen(context, artist: song.artist);
+            AppRouter().gotoArtistDetailsScreen(context, artist: song.artist);
           },
           hideSheetOnTap: false,
         ),

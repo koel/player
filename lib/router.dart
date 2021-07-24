@@ -1,3 +1,4 @@
+import 'package:app/models/artist.dart';
 import 'package:app/ui/screens/add_to_playlist.dart';
 import 'package:app/ui/screens/album_details.dart';
 import 'package:app/ui/screens/albums.dart';
@@ -51,6 +52,16 @@ class AppRouter {
     await Navigator.of(context, rootNavigator: true).pushNamed(
       AlbumDetailsScreen.routeName,
       arguments: album,
+    );
+  }
+
+  Future<void> gotoArtistDetailsScreen(
+    BuildContext context, {
+    required Artist artist,
+  }) async {
+    await Navigator.of(context, rootNavigator: true).pushNamed(
+      ArtistDetailsScreen.routeName,
+      arguments: artist,
     );
   }
 }

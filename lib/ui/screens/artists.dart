@@ -1,5 +1,6 @@
 import 'package:app/models/artist.dart';
 import 'package:app/providers/artist_provider.dart';
+import 'package:app/router.dart';
 import 'package:app/ui/widgets/artist_thumbnail.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/typography.dart';
@@ -7,12 +8,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'artist_details.dart';
-
 class ArtistsScreen extends StatefulWidget {
   static const routeName = '/artists';
+  final AppRouter router;
 
-  const ArtistsScreen({Key? key}) : super(key: key);
+  const ArtistsScreen({
+    Key? key,
+    this.router = const AppRouter(),
+  }) : super(key: key);
 
   @override
   _ArtistsScreenState createState() => _ArtistsScreenState();
@@ -47,7 +50,10 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
                 (BuildContext context, int index) {
                   Artist artist = _artists[index];
                   return InkWell(
-                    onTap: () => gotoDetailsScreen(context, artist: artist),
+                    onTap: () => widget.router.gotoArtistDetailsScreen(
+                      context,
+                      artist: artist,
+                    ),
                     child: ListTile(
                       shape: Border(bottom: Divider.createBorderSide(context)),
                       leading: ArtistThumbnail(artist: artist, asHero: true),

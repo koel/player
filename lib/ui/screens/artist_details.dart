@@ -160,10 +160,3 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
     );
   }
 }
-
-void gotoDetailsScreen(BuildContext context, {required Artist artist}) {
-  Navigator.of(context, rootNavigator: true).pushNamed(
-    ArtistDetailsScreen.routeName,
-    arguments: artist,
-  );
-}

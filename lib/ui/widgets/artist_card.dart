@@ -1,13 +1,18 @@
 import 'package:app/models/artist.dart';
-import 'package:app/ui/screens/artist_details.dart';
+import 'package:app/router.dart';
 import 'package:app/ui/widgets/artist_thumbnail.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ArtistCard extends StatefulWidget {
   final Artist artist;
+  final AppRouter router;
 
-  ArtistCard({Key? key, required this.artist}) : super(key: key);
+  ArtistCard({
+    Key? key,
+    required this.artist,
+    this.router = const AppRouter(),
+  }) : super(key: key);
 
   @override
   _ArtistCardState createState() => _ArtistCardState();
@@ -22,7 +27,10 @@ class _ArtistCardState extends State<ArtistCard> {
       onTapDown: (_) => setState(() => _opacity = .4),
       onTapUp: (_) => setState(() => _opacity = 1),
       onTapCancel: () => setState(() => _opacity = 1),
-      onTap: () => gotoDetailsScreen(context, artist: widget.artist),
+      onTap: () => widget.router.gotoArtistDetailsScreen(
+        context,
+        artist: widget.artist,
+      ),
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 100),
         opacity: _opacity,
