@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:app/exceptions/http_response_exception.dart';
 import 'package:app/utils/preferences.dart' as preferences;
@@ -13,16 +14,14 @@ Future<dynamic> request(
 }) async {
   late Http.Response response;
 
-  Uri uri = Uri.parse("${preferences.apiBaseUrl}/$path");
+  Uri uri = Uri.parse('${preferences.apiBaseUrl}/$path');
 
   Map<String, String> headers = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    HttpHeaders.contentTypeHeader: ContentType.json.mimeType,
+    HttpHeaders.acceptHeader: ContentType.json.mimeType,
+    if (preferences.apiToken != null)
+      HttpHeaders.authorizationHeader: 'Bearer ${preferences.apiToken}',
   };
-
-  if (preferences.apiToken != null) {
-    headers['Authorization'] = "Bearer ${preferences.apiToken}";
-  }
 
   switch (method) {
     case HttpMethod.get:
