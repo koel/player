@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../extensions/widget_extension.dart';
+import '../../extensions/widget_tester_extension.dart';
 import 'artist_card_test.mocks.dart';
 
 @GenerateMocks([AppRouter])
@@ -18,14 +18,14 @@ void main() {
   });
 
   testWidgets('renders', (WidgetTester tester) async {
-    await tester.pumpWidget(ArtistCard(artist: _artist).wrapForTest());
+    await tester.pumpKoelWidget(ArtistCard(artist: _artist));
 
     expect(find.byType(ArtistThumbnail), findsOneWidget);
     expect(find.text('Banana'), findsOneWidget);
 
     await expectLater(
       find.byType(ArtistCard),
-      matchesGoldenFile('../goldens/widgets/artist_card.png'),
+      matchesGoldenFile('goldens/artist_card.png'),
     );
   });
 
@@ -35,10 +35,7 @@ void main() {
       router.gotoArtistDetailsScreen(any, artist: _artist),
     ).thenAnswer((_) async => null);
 
-    await tester.pumpWidget(ArtistCard(
-      artist: _artist,
-      router: router,
-    ).wrapForTest());
+    await tester.pumpKoelWidget(ArtistCard(artist: _artist, router: router));
 
     await tester.tap(find.text('Banana'));
     verify(router.gotoArtistDetailsScreen(any, artist: _artist)).called(1);

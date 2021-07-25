@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../extensions/widget_extension.dart';
+import '../../extensions/widget_tester_extension.dart';
 
 void main() {
   Widget mount({void Function()? onPressed}) {
@@ -14,13 +14,13 @@ void main() {
           icon: CupertinoIcons.phone,
           label: 'Call Me',
           onPressed: onPressed,
-        )
+        ),
       ],
-    ).wrapForTest();
+    );
   }
 
   testWidgets('renders', (WidgetTester tester) async {
-    await tester.pumpWidget(mount());
+    await tester.pumpKoelWidget(mount());
 
     expect(find.byType(ElevatedButton), findsOneWidget);
     expect(find.byType(Icon), findsOneWidget);
@@ -29,14 +29,14 @@ void main() {
     await expectLater(
       find.byType(FullWidthPrimaryIconButton),
       matchesGoldenFile(
-        '../goldens/widgets/full_width_primary_icon_button.png',
+        'goldens/full_width_primary_icon_button.png',
       ),
     );
   });
 
   testWidgets('triggers callback', (WidgetTester tester) async {
     var onPressed = MockOnPress();
-    await tester.pumpWidget(mount(onPressed: onPressed));
+    await tester.pumpKoelWidget(mount(onPressed: onPressed));
 
     await tester.tap(find.byType(ElevatedButton));
     expect(onPressed.called, isTrue);

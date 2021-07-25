@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../extensions/widget_extension.dart';
+import '../../extensions/widget_tester_extension.dart';
 import 'album_card_test.mocks.dart';
 
 @GenerateMocks([AppRouter])
@@ -22,7 +22,7 @@ void main() {
   });
 
   testWidgets('renders', (WidgetTester tester) async {
-    await tester.pumpWidget(AlbumCard(album: _album).wrapForTest());
+    await tester.pumpKoelWidget(AlbumCard(album: _album));
 
     expect(find.byType(AlbumThumbnail), findsOneWidget);
     expect(find.text('Banana'), findsOneWidget);
@@ -30,7 +30,7 @@ void main() {
 
     await expectLater(
       find.byType(AlbumCard),
-      matchesGoldenFile('../goldens/widgets/album_card.png'),
+      matchesGoldenFile('goldens/album_card.png'),
     );
   });
 
@@ -40,10 +40,7 @@ void main() {
       router.gotoAlbumDetailsScreen(any, album: _album),
     ).thenAnswer((_) async => null);
 
-    await tester.pumpWidget(AlbumCard(
-      album: _album,
-      router: router,
-    ).wrapForTest());
+    await tester.pumpKoelWidget(AlbumCard(album: _album, router: router));
 
     await tester.tap(find.text('A Whole New Bunch'));
     verify(router.gotoAlbumDetailsScreen(any, album: _album)).called(1);

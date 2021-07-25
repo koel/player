@@ -11,7 +11,7 @@ import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../../extensions/widget_extension.dart';
+import '../../extensions/widget_tester_extension.dart';
 import 'playlist_row_test.mocks.dart';
 
 @GenerateMocks([PlaylistProvider])
@@ -32,11 +32,11 @@ void main() {
   });
 
   Future<void> mount(WidgetTester tester) async {
-    await tester.pumpWidget(
+    await tester.pumpKoelWidget(
       ChangeNotifierProvider<PlaylistProvider>.value(
         value: _playlistProvider,
         child: PlaylistRow(playlist: _playlist),
-      ).wrapForTest(),
+      ),
     );
   }
 
@@ -76,6 +76,11 @@ void main() {
         findsNothing,
       );
       expect(find.byType(CachedNetworkImage), findsOneWidget);
+
+      await expectLater(
+        find.byType(PlaylistRow),
+        matchesGoldenFile('goldens/playlist_row_populated.png'),
+      );
     },
   );
 }

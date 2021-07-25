@@ -45,6 +45,7 @@ dependencies:
   mockito: ^5.0.12
   build_runner: ^2.0.6
   uuid: ^3.0.4
+  golden_toolkit: ^0.9.0
 
 dev_dependencies:
   flutter_test:
