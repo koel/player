@@ -1,4 +1,4 @@
-![App screenshots](https://user-images.githubusercontent.com/8056274/126906672-f1ef51db-f01d-477f-bffd-9937379e6df1.jpg)
+![Project banner wit app screenshots](https://user-images.githubusercontent.com/8056274/126907246-9fa5c3c7-6bf1-4733-b36b-7b35d2db0bf6.jpg)
 
 # Koel Player
 
