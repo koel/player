@@ -6,7 +6,6 @@ import 'package:app/providers/artist_provider.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/values/parse_result.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 
 ParseResult parseSongs(List<dynamic> data) {
   ParseResult result = ParseResult();
@@ -15,7 +14,7 @@ ParseResult parseSongs(List<dynamic> data) {
   return result;
 }
 
-class SongProvider with ChangeNotifier {
+class SongProvider {
   ArtistProvider _artistProvider;
   AlbumProvider _albumProvider;
   late CoverImageStack coverImageStack;

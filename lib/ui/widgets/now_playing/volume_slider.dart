@@ -1,4 +1,4 @@
-import 'package:app/providers/audio_player_provider.dart';
+import 'package:app/providers/audio_provider.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
@@ -13,7 +13,7 @@ class VolumeSlider extends StatefulWidget {
 
 class _VolumeSliderState extends State<VolumeSlider> {
   double _volume = .7;
-  late AudioPlayerProvider audio;
+  late AudioProvider audio;
 
   @override
   void initState() {

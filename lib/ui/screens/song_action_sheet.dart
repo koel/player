@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:app/extensions/assets_audio_player.dart';
 import 'package:app/models/song.dart';
-import 'package:app/providers/audio_player_provider.dart';
+import 'package:app/providers/audio_provider.dart';
 import 'package:app/providers/interaction_provider.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/screens/add_to_playlist.dart';
@@ -16,7 +16,7 @@ Future<void> showActionSheet({
   required Song song,
 }) async {
   InteractionProvider interactionProvider = context.read();
-  AudioPlayerProvider audio = context.read();
+  AudioProvider audio = context.read();
 
   bool queued = await audio.queued(song);
   bool isCurrent = audio.player.songId == song.id;

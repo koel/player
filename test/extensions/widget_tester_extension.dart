@@ -4,16 +4,25 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 
 extension WidgetTesterExtension on WidgetTester {
-  Future<void> pumpKoelWidget(
+  Future<void> pumpAppWidget(
     Widget widget, {
-    Size surfaceSize = const Size(800, 600),
+    Size surfaceSize = const Size(375, 812), // iPhone X
+    NavigatorObserver? navigatorObserver,
+    Map<String, Widget Function(BuildContext)>? routes,
   }) async {
     await pumpWidgetBuilder(
       widget,
-      wrapper: materialAppWrapper(
-        theme: ThemeData.dark(),
-        platform: TargetPlatform.iOS,
-      ),
+      wrapper: (Widget widget) {
+        return MaterialApp(
+          theme: ThemeData.dark().copyWith(platform: TargetPlatform.iOS),
+          navigatorObservers: [
+            if (navigatorObserver != null) navigatorObserver,
+          ],
+          home: Material(child: widget),
+          routes: routes ?? {},
+        );
+      },
+      surfaceSize: surfaceSize,
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:app/constants/dimensions.dart';
 import 'package:app/models/song.dart';
-import 'package:app/providers/audio_player_provider.dart';
+import 'package:app/providers/audio_provider.dart';
 import 'package:app/ui/widgets/full_width_primary_icon_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +23,7 @@ class SongListButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AudioPlayerProvider audio = context.read();
+    AudioProvider audio = context.read();
     return Container(
       padding: const EdgeInsets.all(AppDimensions.horizontalPadding),
       child: Row(

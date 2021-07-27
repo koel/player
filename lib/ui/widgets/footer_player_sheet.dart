@@ -2,9 +2,9 @@ import 'dart:ui';
 
 import 'package:app/extensions/assets_audio_player.dart';
 import 'package:app/models/song.dart';
-import 'package:app/providers/audio_player_provider.dart';
+import 'package:app/providers/audio_provider.dart';
 import 'package:app/providers/song_provider.dart';
-import 'package:app/ui/screens/now_playing.dart';
+import 'package:app/router.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart';
@@ -12,28 +12,35 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class FooterPlayerSheet extends StatefulWidget {
-  const FooterPlayerSheet({Key? key}) : super(key: key);
+  static const Key pauseButtonKey = Key('pauseButton');
+  static const Key nextButtonKey = Key('nextButton');
+
+  final AppRouter router;
+
+  const FooterPlayerSheet({
+    Key? key,
+    this.router = const AppRouter(),
+  }) : super(key: key);
 
   @override
   _FooterPlayerSheetState createState() => _FooterPlayerSheetState();
 }
 
 class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
-  late AudioPlayerProvider audio;
+  late AudioProvider audio;
   late SongProvider songProvider;
 
   @override
   void initState() {
     super.initState();
     audio = context.read();
+    songProvider = context.read();
   }
 
   @override
   Widget build(BuildContext context) {
-    songProvider = context.watch<SongProvider>();
-
     return StreamBuilder<PlayerState?>(
-      stream: audio.player.playerState,
+      stream: audio.playerState,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         String? songId = audio.player.songId;
         if (songId == null) return SizedBox.shrink();
@@ -57,7 +64,7 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
                   child: InkWell(
-                    onTap: () => openNowPlayingScreen(context),
+                    onTap: () => widget.router.openNowPlayingScreen(context),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
@@ -98,7 +105,8 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
                             return Row(
                               children: <Widget>[
                                 IconButton(
-                                  onPressed: () => audio.player.playOrPause(),
+                                  key: FooterPlayerSheet.pauseButtonKey,
+                                  onPressed: () => audio.playOrPause(),
                                   icon: Icon(
                                     isPlaying
                                         ? CupertinoIcons.pause_fill
@@ -107,7 +115,8 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
                                   ),
                                 ),
                                 IconButton(
-                                  onPressed: () => audio.player.next(),
+                                  key: FooterPlayerSheet.nextButtonKey,
+                                  onPressed: () => audio.playNext(),
                                   icon: const Icon(
                                     CupertinoIcons.forward_fill,
                                     size: 24,

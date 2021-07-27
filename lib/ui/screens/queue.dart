@@ -1,6 +1,6 @@
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/song.dart';
-import 'package:app/providers/audio_player_provider.dart';
+import 'package:app/providers/audio_provider.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list.dart';
@@ -19,7 +19,7 @@ class QueueScreen extends StatefulWidget {
 }
 
 class _QueueState extends State<QueueScreen> with StreamSubscriber {
-  late AudioPlayerProvider audio;
+  late AudioProvider audio;
   List<Song> _songs = [];
 
   @override

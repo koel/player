@@ -1,5 +1,5 @@
 import 'package:app/extensions/assets_audio_player.dart';
-import 'package:app/providers/audio_player_provider.dart';
+import 'package:app/providers/audio_provider.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
@@ -10,7 +10,7 @@ class AudioControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AudioPlayerProvider audio = context.watch();
+    AudioProvider audio = context.watch();
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,

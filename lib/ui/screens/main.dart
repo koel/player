@@ -1,4 +1,4 @@
-import 'package:app/providers/audio_player_provider.dart';
+import 'package:app/providers/audio_provider.dart';
 import 'package:app/ui/screens/home.dart';
 import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/screens/search.dart';
@@ -24,7 +24,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   late Future futureData;
   int _selectedIndex = 0;
-  late AudioPlayerProvider audio;
+  late AudioProvider audio;
 
   static const List<Widget> _widgetOptions = [
     const HomeScreen(),

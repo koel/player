@@ -8,11 +8,9 @@ import 'package:app/providers/interaction_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
-class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
+class AudioProvider with StreamSubscriber {
   SongProvider _songProvider;
   InteractionProvider _interactionProvider;
 
@@ -23,7 +21,7 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
 
   ValueStream<bool> get queueModifiedStream => _queueModified.stream;
 
-  AudioPlayerProvider({
+  AudioProvider({
     required SongProvider songProvider,
     required InteractionProvider interactionProvider,
   })  : _songProvider = songProvider,
@@ -134,6 +132,10 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
     return currentSongIndex + 1;
   }
 
+  Future<bool> playNext() async => await _player.next();
+
+  Future<void> playOrPause() async => await _player.playOrPause();
+
   Future<void> replaceQueue(List<Song> songs, {shuffle = false}) async {
     List<Audio> audios = await Future.wait(
       songs.map((song) async => await song.asAudio()),
@@ -188,15 +190,10 @@ class AudioPlayerProvider with ChangeNotifier, StreamSubscriber {
 
   void _broadcastQueueChangedEvent() => _queueModified.add(true);
 
+  ValueStream<PlayerState> get playerState => _player.playerState;
+
   Future<void> cleanUpUponLogout() async {
     await _player.stop();
     _player.playlist?.audios.clear();
-  }
-
-  @override
-  Future<void> dispose() async {
-    await _queueModified.close();
-    unsubscribeAll();
-    super.dispose();
   }
 }

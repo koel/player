@@ -1,6 +1,6 @@
 import 'package:app/providers/album_provider.dart';
 import 'package:app/providers/artist_provider.dart';
-import 'package:app/providers/audio_player_provider.dart';
+import 'package:app/providers/audio_provider.dart';
 import 'package:app/providers/auth_provider.dart';
 import 'package:app/providers/cache_provider.dart';
 import 'package:app/providers/data_provider.dart';
@@ -26,7 +26,7 @@ List<SingleChildWidget> _providers = [
       artistProvider: context.read<ArtistProvider>(),
     ),
   ),
-  ChangeNotifierProvider(
+  Provider(
     create: (context) => SongProvider(
       artistProvider: context.read<ArtistProvider>(),
       albumProvider: context.read<AlbumProvider>(),
@@ -42,8 +42,8 @@ List<SingleChildWidget> _providers = [
       songProvider: context.read<SongProvider>(),
     ),
   ),
-  ChangeNotifierProvider(
-    create: (context) => AudioPlayerProvider(
+  Provider(
+    create: (context) => AudioProvider(
       songProvider: context.read<SongProvider>(),
       interactionProvider: context.read<InteractionProvider>(),
     ),

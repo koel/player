@@ -1,7 +1,7 @@
 import 'package:app/extensions/assets_audio_player.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/song.dart';
-import 'package:app/providers/audio_player_provider.dart';
+import 'package:app/providers/audio_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/song_action_sheet.dart';
 import 'package:app/ui/widgets/song_cache_icon.dart';
@@ -36,7 +36,7 @@ class SongRow extends StatefulWidget {
 }
 
 class _SongRowState extends State<SongRow> {
-  late AudioPlayerProvider audio;
+  late AudioProvider audio;
 
   @override
   void initState() {
@@ -118,7 +118,7 @@ class SongRowThumbnail extends StatefulWidget {
 
 class _SongRowThumbnailState extends State<SongRowThumbnail>
     with StreamSubscriber {
-  late AudioPlayerProvider audio;
+  late AudioProvider audio;
   late SongProvider songProvider;
   PlayerState _state = PlayerState.stop;
   bool _isCurrentSong = false;
