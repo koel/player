@@ -1,7 +1,7 @@
 import 'package:app/extensions/assets_audio_player.dart';
 import 'package:app/extensions/duration.dart';
 import 'package:app/mixins/stream_subscriber.dart';
-import 'package:app/providers/audio_player_provider.dart';
+import 'package:app/providers/audio_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +13,7 @@ class ProgressBar extends StatefulWidget {
 }
 
 class _ProgressBarState extends State<ProgressBar> with StreamSubscriber {
-  late final AudioPlayerProvider audio;
+  late final AudioProvider audio;
   late final SongProvider songProvider;
 
   late Duration _duration, _position;

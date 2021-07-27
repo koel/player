@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:app/constants/dimensions.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/user.dart';
-import 'package:app/providers/audio_player_provider.dart';
+import 'package:app/providers/audio_provider.dart';
 import 'package:app/providers/auth_provider.dart';
 import 'package:app/providers/cache_provider.dart';
 import 'package:app/providers/interaction_provider.dart';
@@ -137,7 +137,7 @@ class LogOutButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AuthProvider auth = context.watch();
-    AudioPlayerProvider audio = context.watch();
+    AudioProvider audio = context.watch();
 
     return Expanded(
       child: OutlinedButton(

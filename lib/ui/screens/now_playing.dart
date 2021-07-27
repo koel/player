@@ -1,9 +1,8 @@
-import 'dart:async';
 import 'dart:ui';
 
 import 'package:app/extensions/assets_audio_player.dart';
 import 'package:app/models/song.dart';
-import 'package:app/providers/audio_player_provider.dart';
+import 'package:app/providers/audio_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/info_sheet.dart';
 import 'package:app/ui/screens/queue.dart';
@@ -25,7 +24,7 @@ class NowPlayingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AudioPlayerProvider audio = context.watch();
+    final AudioProvider audio = context.watch();
     final SongProvider songProvider = context.watch();
 
     Color bottomIconColor = Colors.white54;
@@ -138,18 +137,4 @@ class NowPlayingScreen extends StatelessWidget {
       },
     );
   }
-}
-
-Future<void> openNowPlayingScreen(BuildContext context) async {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (BuildContext context) {
-      return Container(
-        height: MediaQuery.of(context).size.height,
-        child: const NowPlayingScreen(),
-      );
-    },
-  );
 }

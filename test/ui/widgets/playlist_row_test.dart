@@ -32,7 +32,7 @@ void main() {
   });
 
   Future<void> mount(WidgetTester tester) async {
-    await tester.pumpKoelWidget(
+    await tester.pumpAppWidget(
       ChangeNotifierProvider<PlaylistProvider>.value(
         value: _playlistProvider,
         child: PlaylistRow(playlist: _playlist),

@@ -1,4 +1,4 @@
-import 'package:app/providers/audio_player_provider.dart';
+import 'package:app/providers/audio_provider.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart';
@@ -14,7 +14,7 @@ class LoopModeButton extends StatefulWidget {
 
 class _LoopModeButtonState extends State<LoopModeButton> {
   LoopMode _loopMode = LoopMode.none;
-  late AudioPlayerProvider audio;
+  late AudioProvider audio;
 
   @override
   void initState() {

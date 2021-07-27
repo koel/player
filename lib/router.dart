@@ -11,6 +11,7 @@ import 'package:app/ui/screens/initial.dart';
 import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/screens/login.dart';
 import 'package:app/ui/screens/main.dart';
+import 'package:app/ui/screens/now_playing.dart';
 import 'package:app/ui/screens/playlist_details.dart';
 import 'package:app/ui/screens/playlists.dart';
 import 'package:app/ui/screens/profile.dart';
@@ -18,6 +19,7 @@ import 'package:app/ui/screens/queue.dart';
 import 'package:app/ui/screens/search.dart';
 import 'package:app/ui/screens/songs.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import 'models/album.dart';
 
@@ -62,6 +64,20 @@ class AppRouter {
     await Navigator.of(context, rootNavigator: true).pushNamed(
       ArtistDetailsScreen.routeName,
       arguments: artist,
+    );
+  }
+
+  Future<void> openNowPlayingScreen(BuildContext context) async {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height,
+          child: const NowPlayingScreen(),
+        );
+      },
     );
   }
 }

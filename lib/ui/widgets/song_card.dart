@@ -1,5 +1,5 @@
 import 'package:app/models/song.dart';
-import 'package:app/providers/audio_player_provider.dart';
+import 'package:app/providers/audio_provider.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,7 +18,7 @@ class _SongCardState extends State<SongCard> {
 
   @override
   Widget build(BuildContext context) {
-    AudioPlayerProvider audio = context.watch();
+    AudioProvider audio = context.watch();
 
     return GestureDetector(
       onTapDown: (_) => setState(() => _opacity = .7),

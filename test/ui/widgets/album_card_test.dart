@@ -22,7 +22,7 @@ void main() {
   });
 
   testWidgets('renders', (WidgetTester tester) async {
-    await tester.pumpKoelWidget(AlbumCard(album: _album));
+    await tester.pumpAppWidget(AlbumCard(album: _album));
 
     expect(find.byType(AlbumThumbnail), findsOneWidget);
     expect(find.text('Banana'), findsOneWidget);
@@ -40,7 +40,7 @@ void main() {
       router.gotoAlbumDetailsScreen(any, album: _album),
     ).thenAnswer((_) async => null);
 
-    await tester.pumpKoelWidget(AlbumCard(album: _album, router: router));
+    await tester.pumpAppWidget(AlbumCard(album: _album, router: router));
 
     await tester.tap(find.text('A Whole New Bunch'));
     verify(router.gotoAlbumDetailsScreen(any, album: _album)).called(1);

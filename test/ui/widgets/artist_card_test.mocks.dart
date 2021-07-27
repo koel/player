@@ -42,4 +42,9 @@ class MockAppRouter extends _i1.Mock implements _i2.AppRouter {
               #gotoArtistDetailsScreen, [context], {#artist: artist}),
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i3.Future<void>);
+  @override
+  _i3.Future<void> openNowPlayingScreen(_i4.BuildContext? context) =>
+      (super.noSuchMethod(Invocation.method(#openNowPlayingScreen, [context]),
+          returnValue: Future<void>.value(),
+          returnValueForMissingStub: Future<void>.value()) as _i3.Future<void>);
 }

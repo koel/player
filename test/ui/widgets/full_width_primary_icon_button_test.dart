@@ -20,7 +20,7 @@ void main() {
   }
 
   testWidgets('renders', (WidgetTester tester) async {
-    await tester.pumpKoelWidget(mount());
+    await tester.pumpAppWidget(mount());
 
     expect(find.byType(ElevatedButton), findsOneWidget);
     expect(find.byType(Icon), findsOneWidget);
@@ -36,7 +36,7 @@ void main() {
 
   testWidgets('triggers callback', (WidgetTester tester) async {
     var onPressed = MockOnPress();
-    await tester.pumpKoelWidget(mount(onPressed: onPressed));
+    await tester.pumpAppWidget(mount(onPressed: onPressed));
 
     await tester.tap(find.byType(ElevatedButton));
     expect(onPressed.called, isTrue);

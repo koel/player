@@ -18,7 +18,7 @@ void main() {
   });
 
   testWidgets('renders', (WidgetTester tester) async {
-    await tester.pumpKoelWidget(ArtistCard(artist: _artist));
+    await tester.pumpAppWidget(ArtistCard(artist: _artist));
 
     expect(find.byType(ArtistThumbnail), findsOneWidget);
     expect(find.text('Banana'), findsOneWidget);
@@ -35,7 +35,7 @@ void main() {
       router.gotoArtistDetailsScreen(any, artist: _artist),
     ).thenAnswer((_) async => null);
 
-    await tester.pumpKoelWidget(ArtistCard(artist: _artist, router: router));
+    await tester.pumpAppWidget(ArtistCard(artist: _artist, router: router));
 
     await tester.tap(find.text('Banana'));
     verify(router.gotoArtistDetailsScreen(any, artist: _artist)).called(1);
