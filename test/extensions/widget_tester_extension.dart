@@ -1,3 +1,4 @@
+import 'package:app/ui/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,13 +14,17 @@ extension WidgetTesterExtension on WidgetTester {
     await pumpWidgetBuilder(
       widget,
       wrapper: (Widget widget) {
-        return MaterialApp(
-          theme: ThemeData.dark().copyWith(platform: TargetPlatform.iOS),
-          navigatorObservers: [
-            if (navigatorObserver != null) navigatorObserver,
-          ],
-          home: Material(child: widget),
-          routes: routes ?? {},
+        return Builder(
+          builder: (BuildContext context) {
+            return MaterialApp(
+              theme: themeData(context).copyWith(platform: TargetPlatform.iOS),
+              navigatorObservers: [
+                if (navigatorObserver != null) navigatorObserver,
+              ],
+              home: Material(child: widget),
+              routes: routes ?? {},
+            );
+          },
         );
       },
       surfaceSize: surfaceSize,
