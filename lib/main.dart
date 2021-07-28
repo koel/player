@@ -17,7 +17,7 @@ import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 List<SingleChildWidget> _providers = [
-  ChangeNotifierProvider(create: (_) => AuthProvider()),
+  Provider(create: (_) => AuthProvider()),
   ChangeNotifierProvider(create: (_) => ArtistProvider()),
   Provider(create: (_) => MediaInfoProvider()),
   Provider(create: (_) => CacheProvider()),

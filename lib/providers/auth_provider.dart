@@ -1,9 +1,8 @@
 import 'package:app/models/user.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:app/utils/preferences.dart' as preferences;
-import 'package:flutter/foundation.dart';
 
-class AuthProvider with ChangeNotifier {
+class AuthProvider {
   late User _authUser;
   User get authUser => _authUser;
 
@@ -23,10 +22,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  void setAuthUser(User user) {
-    _authUser = user;
-    notifyListeners();
-  }
+  void setAuthUser(User user) => _authUser = user;
 
   Future<User?> tryGetAuthUser() async {
     if (preferences.apiToken == null) {

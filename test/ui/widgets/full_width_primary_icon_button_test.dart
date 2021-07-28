@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../extensions/widget_tester_extension.dart';
+import '../../utils.dart';
 
 void main() {
-  Widget mount({void Function()? onPressed}) {
+  Widget _mount({void Function()? onPressed}) {
     return Flex(
       direction: Axis.vertical,
       children: <Widget>[
@@ -20,7 +21,7 @@ void main() {
   }
 
   testWidgets('renders', (WidgetTester tester) async {
-    await tester.pumpAppWidget(mount());
+    await tester.pumpAppWidget(_mount());
 
     expect(find.byType(ElevatedButton), findsOneWidget);
     expect(find.byType(Icon), findsOneWidget);
@@ -35,15 +36,10 @@ void main() {
   });
 
   testWidgets('triggers callback', (WidgetTester tester) async {
-    var onPressed = MockOnPress();
-    await tester.pumpAppWidget(mount(onPressed: onPressed));
+    var onPressed = Callable();
+    await tester.pumpAppWidget(_mount(onPressed: onPressed));
 
     await tester.tap(find.byType(ElevatedButton));
     expect(onPressed.called, isTrue);
   });
-}
-
-class MockOnPress {
-  bool called = false;
-  call() => called = true;
 }

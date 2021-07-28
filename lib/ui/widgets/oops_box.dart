@@ -5,7 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class OopsBox extends StatelessWidget {
-  final Function()? onRetryButtonPressed;
+  static Key retryButtonKey = UniqueKey();
+  static Key logOutButtonKey = UniqueKey();
+
+  final void Function()? onRetryButtonPressed;
   final String? message;
 
   const OopsBox({Key? key, this.message, this.onRetryButtonPressed})
@@ -31,10 +34,12 @@ class OopsBox extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 TextButton(
+                  key: retryButtonKey,
                   onPressed: onRetryButtonPressed,
                   child: const Text('Retry'),
                 ),
                 TextButton(
+                  key: logOutButtonKey,
                   onPressed: () async {
                     await auth.logout();
                     await Navigator.of(

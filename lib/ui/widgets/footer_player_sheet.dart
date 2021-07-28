@@ -12,8 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class FooterPlayerSheet extends StatefulWidget {
-  static const Key pauseButtonKey = Key('pauseButton');
-  static const Key nextButtonKey = Key('nextButton');
+  static Key pauseButtonKey = UniqueKey();
+  static Key nextButtonKey = UniqueKey();
 
   final AppRouter router;
 
