@@ -22,9 +22,7 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
 
   void triggerCacheState() {
     setState(() {
-      _futureCachedFile = DefaultCacheManager().getFileFromCache(
-        widget.song.cacheKey,
-      );
+      _futureCachedFile = cache.getCachedMedia(song: widget.song);
     });
   }
 
@@ -34,6 +32,12 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
     cache = context.read();
 
     subscribe(cache.cacheClearedStream.listen((_) => triggerCacheState()));
+
+    subscribe(cache.songMediaCachedStream.listen((event) {
+      if (event.song == widget.song) {
+        triggerCacheState();
+      }
+    }));
 
     triggerCacheState();
   }
@@ -66,7 +70,7 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
             : GestureDetector(
                 onTap: () async {
                   setState(() => _downloading = true);
-                  await widget.song.cacheSourceFile();
+                  await cache.cacheMedia(song: widget.song);
                   setState(() => _downloading = false);
                   // trigger getting cache to re-determine _futureCachedFile's status
                   // and rebuild the widget

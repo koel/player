@@ -79,14 +79,6 @@ class Song {
     throw UnsupportedTypeException.fromObject(album.image);
   }
 
-  Future<FileInfo> cacheSourceFile() async {
-    return DefaultCacheManager().downloadFile(
-      sourceUrl,
-      key: cacheKey,
-      force: true,
-    );
-  }
-
   bool get hasCustomImage {
     return image is CachedNetworkImageProvider &&
         !(image as CachedNetworkImageProvider).url.endsWith(
