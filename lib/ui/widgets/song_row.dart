@@ -2,7 +2,6 @@ import 'package:app/extensions/assets_audio_player.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_provider.dart';
-import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/song_action_sheet.dart';
 import 'package:app/ui/widgets/song_cache_icon.dart';
 import 'package:app/ui/widgets/song_list.dart';
@@ -119,7 +118,6 @@ class SongRowThumbnail extends StatefulWidget {
 class _SongRowThumbnailState extends State<SongRowThumbnail>
     with StreamSubscriber {
   late AudioProvider audio;
-  late SongProvider songProvider;
   PlayerState _state = PlayerState.stop;
   bool _isCurrentSong = false;
 
@@ -136,8 +134,6 @@ class _SongRowThumbnailState extends State<SongRowThumbnail>
     subscribe(audio.player.current.listen((Playing? current) {
       setState(() => _isCurrentSong = audio.player.songId == widget.song.id);
     }));
-
-    songProvider = context.read();
   }
 
   @override
