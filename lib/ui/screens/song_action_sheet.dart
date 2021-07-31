@@ -9,6 +9,7 @@ import 'package:app/ui/screens/add_to_playlist.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 Future<void> showActionSheet({
@@ -31,6 +32,7 @@ Future<void> showActionSheet({
         required Icon icon,
         required Function onTap,
         bool hideSheetOnTap = true,
+        bool withHapticFeedback = true,
       }) {
         return ListTile(
           leading: icon,
@@ -38,6 +40,11 @@ Future<void> showActionSheet({
           title: Text(text),
           onTap: () {
             onTap();
+
+            if (withHapticFeedback) {
+              HapticFeedback.lightImpact();
+            }
+
             if (hideSheetOnTap) {
               Navigator.pop(context);
             }
@@ -93,6 +100,7 @@ Future<void> showActionSheet({
             AppRouter().gotoAlbumDetailsScreen(context, album: song.album);
           },
           hideSheetOnTap: false,
+          withHapticFeedback: false,
         ),
         _button(
           text: 'Go to Artist',
@@ -105,6 +113,7 @@ Future<void> showActionSheet({
             AppRouter().gotoArtistDetailsScreen(context, artist: song.artist);
           },
           hideSheetOnTap: false,
+          withHapticFeedback: false,
         ),
         const Divider(indent: 16, endIndent: 16),
         _button(
@@ -118,6 +127,7 @@ Future<void> showActionSheet({
             gotoAddToPlaylistScreen(context, song: song);
           },
           hideSheetOnTap: false,
+          withHapticFeedback: false,
         ),
       ];
 

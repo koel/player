@@ -9,6 +9,7 @@ import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_html/style.dart';
 import 'package:provider/provider.dart';
 
@@ -59,7 +60,10 @@ class _SongRowState extends State<SongRow> {
 
     return InkWell(
       onTap: () async => await audio.play(song: widget.song),
-      onLongPress: () => showActionSheet(context: context, song: widget.song),
+      onLongPress: () {
+        HapticFeedback.lightImpact();
+        showActionSheet(context: context, song: widget.song);
+      },
       child: ListTile(
         key: UniqueKey(),
         contentPadding: widget.padding,

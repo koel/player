@@ -6,6 +6,7 @@ import 'package:app/ui/widgets/playlist_row.dart';
 import 'package:app/ui/widgets/typography.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class AddToPlaylistScreen extends StatefulWidget {
@@ -48,11 +49,12 @@ class _AddToPlaylistScreenState extends State<AddToPlaylistScreen> {
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) => PlaylistRow(
                   playlist: _playlists[index],
-                  onTap: () async {
+                  onTap: () {
                     playlistProvider.addSongToPlaylist(
                       song: song,
                       playlist: _playlists[index],
                     );
+                    HapticFeedback.lightImpact();
                     Navigator.pop(context);
                   },
                 ),
