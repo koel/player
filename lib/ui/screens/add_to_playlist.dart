@@ -54,7 +54,7 @@ class _AddToPlaylistScreenState extends State<AddToPlaylistScreen> {
                       song: song,
                       playlist: _playlists[index],
                     );
-                    HapticFeedback.lightImpact();
+                    HapticFeedback.mediumImpact();
                     Navigator.pop(context);
                   },
                 ),

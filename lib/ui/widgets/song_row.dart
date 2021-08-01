@@ -61,7 +61,7 @@ class _SongRowState extends State<SongRow> {
     return InkWell(
       onTap: () async => await audio.play(song: widget.song),
       onLongPress: () {
-        HapticFeedback.lightImpact();
+        HapticFeedback.mediumImpact();
         showActionSheet(context: context, song: widget.song);
       },
       child: ListTile(

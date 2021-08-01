@@ -42,7 +42,7 @@ Future<void> showActionSheet({
             onTap();
 
             if (withHapticFeedback) {
-              HapticFeedback.lightImpact();
+              HapticFeedback.mediumImpact();
             }
 
             if (hideSheetOnTap) {
