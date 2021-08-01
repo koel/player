@@ -14,19 +14,21 @@ class SongCard extends StatefulWidget {
 }
 
 class _SongCardState extends State<SongCard> {
-  double _opacity = 1;
+  double _opacity = 1.0;
+  double _cardWidth = 144.0;
 
   @override
   Widget build(BuildContext context) {
     AudioProvider audio = context.watch();
 
     return GestureDetector(
-      onTapDown: (_) => setState(() => _opacity = .7),
-      onTapCancel: () => setState(() => _opacity = 1),
+      onTapDown: (_) => setState(() => _opacity = 0.7),
+      onTapCancel: () => setState(() => _opacity = 1.0),
       onTap: () async {
-        setState(() => _opacity = 1);
+        setState(() => _opacity = 1.0);
         await audio.play(song: widget.song);
       },
+      behavior: HitTestBehavior.opaque,
       child: AnimatedOpacity(
         duration: const Duration(microseconds: 100),
         opacity: _opacity,
@@ -35,7 +37,7 @@ class _SongCardState extends State<SongCard> {
             SongThumbnail(song: widget.song, size: ThumbnailSize.md),
             const SizedBox(height: 12),
             SizedBox(
-              width: 144,
+              width: _cardWidth,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
