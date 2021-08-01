@@ -1,6 +1,8 @@
-![Project banner wit app screenshots](https://user-images.githubusercontent.com/8056274/126907246-9fa5c3c7-6bf1-4733-b36b-7b35d2db0bf6.jpg)
+[![Codemagic build status](https://api.codemagic.io/apps/60fc5d0cbe2122b603e3f35b/60fc5d0cbe2122b603e3f35a/status_badge.svg)](https://codemagic.io/apps/60fc5d0cbe2122b603e3f35b/60fc5d0cbe2122b603e3f35a/latest_build)
 
 # Koel Player
+
+![Project banner with app screenshots](https://user-images.githubusercontent.com/8056274/126907246-9fa5c3c7-6bf1-4733-b36b-7b35d2db0bf6.jpg)
 
 The mobile app for Koel, which provides a complete mobile app experience and doesn't have the 
 [limitations](https://docs.koel.dev/#mobile-support-and-limitation) of the mobile web version. 
