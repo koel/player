@@ -8,6 +8,7 @@ on:
       - '**'
 jobs:
   run:
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
