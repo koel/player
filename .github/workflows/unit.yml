@@ -3,8 +3,11 @@ on:
   push:
     tags-ignore:
       - '**'
+  workflow_dispatch:
+    tags-ignore:
+      - '**'
 jobs:
-  test:
+  run:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
