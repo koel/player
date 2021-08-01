@@ -11,7 +11,7 @@ class SimpleSongList extends StatelessWidget {
   final Iterable<Song> songs;
   final String? headingText;
   final bool bordered;
-  final VoidCallback? onHeaderTap;
+  final void Function()? onHeaderTap;
 
   const SimpleSongList({
     Key? key,

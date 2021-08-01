@@ -109,7 +109,7 @@ class LibraryScreen extends StatelessWidget {
 class LibraryMenuItem extends StatelessWidget {
   final dynamic icon;
   final String label;
-  final VoidCallback onTap;
+  final void Function() onTap;
 
   const LibraryMenuItem({
     Key? key,

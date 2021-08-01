@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class FullWidthPrimaryIconButton extends StatelessWidget {
   final IconData icon;
   final String label;
-  final VoidCallback? onPressed;
+  final void Function()? onPressed;
 
   const FullWidthPrimaryIconButton({
     Key? key,
@@ -21,9 +21,7 @@ class FullWidthPrimaryIconButton extends StatelessWidget {
         child: Row(
           children: <Widget>[
             Icon(icon, size: 20),
-            Expanded(
-              child: Text(label, textAlign: TextAlign.center),
-            ),
+            Expanded(child: Text(label, textAlign: TextAlign.center)),
           ],
         ),
       ),

@@ -14,7 +14,7 @@ import 'package:provider/provider.dart';
 class PlaylistRow extends StatefulWidget {
   final Playlist playlist;
 
-  final VoidCallback? onTap;
+  final void Function()? onTap;
 
   const PlaylistRow({Key? key, required this.playlist, this.onTap})
       : super(key: key);

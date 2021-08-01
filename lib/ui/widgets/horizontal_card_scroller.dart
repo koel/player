@@ -46,7 +46,7 @@ class HorizontalCardScroller extends StatelessWidget {
 
 class PlaceholderCard extends StatelessWidget {
   final IconData icon;
-  final VoidCallback? onPressed;
+  final void Function()? onPressed;
 
   const PlaceholderCard({
     Key? key,

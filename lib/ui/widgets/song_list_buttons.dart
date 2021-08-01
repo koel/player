@@ -17,6 +17,9 @@ enum SongListContext {
 }
 
 class SongListButtons extends StatelessWidget {
+  static final Key playAllButtonKey = UniqueKey();
+  static final Key shuffleAllButtonKey = UniqueKey();
+
   final List<Song> songs;
 
   const SongListButtons({Key? key, required this.songs}) : super(key: key);
@@ -29,12 +32,14 @@ class SongListButtons extends StatelessWidget {
       child: Row(
         children: <Widget>[
           FullWidthPrimaryIconButton(
+            key: SongListButtons.playAllButtonKey,
             icon: CupertinoIcons.play_fill,
             label: 'Play All',
             onPressed: () async => await audio.replaceQueue(songs),
           ),
           const SizedBox(width: 12),
           FullWidthPrimaryIconButton(
+            key: SongListButtons.shuffleAllButtonKey,
             icon: CupertinoIcons.shuffle,
             label: 'Shuffle All',
             onPressed: () async =>
