@@ -16,12 +16,12 @@ class CacheProvider {
 
   final BehaviorSubject<SongCached> _songMediaCached = BehaviorSubject();
 
-  ValueStream<SongCached> get songMediaCachedStream => _songMediaCached.stream;
+  ValueStream<SongCached> get songCachedStream => _songMediaCached.stream;
 
-  static CacheManager cache = DefaultCacheManager();
+  static CacheManager _cache = DefaultCacheManager();
 
-  Future<void> cacheMedia({required Song song}) async {
-    FileInfo fileInfo = await cache.downloadFile(
+  Future<void> cache({required Song song}) async {
+    FileInfo fileInfo = await _cache.downloadFile(
       song.sourceUrl,
       key: song.cacheKey,
       force: true,
@@ -30,12 +30,16 @@ class CacheProvider {
     _songMediaCached.add(SongCached(song: song, info: fileInfo));
   }
 
-  Future<FileInfo?> getCachedMedia({required Song song}) async {
-    return await cache.getFileFromCache(song.cacheKey);
+  Future<FileInfo?> getCache({required Song song}) async {
+    return await _cache.getFileFromCache(song.cacheKey);
+  }
+
+  Future<bool> hasCache({required Song song}) async {
+    return await this.getCache(song: song) != null;
   }
 
   Future<void> clear() async {
-    await cache.emptyCache();
+    await _cache.emptyCache();
     _cacheCleared.add(true);
   }
 }

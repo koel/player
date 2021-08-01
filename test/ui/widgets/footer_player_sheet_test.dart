@@ -1,4 +1,5 @@
 import 'package:app/extensions/assets_audio_player.dart';
+import 'package:app/models/artist.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_provider.dart';
 import 'package:app/providers/song_provider.dart';
@@ -23,7 +24,10 @@ void main() {
   late Song song;
 
   setUp(() {
-    song = Song.fake(title: 'A Banana Work Is Never Done');
+    song = Song.fake(
+      title: 'A Banana Work Is Never Done',
+      artist: Artist.fake(name: 'Super Bananas'),
+    );
 
     player = AssetsAudioPlayer();
     player.setSongId(song.id);

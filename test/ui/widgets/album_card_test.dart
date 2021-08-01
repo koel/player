@@ -12,17 +12,17 @@ import 'album_card_test.mocks.dart';
 
 @GenerateMocks([AppRouter])
 void main() {
-  late Album _album;
+  late Album album;
 
   setUpAll(() {
-    _album = Album.fake(
+    album = Album.fake(
       name: 'A Whole New Bunch',
       artist: Artist.fake(name: 'Banana'),
     );
   });
 
   testWidgets('renders', (WidgetTester tester) async {
-    await tester.pumpAppWidget(AlbumCard(album: _album));
+    await tester.pumpAppWidget(AlbumCard(album: album));
 
     expect(find.byType(AlbumThumbnail), findsOneWidget);
     expect(find.text('Banana'), findsOneWidget);
@@ -37,12 +37,12 @@ void main() {
   testWidgets('goes to Album Details screen', (WidgetTester tester) async {
     MockAppRouter router = MockAppRouter();
     when(
-      router.gotoAlbumDetailsScreen(any, album: _album),
+      router.gotoAlbumDetailsScreen(any, album: album),
     ).thenAnswer((_) async => null);
 
-    await tester.pumpAppWidget(AlbumCard(album: _album, router: router));
+    await tester.pumpAppWidget(AlbumCard(album: album, router: router));
 
     await tester.tap(find.text('A Whole New Bunch'));
-    verify(router.gotoAlbumDetailsScreen(any, album: _album)).called(1);
+    verify(router.gotoAlbumDetailsScreen(any, album: album)).called(1);
   });
 }

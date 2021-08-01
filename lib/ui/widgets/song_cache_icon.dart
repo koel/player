@@ -3,7 +3,6 @@ import 'package:app/models/song.dart';
 import 'package:app/providers/cache_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:provider/provider.dart';
 
 class SongCacheIcon extends StatefulWidget {
@@ -17,29 +16,27 @@ class SongCacheIcon extends StatefulWidget {
 
 class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
   late CacheProvider cache;
-  late Future<FileInfo?> _futureCachedFile;
   bool _downloading = false;
-
-  void triggerCacheState() {
-    setState(() {
-      _futureCachedFile = cache.getCachedMedia(song: widget.song);
-    });
-  }
+  bool? _hasCache;
 
   @override
   void initState() {
     super.initState();
     cache = context.read();
 
-    subscribe(cache.cacheClearedStream.listen((_) => triggerCacheState()));
+    subscribe(cache.cacheClearedStream.listen((_) {
+      setState(() => _hasCache = false);
+    }));
 
-    subscribe(cache.songMediaCachedStream.listen((event) {
+    subscribe(cache.songCachedStream.listen((event) {
       if (event.song == widget.song) {
-        triggerCacheState();
+        setState(() => _hasCache = true);
       }
     }));
 
-    triggerCacheState();
+    cache.hasCache(song: widget.song).then((value) {
+      setState(() => _hasCache = value);
+    });
   }
 
   @override
@@ -48,40 +45,35 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
     super.dispose();
   }
 
+  Future<void> _cache() async {
+    setState(() => _downloading = true);
+    await cache.cache(song: widget.song);
+    setState(() {
+      _downloading = false;
+      _hasCache = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<FileInfo?>(
-      future: _futureCachedFile,
-      builder: (_, snapshot) {
-        if (snapshot.hasData) {
-          return Icon(
-            CupertinoIcons.checkmark_alt_circle_fill,
-            size: 18,
-            color: Colors.white24,
-          );
-        }
+    if (_downloading) return CupertinoActivityIndicator(radius: 9);
 
-        if (snapshot.connectionState != ConnectionState.done) {
-          return SizedBox.shrink();
-        }
+    if (_hasCache == null) return SizedBox.shrink();
 
-        return _downloading
-            ? CupertinoActivityIndicator(radius: 9)
-            : GestureDetector(
-                onTap: () async {
-                  setState(() => _downloading = true);
-                  await cache.cacheMedia(song: widget.song);
-                  setState(() => _downloading = false);
-                  // trigger getting cache to re-determine _futureCachedFile's status
-                  // and rebuild the widget
-                  triggerCacheState();
-                },
-                child: const Icon(
-                  CupertinoIcons.cloud_download_fill,
-                  size: 16,
-                ),
-              );
-      },
+    if (_hasCache!) {
+      return Icon(
+        CupertinoIcons.checkmark_alt_circle_fill,
+        size: 18,
+        color: Colors.white24,
+      );
+    }
+
+    return GestureDetector(
+      onTap: () async => await _cache(),
+      child: const Icon(
+        CupertinoIcons.cloud_download_fill,
+        size: 16,
+      ),
     );
   }
 }

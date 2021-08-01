@@ -16,26 +16,26 @@ import 'playlist_row_test.mocks.dart';
 
 @GenerateMocks([PlaylistProvider])
 void main() {
-  late final MockPlaylistProvider _playlistProvider;
-  late final Playlist _playlist;
-  late final BehaviorSubject<Playlist> _playlistPopulated;
+  late MockPlaylistProvider playlistProviderMock;
+  late Playlist playlist;
+  late BehaviorSubject<Playlist> playlistPopulated;
 
-  setUpAll(() {
-    _playlistProvider = MockPlaylistProvider();
-    _playlistPopulated = BehaviorSubject();
+  setUp(() {
+    playlistProviderMock = MockPlaylistProvider();
+    playlistPopulated = BehaviorSubject();
 
-    when(_playlistProvider.playlistPopulatedStream).thenAnswer(
-      (_) => _playlistPopulated.stream,
+    when(playlistProviderMock.playlistPopulatedStream).thenAnswer(
+      (_) => playlistPopulated.stream,
     );
 
-    _playlist = Playlist.fake(name: 'A Bunch of Bananas');
+    playlist = Playlist.fake(name: 'A Bunch of Bananas');
   });
 
   Future<void> mount(WidgetTester tester) async {
     await tester.pumpAppWidget(
       ChangeNotifierProvider<PlaylistProvider>.value(
-        value: _playlistProvider,
-        child: PlaylistRow(playlist: _playlist),
+        value: playlistProviderMock,
+        child: PlaylistRow(playlist: playlist),
       ),
     );
   }
@@ -56,9 +56,9 @@ void main() {
     'updates state when playlist is loaded',
     (WidgetTester tester) async {
       Playlist populatedPlaylist = Playlist.fake(
-        id: _playlist.id,
-        name: _playlist.name,
-        isSmart: _playlist.isSmart,
+        id: playlist.id,
+        name: playlist.name,
+        isSmart: playlist.isSmart,
         populated: true,
       );
 
@@ -66,7 +66,7 @@ void main() {
 
       await mount(tester);
       await tester.pumpAndSettle();
-      _playlistPopulated.add(populatedPlaylist);
+      playlistPopulated.add(populatedPlaylist);
       await tester.pumpAndSettle();
       expect(find.text('Standard playlist • 4 songs'), findsOneWidget);
 

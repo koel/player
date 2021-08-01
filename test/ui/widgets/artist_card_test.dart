@@ -11,14 +11,14 @@ import 'artist_card_test.mocks.dart';
 
 @GenerateMocks([AppRouter])
 void main() {
-  late Artist _artist;
+  late Artist artist;
 
   setUpAll(() {
-    _artist = Artist.fake(name: 'Banana');
+    artist = Artist.fake(name: 'Banana');
   });
 
   testWidgets('renders', (WidgetTester tester) async {
-    await tester.pumpAppWidget(ArtistCard(artist: _artist));
+    await tester.pumpAppWidget(ArtistCard(artist: artist));
 
     expect(find.byType(ArtistThumbnail), findsOneWidget);
     expect(find.text('Banana'), findsOneWidget);
@@ -32,12 +32,12 @@ void main() {
   testWidgets('goes to Artist Details screen', (WidgetTester tester) async {
     MockAppRouter router = MockAppRouter();
     when(
-      router.gotoArtistDetailsScreen(any, artist: _artist),
+      router.gotoArtistDetailsScreen(any, artist: artist),
     ).thenAnswer((_) async => null);
 
-    await tester.pumpAppWidget(ArtistCard(artist: _artist, router: router));
+    await tester.pumpAppWidget(ArtistCard(artist: artist, router: router));
 
     await tester.tap(find.text('Banana'));
-    verify(router.gotoArtistDetailsScreen(any, artist: _artist)).called(1);
+    verify(router.gotoArtistDetailsScreen(any, artist: artist)).called(1);
   });
 }
