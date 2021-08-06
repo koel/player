@@ -56,21 +56,30 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
 
   @override
   Widget build(BuildContext context) {
-    if (_downloading) return CupertinoActivityIndicator(radius: 9);
+    if (_downloading)
+      return const Padding(
+        padding: EdgeInsets.only(right: 4.0),
+        child: CupertinoActivityIndicator(radius: 9),
+      );
 
-    if (_hasCache == null) return SizedBox.shrink();
+    if (_hasCache == null) return const SizedBox.shrink();
 
     if (_hasCache!) {
-      return Icon(
-        CupertinoIcons.checkmark_alt_circle_fill,
-        size: 18,
-        color: Colors.white24,
+      return const Padding(
+        padding: EdgeInsets.only(right: 4.0),
+        child: Icon(
+          CupertinoIcons.checkmark_alt_circle_fill,
+          size: 18,
+          color: Colors.white24,
+        ),
       );
     }
 
-    return GestureDetector(
-      onTap: () async => await _cache(),
-      child: const Icon(
+    return IconButton(
+      onPressed: () async => await _cache(),
+      constraints: const BoxConstraints(),
+      padding: const EdgeInsets.symmetric(horizontal: 0.0),
+      icon: const Icon(
         CupertinoIcons.cloud_download_fill,
         size: 16,
       ),
