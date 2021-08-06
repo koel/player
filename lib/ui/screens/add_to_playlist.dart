@@ -2,6 +2,7 @@ import 'package:app/models/playlist.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/playlist_provider.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
+import 'package:app/ui/widgets/message_overlay.dart';
 import 'package:app/ui/widgets/playlist_row.dart';
 import 'package:app/ui/widgets/typography.dart';
 import 'package:flutter/cupertino.dart';
@@ -56,6 +57,12 @@ class _AddToPlaylistScreenState extends State<AddToPlaylistScreen> {
                     );
                     HapticFeedback.mediumImpact();
                     Navigator.pop(context);
+                    showOverlay(
+                      context,
+                      icon: CupertinoIcons.text_badge_plus,
+                      caption: 'Added',
+                      message: 'Song added to playlist.',
+                    );
                   },
                 ),
                 childCount: _playlists.length,

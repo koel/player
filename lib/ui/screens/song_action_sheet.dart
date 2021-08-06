@@ -6,10 +6,10 @@ import 'package:app/providers/audio_provider.dart';
 import 'package:app/providers/interaction_provider.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/screens/add_to_playlist.dart';
+import 'package:app/ui/widgets/message_overlay.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 Future<void> showActionSheet({
@@ -32,7 +32,6 @@ Future<void> showActionSheet({
         required Icon icon,
         required Function onTap,
         bool hideSheetOnTap = true,
-        bool withHapticFeedback = true,
       }) {
         return ListTile(
           leading: icon,
@@ -40,10 +39,6 @@ Future<void> showActionSheet({
           title: Text(text),
           onTap: () {
             onTap();
-
-            if (withHapticFeedback) {
-              HapticFeedback.mediumImpact();
-            }
 
             if (hideSheetOnTap) {
               Navigator.pop(context);
@@ -60,7 +55,15 @@ Future<void> showActionSheet({
               CupertinoIcons.arrow_right_circle_fill,
               color: Colors.white30,
             ),
-            onTap: () => audio.queueAfterCurrent(song: song),
+            onTap: () {
+              audio.queueAfterCurrent(song: song);
+              showOverlay(
+                context,
+                icon: CupertinoIcons.arrow_right_circle_fill,
+                caption: 'Queued',
+                message: 'Song to be played next.',
+              );
+            },
           ),
         if (!isCurrent)
           _button(
@@ -69,7 +72,15 @@ Future<void> showActionSheet({
               CupertinoIcons.arrow_down_right_circle_fill,
               color: Colors.white30,
             ),
-            onTap: () => audio.queueToBottom(song: song),
+            onTap: () {
+              audio.queueToBottom(song: song);
+              showOverlay(
+                context,
+                icon: CupertinoIcons.arrow_down_right_circle_fill,
+                caption: 'Queued',
+                message: 'Song queued to bottom.',
+              );
+            },
           ),
         if (queued)
           _button(
@@ -78,7 +89,15 @@ Future<void> showActionSheet({
               CupertinoIcons.text_badge_minus,
               color: Colors.white30,
             ),
-            onTap: () => audio.removeFromQueue(song: song),
+            onTap: () {
+              audio.removeFromQueue(song: song);
+              showOverlay(
+                context,
+                icon: CupertinoIcons.text_badge_minus,
+                caption: 'Removed',
+                message: 'Song removed from queue.',
+              );
+            },
           ),
         _button(
           text: song.liked ? 'Unlike' : 'Like',
@@ -86,7 +105,19 @@ Future<void> showActionSheet({
             song.liked ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
             color: Colors.white30,
           ),
-          onTap: () => interactionProvider.toggleLike(song: song),
+          onTap: () {
+            showOverlay(
+              context,
+              caption: song.liked ? 'Unliked' : 'Liked',
+              message: song.liked
+                  ? 'Song removed from Favorites.'
+                  : 'Song added to Favorites.',
+              icon: song.liked
+                  ? CupertinoIcons.heart_slash
+                  : CupertinoIcons.heart_fill,
+            );
+            interactionProvider.toggleLike(song: song);
+          },
         ),
         const Divider(indent: 16, endIndent: 16),
         _button(
@@ -100,7 +131,6 @@ Future<void> showActionSheet({
             AppRouter().gotoAlbumDetailsScreen(context, album: song.album);
           },
           hideSheetOnTap: false,
-          withHapticFeedback: false,
         ),
         _button(
           text: 'Go to Artist',
@@ -113,7 +143,6 @@ Future<void> showActionSheet({
             AppRouter().gotoArtistDetailsScreen(context, artist: song.artist);
           },
           hideSheetOnTap: false,
-          withHapticFeedback: false,
         ),
         const Divider(indent: 16, endIndent: 16),
         _button(
@@ -127,7 +156,6 @@ Future<void> showActionSheet({
             gotoAddToPlaylistScreen(context, song: song);
           },
           hideSheetOnTap: false,
-          withHapticFeedback: false,
         ),
       ];
 
