@@ -142,26 +142,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return SafeArea(
       child: Scaffold(
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppDimensions.horizontalPadding),
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                ...[
-                  Image.asset('assets/images/logo.png', width: 160),
-                  hostField,
-                  emailField,
-                  passwordField,
-                  SizedBox(
-                    width: double.infinity,
-                    child: _authenticating ? spinnerWidget : submitButton,
-                  )
-                ].expand(
-                  (element) => [element, const SizedBox(height: 12)],
-                ),
-              ],
+        body: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppDimensions.horizontalPadding),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  ...[
+                    Image.asset('assets/images/logo.png', width: 160),
+                    hostField,
+                    emailField,
+                    passwordField,
+                    SizedBox(
+                      width: double.infinity,
+                      child: _authenticating ? spinnerWidget : submitButton,
+                    )
+                  ].expand((widget) => [widget, const SizedBox(height: 12)]),
+                ],
+              ),
             ),
           ),
         ),
