@@ -133,7 +133,10 @@ Future<void> showActionSheet({
 
       return ClipRect(
         child: Container(
-          padding: const EdgeInsets.only(bottom: 8.0),
+          padding: const EdgeInsets.only(
+            top: 16.0,
+            bottom: 8.0,
+          ),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
             child: Column(
@@ -156,10 +159,13 @@ Future<void> showActionSheet({
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      '${song.artist.name} • ${song.album.name}',
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: Colors.white54),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text(
+                        '${song.artist.name} • ${song.album.name}',
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: Colors.white54),
+                      ),
                     ),
                   ],
                 ),
