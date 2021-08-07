@@ -1,3 +1,4 @@
+import 'package:app/constants/colors.dart';
 import 'package:app/constants/dimensions.dart';
 import 'package:app/models/album.dart';
 import 'package:app/models/artist.dart';
@@ -24,26 +25,31 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
+  bool _hasFocus = false;
   bool _initial = true;
   List<Song> _songs = [];
   List<Artist> _artists = [];
   List<Album> _albums = [];
 
   late SearchProvider searchProvider;
-  late TextEditingController _searchInputController;
+  late TextEditingController _controller = TextEditingController(text: '');
+  FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
+
     searchProvider = context.read();
-    _searchInputController = TextEditingController(text: '');
+    _focusNode.addListener(() {
+      setState(() => _hasFocus = _focusNode.hasFocus);
+    });
   }
 
-  search(String keywords) => EasyDebounce.debounce(
+  _search(String keywords) => EasyDebounce.debounce(
         'search',
         const Duration(microseconds: 500), // typing on a phone isn't that fast
         () async {
-          if (keywords.length == 0) return resetSearch();
+          if (keywords.length == 0) return _resetSearch();
           if (keywords.length < 2) return;
 
           SearchResult result = await searchProvider.searchExcerpts(
@@ -69,8 +75,8 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  void resetSearch() {
-    _searchInputController.text = '';
+  void _resetSearch() {
+    _controller.text = '';
     this.setState(() => _initial = true);
   }
 
@@ -78,16 +84,39 @@ class _SearchScreenState extends State<SearchScreen> {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.horizontalPadding),
       color: Colors.black,
-      child: CupertinoSearchTextField(
-        controller: _searchInputController,
-        style: const TextStyle(color: Colors.white),
-        decoration: BoxDecoration(
-          color: Colors.white10,
-          borderRadius: AppDimensions.inputBorderRadius,
-        ),
-        placeholder: 'Search your library',
-        onChanged: search,
-        onSuffixTap: resetSearch,
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: CupertinoSearchTextField(
+              controller: _controller,
+              focusNode: _focusNode,
+              style: const TextStyle(color: Colors.white),
+              decoration: BoxDecoration(
+                color: Colors.white10,
+                borderRadius: AppDimensions.inputBorderRadius,
+              ),
+              placeholder: 'Search your library',
+              onChanged: _search,
+              onSuffixTap: _resetSearch,
+            ),
+          ),
+          if (_hasFocus)
+            Padding(
+              padding: const EdgeInsets.only(left: 12.0),
+              child: CupertinoButton(
+                padding: EdgeInsets.zero,
+                minSize: 0,
+                onPressed: () {
+                  _resetSearch();
+                  _focusNode.unfocus();
+                },
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: AppColors.red),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
