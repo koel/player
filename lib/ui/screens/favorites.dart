@@ -32,6 +32,7 @@ class _FavoritesScreenState extends State<FavoritesScreen>
 
     subscribe(interactionProvider.songLikeToggledStream.listen((song) {
       song.liked ? _songs.add(song) : _songs.remove(song);
+      setState(() => _songs = _songs);
     }));
   }
 
