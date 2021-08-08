@@ -251,8 +251,8 @@ class AlbumInfoPane extends StatelessWidget {
   }
 }
 
-showInfoSheet(BuildContext context, {required Song song}) {
-  showModalBottomSheet(
+Future<void> showInfoSheet(BuildContext context, {required Song song}) {
+  return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,

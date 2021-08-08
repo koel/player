@@ -84,7 +84,7 @@ class NowPlayingScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            const ProgressBar(),
+            ProgressBar(song: song),
           ],
         );
 

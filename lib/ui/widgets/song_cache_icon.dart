@@ -39,6 +39,22 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
     });
   }
 
+  /// Since this widget is rendered inside NowPlayingScreen, change to current
+  /// song in the parent will not trigger initState() and as a result not
+  /// refresh the song's cache status.
+  /// For that, we hook into didUpdateWidget().
+  /// See https://stackoverflow.com/questions/54759920/flutter-why-is-child-widgets-initstate-is-not-called-on-every-rebuild-of-pa.
+  @override
+  void didUpdateWidget(covariant SongCacheIcon oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _resolveCacheStatus();
+  }
+
+  Future<void> _resolveCacheStatus() async {
+    bool hasState = await cache.hasCache(song: widget.song);
+    setState(() => _hasCache = hasState);
+  }
+
   @override
   void dispose() {
     unsubscribeAll();
