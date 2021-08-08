@@ -18,9 +18,12 @@ class PlaylistProvider with ChangeNotifier {
   late List<Playlist> _playlists;
 
   final BehaviorSubject<Playlist> _playlistPopulated = BehaviorSubject();
+  final BehaviorSubject<Playlist> _playlistCreated = BehaviorSubject();
 
   ValueStream<Playlist> get playlistPopulatedStream =>
       _playlistPopulated.stream;
+
+  ValueStream<Playlist> get playlistCreatedStream => _playlistCreated.stream;
 
   PlaylistProvider({required SongProvider songProvider})
       : _songProvider = songProvider;
@@ -90,6 +93,18 @@ class PlaylistProvider with ChangeNotifier {
       print(err);
       // not the end of the world
     }
+  }
+
+  Future<Playlist> create({required String name}) async {
+    var json = await post('playlist', data: {
+      'name': name,
+    });
+
+    Playlist playlist = Playlist.fromJson(json);
+    _playlists.add(playlist);
+    _playlistCreated.add(playlist);
+
+    return playlist;
   }
 
   Future<void> _syncPlaylist({required Playlist playlist}) async {

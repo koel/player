@@ -4,6 +4,7 @@ import 'package:app/ui/screens/album_details.dart';
 import 'package:app/ui/screens/albums.dart';
 import 'package:app/ui/screens/artist_details.dart';
 import 'package:app/ui/screens/artists.dart';
+import 'package:app/ui/screens/create_playlist_sheet.dart';
 import 'package:app/ui/screens/data_loading.dart';
 import 'package:app/ui/screens/favorites.dart';
 import 'package:app/ui/screens/home.dart';
@@ -76,6 +77,20 @@ class AppRouter {
         return Container(
           height: MediaQuery.of(context).size.height,
           child: const NowPlayingScreen(),
+        );
+      },
+    );
+  }
+
+  Future<void> showCreatePlaylistSheet(BuildContext context) async {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height,
+          child: const CreatePlaylistSheet(),
         );
       },
     );
