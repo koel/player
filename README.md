@@ -8,12 +8,10 @@ Supports both iOS and Android.
 
 ## Download
 
-If you're on Android, you can build the project and copy the .apk file to your device to start using it. 
-An official build will also be available on Google Play soon, which you can purchase to support the project.
+[<img src="https://user-images.githubusercontent.com/8056274/126906876-acd3784c-c984-40e0-a7f5-6d2a8194d294.png" height=64>](https://apps.apple.com/de/app/koel-player/id1576886982?l=en)
+[<img src="https://user-images.githubusercontent.com/8056274/128632258-2077abef-7d99-4299-a286-ae13a3df6dca.png" height=64>](https://play.google.com/store/apps/details?id=phanan.koel.app)
 
-If you're on iOS, here is a link to buy and download the app:
-
-[<img src="https://user-images.githubusercontent.com/8056274/126906876-acd3784c-c984-40e0-a7f5-6d2a8194d294.png" height=48>](https://apps.apple.com/de/app/koel-player/id1576886982?l=en)
+You can, of course, build the project and install the app on your own.
 
 ## Contribution
 
