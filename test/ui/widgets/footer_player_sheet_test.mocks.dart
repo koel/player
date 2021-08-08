@@ -234,4 +234,9 @@ class MockAppRouter extends _i1.Mock implements _i12.AppRouter {
       (super.noSuchMethod(Invocation.method(#openNowPlayingScreen, [context]),
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i8.Future<void>);
+  @override
+  _i8.Future<void> showCreatePlaylistSheet(_i13.BuildContext? context) => (super
+      .noSuchMethod(Invocation.method(#showCreatePlaylistSheet, [context]),
+          returnValue: Future<void>.value(),
+          returnValueForMissingStub: Future<void>.value()) as _i8.Future<void>);
 }
