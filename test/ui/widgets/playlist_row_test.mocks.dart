@@ -37,11 +37,6 @@ class MockPlaylistProvider extends _i1.Mock implements _i4.PlaylistProvider {
               returnValue: _FakeValueStream<_i3.Playlist>())
           as _i2.ValueStream<_i3.Playlist>);
   @override
-  _i2.ValueStream<_i3.Playlist> get playlistCreatedStream =>
-      (super.noSuchMethod(Invocation.getter(#playlistCreatedStream),
-              returnValue: _FakeValueStream<_i3.Playlist>())
-          as _i2.ValueStream<_i3.Playlist>);
-  @override
   List<_i3.Playlist> get playlists =>
       (super.noSuchMethod(Invocation.getter(#playlists),
           returnValue: <_i3.Playlist>[]) as List<_i3.Playlist>);

@@ -8,18 +8,15 @@ import 'package:app/providers/interaction_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:rxdart/rxdart.dart';
 
-class AudioProvider with StreamSubscriber {
+class AudioProvider with StreamSubscriber, ChangeNotifier {
   SongProvider _songProvider;
   InteractionProvider _interactionProvider;
 
   late AssetsAudioPlayer _player;
-  final BehaviorSubject<bool> _queueModified = BehaviorSubject();
-
   AssetsAudioPlayer get player => _player;
-
-  ValueStream<bool> get queueModifiedStream => _queueModified.stream;
 
   AudioProvider({
     required SongProvider songProvider,
@@ -65,7 +62,7 @@ class AudioProvider with StreamSubscriber {
       volume: preferences.volume,
     );
 
-    _broadcastQueueChangedEvent();
+    notifyListeners();
   }
 
   Future<bool> queued(Song song) async => await indexInQueue(song) != -1;
@@ -103,7 +100,7 @@ class AudioProvider with StreamSubscriber {
     }
 
     _player.playlist!.insert(0, await song.asAudio());
-    _broadcastQueueChangedEvent();
+    notifyListeners();
     return 0;
   }
 
@@ -113,7 +110,7 @@ class AudioProvider with StreamSubscriber {
     }
 
     _player.playlist!.add(await song.asAudio());
-    _broadcastQueueChangedEvent();
+    notifyListeners();
 
     return _player.playlist!.numberOfItems - 1;
   }
@@ -127,7 +124,7 @@ class AudioProvider with StreamSubscriber {
     Audio audio = await song.asAudio();
     int currentSongIndex = _player.current.value?.index ?? -1;
     _player.playlist!.insert(currentSongIndex + 1, audio);
-    _broadcastQueueChangedEvent();
+    notifyListeners();
 
     return currentSongIndex + 1;
   }
@@ -152,7 +149,7 @@ class AudioProvider with StreamSubscriber {
     await _openPlayer(audios);
 
     _player.play();
-    _broadcastQueueChangedEvent();
+    notifyListeners();
   }
 
   List<Song> get queuedSongs {
@@ -164,12 +161,12 @@ class AudioProvider with StreamSubscriber {
 
   void clearQueue() {
     _player.playlist?.audios.clear();
-    _broadcastQueueChangedEvent();
+    notifyListeners();
   }
 
   Future<void> removeFromQueue({required Song song}) async {
     _player.playlist?.audios.remove(await song.asAudio());
-    _broadcastQueueChangedEvent();
+    notifyListeners();
   }
 
   void reorderQueue(int oldIndex, int newIndex) {
@@ -184,11 +181,9 @@ class AudioProvider with StreamSubscriber {
       _player.playlist
         ?..remove(audio)
         ..insert(newIndex, audio);
-      _broadcastQueueChangedEvent();
+      notifyListeners();
     }
   }
-
-  void _broadcastQueueChangedEvent() => _queueModified.add(true);
 
   ValueStream<PlayerState> get playerState => _player.playerState;
 

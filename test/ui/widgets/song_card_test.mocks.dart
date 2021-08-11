@@ -3,6 +3,7 @@
 // Do not manually edit this file.
 
 import 'dart:async' as _i6;
+import 'dart:ui' as _i7;
 
 import 'package:app/models/song.dart' as _i5;
 import 'package:app/providers/audio_provider.dart' as _i4;
@@ -36,10 +37,6 @@ class MockAudioProvider extends _i1.Mock implements _i4.AudioProvider {
       (super.noSuchMethod(Invocation.getter(#player),
           returnValue: _FakeAssetsAudioPlayer()) as _i2.AssetsAudioPlayer);
   @override
-  _i3.ValueStream<bool> get queueModifiedStream =>
-      (super.noSuchMethod(Invocation.getter(#queueModifiedStream),
-          returnValue: _FakeValueStream<bool>()) as _i3.ValueStream<bool>);
-  @override
   List<_i5.Song> get queuedSongs =>
       (super.noSuchMethod(Invocation.getter(#queuedSongs),
           returnValue: <_i5.Song>[]) as List<_i5.Song>);
@@ -48,6 +45,10 @@ class MockAudioProvider extends _i1.Mock implements _i4.AudioProvider {
       (super.noSuchMethod(Invocation.getter(#playerState),
               returnValue: _FakeValueStream<_i2.PlayerState>())
           as _i3.ValueStream<_i2.PlayerState>);
+  @override
+  bool get hasListeners =>
+      (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
+          as bool);
   @override
   _i6.Future<void> init() => (super.noSuchMethod(Invocation.method(#init, []),
       returnValue: Future<void>.value(),
@@ -121,5 +122,20 @@ class MockAudioProvider extends _i1.Mock implements _i4.AudioProvider {
   @override
   void subscribe(_i6.StreamSubscription<dynamic>? sub) =>
       super.noSuchMethod(Invocation.method(#subscribe, [sub]),
+          returnValueForMissingStub: null);
+  @override
+  void addListener(_i7.VoidCallback? listener) =>
+      super.noSuchMethod(Invocation.method(#addListener, [listener]),
+          returnValueForMissingStub: null);
+  @override
+  void removeListener(_i7.VoidCallback? listener) =>
+      super.noSuchMethod(Invocation.method(#removeListener, [listener]),
+          returnValueForMissingStub: null);
+  @override
+  void dispose() => super.noSuchMethod(Invocation.method(#dispose, []),
+      returnValueForMissingStub: null);
+  @override
+  void notifyListeners() =>
+      super.noSuchMethod(Invocation.method(#notifyListeners, []),
           returnValueForMissingStub: null);
 }

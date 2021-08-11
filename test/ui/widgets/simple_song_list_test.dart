@@ -46,7 +46,7 @@ void main() {
     await tester.pumpAppWidget(
       MultiProvider(
         providers: [
-          Provider<AudioProvider>(create: (_) => audioMock),
+          ChangeNotifierProvider<AudioProvider>(create: (_) => audioMock),
           Provider<CacheProvider>(create: (_) => CacheProvider()),
         ],
         child: SimpleSongList(

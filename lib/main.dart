@@ -42,7 +42,7 @@ List<SingleChildWidget> _providers = [
       songProvider: context.read<SongProvider>(),
     ),
   ),
-  Provider(
+  ChangeNotifierProvider(
     create: (context) => AudioProvider(
       songProvider: context.read<SongProvider>(),
       interactionProvider: context.read<InteractionProvider>(),

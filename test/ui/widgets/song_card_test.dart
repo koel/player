@@ -25,7 +25,7 @@ void main() {
 
   Future<void> _mount(WidgetTester tester) async {
     await tester.pumpAppWidget(
-      Provider<AudioProvider>.value(
+      ChangeNotifierProvider<AudioProvider>.value(
         value: audioMock,
         child: SongCard(song: song),
       ),

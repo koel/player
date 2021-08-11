@@ -52,7 +52,7 @@ void main() {
     await tester.pumpAppWidget(
       MultiProvider(
         providers: [
-          Provider<AudioProvider>(create: (_) => audioMock),
+          ChangeNotifierProvider<AudioProvider>(create: (_) => audioMock),
           Provider<SongProvider>(create: (_) => songProviderMock),
         ],
         child: FooterPlayerSheet(router: routerMock),

@@ -1,5 +1,3 @@
-import 'package:app/mixins/stream_subscriber.dart';
-import 'package:app/models/song.dart';
 import 'package:app/providers/audio_provider.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
@@ -9,98 +7,81 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
-class QueueScreen extends StatefulWidget {
+class QueueScreen extends StatelessWidget {
   static const routeName = '/queue';
 
   const QueueScreen({Key? key}) : super(key: key);
 
   @override
-  _QueueState createState() => _QueueState();
-}
-
-class _QueueState extends State<QueueScreen> with StreamSubscriber {
-  late AudioProvider audio;
-  List<Song> _songs = [];
-
-  @override
-  void initState() {
-    super.initState();
-    audio = context.read();
-    subscribe(audio.queueModifiedStream.listen((_) {
-      setState(() => _songs = audio.queuedSongs);
-    }));
-  }
-
-  @override
-  void dispose() {
-    unsubscribeAll();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          AppBar(
-            headingText: 'Current Queue',
-            coverImage: CoverImageStack(songs: _songs),
-            actions: <Widget>[
-              if (_songs.isNotEmpty)
-                TextButton(
-                  onPressed: () => audio.clearQueue(),
-                  child: const Text(
-                    'Clear',
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                ),
-            ],
-          ),
-          if (_songs.isEmpty)
-            SliverToBoxAdapter(
-              child: Column(
-                children: <Widget>[
-                  const SizedBox(height: 128),
-                  Center(
-                    child: const Text(
-                      'No songs queued.',
-                      style: const TextStyle(color: Colors.white54),
+      body: Consumer<AudioProvider>(
+        builder: (_, provider, __) {
+          print('called');
+          return CustomScrollView(
+            slivers: <Widget>[
+              AppBar(
+                headingText: 'Current Queue',
+                coverImage: CoverImageStack(songs: provider.queuedSongs),
+                actions: <Widget>[
+                  if (provider.queuedSongs.isNotEmpty)
+                    TextButton(
+                      onPressed: () => provider.clearQueue(),
+                      child: const Text(
+                        'Clear',
+                        style: const TextStyle(color: Colors.red),
+                      ),
                     ),
-                  ),
                 ],
               ),
-            )
-          else
-            SliverReorderableList(
-              itemCount: _songs.length,
-              itemBuilder: (BuildContext context, int index) {
-                return Dismissible(
-                  direction: DismissDirection.endToStart,
-                  onDismissed: (DismissDirection direction) =>
-                      audio.removeFromQueue(song: _songs[index]),
-                  background: Container(
-                    alignment: AlignmentDirectional.centerEnd,
-                    color: Colors.red,
-                    child: const Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: const Icon(CupertinoIcons.delete_simple),
-                    ),
+              if (provider.queuedSongs.isEmpty)
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: <Widget>[
+                      const SizedBox(height: 128),
+                      Center(
+                        child: const Text(
+                          'No songs queued.',
+                          style: const TextStyle(color: Colors.white54),
+                        ),
+                      ),
+                    ],
                   ),
-                  key: ValueKey(_songs[index]),
-                  child: SongRow(
-                    index: index,
-                    key: ValueKey(_songs[index]),
-                    song: _songs[index],
-                    listContext: SongListContext.queue,
-                  ),
-                );
-              },
-              onReorder: (int oldIndex, int newIndex) {
-                audio.reorderQueue(oldIndex, newIndex);
-              },
-            ),
-          const SliverToBoxAdapter(child: const BottomSpace()),
-        ],
+                )
+              else
+                SliverReorderableList(
+                  itemCount: provider.queuedSongs.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Dismissible(
+                      direction: DismissDirection.endToStart,
+                      onDismissed: (DismissDirection direction) =>
+                          provider.removeFromQueue(
+                        song: provider.queuedSongs[index],
+                      ),
+                      background: Container(
+                        alignment: AlignmentDirectional.centerEnd,
+                        color: Colors.red,
+                        child: const Padding(
+                          padding: EdgeInsets.only(right: 16),
+                          child: Icon(CupertinoIcons.delete_simple),
+                        ),
+                      ),
+                      key: ValueKey(provider.queuedSongs[index]),
+                      child: SongRow(
+                        index: index,
+                        key: ValueKey(provider.queuedSongs[index]),
+                        song: provider.queuedSongs[index],
+                        listContext: SongListContext.queue,
+                      ),
+                    );
+                  },
+                  onReorder: (int oldIndex, int newIndex) =>
+                      provider.reorderQueue(oldIndex, newIndex),
+                ),
+              const SliverToBoxAdapter(child: const BottomSpace()),
+            ],
+          );
+        },
       ),
     );
   }

@@ -3,17 +3,17 @@
 // Do not manually edit this file.
 
 import 'dart:async' as _i8;
+import 'dart:ui' as _i9;
 
-import 'package:app/models/album.dart' as _i11;
-import 'package:app/models/artist.dart' as _i10;
+import 'package:app/models/album.dart' as _i12;
+import 'package:app/models/artist.dart' as _i11;
 import 'package:app/models/song.dart' as _i6;
 import 'package:app/providers/audio_provider.dart' as _i7;
-import 'package:app/providers/song_provider.dart' as _i9;
-import 'package:app/router.dart' as _i12;
+import 'package:app/providers/song_provider.dart' as _i10;
+import 'package:app/router.dart' as _i13;
 import 'package:app/ui/widgets/app_bar.dart' as _i4;
 import 'package:assets_audio_player/assets_audio_player.dart' as _i2;
-import 'package:flutter/cupertino.dart' as _i13;
-import 'package:flutter/foundation.dart' as _i5;
+import 'package:flutter/cupertino.dart' as _i5;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:rxdart/rxdart.dart' as _i3;
 
@@ -51,10 +51,6 @@ class MockAudioProvider extends _i1.Mock implements _i7.AudioProvider {
       (super.noSuchMethod(Invocation.getter(#player),
           returnValue: _FakeAssetsAudioPlayer()) as _i2.AssetsAudioPlayer);
   @override
-  _i3.ValueStream<bool> get queueModifiedStream =>
-      (super.noSuchMethod(Invocation.getter(#queueModifiedStream),
-          returnValue: _FakeValueStream<bool>()) as _i3.ValueStream<bool>);
-  @override
   List<_i6.Song> get queuedSongs =>
       (super.noSuchMethod(Invocation.getter(#queuedSongs),
           returnValue: <_i6.Song>[]) as List<_i6.Song>);
@@ -63,6 +59,10 @@ class MockAudioProvider extends _i1.Mock implements _i7.AudioProvider {
       (super.noSuchMethod(Invocation.getter(#playerState),
               returnValue: _FakeValueStream<_i2.PlayerState>())
           as _i3.ValueStream<_i2.PlayerState>);
+  @override
+  bool get hasListeners =>
+      (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
+          as bool);
   @override
   _i8.Future<void> init() => (super.noSuchMethod(Invocation.method(#init, []),
       returnValue: Future<void>.value(),
@@ -137,12 +137,27 @@ class MockAudioProvider extends _i1.Mock implements _i7.AudioProvider {
   void subscribe(_i8.StreamSubscription<dynamic>? sub) =>
       super.noSuchMethod(Invocation.method(#subscribe, [sub]),
           returnValueForMissingStub: null);
+  @override
+  void addListener(_i9.VoidCallback? listener) =>
+      super.noSuchMethod(Invocation.method(#addListener, [listener]),
+          returnValueForMissingStub: null);
+  @override
+  void removeListener(_i9.VoidCallback? listener) =>
+      super.noSuchMethod(Invocation.method(#removeListener, [listener]),
+          returnValueForMissingStub: null);
+  @override
+  void dispose() => super.noSuchMethod(Invocation.method(#dispose, []),
+      returnValueForMissingStub: null);
+  @override
+  void notifyListeners() =>
+      super.noSuchMethod(Invocation.method(#notifyListeners, []),
+          returnValueForMissingStub: null);
 }
 
 /// A class which mocks [SongProvider].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockSongProvider extends _i1.Mock implements _i9.SongProvider {
+class MockSongProvider extends _i1.Mock implements _i10.SongProvider {
   MockSongProvider() {
     _i1.throwOnMissingStub(this);
   }
@@ -192,11 +207,11 @@ class MockSongProvider extends _i1.Mock implements _i9.SongProvider {
       (super.noSuchMethod(Invocation.method(#byIds, [ids]),
           returnValue: <_i6.Song>[]) as List<_i6.Song>);
   @override
-  List<_i6.Song> byArtist(_i10.Artist? artist) =>
+  List<_i6.Song> byArtist(_i11.Artist? artist) =>
       (super.noSuchMethod(Invocation.method(#byArtist, [artist]),
           returnValue: <_i6.Song>[]) as List<_i6.Song>);
   @override
-  List<_i6.Song> byAlbum(_i11.Album? album) =>
+  List<_i6.Song> byAlbum(_i12.Album? album) =>
       (super.noSuchMethod(Invocation.method(#byAlbum, [album]),
           returnValue: <_i6.Song>[]) as List<_i6.Song>);
   @override
@@ -208,34 +223,34 @@ class MockSongProvider extends _i1.Mock implements _i9.SongProvider {
 /// A class which mocks [AppRouter].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAppRouter extends _i1.Mock implements _i12.AppRouter {
+class MockAppRouter extends _i1.Mock implements _i13.AppRouter {
   MockAppRouter() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i8.Future<void> gotoAlbumDetailsScreen(_i13.BuildContext? context,
-          {_i11.Album? album}) =>
+  _i8.Future<void> gotoAlbumDetailsScreen(_i5.BuildContext? context,
+          {_i12.Album? album}) =>
       (super.noSuchMethod(
           Invocation.method(
               #gotoAlbumDetailsScreen, [context], {#album: album}),
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i8.Future<void>);
   @override
-  _i8.Future<void> gotoArtistDetailsScreen(_i13.BuildContext? context,
-          {_i10.Artist? artist}) =>
+  _i8.Future<void> gotoArtistDetailsScreen(_i5.BuildContext? context,
+          {_i11.Artist? artist}) =>
       (super.noSuchMethod(
           Invocation.method(
               #gotoArtistDetailsScreen, [context], {#artist: artist}),
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i8.Future<void>);
   @override
-  _i8.Future<void> openNowPlayingScreen(_i13.BuildContext? context) =>
+  _i8.Future<void> openNowPlayingScreen(_i5.BuildContext? context) =>
       (super.noSuchMethod(Invocation.method(#openNowPlayingScreen, [context]),
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i8.Future<void>);
   @override
-  _i8.Future<void> showCreatePlaylistSheet(_i13.BuildContext? context) => (super
+  _i8.Future<void> showCreatePlaylistSheet(_i5.BuildContext? context) => (super
       .noSuchMethod(Invocation.method(#showCreatePlaylistSheet, [context]),
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i8.Future<void>);
