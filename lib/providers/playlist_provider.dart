@@ -18,12 +18,9 @@ class PlaylistProvider with ChangeNotifier {
   late List<Playlist> _playlists;
 
   final BehaviorSubject<Playlist> _playlistPopulated = BehaviorSubject();
-  final BehaviorSubject<Playlist> _playlistCreated = BehaviorSubject();
 
   ValueStream<Playlist> get playlistPopulatedStream =>
       _playlistPopulated.stream;
-
-  ValueStream<Playlist> get playlistCreatedStream => _playlistCreated.stream;
 
   PlaylistProvider({required SongProvider songProvider})
       : _songProvider = songProvider;
@@ -31,6 +28,7 @@ class PlaylistProvider with ChangeNotifier {
   Future<void> init(List<dynamic> playlistData) async {
     ParseResult result = await compute(parsePlaylists, playlistData);
     _playlists = result.collection.cast();
+    notifyListeners();
   }
 
   List<Playlist> get playlists => _playlists;
@@ -65,6 +63,7 @@ class PlaylistProvider with ChangeNotifier {
     required Playlist playlist,
   }) async {
     assert(!playlist.isSmart, 'Cannot manually mutate smart playlists.');
+
     if (!playlist.populated) {
       await populatePlaylist(playlist: playlist);
     }
@@ -102,7 +101,7 @@ class PlaylistProvider with ChangeNotifier {
 
     Playlist playlist = Playlist.fromJson(json);
     _playlists.add(playlist);
-    _playlistCreated.add(playlist);
+    notifyListeners();
 
     return playlist;
   }

@@ -1,5 +1,4 @@
 import 'package:app/mixins/stream_subscriber.dart';
-import 'package:app/models/playlist.dart';
 import 'package:app/providers/playlist_provider.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
@@ -25,19 +24,12 @@ class PlaylistsScreen extends StatefulWidget {
 class _PlaylistsScreenState extends State<PlaylistsScreen>
     with StreamSubscriber {
   late PlaylistProvider playlistProvider;
-  late List<Playlist> _playlists = [];
 
   @override
   void initState() {
     super.initState();
 
     playlistProvider = context.read();
-
-    subscribe(playlistProvider.playlistCreatedStream.listen((playlist) {
-      setState(() => _playlists = playlistProvider.playlists);
-    }));
-
-    setState(() => _playlists = playlistProvider.playlists);
 
     // Try to populate all playlists even before user interactions to update
     // the playlist's thumbnail and song count.
@@ -62,15 +54,20 @@ class _PlaylistsScreenState extends State<PlaylistsScreen>
               largeTitle: const LargeTitle(text: 'Playlists'),
               trailing: IconButton(
                 onPressed: () => widget.router.showCreatePlaylistSheet(context),
-                icon: Icon(CupertinoIcons.add_circled),
+                icon: const Icon(CupertinoIcons.add_circled),
               ),
             ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) =>
-                    PlaylistRow(playlist: _playlists[index]),
-                childCount: _playlists.length,
-              ),
+            Consumer<PlaylistProvider>(
+              builder: (context, provider, child) {
+                return SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (_, int index) => PlaylistRow(
+                      playlist: provider.playlists[index],
+                    ),
+                    childCount: provider.playlists.length,
+                  ),
+                );
+              },
             ),
             const SliverToBoxAdapter(child: const BottomSpace()),
           ],
