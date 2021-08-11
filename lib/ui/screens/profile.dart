@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:app/constants/dimensions.dart';
-import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/user.dart';
 import 'package:app/providers/audio_provider.dart';
 import 'package:app/providers/auth_provider.dart';
@@ -241,35 +240,18 @@ class ClearCacheButton extends StatelessWidget {
   }
 }
 
-class FavoriteMetricBlock extends StatefulWidget {
+class FavoriteMetricBlock extends StatelessWidget {
   const FavoriteMetricBlock({Key? key}) : super(key: key);
 
   @override
-  _FavoriteMetricBlock createState() => _FavoriteMetricBlock();
-}
-
-class _FavoriteMetricBlock extends State<FavoriteMetricBlock>
-    with StreamSubscriber {
-  late InteractionProvider interactionProvider;
-  late int _favoriteCount;
-
-  @override
-  void initState() {
-    super.initState();
-    interactionProvider = context.read();
-
-    setState(() => _favoriteCount = interactionProvider.favorites.length);
-
-    subscribe(interactionProvider.songLikeToggledStream.listen((song) {
-      setState(() => _favoriteCount = interactionProvider.favorites.length);
-    }));
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return MetricBlock(
-      number: _favoriteCount,
-      label: 'favorites',
+    return Consumer<InteractionProvider>(
+      builder: (_, provider, __) {
+        return MetricBlock(
+          number: provider.favorites.length,
+          label: 'favorites',
+        );
+      },
     );
   }
 }
