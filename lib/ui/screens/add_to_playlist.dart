@@ -68,7 +68,7 @@ class _AddToPlaylistScreenState extends State<AddToPlaylistScreen> {
                 childCount: _playlists.length,
               ),
             ),
-            const SliverToBoxAdapter(child: const BottomSpace()),
+            const BottomSpace(),
           ],
         ),
       ),

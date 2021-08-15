@@ -104,7 +104,7 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                   childCount: songs.length,
                 ),
               ),
-              const SliverToBoxAdapter(child: const BottomSpace()),
+              const BottomSpace(),
             ],
           );
         },

@@ -116,7 +116,7 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                   childCount: songs.length,
                 ),
               ),
-              const SliverToBoxAdapter(child: BottomSpace()),
+              const BottomSpace(),
             ],
           );
         },

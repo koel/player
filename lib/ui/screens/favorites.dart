@@ -48,7 +48,7 @@ class FavoritesScreen extends StatelessWidget {
                   childCount: provider.favorites.length,
                 ),
               ),
-              const SliverToBoxAdapter(child: const BottomSpace()),
+              const BottomSpace(),
             ],
           );
         },

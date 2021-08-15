@@ -61,7 +61,7 @@ class _SongsScreenState extends State<SongsScreen> {
                   childCount: songs.length,
                 ),
               ),
-              const SliverToBoxAdapter(child: BottomSpace()),
+              const BottomSpace(),
             ],
           );
         },

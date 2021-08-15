@@ -99,7 +99,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
                     childCount: provider.playlists.length,
                   ),
                 ),
-                const SliverToBoxAdapter(child: BottomSpace()),
+                const BottomSpace(),
               ],
             );
           },

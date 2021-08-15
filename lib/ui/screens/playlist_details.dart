@@ -112,7 +112,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                     childCount: playlist.songs.length,
                   ),
                 ),
-              const SliverToBoxAdapter(child: const BottomSpace()),
+              const BottomSpace(),
             ],
           );
         },

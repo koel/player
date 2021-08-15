@@ -78,7 +78,7 @@ class QueueScreen extends StatelessWidget {
                   onReorder: (int oldIndex, int newIndex) =>
                       provider.reorderQueue(oldIndex, newIndex),
                 ),
-              const SliverToBoxAdapter(child: const BottomSpace()),
+              const BottomSpace(),
             ],
           );
         },
