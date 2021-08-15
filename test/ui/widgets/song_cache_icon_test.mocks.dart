@@ -48,11 +48,11 @@ class MockCacheProvider extends _i1.Mock implements _i4.CacheProvider {
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i5.Future<void>);
   @override
-  _i5.Future<_i7.FileInfo?> getCache({_i6.Song? song}) => (super.noSuchMethod(
+  _i5.Future<_i7.FileInfo?> get({_i6.Song? song}) => (super.noSuchMethod(
       Invocation.method(#getCache, [], {#song: song}),
       returnValue: Future<_i7.FileInfo?>.value()) as _i5.Future<_i7.FileInfo?>);
   @override
-  _i5.Future<bool> hasCache({_i6.Song? song}) =>
+  _i5.Future<bool> has({_i6.Song? song}) =>
       (super.noSuchMethod(Invocation.method(#hasCache, [], {#song: song}),
           returnValue: Future<bool>.value(false)) as _i5.Future<bool>);
   @override

@@ -7,6 +7,8 @@ import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/values/parse_result.dart';
 import 'package:flutter/foundation.dart';
 
+import 'cache_provider.dart';
+
 ParseResult parseSongs(List<dynamic> data) {
   ParseResult result = ParseResult();
   data.forEach((json) => result.add(Song.fromJson(json), json['id']));
@@ -15,28 +17,33 @@ ParseResult parseSongs(List<dynamic> data) {
 }
 
 class SongProvider {
-  ArtistProvider _artistProvider;
-  AlbumProvider _albumProvider;
+  late ArtistProvider artistProvider;
+  late AlbumProvider albumProvider;
+  late CacheProvider cacheProvider;
   late CoverImageStack coverImageStack;
 
   late List<Song> _songs;
   late Map<String, Song> _index;
 
   SongProvider({
-    required ArtistProvider artistProvider,
-    required AlbumProvider albumProvider,
-  })  : _artistProvider = artistProvider,
-        _albumProvider = albumProvider;
+    required this.artistProvider,
+    required this.albumProvider,
+    required this.cacheProvider,
+  });
 
   Future<void> init(List<dynamic> songData) async {
     ParseResult result = await compute(parseSongs, songData);
     _songs = result.collection.cast();
     _index = result.index.cast();
 
-    _songs.forEach((song) {
+    _songs.forEach((song) async {
       song
-        ..artist = _artistProvider.byId(song.artistId)
-        ..album = _albumProvider.byId(song.albumId);
+        ..artist = artistProvider.byId(song.artistId)
+        ..album = albumProvider.byId(song.albumId);
+
+      if (await cacheProvider.has(song: song)) {
+        cacheProvider.songs.add(song);
+      }
     });
 
     coverImageStack = CoverImageStack(songs: _songs);

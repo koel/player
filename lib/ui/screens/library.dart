@@ -4,6 +4,7 @@ import 'package:app/models/song.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/albums.dart';
 import 'package:app/ui/screens/artists.dart';
+import 'package:app/ui/screens/downloaded.dart';
 import 'package:app/ui/screens/favorites.dart';
 import 'package:app/ui/screens/playlists.dart';
 import 'package:app/ui/screens/songs.dart';
@@ -56,6 +57,12 @@ class LibraryScreen extends StatelessWidget {
           label: 'Songs',
           onTap: () => Navigator.of(context, rootNavigator: true)
               .pushNamed(SongsScreen.routeName),
+        ),
+        LibraryMenuItem(
+          icon: CupertinoIcons.cloud_download_fill,
+          label: 'Downloaded',
+          onTap: () => Navigator.of(context, rootNavigator: true)
+              .pushNamed(DownloadedScreen.routeName),
         ),
       ],
     ).toList();

@@ -1,4 +1,5 @@
 import 'package:app/models/song.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -9,14 +10,17 @@ class SongCached {
   SongCached({required this.song, required this.info});
 }
 
-class CacheProvider {
-  final BehaviorSubject<bool> _cacheCleared = BehaviorSubject();
+class CacheProvider with ChangeNotifier {
+  List<Song> songs = [];
 
+  final BehaviorSubject<bool> _cacheCleared = BehaviorSubject();
   ValueStream<bool> get cacheClearedStream => _cacheCleared.stream;
 
-  final BehaviorSubject<SongCached> _songMediaCached = BehaviorSubject();
+  final BehaviorSubject<Song> _singleCacheRemoved = BehaviorSubject();
+  ValueStream<Song> get singleCacheRemovedStream => _singleCacheRemoved.stream;
 
-  ValueStream<SongCached> get songCachedStream => _songMediaCached.stream;
+  final BehaviorSubject<SongCached> _songCached = BehaviorSubject();
+  ValueStream<SongCached> get songCachedStream => _songCached.stream;
 
   static CacheManager _cache = DefaultCacheManager();
 
@@ -27,19 +31,30 @@ class CacheProvider {
       force: true,
     );
 
-    _songMediaCached.add(SongCached(song: song, info: fileInfo));
+    _songCached.add(SongCached(song: song, info: fileInfo));
+    songs.add(song);
+    notifyListeners();
   }
 
-  Future<FileInfo?> getCache({required Song song}) async {
+  Future<FileInfo?> get({required Song song}) async {
     return await _cache.getFileFromCache(song.cacheKey);
   }
 
-  Future<bool> hasCache({required Song song}) async {
-    return await this.getCache(song: song) != null;
+  Future<bool> has({required Song song}) async {
+    return await this.get(song: song) != null;
+  }
+
+  Future<void> remove({required Song song}) async {
+    await _cache.removeFile(song.cacheKey);
+    _singleCacheRemoved.add(song);
+    this.songs.remove(song);
+    notifyListeners();
   }
 
   Future<void> clear() async {
     await _cache.emptyCache();
     _cacheCleared.add(true);
+    this.songs.clear();
+    notifyListeners();
   }
 }

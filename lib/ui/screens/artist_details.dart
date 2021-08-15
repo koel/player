@@ -154,7 +154,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
               childCount: sortedSongs.length,
             ),
           ),
-          const SliverToBoxAdapter(child: const BottomSpace()),
+          const SliverToBoxAdapter(child: BottomSpace()),
         ],
       ),
     );

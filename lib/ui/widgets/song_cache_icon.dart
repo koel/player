@@ -28,13 +28,19 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
       setState(() => _hasCache = false);
     }));
 
+    subscribe(cache.singleCacheRemovedStream.listen((song) {
+      if (song == widget.song) {
+        setState(() => _hasCache = false);
+      }
+    }));
+
     subscribe(cache.songCachedStream.listen((event) {
       if (event.song == widget.song) {
         setState(() => _hasCache = true);
       }
     }));
 
-    cache.hasCache(song: widget.song).then((value) {
+    cache.has(song: widget.song).then((value) {
       setState(() => _hasCache = value);
     });
   }
@@ -51,7 +57,7 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
   }
 
   Future<void> _resolveCacheStatus() async {
-    bool hasState = await cache.hasCache(song: widget.song);
+    bool hasState = await cache.has(song: widget.song);
     setState(() => _hasCache = hasState);
   }
 

@@ -6,6 +6,7 @@ import 'package:app/ui/screens/artist_details.dart';
 import 'package:app/ui/screens/artists.dart';
 import 'package:app/ui/screens/create_playlist_sheet.dart';
 import 'package:app/ui/screens/data_loading.dart';
+import 'package:app/ui/screens/downloaded.dart';
 import 'package:app/ui/screens/favorites.dart';
 import 'package:app/ui/screens/home.dart';
 import 'package:app/ui/screens/initial.dart';
@@ -46,6 +47,7 @@ class AppRouter {
     AddToPlaylistScreen.routeName: (_) => const AddToPlaylistScreen(),
     ProfileScreen.routeName: (_) => const ProfileScreen(),
     DataLoadingScreen.routeName: (_) => const DataLoadingScreen(),
+    DownloadedScreen.routeName: (_) => const DownloadedScreen(),
   };
 
   Future<void> gotoAlbumDetailsScreen(
