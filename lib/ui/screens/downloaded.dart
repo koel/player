@@ -43,16 +43,17 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                 coverImage: CoverImageStack(songs: songs),
                 actions: [
                   SortButton(
-                      options: {
-                        OrderBy.artist: 'Artist',
-                        OrderBy.title: 'Song title',
-                        OrderBy.recentlyAdded: 'Recently added',
-                      },
-                      currentOrder: _sortOrder,
-                      onActionSheetActionPressed: (OrderBy order) {
-                        _currentSortOrder = order;
-                        setState(() => _sortOrder = order);
-                      })
+                    options: {
+                      OrderBy.artist: 'Artist',
+                      OrderBy.title: 'Song title',
+                      OrderBy.recentlyAdded: 'Recently added',
+                    },
+                    currentOrder: _sortOrder,
+                    onActionSheetActionPressed: (OrderBy order) {
+                      _currentSortOrder = order;
+                      setState(() => _sortOrder = order);
+                    },
+                  ),
                 ],
               ),
               SliverToBoxAdapter(child: SongListButtons(songs: songs)),
