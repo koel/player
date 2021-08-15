@@ -113,4 +113,10 @@ class PlaylistProvider with ChangeNotifier {
 
     _playlistPopulated.add(playlist);
   }
+
+  Future<void> remove({required Playlist playlist}) async {
+    // For a snappier experience, we don't `await` the operation.
+    delete('playlist/${playlist.id}');
+    _playlists.remove(playlist);
+  }
 }

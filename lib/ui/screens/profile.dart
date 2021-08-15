@@ -231,10 +231,7 @@ class ClearCacheButton extends StatelessWidget {
           );
           await DefaultCacheManager().emptyCache();
         },
-        child: Text(
-          'Clear Cache',
-          textAlign: TextAlign.center,
-        ),
+        child: const Text('Clear Cache', textAlign: TextAlign.center),
       ),
     );
   }

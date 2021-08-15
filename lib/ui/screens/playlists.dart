@@ -1,6 +1,6 @@
 import 'package:app/constants/colors.dart';
 import 'package:app/constants/dimensions.dart';
-import 'package:app/mixins/stream_subscriber.dart';
+import 'package:app/models/playlist.dart';
 import 'package:app/providers/playlist_provider.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
@@ -23,25 +23,14 @@ class PlaylistsScreen extends StatefulWidget {
   _PlaylistsScreenState createState() => _PlaylistsScreenState();
 }
 
-class _PlaylistsScreenState extends State<PlaylistsScreen>
-    with StreamSubscriber {
-  late PlaylistProvider playlistProvider;
-
+class _PlaylistsScreenState extends State<PlaylistsScreen> {
   @override
   void initState() {
     super.initState();
 
-    playlistProvider = context.read();
-
     // Try to populate all playlists even before user interactions to update
     // the playlist's thumbnail and song count.
-    playlistProvider.populateAllPlaylists();
-  }
-
-  @override
-  void dispose() {
-    unsubscribeAll();
-    super.dispose();
+    context.read<PlaylistProvider>().populateAllPlaylists();
   }
 
   @override
@@ -87,13 +76,30 @@ class _PlaylistsScreenState extends State<PlaylistsScreen>
                 navigationBar!,
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (_, int index) => PlaylistRow(
-                      playlist: provider.playlists[index],
+                    (BuildContext context, int index) => Dismissible(
+                      direction: DismissDirection.endToStart,
+                      confirmDismiss: (_) async => await confirmDelete(
+                        context,
+                        playlist: provider.playlists[index],
+                      ),
+                      onDismissed: (_) => provider.remove(
+                        playlist: provider.playlists[index],
+                      ),
+                      background: Container(
+                        alignment: AlignmentDirectional.centerEnd,
+                        color: Colors.red,
+                        child: const Padding(
+                          padding: EdgeInsets.only(right: 28),
+                          child: Icon(CupertinoIcons.delete),
+                        ),
+                      ),
+                      key: ValueKey(provider.playlists[index]),
+                      child: PlaylistRow(playlist: provider.playlists[index]),
                     ),
                     childCount: provider.playlists.length,
                   ),
                 ),
-                const SliverToBoxAdapter(child: const BottomSpace()),
+                const SliverToBoxAdapter(child: BottomSpace()),
               ],
             );
           },
@@ -107,6 +113,44 @@ class _PlaylistsScreenState extends State<PlaylistsScreen>
           ),
         ),
       ),
+    );
+  }
+
+  Future<bool> confirmDelete(
+    BuildContext context, {
+    required Playlist playlist,
+  }) async {
+    return await showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              children: <InlineSpan>[
+                const TextSpan(text: 'Delete the playlist '),
+                TextSpan(
+                  text: playlist.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const TextSpan(text: '?'),
+              ],
+            ),
+          ),
+          content: const Text('You cannot undo this action.'),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.pop(context, false),
+            ),
+            CupertinoDialogAction(
+              child: const Text('Confirm'),
+              isDestructiveAction: true,
+              onPressed: () => Navigator.pop(context, true),
+            ),
+          ],
+        );
+      },
     );
   }
 }
