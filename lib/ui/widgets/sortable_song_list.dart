@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 enum OrderBy {
   trackNumber,
   artist,
+  album,
   title,
   recentlyAdded,
 }
@@ -15,6 +16,10 @@ List<Song> sortSongs(List<Song> songs, {required OrderBy orderBy}) {
       return songs..sort((a, b) => a.title.compareTo(b.title));
     case OrderBy.artist:
       return songs..sort((a, b) => a.artist.name.compareTo(b.artist.name));
+    case OrderBy.album:
+      return songs
+        ..sort((a, b) => '${a.album.name}${a.albumId}${a.track}'
+            .compareTo('${b.album.name}${b.albumId}${b.track}'));
     case OrderBy.recentlyAdded:
       return songs..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     case OrderBy.trackNumber:
