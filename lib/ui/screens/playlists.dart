@@ -1,3 +1,5 @@
+import 'package:app/constants/colors.dart';
+import 'package:app/constants/dimensions.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/providers/playlist_provider.dart';
 import 'package:app/router.dart';
@@ -47,30 +49,62 @@ class _PlaylistsScreenState extends State<PlaylistsScreen>
     return Scaffold(
       body: CupertinoTheme(
         data: CupertinoThemeData(primaryColor: Colors.white),
-        child: CustomScrollView(
-          slivers: <Widget>[
-            CupertinoSliverNavigationBar(
-              backgroundColor: Colors.black,
-              largeTitle: const LargeTitle(text: 'Playlists'),
-              trailing: IconButton(
-                onPressed: () => widget.router.showCreatePlaylistSheet(context),
-                icon: const Icon(CupertinoIcons.add_circled),
-              ),
-            ),
-            Consumer<PlaylistProvider>(
-              builder: (context, provider, child) {
-                return SliverList(
+        child: Consumer<PlaylistProvider>(
+          builder: (context, provider, navigationBar) {
+            if (provider.playlists.length == 0) {
+              return Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppDimensions.horizontalPadding,
+                ),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => widget.router.showCreatePlaylistSheet(context),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        const Icon(
+                          CupertinoIcons.exclamationmark_square,
+                          size: 56.0,
+                          color: AppColors.red,
+                        ),
+                        const SizedBox(height: 16.0),
+                        Text(
+                          'No playlists.',
+                          style: Theme.of(context).textTheme.headline5,
+                        ),
+                        const SizedBox(height: 16.0),
+                        const Text('Tap to create a playlist.'),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return CustomScrollView(
+              slivers: <Widget>[
+                navigationBar!,
+                SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (_, int index) => PlaylistRow(
                       playlist: provider.playlists[index],
                     ),
                     childCount: provider.playlists.length,
                   ),
-                );
-              },
+                ),
+                const SliverToBoxAdapter(child: const BottomSpace()),
+              ],
+            );
+          },
+          child: CupertinoSliverNavigationBar(
+            backgroundColor: Colors.black,
+            largeTitle: const LargeTitle(text: 'Playlists'),
+            trailing: IconButton(
+              onPressed: () => widget.router.showCreatePlaylistSheet(context),
+              icon: const Icon(CupertinoIcons.add_circled),
             ),
-            const SliverToBoxAdapter(child: const BottomSpace()),
-          ],
+          ),
         ),
       ),
     );
