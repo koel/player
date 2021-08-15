@@ -1,3 +1,4 @@
+import 'package:app/constants/dimensions.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/cache_provider.dart';
 import 'package:app/ui/widgets/app_bar.dart';
@@ -29,8 +30,44 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
       body: Consumer<CacheProvider>(
         builder: (_, provider, __) {
           if (provider.songs.length == 0) {
-            return Center(
-              child: Text('No downloaded songs available.'),
+            return Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: AppDimensions.horizontalPadding,
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      'No downloaded songs.',
+                      style: Theme.of(context).textTheme.headline5,
+                    ),
+                    const SizedBox(height: 16.0),
+                    RichText(
+                      textAlign: TextAlign.center,
+                      text: const TextSpan(
+                        style: TextStyle(color: Colors.white54),
+                        children: <InlineSpan>[
+                          TextSpan(text: 'Click the'),
+                          WidgetSpan(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 5.0),
+                              child: Icon(
+                                CupertinoIcons.cloud_download_fill,
+                                size: 16.0,
+                              ),
+                            ),
+                          ),
+                          TextSpan(
+                            text: 'icon next to a song to download it for '
+                                'offline playback.',
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
             );
           }
 
