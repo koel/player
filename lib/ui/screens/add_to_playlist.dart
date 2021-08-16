@@ -1,6 +1,8 @@
 import 'package:app/models/playlist.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/playlist_provider.dart';
+import 'package:app/router.dart';
+import 'package:app/ui/screens/playlists.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/message_overlay.dart';
 import 'package:app/ui/widgets/playlist_row.dart';
@@ -10,66 +12,72 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-class AddToPlaylistScreen extends StatefulWidget {
+class AddToPlaylistScreen extends StatelessWidget {
   static const routeName = '/add-to-playlist';
 
-  const AddToPlaylistScreen({Key? key}) : super(key: key);
+  final AppRouter router;
 
-  @override
-  _AddToPlaylistScreenState createState() => _AddToPlaylistScreenState();
-}
-
-class _AddToPlaylistScreenState extends State<AddToPlaylistScreen> {
-  late Song song;
-  late PlaylistProvider playlistProvider;
-  late List<Playlist> _playlists = [];
-
-  @override
-  void initState() {
-    super.initState();
-    playlistProvider = context.read();
-    setState(() => _playlists = playlistProvider.standardPlaylist);
-  }
+  const AddToPlaylistScreen({
+    Key? key,
+    this.router = const AppRouter(),
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    song = ModalRoute.of(context)!.settings.arguments as Song;
+    Song song = ModalRoute.of(context)!.settings.arguments as Song;
 
     return Scaffold(
       body: CupertinoTheme(
-        data: CupertinoThemeData(
-          primaryColor: Colors.white,
-        ),
-        child: CustomScrollView(
-          slivers: <Widget>[
-            CupertinoSliverNavigationBar(
-              backgroundColor: Colors.black,
-              largeTitle: const LargeTitle(text: 'Add to a Playlist'),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) => PlaylistRow(
-                  playlist: _playlists[index],
-                  onTap: () {
-                    playlistProvider.addSongToPlaylist(
-                      song: song,
-                      playlist: _playlists[index],
-                    );
-                    HapticFeedback.mediumImpact();
-                    Navigator.pop(context);
-                    showOverlay(
-                      context,
-                      icon: CupertinoIcons.text_badge_plus,
-                      caption: 'Added',
-                      message: 'Song added to playlist.',
-                    );
-                  },
+        data: CupertinoThemeData(primaryColor: Colors.white),
+        child: Consumer<PlaylistProvider>(
+          builder: (context, provider, navigationBar) {
+            if (provider.standardPlaylists.isEmpty) {
+              return NoPlaylistsScreen(
+                onTap: () => router.showCreatePlaylistSheet(context),
+              );
+            }
+
+            return CustomScrollView(
+              slivers: <Widget>[
+                navigationBar!,
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                      Playlist playlist = provider.standardPlaylists[index];
+
+                      return PlaylistRow(
+                        playlist: playlist,
+                        onTap: () {
+                          provider.addSongToPlaylist(
+                            song: song,
+                            playlist: playlist,
+                          );
+                          HapticFeedback.mediumImpact();
+                          Navigator.pop(context);
+                          showOverlay(
+                            context,
+                            icon: CupertinoIcons.text_badge_plus,
+                            caption: 'Added',
+                            message: 'Song added to playlist.',
+                          );
+                        },
+                      );
+                    },
+                    childCount: provider.standardPlaylists.length,
+                  ),
                 ),
-                childCount: _playlists.length,
-              ),
+                const BottomSpace(),
+              ],
+            );
+          },
+          child: CupertinoSliverNavigationBar(
+            backgroundColor: Colors.black,
+            largeTitle: const LargeTitle(text: 'Add to a Playlist'),
+            trailing: IconButton(
+              onPressed: () => router.showCreatePlaylistSheet(context),
+              icon: const Icon(CupertinoIcons.add_circled),
             ),
-            const BottomSpace(),
-          ],
+          ),
         ),
       ),
     );

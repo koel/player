@@ -41,33 +41,8 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
         child: Consumer<PlaylistProvider>(
           builder: (context, provider, navigationBar) {
             if (provider.playlists.isEmpty) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.horizontalPadding,
-                ),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => widget.router.showCreatePlaylistSheet(context),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        const Icon(
-                          CupertinoIcons.exclamationmark_square,
-                          size: 56.0,
-                          color: AppColors.red,
-                        ),
-                        const SizedBox(height: 16.0),
-                        Text(
-                          'No playlists',
-                          style: Theme.of(context).textTheme.headline5,
-                        ),
-                        const SizedBox(height: 16.0),
-                        const Text('Tap to create a playlist.'),
-                      ],
-                    ),
-                  ),
-                ),
+              return NoPlaylistsScreen(
+                onTap: () => widget.router.showCreatePlaylistSheet(context),
               );
             }
 
@@ -76,26 +51,30 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
                 navigationBar!,
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) => Dismissible(
-                      direction: DismissDirection.endToStart,
-                      confirmDismiss: (_) async => await confirmDelete(
-                        context,
-                        playlist: provider.playlists[index],
-                      ),
-                      onDismissed: (_) => provider.remove(
-                        playlist: provider.playlists[index],
-                      ),
-                      background: Container(
-                        alignment: AlignmentDirectional.centerEnd,
-                        color: Colors.red,
-                        child: const Padding(
-                          padding: EdgeInsets.only(right: 28),
-                          child: Icon(CupertinoIcons.delete),
+                    (BuildContext context, int index) {
+                      Playlist playlist = provider.playlists[index];
+
+                      return Dismissible(
+                        direction: DismissDirection.endToStart,
+                        confirmDismiss: (_) async => await confirmDelete(
+                          context,
+                          playlist: playlist,
                         ),
-                      ),
-                      key: ValueKey(provider.playlists[index]),
-                      child: PlaylistRow(playlist: provider.playlists[index]),
-                    ),
+                        onDismissed: (_) => provider.remove(
+                          playlist: playlist,
+                        ),
+                        background: Container(
+                          alignment: AlignmentDirectional.centerEnd,
+                          color: Colors.red,
+                          child: const Padding(
+                            padding: EdgeInsets.only(right: 28),
+                            child: Icon(CupertinoIcons.delete),
+                          ),
+                        ),
+                        key: ValueKey(playlist),
+                        child: PlaylistRow(playlist: playlist),
+                      );
+                    },
                     childCount: provider.playlists.length,
                   ),
                 ),
@@ -151,6 +130,44 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
           ],
         );
       },
+    );
+  }
+}
+
+class NoPlaylistsScreen extends StatelessWidget {
+  final void Function() onTap;
+
+  const NoPlaylistsScreen({Key? key, required this.onTap}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.horizontalPadding,
+      ),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Icon(
+                CupertinoIcons.exclamationmark_square,
+                size: 56.0,
+                color: AppColors.red,
+              ),
+              const SizedBox(height: 16.0),
+              Text(
+                'No playlists',
+                style: Theme.of(context).textTheme.headline5,
+              ),
+              const SizedBox(height: 16.0),
+              const Text('Tap to create a playlist.'),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

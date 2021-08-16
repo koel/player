@@ -71,7 +71,7 @@ class AppRouter {
   }
 
   Future<void> openNowPlayingScreen(BuildContext context) async {
-    showModalBottomSheet(
+    await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -85,7 +85,7 @@ class AppRouter {
   }
 
   Future<void> showCreatePlaylistSheet(BuildContext context) async {
-    showModalBottomSheet(
+    await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,

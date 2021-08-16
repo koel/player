@@ -33,7 +33,7 @@ class PlaylistProvider with ChangeNotifier {
 
   List<Playlist> get playlists => _playlists;
 
-  List<Playlist> get standardPlaylist =>
+  List<Playlist> get standardPlaylists =>
       _playlists.where((playlist) => playlist.isStandard).toList();
 
   Future<Playlist> populatePlaylist({required Playlist playlist}) async {
