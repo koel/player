@@ -40,9 +40,9 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
         data: CupertinoThemeData(primaryColor: Colors.white),
         child: Consumer<PlaylistProvider>(
           builder: (context, provider, navigationBar) {
-            if (provider.playlists.length == 0) {
+            if (provider.playlists.isEmpty) {
               return Padding(
-                padding: EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                   horizontal: AppDimensions.horizontalPadding,
                 ),
                 child: GestureDetector(
@@ -59,7 +59,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
                         ),
                         const SizedBox(height: 16.0),
                         Text(
-                          'No playlists.',
+                          'No playlists',
                           style: Theme.of(context).textTheme.headline5,
                         ),
                         const SizedBox(height: 16.0),

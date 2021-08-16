@@ -31,7 +31,7 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
         builder: (_, provider, __) {
           if (provider.songs.length == 0) {
             return Padding(
-              padding: EdgeInsets.symmetric(
+              padding: const EdgeInsets.symmetric(
                 horizontal: AppDimensions.horizontalPadding,
               ),
               child: Center(
@@ -39,7 +39,7 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
-                      'No downloaded songs.',
+                      'No downloaded songs',
                       style: Theme.of(context).textTheme.headline5,
                     ),
                     const SizedBox(height: 16.0),
@@ -48,7 +48,7 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                       text: const TextSpan(
                         style: TextStyle(color: Colors.white54),
                         children: <InlineSpan>[
-                          TextSpan(text: 'Click the'),
+                          TextSpan(text: 'Tap the'),
                           WidgetSpan(
                             child: Padding(
                               padding: EdgeInsets.symmetric(horizontal: 5.0),
@@ -64,7 +64,7 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                           ),
                         ],
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),

@@ -100,7 +100,7 @@ Future<void> showActionSheet({
             },
           ),
         _button(
-          text: song.liked ? 'Unlike' : 'Like',
+          text: song.liked ? 'Remove as Favorite' : 'Mark as Favorite',
           icon: Icon(
             song.liked ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
             color: Colors.white30,
