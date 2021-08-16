@@ -47,7 +47,7 @@ void main() {
       MultiProvider(
         providers: [
           ChangeNotifierProvider<AudioProvider>(create: (_) => audioMock),
-          Provider<CacheProvider>(create: (_) => CacheProvider()),
+          ChangeNotifierProvider<CacheProvider>(create: (_) => CacheProvider()),
         ],
         child: SimpleSongList(
           songs: songs ?? Song.fakeMany(4),

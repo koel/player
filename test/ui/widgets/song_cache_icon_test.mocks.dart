@@ -2,9 +2,10 @@
 // in app/test/ui/widgets/song_cache_icon_test.dart.
 // Do not manually edit this file.
 
-import 'dart:async' as _i5;
+import 'dart:async' as _i6;
+import 'dart:ui' as _i8;
 
-import 'package:app/models/song.dart' as _i6;
+import 'package:app/models/song.dart' as _i5;
 import 'package:app/providers/cache_provider.dart' as _i4;
 import 'package:file/file.dart' as _i3;
 import 'package:flutter_cache_manager/flutter_cache_manager.dart' as _i7;
@@ -34,31 +35,67 @@ class MockCacheProvider extends _i1.Mock implements _i4.CacheProvider {
   }
 
   @override
+  List<_i5.Song> get songs =>
+      (super.noSuchMethod(Invocation.getter(#songs), returnValue: <_i5.Song>[])
+          as List<_i5.Song>);
+  @override
+  set songs(List<_i5.Song>? _songs) =>
+      super.noSuchMethod(Invocation.setter(#songs, _songs),
+          returnValueForMissingStub: null);
+  @override
   _i2.ValueStream<bool> get cacheClearedStream =>
       (super.noSuchMethod(Invocation.getter(#cacheClearedStream),
           returnValue: _FakeValueStream<bool>()) as _i2.ValueStream<bool>);
+  @override
+  _i2.ValueStream<_i5.Song> get singleCacheRemovedStream => (super.noSuchMethod(
+      Invocation.getter(#singleCacheRemovedStream),
+      returnValue: _FakeValueStream<_i5.Song>()) as _i2.ValueStream<_i5.Song>);
   @override
   _i2.ValueStream<_i4.SongCached> get songCachedStream =>
       (super.noSuchMethod(Invocation.getter(#songCachedStream),
               returnValue: _FakeValueStream<_i4.SongCached>())
           as _i2.ValueStream<_i4.SongCached>);
   @override
-  _i5.Future<void> cache({_i6.Song? song}) =>
+  bool get hasListeners =>
+      (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
+          as bool);
+  @override
+  _i6.Future<void> cache({_i5.Song? song}) =>
       (super.noSuchMethod(Invocation.method(#cache, [], {#song: song}),
           returnValue: Future<void>.value(),
-          returnValueForMissingStub: Future<void>.value()) as _i5.Future<void>);
+          returnValueForMissingStub: Future<void>.value()) as _i6.Future<void>);
   @override
-  _i5.Future<_i7.FileInfo?> get({_i6.Song? song}) => (super.noSuchMethod(
-      Invocation.method(#getCache, [], {#song: song}),
-      returnValue: Future<_i7.FileInfo?>.value()) as _i5.Future<_i7.FileInfo?>);
+  _i6.Future<_i7.FileInfo?> get({_i5.Song? song}) => (super.noSuchMethod(
+      Invocation.method(#get, [], {#song: song}),
+      returnValue: Future<_i7.FileInfo?>.value()) as _i6.Future<_i7.FileInfo?>);
   @override
-  _i5.Future<bool> has({_i6.Song? song}) =>
-      (super.noSuchMethod(Invocation.method(#hasCache, [], {#song: song}),
-          returnValue: Future<bool>.value(false)) as _i5.Future<bool>);
+  _i6.Future<bool> has({_i5.Song? song}) =>
+      (super.noSuchMethod(Invocation.method(#has, [], {#song: song}),
+          returnValue: Future<bool>.value(false)) as _i6.Future<bool>);
   @override
-  _i5.Future<void> clear() => (super.noSuchMethod(Invocation.method(#clear, []),
+  _i6.Future<void> remove({_i5.Song? song}) =>
+      (super.noSuchMethod(Invocation.method(#remove, [], {#song: song}),
+          returnValue: Future<void>.value(),
+          returnValueForMissingStub: Future<void>.value()) as _i6.Future<void>);
+  @override
+  _i6.Future<void> clear() => (super.noSuchMethod(Invocation.method(#clear, []),
       returnValue: Future<void>.value(),
-      returnValueForMissingStub: Future<void>.value()) as _i5.Future<void>);
+      returnValueForMissingStub: Future<void>.value()) as _i6.Future<void>);
+  @override
+  void addListener(_i8.VoidCallback? listener) =>
+      super.noSuchMethod(Invocation.method(#addListener, [listener]),
+          returnValueForMissingStub: null);
+  @override
+  void removeListener(_i8.VoidCallback? listener) =>
+      super.noSuchMethod(Invocation.method(#removeListener, [listener]),
+          returnValueForMissingStub: null);
+  @override
+  void dispose() => super.noSuchMethod(Invocation.method(#dispose, []),
+      returnValueForMissingStub: null);
+  @override
+  void notifyListeners() =>
+      super.noSuchMethod(Invocation.method(#notifyListeners, []),
+          returnValueForMissingStub: null);
 }
 
 /// A class which mocks [FileInfo].

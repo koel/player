@@ -18,6 +18,7 @@ void main() {
   late Song song;
   late BehaviorSubject<bool> cacheCleared;
   late BehaviorSubject<SongCached> songCached;
+  late BehaviorSubject<Song> singleCacheRemoved;
 
   setUp(() {
     cacheMock = MockCacheProvider();
@@ -28,11 +29,15 @@ void main() {
 
     songCached = BehaviorSubject();
     when(cacheMock.songCachedStream).thenAnswer((_) => songCached.stream);
+
+    singleCacheRemoved = BehaviorSubject();
+    when(cacheMock.singleCacheRemovedStream)
+        .thenAnswer((_) => singleCacheRemoved.stream);
   });
 
   Future<void> _mount(WidgetTester tester) async {
     await tester.pumpAppWidget(
-      Provider<CacheProvider>.value(
+      ChangeNotifierProvider<CacheProvider>.value(
         value: cacheMock,
         child: SongCacheIcon(song: song),
       ),
@@ -96,4 +101,18 @@ void main() {
     await tester.pumpAndSettle();
     _assertCacheStatus(hasCache: true);
   });
+
+  testWidgets(
+    're-renders when song cache is removed',
+    (WidgetTester tester) async {
+      when(cacheMock.has(song: song)).thenAnswer((_) async => true);
+
+      await _mount(tester);
+      _assertCacheStatus(hasCache: true);
+
+      singleCacheRemoved.add(song);
+      await tester.pumpAndSettle();
+      _assertCacheStatus(hasCache: false);
+    },
+  );
 }

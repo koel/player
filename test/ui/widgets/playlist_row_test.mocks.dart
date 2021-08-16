@@ -85,6 +85,11 @@ class MockPlaylistProvider extends _i1.Mock implements _i4.PlaylistProvider {
               returnValue: Future<_i3.Playlist>.value(_FakePlaylist()))
           as _i5.Future<_i3.Playlist>);
   @override
+  _i5.Future<void> remove({_i3.Playlist? playlist}) =>
+      (super.noSuchMethod(Invocation.method(#remove, [], {#playlist: playlist}),
+          returnValue: Future<void>.value(),
+          returnValueForMissingStub: Future<void>.value()) as _i5.Future<void>);
+  @override
   void addListener(_i7.VoidCallback? listener) =>
       super.noSuchMethod(Invocation.method(#addListener, [listener]),
           returnValueForMissingStub: null);
