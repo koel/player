@@ -10,10 +10,12 @@ import 'package:app/utils/preferences.dart' as preferences;
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:mutex/mutex.dart';
 
 class AudioProvider with StreamSubscriber, ChangeNotifier {
   SongProvider _songProvider;
   InteractionProvider _interactionProvider;
+  Mutex _mutex;
 
   late AssetsAudioPlayer _player;
   AssetsAudioPlayer get player => _player;
@@ -22,7 +24,8 @@ class AudioProvider with StreamSubscriber, ChangeNotifier {
     required SongProvider songProvider,
     required InteractionProvider interactionProvider,
   })  : _songProvider = songProvider,
-        _interactionProvider = interactionProvider;
+        _interactionProvider = interactionProvider,
+        _mutex = Mutex();
 
   Future<void> init() async {
     _player = AssetsAudioPlayer.newPlayer();
@@ -72,23 +75,29 @@ class AudioProvider with StreamSubscriber, ChangeNotifier {
   }
 
   Future<void> play({Song? song}) async {
-    if (song == null) {
-      return await _player.play();
+    await _mutex.acquire();
+
+    try {
+      if (song == null) {
+        return await _player.play();
+      }
+
+      int index = await indexInQueue(song);
+
+      if (index != -1) {
+        await _player.playlistPlayAtIndex(index);
+      } else {
+        await _player.playlistPlayAtIndex(
+          _player.current.hasValue
+              ? await queueAfterCurrent(song: song)
+              : await queueToTop(song: song),
+        );
+      }
+
+      await _player.play();
+    } finally {
+      _mutex.release();
     }
-
-    int index = await indexInQueue(song);
-
-    if (index != -1) {
-      await _player.playlistPlayAtIndex(index);
-    } else {
-      await _player.playlistPlayAtIndex(
-        _player.current.hasValue
-            ? await queueAfterCurrent(song: song)
-            : await queueToTop(song: song),
-      );
-    }
-
-    await _player.play();
   }
 
   Future<void> stop() async => await _player.stop();
