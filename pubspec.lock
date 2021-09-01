@@ -457,6 +457,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "5.0.12"
+  mutex:
+    dependency: "direct main"
+    description:
+      name: mutex
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.0"
   nested:
     dependency: transitive
     description:
