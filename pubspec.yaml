@@ -47,6 +47,7 @@ dependencies:
   uuid: ^3.0.4
   golden_toolkit: ^0.9.0
   fake_async: ^1.2.0
+  mutex: ^3.0.0
 
 dev_dependencies:
   flutter_test:
