@@ -16,6 +16,7 @@ class ProgressBar extends StatefulWidget {
 class _ProgressBarState extends State<ProgressBar> with StreamSubscriber {
   late final AudioProvider audio;
   late Duration _duration, _position;
+  bool _shouldAutoUpdatePosition = true;
 
   TextStyle timeStampStyle = const TextStyle(
     fontSize: 12,
@@ -30,7 +31,9 @@ class _ProgressBarState extends State<ProgressBar> with StreamSubscriber {
     setState(() => _duration = Duration(seconds: widget.song.length.toInt()));
 
     subscribe(audio.player.currentPosition.listen((position) {
-      setState(() => _position = position);
+      if (_shouldAutoUpdatePosition) {
+        setState(() => _position = position);
+      }
     }));
   }
 
@@ -60,6 +63,11 @@ class _ProgressBarState extends State<ProgressBar> with StreamSubscriber {
           value: _position.inSeconds.toDouble(),
           max: _duration.inSeconds.toDouble(),
           onChanged: (double value) {
+            setState(() => _position = Duration(seconds: value.toInt()));
+          },
+          onChangeStart: (_) => _shouldAutoUpdatePosition = false,
+          onChangeEnd: (double value) {
+            _shouldAutoUpdatePosition = true;
             audio.player.seek(Duration(seconds: value.toInt()));
           },
         ),
