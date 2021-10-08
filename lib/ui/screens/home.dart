@@ -44,14 +44,14 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 32),
-              Text(
+              const SizedBox(height: 32),
+              const Text(
                 'Looks like your library is empty. '
                 'You can add songs using the web interface or via the '
                 'command line.',
                 style: TextStyle(color: Colors.white54),
               ),
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
               Row(
                 children: [
                   Expanded(
@@ -66,7 +66,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                         );
                       },
-                      child: Text('Refresh'),
+                      child: const Text('Refresh'),
                     ),
                   ),
                 ],
@@ -140,7 +140,6 @@ class HomeScreen extends StatelessWidget {
             headingText: 'Hidden gems',
           ),
         ),
-        const BottomSpace(height: 128),
       ]
           .map(
             (widget) => Padding(
@@ -173,6 +172,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             SliverList(delegate: SliverChildListDelegate.fixed(homeBlocks)),
+            const BottomSpace(height: 128),
           ],
         ),
       ),
