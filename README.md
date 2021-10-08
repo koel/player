@@ -1,4 +1,4 @@
-# Koel Player [![Codemagic build status](https://api.codemagic.io/apps/60fc5d0cbe2122b603e3f35b/60fc5d0cbe2122b603e3f35a/status_badge.svg)](https://codemagic.io/apps/60fc5d0cbe2122b603e3f35b/60fc5d0cbe2122b603e3f35a/latest_build)
+# Koel Player [![Unit Tests](https://github.com/koel/player/actions/workflows/unit.yml/badge.svg)](https://github.com/koel/player/actions/workflows/unit.yml)
 
 ![Project banner with app screenshots](https://user-images.githubusercontent.com/8056274/126907246-9fa5c3c7-6bf1-4733-b36b-7b35d2db0bf6.jpg)
 
