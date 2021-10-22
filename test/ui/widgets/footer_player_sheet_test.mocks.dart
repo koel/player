@@ -292,4 +292,12 @@ class MockAppRouter extends _i1.Mock implements _i16.AppRouter {
               returnValue: Future<void>.value(),
               returnValueForMissingStub: Future<void>.value())
       as _i11.Future<void>);
+  @override
+  _i11.Future<void> showActionSheet(_i8.BuildContext? context,
+          {_i9.Song? song}) =>
+      (super.noSuchMethod(
+              Invocation.method(#showActionSheet, [context], {#song: song}),
+              returnValue: Future<void>.value(),
+              returnValueForMissingStub: Future<void>.value())
+          as _i11.Future<void>);
 }

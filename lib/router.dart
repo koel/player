@@ -1,4 +1,6 @@
+import 'package:app/models/album.dart';
 import 'package:app/models/artist.dart';
+import 'package:app/models/song.dart';
 import 'package:app/ui/screens/add_to_playlist.dart';
 import 'package:app/ui/screens/album_details.dart';
 import 'package:app/ui/screens/albums.dart';
@@ -19,11 +21,10 @@ import 'package:app/ui/screens/playlists.dart';
 import 'package:app/ui/screens/profile.dart';
 import 'package:app/ui/screens/queue.dart';
 import 'package:app/ui/screens/search.dart';
+import 'package:app/ui/screens/song_action_sheet.dart';
 import 'package:app/ui/screens/songs.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import 'models/album.dart';
 
 class AppRouter {
   const AppRouter();
@@ -95,6 +96,18 @@ class AppRouter {
           child: const CreatePlaylistSheet(),
         );
       },
+    );
+  }
+
+  Future<void> showActionSheet(
+    BuildContext context, {
+    required Song song,
+  }) async {
+    showModalBottomSheet<void>(
+      useRootNavigator: true, // covering everything else
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => SongActionSheet(song: song),
     );
   }
 }

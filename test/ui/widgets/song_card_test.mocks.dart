@@ -5,9 +5,13 @@
 import 'dart:async' as _i6;
 import 'dart:ui' as _i7;
 
+import 'package:app/models/album.dart' as _i10;
+import 'package:app/models/artist.dart' as _i11;
 import 'package:app/models/song.dart' as _i5;
 import 'package:app/providers/audio_provider.dart' as _i4;
+import 'package:app/router.dart' as _i8;
 import 'package:assets_audio_player/assets_audio_player.dart' as _i2;
+import 'package:flutter/cupertino.dart' as _i9;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:rxdart/rxdart.dart' as _i3;
 
@@ -138,4 +142,47 @@ class MockAudioProvider extends _i1.Mock implements _i4.AudioProvider {
   void notifyListeners() =>
       super.noSuchMethod(Invocation.method(#notifyListeners, []),
           returnValueForMissingStub: null);
+}
+
+/// A class which mocks [AppRouter].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockAppRouter extends _i1.Mock implements _i8.AppRouter {
+  MockAppRouter() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i6.Future<void> gotoAlbumDetailsScreen(_i9.BuildContext? context,
+          {_i10.Album? album}) =>
+      (super.noSuchMethod(
+          Invocation.method(
+              #gotoAlbumDetailsScreen, [context], {#album: album}),
+          returnValue: Future<void>.value(),
+          returnValueForMissingStub: Future<void>.value()) as _i6.Future<void>);
+  @override
+  _i6.Future<void> gotoArtistDetailsScreen(_i9.BuildContext? context,
+          {_i11.Artist? artist}) =>
+      (super.noSuchMethod(
+          Invocation.method(
+              #gotoArtistDetailsScreen, [context], {#artist: artist}),
+          returnValue: Future<void>.value(),
+          returnValueForMissingStub: Future<void>.value()) as _i6.Future<void>);
+  @override
+  _i6.Future<void> openNowPlayingScreen(_i9.BuildContext? context) =>
+      (super.noSuchMethod(Invocation.method(#openNowPlayingScreen, [context]),
+          returnValue: Future<void>.value(),
+          returnValueForMissingStub: Future<void>.value()) as _i6.Future<void>);
+  @override
+  _i6.Future<void> showCreatePlaylistSheet(_i9.BuildContext? context) => (super
+      .noSuchMethod(Invocation.method(#showCreatePlaylistSheet, [context]),
+          returnValue: Future<void>.value(),
+          returnValueForMissingStub: Future<void>.value()) as _i6.Future<void>);
+  @override
+  _i6.Future<void> showActionSheet(_i9.BuildContext? context,
+          {_i5.Song? song}) =>
+      (super.noSuchMethod(
+          Invocation.method(#showActionSheet, [context], {#song: song}),
+          returnValue: Future<void>.value(),
+          returnValueForMissingStub: Future<void>.value()) as _i6.Future<void>);
 }
