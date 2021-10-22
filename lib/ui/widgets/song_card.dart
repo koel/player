@@ -1,13 +1,20 @@
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_provider.dart';
+import 'package:app/router.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class SongCard extends StatefulWidget {
   final Song song;
+  final AppRouter router;
 
-  const SongCard({Key? key, required this.song}) : super(key: key);
+  const SongCard({
+    Key? key,
+    required this.song,
+    this.router = const AppRouter(),
+  }) : super(key: key);
 
   @override
   _SongCardState createState() => _SongCardState();
@@ -27,6 +34,10 @@ class _SongCardState extends State<SongCard> {
       onTap: () async {
         setState(() => _opacity = 1.0);
         await audio.play(song: widget.song);
+      },
+      onLongPress: () {
+        HapticFeedback.mediumImpact();
+        widget.router.showActionSheet(context, song: widget.song);
       },
       behavior: HitTestBehavior.opaque,
       child: AnimatedOpacity(

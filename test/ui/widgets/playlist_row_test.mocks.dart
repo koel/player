@@ -42,7 +42,7 @@ class MockPlaylistProvider extends _i1.Mock implements _i4.PlaylistProvider {
           returnValue: <_i3.Playlist>[]) as List<_i3.Playlist>);
   @override
   List<_i3.Playlist> get standardPlaylists =>
-      (super.noSuchMethod(Invocation.getter(#standardPlaylist),
+      (super.noSuchMethod(Invocation.getter(#standardPlaylists),
           returnValue: <_i3.Playlist>[]) as List<_i3.Playlist>);
   @override
   bool get hasListeners =>

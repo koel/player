@@ -4,9 +4,9 @@ import 'package:app/extensions/assets_audio_player.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_provider.dart';
 import 'package:app/providers/song_provider.dart';
+import 'package:app/router.dart';
 import 'package:app/ui/screens/info_sheet.dart';
 import 'package:app/ui/screens/queue.dart';
-import 'package:app/ui/screens/song_action_sheet.dart';
 import 'package:app/ui/widgets/now_playing/audio_controls.dart';
 import 'package:app/ui/widgets/now_playing/loop_mode_button.dart';
 import 'package:app/ui/widgets/now_playing/progress_bar.dart';
@@ -20,7 +20,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class NowPlayingScreen extends StatelessWidget {
-  const NowPlayingScreen({Key? key}) : super(key: key);
+  final AppRouter router;
+
+  const NowPlayingScreen({
+    Key? key,
+    this.router = const AppRouter(),
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -77,8 +82,7 @@ class NowPlayingScreen extends StatelessWidget {
                 const SizedBox(width: 8),
                 SongCacheIcon(song: song),
                 IconButton(
-                  onPressed: () =>
-                      showActionSheet(context: context, song: song),
+                  onPressed: () => router.showActionSheet(context, song: song),
                   icon: const Icon(CupertinoIcons.ellipsis),
                 ),
               ],
