@@ -10,22 +10,37 @@ class SongThumbnail extends StatelessWidget {
   final Song song;
   final ThumbnailSize size;
   final bool playing;
+  final bool buffering;
 
   const SongThumbnail({
     Key? key,
     required this.song,
     this.size = ThumbnailSize.sm,
     this.playing = false,
+    this.buffering = true
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    
     return this.playing
         ? PlayingSongThumbnail(
             width: width,
             height: height,
             song: song,
             borderRadius: borderRadius,
+          )
+        : this.buffering ?
+          ClipRRect(
+            borderRadius: BorderRadius.circular(borderRadius),
+            child: CachedNetworkImage(
+              fit: BoxFit.cover,
+              width: 20,
+              height: 20,
+              placeholder: (_, __) => defaultImage,
+              errorWidget: (_, __, ___) => defaultImage,
+              imageUrl: song.imageUrl ?? preferences.defaultImageUrl,
+            ),
           )
         : ClipRRect(
             borderRadius: BorderRadius.circular(borderRadius),
@@ -38,6 +53,7 @@ class SongThumbnail extends StatelessWidget {
               imageUrl: song.imageUrl ?? preferences.defaultImageUrl,
             ),
           );
+
   }
 
   double get width {
