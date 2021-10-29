@@ -2,7 +2,7 @@ import 'package:app/extensions/assets_audio_player.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_provider.dart';
-import 'package:app/ui/screens/song_action_sheet.dart';
+import 'package:app/router.dart';
 import 'package:app/ui/widgets/song_cache_icon.dart';
 import 'package:app/ui/widgets/song_list_buttons.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
@@ -22,6 +22,8 @@ class SongRow extends StatefulWidget {
   /// The index of the row in a list, important for (Sliver) orderable lists.
   final int index;
 
+  final AppRouter router;
+
   SongRow({
     Key? key,
     required this.song,
@@ -29,6 +31,7 @@ class SongRow extends StatefulWidget {
     this.padding,
     this.listContext = SongListContext.other,
     this.index = 0,
+    this.router = const AppRouter(),
   }) : super(key: key);
 
   @override
@@ -85,7 +88,7 @@ class _SongRowState extends State<SongRow> {
       },
       onLongPress: () {
         HapticFeedback.mediumImpact();
-        showActionSheet(context: context, song: widget.song);
+        widget.router.showActionSheet(context, song: widget.song);
       },
       child: ListTile(
         key: UniqueKey(),
@@ -202,12 +205,14 @@ class SongRowTrailingActions extends StatelessWidget {
   final SongListContext listContext;
   final Song song;
   final int index;
+  final AppRouter router;
 
   const SongRowTrailingActions({
     Key? key,
     required this.song,
     required this.listContext,
     required this.index,
+    this.router = const AppRouter(),
   }) : super(key: key);
 
   @override
@@ -232,8 +237,8 @@ class SongRowTrailingActions extends StatelessWidget {
         else
           IconButton(
             icon: const Icon(CupertinoIcons.ellipsis, size: 20),
-            onPressed: () => showActionSheet(
-              context: context,
+            onPressed: () => router.showActionSheet(
+              context,
               song: song,
             ),
           ),

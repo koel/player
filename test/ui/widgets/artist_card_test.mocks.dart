@@ -6,6 +6,7 @@ import 'dart:async' as _i3;
 
 import 'package:app/models/album.dart' as _i5;
 import 'package:app/models/artist.dart' as _i6;
+import 'package:app/models/song.dart' as _i7;
 import 'package:app/router.dart' as _i2;
 import 'package:flutter/cupertino.dart' as _i4;
 import 'package:mockito/mockito.dart' as _i1;
@@ -50,6 +51,13 @@ class MockAppRouter extends _i1.Mock implements _i2.AppRouter {
   @override
   _i3.Future<void> showCreatePlaylistSheet(_i4.BuildContext? context) => (super
       .noSuchMethod(Invocation.method(#showCreatePlaylistSheet, [context]),
+          returnValue: Future<void>.value(),
+          returnValueForMissingStub: Future<void>.value()) as _i3.Future<void>);
+  @override
+  _i3.Future<void> showActionSheet(_i4.BuildContext? context,
+          {_i7.Song? song}) =>
+      (super.noSuchMethod(
+          Invocation.method(#showActionSheet, [context], {#song: song}),
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i3.Future<void>);
 }
