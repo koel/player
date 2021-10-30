@@ -40,30 +40,12 @@ class SongRow extends StatefulWidget {
 
 class _SongRowState extends State<SongRow> {
   late AudioProvider audio;
-  String buffering = '';
+  static String buffering = '';
 
   @override
   void initState() {
     super.initState();
     audio = context.read();
-
-    audio.player.isBuffering.listen((event) { 
-      if(event) {
-       
-      //   print('hare krishna');
-      //   print(widget.buffering);
-      //   if(widget.buffering == widget.song.id) {
-      //     _buffering = true;
-      //   } else {
-      //     _buffering = false;
-      //   }
-        
-      // } else {
-      //   _buffering = false;
-      }
-      
-      // setState(() {});
-    });
   }
 
   @override
@@ -82,9 +64,8 @@ class _SongRowState extends State<SongRow> {
 
     return InkWell(
       onTap: () async {
-       buffering = widget.song.id;
-       print('krishna radhe '+buffering);
-        audio.play(song: widget.song);
+        _SongRowState.buffering = widget.song.id;
+        await audio.play(song: widget.song);
       },
       onLongPress: () {
         HapticFeedback.mediumImpact();
@@ -98,7 +79,7 @@ class _SongRowState extends State<SongRow> {
             : null,
         leading: widget.listContext == SongListContext.album
             ? SongRowTrackNumber(song: widget.song)
-            : SongRowThumbnail(song: widget.song, buffering: buffering),
+            : SongRowThumbnail(song: widget.song),
         minLeadingWidth: widget.listContext == SongListContext.album ? 0 : null,
         title: Text(widget.song.title, overflow: TextOverflow.ellipsis),
         subtitle: Text(
@@ -138,9 +119,8 @@ class SongRowTrackNumber extends StatelessWidget {
 
 class SongRowThumbnail extends StatefulWidget {
   final Song song;
-  final String buffering;
 
-  const SongRowThumbnail({Key? key, required this.song, required this.buffering }) : super(key: key);
+  const SongRowThumbnail({Key? key, required this.song }) : super(key: key);
 
   @override
   _SongRowThumbnailState createState() => _SongRowThumbnailState();
@@ -158,17 +138,12 @@ class _SongRowThumbnailState extends State<SongRowThumbnail>
     super.initState();
     audio = context.read();
 
-    subscribe(audio.player.isBuffering.listen(( state) {
+    subscribe(audio.player.isBuffering.listen((state) {
       setState(() {
-        if(state) {
-          print('krishna1');
-          print(widget.buffering);
-
-        }
-        
-        _isBuffering = state;
+        if(_SongRowState.buffering == widget.song.id) {
+          _isBuffering = state;
+        } 
       });
-
     }));
 
     subscribe(audio.player.playerState.listen((PlayerState state) {
@@ -188,11 +163,6 @@ class _SongRowThumbnailState extends State<SongRowThumbnail>
 
   @override
   Widget build(BuildContext context) {
-
-    
-    if(widget.buffering == widget.song.id)
-      print('buffering '+widget.buffering);
-    //audio.player.current.
     return SongThumbnail(
       song: widget.song,
       playing: _state == PlayerState.play && _isCurrentSong,
