@@ -40,7 +40,7 @@ class SongRow extends StatefulWidget {
 
 class _SongRowState extends State<SongRow> {
   late AudioProvider audio;
-  static String buffering = '';
+  static String bufferingSongId = '';
 
   @override
   void initState() {
@@ -64,7 +64,7 @@ class _SongRowState extends State<SongRow> {
 
     return InkWell(
       onTap: () async {
-        _SongRowState.buffering = widget.song.id;
+        _SongRowState.bufferingSongId = widget.song.id;
         await audio.play(song: widget.song);
       },
       onLongPress: () {
@@ -140,7 +140,7 @@ class _SongRowThumbnailState extends State<SongRowThumbnail>
 
     subscribe(audio.player.isBuffering.listen((state) {
       setState(() {
-        if(_SongRowState.buffering == widget.song.id) {
+        if(_SongRowState.bufferingSongId == widget.song.id) {
           _isBuffering = state;
         } 
       });
