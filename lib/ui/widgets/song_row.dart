@@ -32,7 +32,7 @@ class SongRow extends StatefulWidget {
     this.padding,
     this.listContext = SongListContext.other,
     this.index = 0,
-    this.router = const AppRouter()
+    this.router = const AppRouter(),
   }) : super(key: key);
 
   @override
@@ -120,7 +120,7 @@ class SongRowTrackNumber extends StatelessWidget {
 class SongRowThumbnail extends StatefulWidget {
   final Song song;
 
-  const SongRowThumbnail({Key? key, required this.song }) : super(key: key);
+  const SongRowThumbnail({Key? key, required this.song}) : super(key: key);
 
   @override
   _SongRowThumbnailState createState() => _SongRowThumbnailState();
