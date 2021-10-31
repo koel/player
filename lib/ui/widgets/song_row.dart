@@ -18,6 +18,7 @@ class SongRow extends StatefulWidget {
   final bool bordered;
   final EdgeInsetsGeometry? padding;
   final SongListContext listContext;
+  static String bufferingSongId = '';
 
   /// The index of the row in a list, important for (Sliver) orderable lists.
   final int index;
@@ -31,7 +32,7 @@ class SongRow extends StatefulWidget {
     this.padding,
     this.listContext = SongListContext.other,
     this.index = 0,
-    this.router = const AppRouter(),
+    this.router = const AppRouter()
   }) : super(key: key);
 
   @override
@@ -40,7 +41,6 @@ class SongRow extends StatefulWidget {
 
 class _SongRowState extends State<SongRow> {
   late AudioProvider audio;
-  static String bufferingSongId = '';
 
   @override
   void initState() {
@@ -64,8 +64,9 @@ class _SongRowState extends State<SongRow> {
 
     return InkWell(
       onTap: () async {
-        _SongRowState.bufferingSongId = widget.song.id;
-        await audio.play(song: widget.song);
+        print('play click');
+        SongRow.bufferingSongId = widget.song.id;
+        audio.play(song: widget.song);
       },
       onLongPress: () {
         HapticFeedback.mediumImpact();
@@ -139,11 +140,13 @@ class _SongRowThumbnailState extends State<SongRowThumbnail>
     audio = context.read();
 
     subscribe(audio.player.isBuffering.listen((state) {
-      setState(() {
-        if(_SongRowState.bufferingSongId == widget.song.id) {
+      if(state) {
+        if(SongRow.bufferingSongId == widget.song.id) {
           _isBuffering = state;
         } 
-      });
+      } else {
+        _isBuffering = state;
+      }
     }));
 
     subscribe(audio.player.playerState.listen((PlayerState state) {
