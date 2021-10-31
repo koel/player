@@ -64,7 +64,6 @@ class _SongRowState extends State<SongRow> {
 
     return InkWell(
       onTap: () async {
-        print('play click');
         SongRow.bufferingSongId = widget.song.id;
         audio.play(song: widget.song);
       },
