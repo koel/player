@@ -15,16 +15,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-class MainScreen extends StatefulWidget {
-  static const routeName = '/main';
+class RootScreen extends StatefulWidget {
+  static const routeName = '/root';
 
-  const MainScreen({Key? key}) : super(key: key);
+  const RootScreen({Key? key}) : super(key: key);
 
   @override
-  _MainScreenState createState() => _MainScreenState();
+  _RootScreenState createState() => _RootScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _RootScreenState extends State<RootScreen> {
   late Future futureData;
   int _selectedIndex = 0;
   late AudioProvider audio;
@@ -54,9 +54,7 @@ class _MainScreenState extends State<MainScreen> {
           children: <Widget>[
             CupertinoTabScaffold(
               tabBuilder: (_, index) {
-                return CupertinoTabView(builder: (_) {
-                  return _widgetOptions[index];
-                });
+                return CupertinoTabView(builder: (_) => _widgetOptions[index]);
               },
               tabBar: CupertinoTabBar(
                 backgroundColor: Colors.black12,

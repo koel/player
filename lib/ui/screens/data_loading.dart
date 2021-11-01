@@ -1,5 +1,5 @@
 import 'package:app/providers/data_provider.dart';
-import 'package:app/ui/screens/main.dart';
+import 'package:app/ui/screens/root.dart';
 import 'package:app/ui/widgets/oops_box.dart';
 import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/cupertino.dart';
@@ -28,7 +28,7 @@ class _DataLoadingScreen extends State<DataLoadingScreen> {
     context.read<DataProvider>().init(context).then((_) async {
       await Navigator.of(context).pushReplacement(
         PageRouteBuilder(
-          pageBuilder: (_, __, ___) => const MainScreen(),
+          pageBuilder: (_, __, ___) => const RootScreen(),
           transitionDuration: const Duration(seconds: 2),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return ZoomPageTransitionsBuilder().buildTransitions(
