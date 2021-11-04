@@ -64,7 +64,7 @@ class _SongRowState extends State<SongRow> {
     return InkWell(
       onTap: () async {
         audio.player.setBufferingSongId(widget.song.id);
-        audio.play(song: widget.song);
+        await audio.play(song: widget.song);
       },
       onLongPress: () {
         HapticFeedback.mediumImpact();
