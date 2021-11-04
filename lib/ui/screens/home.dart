@@ -7,8 +7,8 @@ import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/screens/albums.dart';
 import 'package:app/ui/screens/artists.dart';
 import 'package:app/ui/screens/favorites.dart';
-import 'package:app/ui/screens/main.dart';
 import 'package:app/ui/screens/profile.dart';
+import 'package:app/ui/screens/root.dart';
 import 'package:app/ui/screens/songs.dart';
 import 'package:app/ui/widgets/album_card.dart';
 import 'package:app/ui/widgets/artist_card.dart';
@@ -62,7 +62,7 @@ class HomeScreen extends StatelessWidget {
                           rootNavigator: true,
                         ).pushReplacement(
                           MaterialPageRoute(
-                            builder: (_) => const MainScreen(),
+                            builder: (_) => const RootScreen(),
                           ),
                         );
                       },
@@ -89,8 +89,8 @@ class HomeScreen extends StatelessWidget {
             ...songProvider.mostPlayed().map((song) => SongCard(song: song)),
             PlaceholderCard(
               icon: CupertinoIcons.music_note,
-              onPressed: () => Navigator.of(context, rootNavigator: true)
-                  .pushNamed(SongsScreen.routeName),
+              onPressed: () => Navigator.of(context)
+                  .push(CupertinoPageRoute(builder: (_) => SongsScreen())),
             ),
           ],
         ),
@@ -101,8 +101,8 @@ class HomeScreen extends StatelessWidget {
           child: SimpleSongList(
             songs: interactionProvider.getRandomFavorites(limit: 5),
             headingText: 'From your favorites',
-            onHeaderTap: () => Navigator.of(context, rootNavigator: true)
-                .pushNamed(FavoritesScreen.routeName),
+            onHeaderTap: () => Navigator.of(context)
+                .push(CupertinoPageRoute(builder: (_) => FavoritesScreen())),
           ),
         ),
         HorizontalCardScroller(
@@ -113,8 +113,8 @@ class HomeScreen extends StatelessWidget {
                 .map((album) => AlbumCard(album: album)),
             PlaceholderCard(
               icon: CupertinoIcons.music_albums,
-              onPressed: () => Navigator.of(context, rootNavigator: true)
-                  .pushNamed(AlbumsScreen.routeName),
+              onPressed: () => Navigator.of(context)
+                  .push(CupertinoPageRoute(builder: (_) => AlbumsScreen())),
             ),
           ],
         ),
@@ -126,8 +126,8 @@ class HomeScreen extends StatelessWidget {
                 .map((artist) => ArtistCard(artist: artist)),
             PlaceholderCard(
               icon: CupertinoIcons.music_mic,
-              onPressed: () => Navigator.of(context, rootNavigator: true)
-                  .pushNamed(ArtistsScreen.routeName),
+              onPressed: () => Navigator.of(context)
+                  .push(CupertinoPageRoute(builder: (_) => ArtistsScreen())),
             ),
           ],
         ),
@@ -161,10 +161,9 @@ class HomeScreen extends StatelessWidget {
               backgroundColor: Colors.black,
               largeTitle: const LargeTitle(text: 'Home'),
               trailing: IconButton(
-                onPressed: () => Navigator.of(
-                  context,
-                  rootNavigator: true,
-                ).pushNamed(ProfileScreen.routeName),
+                onPressed: () => Navigator.of(context).push(
+                  new CupertinoPageRoute(builder: (_) => const ProfileScreen()),
+                ),
                 icon: const Icon(
                   CupertinoIcons.person_alt_circle,
                   size: 24,

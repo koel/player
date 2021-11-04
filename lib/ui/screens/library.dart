@@ -31,38 +31,44 @@ class LibraryScreen extends StatelessWidget {
         LibraryMenuItem(
           icon: const Icon(CupertinoIcons.heart_fill, color: AppColors.red),
           label: 'Favorites',
-          onTap: () => Navigator.of(context, rootNavigator: true)
-              .pushNamed(FavoritesScreen.routeName),
+          onTap: () => Navigator.of(context).push(
+            CupertinoPageRoute(builder: (_) => const FavoritesScreen()),
+          ),
         ),
         LibraryMenuItem(
           icon: CupertinoIcons.music_note_list,
           label: 'Playlists',
-          onTap: () => Navigator.of(context, rootNavigator: true)
-              .pushNamed(PlaylistsScreen.routeName),
+          onTap: () => Navigator.of(context).push(
+            CupertinoPageRoute(builder: (_) => const PlaylistsScreen()),
+          ),
         ),
         LibraryMenuItem(
           icon: CupertinoIcons.music_mic,
           label: 'Artists',
-          onTap: () => Navigator.of(context, rootNavigator: true)
-              .pushNamed(ArtistsScreen.routeName),
+          onTap: () => Navigator.of(context).push(
+            CupertinoPageRoute(builder: (_) => const ArtistsScreen()),
+          ),
         ),
         LibraryMenuItem(
           icon: CupertinoIcons.music_albums,
           label: 'Albums',
-          onTap: () => Navigator.of(context, rootNavigator: true)
-              .pushNamed(AlbumsScreen.routeName),
+          onTap: () => Navigator.of(context).push(
+            CupertinoPageRoute(builder: (_) => const AlbumsScreen()),
+          ),
         ),
         LibraryMenuItem(
           icon: CupertinoIcons.music_note,
           label: 'Songs',
-          onTap: () => Navigator.of(context, rootNavigator: true)
-              .pushNamed(SongsScreen.routeName),
+          onTap: () => Navigator.of(context).push(
+            CupertinoPageRoute(builder: (_) => const SongsScreen()),
+          ),
         ),
         LibraryMenuItem(
           icon: CupertinoIcons.cloud_download_fill,
           label: 'Downloaded',
-          onTap: () => Navigator.of(context, rootNavigator: true)
-              .pushNamed(DownloadedScreen.routeName),
+          onTap: () => Navigator.of(context).push(
+            CupertinoPageRoute(builder: (_) => const DownloadedScreen()),
+          ),
         ),
       ],
     ).toList();

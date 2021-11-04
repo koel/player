@@ -14,12 +14,12 @@ import 'package:app/ui/screens/home.dart';
 import 'package:app/ui/screens/initial.dart';
 import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/screens/login.dart';
-import 'package:app/ui/screens/main.dart';
 import 'package:app/ui/screens/now_playing.dart';
 import 'package:app/ui/screens/playlist_details.dart';
 import 'package:app/ui/screens/playlists.dart';
 import 'package:app/ui/screens/profile.dart';
 import 'package:app/ui/screens/queue.dart';
+import 'package:app/ui/screens/root.dart';
 import 'package:app/ui/screens/search.dart';
 import 'package:app/ui/screens/song_action_sheet.dart';
 import 'package:app/ui/screens/songs.dart';
@@ -32,7 +32,7 @@ class AppRouter {
   static Map<String, Widget Function(BuildContext)> routes = {
     InitialScreen.routeName: (_) => const InitialScreen(),
     LoginScreen.routeName: (_) => const LoginScreen(),
-    MainScreen.routeName: (_) => const MainScreen(),
+    RootScreen.routeName: (_) => const RootScreen(),
     HomeScreen.routeName: (_) => const HomeScreen(),
     SearchScreen.routeName: (_) => const SearchScreen(),
     LibraryScreen.routeName: (_) => const LibraryScreen(),
@@ -55,26 +55,27 @@ class AppRouter {
     BuildContext context, {
     required Album album,
   }) async {
-    await Navigator.of(context, rootNavigator: true).pushNamed(
-      AlbumDetailsScreen.routeName,
-      arguments: album,
-    );
+    await Navigator.of(context).push(CupertinoPageRoute(
+      builder: (_) => const AlbumDetailsScreen(),
+      settings: RouteSettings(arguments: album),
+    ));
   }
 
   Future<void> gotoArtistDetailsScreen(
     BuildContext context, {
     required Artist artist,
   }) async {
-    await Navigator.of(context, rootNavigator: true).pushNamed(
-      ArtistDetailsScreen.routeName,
-      arguments: artist,
-    );
+    await Navigator.of(context).push(CupertinoPageRoute(
+      builder: (_) => const ArtistDetailsScreen(),
+      settings: RouteSettings(arguments: artist),
+    ));
   }
 
   Future<void> openNowPlayingScreen(BuildContext context) async {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return Container(
@@ -89,6 +90,7 @@ class AppRouter {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return Container(
