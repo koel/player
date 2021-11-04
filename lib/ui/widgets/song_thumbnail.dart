@@ -3,6 +3,7 @@ import 'package:app/models/song.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 enum ThumbnailSize { sm, md, lg, xl }
 
@@ -11,7 +12,7 @@ class SongThumbnail extends StatelessWidget {
   final ThumbnailSize size;
   final bool playing;
   final bool buffering;
-
+  
   const SongThumbnail({
     Key? key,
     required this.song,
@@ -164,10 +165,9 @@ class BufferingSongThumbnail extends StatelessWidget {
           ),
           Align(
             alignment: Alignment.center,
-            child: SizedBox(
-              child: Image.asset('assets/images/buffering-song.gif'),
-              width: 36,
-              height: 36,
+            child: SpinKitDoubleBounce(
+              color: Colors.white,
+              size: 36.0,
             ),
           ),
         ],

@@ -18,7 +18,6 @@ class SongRow extends StatefulWidget {
   final bool bordered;
   final EdgeInsetsGeometry? padding;
   final SongListContext listContext;
-  static String bufferingSongId = '';
 
   /// The index of the row in a list, important for (Sliver) orderable lists.
   final int index;
@@ -64,7 +63,7 @@ class _SongRowState extends State<SongRow> {
 
     return InkWell(
       onTap: () async {
-        SongRow.bufferingSongId = widget.song.id;
+        audio.player.setBufferingSongId(widget.song.id);
         audio.play(song: widget.song);
       },
       onLongPress: () {
@@ -139,13 +138,7 @@ class _SongRowThumbnailState extends State<SongRowThumbnail>
     audio = context.read();
 
     subscribe(audio.player.isBuffering.listen((state) {
-      if(state) {
-        if(SongRow.bufferingSongId == widget.song.id) {
-          _isBuffering = state;
-        } 
-      } else {
-        _isBuffering = state;
-      }
+      _isBuffering = state && audio.player.bufferingSongId == widget.song.id;
     }));
 
     subscribe(audio.player.playerState.listen((PlayerState state) {

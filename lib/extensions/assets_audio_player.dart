@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 
 extension AssetsAudioPlayerExtension on AssetsAudioPlayer {
   static String? _songId;
+  static String? _bufferingSongId;
 
   Future<void> restart() async {
     this.seek(new Duration(seconds: 0), force: true);
@@ -12,4 +13,7 @@ extension AssetsAudioPlayerExtension on AssetsAudioPlayer {
 
   @visibleForTesting
   void setSongId(String id) => _songId = id;
+
+  String? get bufferingSongId => _bufferingSongId;
+  void setBufferingSongId(String id) => _bufferingSongId = id;
 }
