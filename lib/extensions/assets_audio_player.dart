@@ -15,5 +15,5 @@ extension AssetsAudioPlayerExtension on AssetsAudioPlayer {
   void setSongId(String id) => _songId = id;
 
   String? get bufferingSongId => _bufferingSongId;
-  void setBufferingSongId(String id) { _bufferingSongId = id; } 
+  void setBufferingSongId(String id) { _bufferingSongId = id; _songId = id; } 
 }
