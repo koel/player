@@ -1,8 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="phanan.koel.app">
    <application
-        android:label="Koel"
-        android:icon="@mipmap/ic_launcher">
+       android:label="Koel"
+       android:icon="@mipmap/ic_launcher"
+       android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

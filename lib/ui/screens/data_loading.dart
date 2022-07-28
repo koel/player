@@ -48,9 +48,10 @@ class _DataLoadingScreen extends State<DataLoadingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _hasError
-          ? OopsBox(
-              onRetryButtonPressed: () => setState(() => _hasError = false),
-            )
+          ? OopsBox(onRetryButtonPressed: () {
+              setState(() => _hasError = false);
+              _loadData();
+            })
           : const ContainerWithSpinner(),
     );
   }
