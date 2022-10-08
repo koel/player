@@ -9,8 +9,8 @@ import 'package:app/providers/song_provider.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:mutex/mutex.dart';
+import 'package:rxdart/rxdart.dart';
 
 class AudioProvider with StreamSubscriber, ChangeNotifier {
   SongProvider _songProvider;

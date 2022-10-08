@@ -71,7 +71,7 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
                         Hero(
                           tag: 'hero-now-playing-thumbnail',
                           child: SongThumbnail(
-                            song: songProvider.byId(songId),
+                            song: current,
                           ),
                         ),
                         Expanded(
