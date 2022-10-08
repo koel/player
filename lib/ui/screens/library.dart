@@ -23,6 +23,7 @@ class LibraryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SongProvider songProvider = context.watch();
+    List<Song> recentlyAddedSongs = songProvider.recentlyAdded(limit: 10);
     List<Song> mostPlayedSongs = songProvider.mostPlayed(limit: 10);
 
     List<Widget> menuItems = ListTile.divideTiles(
@@ -101,6 +102,26 @@ class LibraryScreen extends StatelessWidget {
               ),
               sliver: SliverToBoxAdapter(
                 child: const Heading5(text: 'Recently added'),
+              ),
+            ),
+            recentlyAddedSongs.length == 0
+                ? const SliverToBoxAdapter(child: SizedBox.shrink())
+                : SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (_, int index) =>
+                          SongRow(song: recentlyAddedSongs[index]),
+                      childCount: recentlyAddedSongs.length,
+                    ),
+                  ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                AppDimensions.horizontalPadding,
+                24,
+                AppDimensions.horizontalPadding,
+                0,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: const Heading5(text: 'Most played'),
               ),
             ),
             mostPlayedSongs.length == 0
