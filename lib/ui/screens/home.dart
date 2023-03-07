@@ -1,14 +1,9 @@
 import 'package:app/constants/dimensions.dart';
 import 'package:app/models/song.dart';
-import 'package:app/providers/album_provider.dart';
-import 'package:app/providers/artist_provider.dart';
-import 'package:app/providers/interaction_provider.dart';
-import 'package:app/providers/song_provider.dart';
+import 'package:app/providers/overview_provider.dart';
 import 'package:app/ui/screens/albums.dart';
 import 'package:app/ui/screens/artists.dart';
-import 'package:app/ui/screens/favorites.dart';
 import 'package:app/ui/screens/profile.dart';
-import 'package:app/ui/screens/root.dart';
 import 'package:app/ui/screens/songs.dart';
 import 'package:app/ui/widgets/album_card.dart';
 import 'package:app/ui/widgets/artist_card.dart';
@@ -28,153 +23,91 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    late SongProvider songProvider = context.watch();
-    late ArtistProvider artistProvider = context.watch();
-    late AlbumProvider albumProvider = context.watch();
-    late InteractionProvider interactionProvider = context.watch();
+    return Consumer<OverviewProvider>(
+      builder: (_, overviewProvider, __) {
+        overviewProvider.fetchOverview();
 
-    late List<Widget> homeBlocks;
-
-    if (songProvider.songs.isEmpty) {
-      homeBlocks = <Widget>[
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.horizontalPadding,
+        List<Widget> homeBlocks = <Widget>[
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.horizontalPadding,
+            ),
+            child: SimpleSongList(songs: overviewProvider.recentlyPlayedSongs),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 32),
-              const Text(
-                'Looks like your library is empty. '
-                'You can add songs using the web interface or via the '
-                'command line.',
-                style: TextStyle(color: Colors.white54),
-              ),
-              const SizedBox(height: 32),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.of(
-                          context,
-                          rootNavigator: true,
-                        ).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (_) => const RootScreen(),
-                          ),
-                        );
-                      },
-                      child: const Text('Refresh'),
-                    ),
-                  ),
-                ],
+          HorizontalCardScroller(
+            headingText: 'Most played songs',
+            cards: <Widget>[
+              ...overviewProvider.mostPlayedSongs
+                  .map((song) => SongCard(song: song)),
+              PlaceholderCard(
+                icon: CupertinoIcons.music_note,
+                onPressed: () => Navigator.of(context)
+                    .push(CupertinoPageRoute(builder: (_) => SongsScreen())),
               ),
             ],
           ),
-        ),
-      ];
-    } else {
-      homeBlocks = <Widget>[
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.horizontalPadding,
-          ),
-          child: SimpleSongList(songs: songProvider.recentlyAdded()),
-        ),
-        HorizontalCardScroller(
-          headingText: 'Most played songs',
-          cards: <Widget>[
-            ...songProvider.mostPlayed().map((song) => SongCard(song: song)),
-            PlaceholderCard(
-              icon: CupertinoIcons.music_note,
-              onPressed: () => Navigator.of(context)
-                  .push(CupertinoPageRoute(builder: (_) => SongsScreen())),
-            ),
-          ],
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.horizontalPadding,
-          ),
-          child: SimpleSongList(
-            songs: interactionProvider.getRandomFavorites(limit: 5),
-            headingText: 'From your favorites',
-            onHeaderTap: () => Navigator.of(context)
-                .push(CupertinoPageRoute(builder: (_) => FavoritesScreen())),
-          ),
-        ),
-        HorizontalCardScroller(
-          headingText: 'Top albums',
-          cards: <Widget>[
-            ...albumProvider
-                .mostPlayed()
-                .map((album) => AlbumCard(album: album)),
-            PlaceholderCard(
-              icon: CupertinoIcons.music_albums,
-              onPressed: () => Navigator.of(context)
-                  .push(CupertinoPageRoute(builder: (_) => AlbumsScreen())),
-            ),
-          ],
-        ),
-        HorizontalCardScroller(
-          headingText: 'Top artists',
-          cards: <Widget>[
-            ...artistProvider
-                .mostPlayed()
-                .map((artist) => ArtistCard(artist: artist)),
-            PlaceholderCard(
-              icon: CupertinoIcons.music_mic,
-              onPressed: () => Navigator.of(context)
-                  .push(CupertinoPageRoute(builder: (_) => ArtistsScreen())),
-            ),
-          ],
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.horizontalPadding,
-          ),
-          child: SimpleSongList(
-            songs: songProvider.leastPlayed(limit: 5),
-            headingText: 'Hidden gems',
-          ),
-        ),
-      ]
-          .map(
-            (widget) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: widget,
-            ),
-          )
-          .toList();
-    }
-
-    return Scaffold(
-      body: CupertinoTheme(
-        data: CupertinoThemeData(
-          primaryColor: Colors.white,
-        ),
-        child: CustomScrollView(
-          slivers: <Widget>[
-            CupertinoSliverNavigationBar(
-              backgroundColor: Colors.black,
-              largeTitle: const LargeTitle(text: 'Home'),
-              trailing: IconButton(
-                onPressed: () => Navigator.of(context).push(
-                  new CupertinoPageRoute(builder: (_) => const ProfileScreen()),
-                ),
-                icon: const Icon(
-                  CupertinoIcons.person_alt_circle,
-                  size: 24,
-                ),
+          HorizontalCardScroller(
+            headingText: 'Top albums',
+            cards: <Widget>[
+              ...overviewProvider.mostPlayedAlbums
+                  .map((album) => AlbumCard(album: album)),
+              PlaceholderCard(
+                icon: CupertinoIcons.music_albums,
+                onPressed: () => Navigator.of(context)
+                    .push(CupertinoPageRoute(builder: (_) => AlbumsScreen())),
               ),
+            ],
+          ),
+          HorizontalCardScroller(
+            headingText: 'Top artists',
+            cards: <Widget>[
+              ...overviewProvider.mostPlayedArtists
+                  .map((artist) => ArtistCard(artist: artist)),
+              PlaceholderCard(
+                icon: CupertinoIcons.music_mic,
+                onPressed: () => Navigator.of(context)
+                    .push(CupertinoPageRoute(builder: (_) => ArtistsScreen())),
+              ),
+            ],
+          ),
+        ]
+            .map(
+              (widget) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: widget,
+              ),
+            )
+            .toList();
+
+        return Scaffold(
+          body: CupertinoTheme(
+            data: CupertinoThemeData(
+              primaryColor: Colors.white,
             ),
-            SliverList(delegate: SliverChildListDelegate.fixed(homeBlocks)),
-            const BottomSpace(height: 128),
-          ],
-        ),
-      ),
+            child: CustomScrollView(
+              slivers: <Widget>[
+                CupertinoSliverNavigationBar(
+                  backgroundColor: Colors.black,
+                  largeTitle: const LargeTitle(text: 'Home'),
+                  trailing: IconButton(
+                    onPressed: () => Navigator.of(context).push(
+                      new CupertinoPageRoute(
+                        builder: (_) => const ProfileScreen(),
+                      ),
+                    ),
+                    icon: const Icon(
+                      CupertinoIcons.person_alt_circle,
+                      size: 24,
+                    ),
+                  ),
+                ),
+                SliverList(delegate: SliverChildListDelegate.fixed(homeBlocks)),
+                const BottomSpace(height: 128),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -2,13 +2,13 @@ import 'dart:ui';
 
 import 'package:app/models/album.dart';
 import 'package:app/models/song.dart';
+import 'package:app/providers/album_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list_buttons.dart';
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/sortable_song_list.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
@@ -24,18 +24,37 @@ class AlbumDetailsScreen extends StatefulWidget {
 
 class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
   OrderBy _sortOrder = _currentSortOrder;
+  late AlbumProvider albumProvider;
+  late SongProvider songProvider;
+  late Album album;
+  late List<Song> songs;
+
+  @override
+  void initState() {
+    super.initState();
+
+    albumProvider = context.read();
+    songProvider = context.read();
+  }
 
   @override
   Widget build(BuildContext context) {
-    Album album = ModalRoute.of(context)!.settings.arguments as Album;
+    int albumId = ModalRoute.of(context)!.settings.arguments as int;
+    Future<Album> futureAlbum = albumProvider.resolve(albumId);
+    Future<List<Song>> futureSongs = songProvider.fetchForAlbum(albumId);
 
     return Scaffold(
-      body: Consumer<SongProvider>(
-        builder: (_, provider, __) {
-          List<Song> songs = sortSongs(
-            provider.byAlbum(album),
-            orderBy: _sortOrder,
-          );
+      body: FutureBuilder(
+        future: Future.wait([futureAlbum, futureSongs]),
+        builder: (_, AsyncSnapshot<List<dynamic>> snapshot) {
+          if (!snapshot.hasData || snapshot.hasError) {
+            return const Center(child: const CircularProgressIndicator());
+          }
+
+          album = snapshot.data![0] as Album;
+          songs = snapshot.data![1] as List<Song>;
+
+          songs = sortSongs(songs, orderBy: _sortOrder);
 
           return CustomScrollView(
             slivers: <Widget>[

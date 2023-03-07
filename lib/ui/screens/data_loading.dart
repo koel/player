@@ -2,7 +2,6 @@ import 'package:app/providers/data_provider.dart';
 import 'package:app/ui/screens/root.dart';
 import 'package:app/ui/widgets/oops_box.dart';
 import 'package:app/ui/widgets/spinner.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

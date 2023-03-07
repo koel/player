@@ -41,7 +41,7 @@ class PlaylistProvider with ChangeNotifier {
       List<dynamic> response = await get('playlist/${playlist.id}/songs');
 
       response.cast<String>().forEach((id) {
-        Song? song = _songProvider.tryById(id);
+        Song? song = _songProvider.byId(id);
         if (song != null) {
           playlist.songs.add(song);
         }

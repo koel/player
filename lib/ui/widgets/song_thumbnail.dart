@@ -35,7 +35,7 @@ class SongThumbnail extends StatelessWidget {
               height: height,
               placeholder: (_, __) => defaultImage,
               errorWidget: (_, __, ___) => defaultImage,
-              imageUrl: song.imageUrl ?? preferences.defaultImageUrl,
+              imageUrl: song.albumCoverUrl ?? preferences.defaultImageUrl,
             ),
           );
   }

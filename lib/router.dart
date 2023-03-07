@@ -1,4 +1,3 @@
-import 'package:app/models/album.dart';
 import 'package:app/models/artist.dart';
 import 'package:app/models/song.dart';
 import 'package:app/ui/screens/add_to_playlist.dart';
@@ -53,11 +52,11 @@ class AppRouter {
 
   Future<void> gotoAlbumDetailsScreen(
     BuildContext context, {
-    required Album album,
+    required int albumId,
   }) async {
     await Navigator.of(context).push(CupertinoPageRoute(
       builder: (_) => const AlbumDetailsScreen(),
-      settings: RouteSettings(arguments: album),
+      settings: RouteSettings(arguments: albumId),
     ));
   }
 

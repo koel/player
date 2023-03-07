@@ -1,10 +1,7 @@
-import 'dart:ui';
-
 import 'package:app/constants/dimensions.dart';
 import 'package:app/models/song.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class AppBar extends StatelessWidget {
@@ -85,7 +82,7 @@ class CoverImageStack extends StatelessWidget {
     if (songs.isNotEmpty) {
       images = songs
           .where((song) => song.hasCustomImage)
-          .map((song) => song.imageUrl)
+          .map((song) => song.albumCoverUrl)
           .toList();
 
       images.shuffle();

@@ -1,6 +1,5 @@
 import 'package:app/providers/auth_provider.dart';
 import 'package:app/ui/screens/login.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -25,7 +24,7 @@ class OopsBox extends StatelessWidget {
           children: <Widget>[
             Text(
               'Oops!',
-              style: Theme.of(context).textTheme.headline5,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 16),
             Text(message ?? 'Something wrong happened.'),

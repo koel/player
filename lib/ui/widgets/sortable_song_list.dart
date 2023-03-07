@@ -15,11 +15,11 @@ List<Song> sortSongs(List<Song> songs, {required OrderBy orderBy}) {
     case OrderBy.title:
       return songs..sort((a, b) => a.title.compareTo(b.title));
     case OrderBy.artist:
-      return songs..sort((a, b) => a.artist.name.compareTo(b.artist.name));
+      return songs..sort((a, b) => a.artistName.compareTo(b.artistName));
     case OrderBy.album:
       return songs
-        ..sort((a, b) => '${a.album.name}${a.albumId}${a.track}'
-            .compareTo('${b.album.name}${b.albumId}${b.track}'));
+        ..sort((a, b) => '${a.albumName}${a.albumId}${a.track}'
+            .compareTo('${b.albumName}${b.albumId}${b.track}'));
     case OrderBy.recentlyAdded:
       return songs..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     case OrderBy.trackNumber:

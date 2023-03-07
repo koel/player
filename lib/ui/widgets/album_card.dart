@@ -1,7 +1,6 @@
 import 'package:app/models/album.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/album_thumbnail.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class AlbumCard extends StatefulWidget {
@@ -30,7 +29,7 @@ class _AlbumCardState extends State<AlbumCard> {
       onTapCancel: () => setState(() => _opacity = 1.0),
       onTap: () => widget.router.gotoAlbumDetailsScreen(
         context,
-        album: widget.album,
+        albumId: widget.album.id,
       ),
       behavior: HitTestBehavior.opaque,
       child: AnimatedOpacity(
@@ -39,7 +38,8 @@ class _AlbumCardState extends State<AlbumCard> {
         child: Column(
           children: <Widget>[
             AlbumThumbnail(
-              album: widget.album,
+              albumId: widget.album.id,
+              albumCoverUrl: widget.album.cover,
               size: ThumbnailSize.md,
               asHero: true,
             ),
@@ -56,7 +56,7 @@ class _AlbumCardState extends State<AlbumCard> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    widget.album.artist.name,
+                    widget.album.artistName,
                     style: const TextStyle(color: Colors.white54),
                     overflow: TextOverflow.ellipsis,
                   ),

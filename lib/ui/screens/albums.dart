@@ -57,14 +57,20 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                     child: InkWell(
                       onTap: () => widget.router.gotoAlbumDetailsScreen(
                         context,
-                        album: album,
+                        albumId: album.id,
                       ),
                       child: ListTile(
-                        leading: AlbumThumbnail(album: album, asHero: true),
-                        title:
-                            Text(album.name, overflow: TextOverflow.ellipsis),
+                        leading: AlbumThumbnail(
+                          albumId: album.id,
+                          albumCoverUrl: album.cover,
+                          asHero: true,
+                        ),
+                        title: Text(
+                          album.name,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         subtitle: Text(
-                          album.artist.name,
+                          album.artistName,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),

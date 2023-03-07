@@ -59,7 +59,7 @@ class _SongCardState extends State<SongCard> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    widget.song.artist.name,
+                    widget.song.artistName,
                     style: const TextStyle(color: Colors.white54),
                     overflow: TextOverflow.ellipsis,
                   )

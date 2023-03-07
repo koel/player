@@ -4,6 +4,7 @@ import 'package:app/utils/preferences.dart' as preferences;
 
 class AuthProvider {
   late User _authUser;
+
   User get authUser => _authUser;
 
   Future<bool> login({required String email, required String password}) async {
@@ -15,6 +16,7 @@ class AuthProvider {
     try {
       final responseData = await post('me', data: loginData);
       preferences.apiToken = responseData['token'];
+      preferences.audioToken = responseData['audioToken'];
       return true;
     } catch (err) {
       print(err);
@@ -40,5 +42,6 @@ class AuthProvider {
     } catch (_) {}
 
     preferences.apiToken = null;
+    preferences.audioToken = null;
   }
 }

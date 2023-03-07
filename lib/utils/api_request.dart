@@ -19,6 +19,7 @@ Future<dynamic> request(
   Map<String, String> headers = {
     HttpHeaders.contentTypeHeader: ContentType.json.mimeType,
     HttpHeaders.acceptHeader: ContentType.json.mimeType,
+    'X-Api-Version': preferences.apiVersion,
     if (preferences.apiToken != null)
       HttpHeaders.authorizationHeader: 'Bearer ${preferences.apiToken}',
   };

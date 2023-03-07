@@ -1,7 +1,7 @@
 import 'package:app/models/album.dart';
+import 'package:app/utils/api_request.dart';
 import 'package:app/values/parse_result.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 
 import 'artist_provider.dart';
 
@@ -13,45 +13,63 @@ ParseResult parseAlbums(List<dynamic> data) {
 }
 
 class AlbumProvider with ChangeNotifier {
-  ArtistProvider _artistProvider;
-  late List<Album> _albums;
-  late Map<int, Album> _index;
+  late ArtistProvider artistProvider;
+  List<Album> albums = [];
+  Map<int, Album> vault = {};
 
-  AlbumProvider({required ArtistProvider artistProvider})
-      : _artistProvider = artistProvider;
+  AlbumProvider({required this.artistProvider});
 
-  List<Album> get albums => _albums;
-
-  Future<void> init(List<dynamic> albumData) async {
-    ParseResult result = await compute(parseAlbums, albumData);
-    _albums = result.collection.cast();
-    _index = result.index.cast();
-
-    _albums.forEach((album) {
-      album.artist = _artistProvider.byId(album.artistId);
-    });
-  }
-
-  Album byId(int id) => _index[id]!;
+  Album? byId(int id) => vault[id];
 
   List<Album> byIds(List<int> ids) {
     List<Album> albums = [];
 
     ids.forEach((id) {
-      if (_index.containsKey(id)) {
-        albums.add(_index[id]!);
+      if (vault.containsKey(id)) {
+        albums.add(vault[id]!);
       }
     });
 
     return albums;
   }
 
-  List<Album> mostPlayed({int limit = 15}) {
-    List<Album> clone = List<Album>.from(_albums)
-        .where((album) => album.isStandardAlbum)
-        .toList()
-          ..sort((a, b) => b.playCount.compareTo(a.playCount));
+  Future<Album> resolve(int id) async {
+    if (vault.containsKey(id)) {
+      return vault[id]!;
+    }
 
-    return clone.take(limit).toList();
+    var json = await get('albums/$id');
+    Album album = Album.fromJson(json);
+    albums.add(album);
+    vault[album.id] = album;
+    notifyListeners();
+
+    return album;
+  }
+
+  List<Album> syncWithVault(dynamic _albums) {
+    if (!(_albums is List<Album> || _albums is Album)) {
+      throw Exception('Invalid type for albums. Must be List<Album> or Album.');
+    }
+
+    if (_albums is Album) {
+      _albums = [_albums];
+    }
+
+    List<Album> synced = (_albums as List<Album>).map<Album>((remote) {
+      Album? local = byId(remote.id);
+
+      if (local == null) {
+        albums.add(remote);
+        vault[remote.id] = remote;
+        return remote;
+      } else {
+        return local.merge(remote);
+      }
+    }).toList();
+
+    notifyListeners();
+
+    return synced;
   }
 }

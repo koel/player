@@ -64,7 +64,7 @@ class SongActionSheet extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: Text(
-                          '${song.artist.name} • ${song.album.name}',
+                          '${song.artistName} • ${song.albumName}',
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(color: Colors.white54),
                         ),
@@ -161,7 +161,7 @@ class SongActionSheet extends StatelessWidget {
                           Navigator.pop(context);
                           AppRouter().gotoAlbumDetailsScreen(
                             context,
-                            album: song.album,
+                            albumId: song.albumId,
                           );
                         },
                         hideSheetOnTap: false,

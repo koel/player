@@ -50,4 +50,15 @@ class Artist {
       imageUrl: imageUrl ?? faker.image.image(width: 192, height: 192),
     )..playCount = playCount ?? faker.randomGenerator.integer(1000);
   }
+
+  Artist merge(Artist remote) {
+    this
+      ..imageUrl = remote.imageUrl
+      ..playCount = remote.playCount ?? 0
+      ..name = remote.name;
+
+    _image = null;
+
+    return this;
+  }
 }

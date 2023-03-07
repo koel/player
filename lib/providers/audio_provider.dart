@@ -18,6 +18,7 @@ class AudioProvider with StreamSubscriber, ChangeNotifier {
   Mutex _mutex;
 
   late AssetsAudioPlayer _player;
+
   AssetsAudioPlayer get player => _player;
 
   AudioProvider({
@@ -34,13 +35,13 @@ class AudioProvider with StreamSubscriber, ChangeNotifier {
       // Everytime a new song is played (including those on Single loop mode)
       // we reset its playCountRegistered flag so that the play count is
       // registered properly.
-      _songProvider.byId(_player.songId!).playCountRegistered = false;
+      _songProvider.byId(_player.songId!)?.playCountRegistered = false;
     }));
 
     subscribe(_player.currentPosition.listen((Duration position) {
       if (player.songId == null) return;
 
-      Song currentSong = _songProvider.byId(_player.songId!);
+      Song currentSong = _songProvider.byId(_player.songId!)!;
 
       if (currentSong.playCountRegistered) return;
 
@@ -163,7 +164,7 @@ class AudioProvider with StreamSubscriber, ChangeNotifier {
 
   List<Song> get queuedSongs {
     return _player.playlist?.audios
-            .map((audio) => _songProvider.byId(audio.songId!))
+            .map((audio) => _songProvider.byId(audio.songId!)!)
             .toList() ??
         [];
   }

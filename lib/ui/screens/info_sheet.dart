@@ -221,11 +221,14 @@ class AlbumInfoPane extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              AlbumThumbnail(album: song.album),
+              AlbumThumbnail(
+                albumId: song.albumId,
+                albumCoverUrl: song.albumCoverUrl,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  song.album.name,
+                  song.albumName,
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,

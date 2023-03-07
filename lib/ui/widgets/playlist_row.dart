@@ -88,7 +88,7 @@ class PlaylistThumbnail extends StatelessWidget {
         return song.hasCustomImage;
       }, orElse: () => playlist.songs[0]);
 
-      thumbnailUrl = songWithCustomImage.imageUrl;
+      thumbnailUrl = songWithCustomImage.albumCoverUrl;
     } else {
       thumbnailUrl = preferences.defaultImageUrl;
     }

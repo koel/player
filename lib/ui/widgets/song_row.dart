@@ -54,10 +54,10 @@ class _SongRowState extends State<SongRow> {
     switch (widget.listContext) {
       case SongListContext.album:
       case SongListContext.artist:
-        subtitle = widget.song.album.name;
+        subtitle = widget.song.albumName;
         break;
       default:
-        subtitle = widget.song.artist.name;
+        subtitle = widget.song.artistName;
         break;
     }
 

@@ -1,5 +1,4 @@
 import 'package:app/constants/images.dart';
-import 'package:app/models/album.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -7,13 +6,15 @@ import 'package:flutter/material.dart';
 enum ThumbnailSize { sm, md, lg, xl }
 
 class AlbumThumbnail extends StatelessWidget {
-  final Album album;
+  final int albumId;
+  final String? albumCoverUrl;
   final ThumbnailSize size;
   final bool asHero;
 
   const AlbumThumbnail({
     Key? key,
-    required this.album,
+    required this.albumId,
+    required this.albumCoverUrl,
     this.size = ThumbnailSize.sm,
     this.asHero = false,
   }) : super(key: key);
@@ -26,14 +27,14 @@ class AlbumThumbnail extends StatelessWidget {
       height: height,
       placeholder: (_, __) => defaultImage,
       errorWidget: (_, __, ___) => defaultImage,
-      imageUrl: album.cover ?? preferences.defaultImageUrl,
+      imageUrl: albumCoverUrl ?? preferences.defaultImageUrl,
     );
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),
       child: asHero
           ? Hero(
-              tag: 'album-hero-${album.id}',
+              tag: 'album-hero-$albumId',
               child: image,
             )
           : image,

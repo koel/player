@@ -1,6 +1,5 @@
 import 'package:app/models/artist.dart';
 import 'package:app/values/parse_result.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 ParseResult parseArtists(List<dynamic> data) {
@@ -11,37 +10,48 @@ ParseResult parseArtists(List<dynamic> data) {
 }
 
 class ArtistProvider with ChangeNotifier {
-  late List<Artist> _artists;
-  late Map<int, Artist> _index;
+  List<Artist> artists = [];
+  Map<int, Artist> vault = {};
 
-  List<Artist> get artists => _artists;
-
-  Future<void> init(List<dynamic> artistData) async {
-    ParseResult result = await compute(parseArtists, artistData);
-    _artists = result.collection.cast();
-    _index = result.index.cast();
-  }
-
-  Artist byId(int id) => _index[id]!;
+  Artist? byId(int id) => vault[id];
 
   List<Artist> byIds(List<int> ids) {
     List<Artist> artists = [];
 
     ids.forEach((id) {
-      if (_index.containsKey(id)) {
-        artists.add(_index[id]!);
+      if (vault.containsKey(id)) {
+        artists.add(vault[id]!);
       }
     });
 
     return artists;
   }
 
-  List<Artist> mostPlayed({int limit = 15}) {
-    List<Artist> clone = List<Artist>.from(_artists)
-        .where((artist) => artist.isStandardArtist)
-        .toList()
-          ..sort((a, b) => b.playCount.compareTo(a.playCount));
+  List<Artist> syncWithVault(dynamic _artists) {
+    if (!(_artists is List<Artist> || _artists is Artist)) {
+      throw Exception(
+        'Invalid type for artists. Must be List<Artist> or Artist.',
+      );
+    }
 
-    return clone.take(limit).toList();
+    if (_artists is Artist) {
+      _artists = [_artists];
+    }
+
+    List<Artist> synced = (_artists as List<Artist>).map<Artist>((remote) {
+      Artist? local = byId(remote.id);
+
+      if (local == null) {
+        artists.add(remote);
+        vault[remote.id] = remote;
+        return remote;
+      } else {
+        return local.merge(remote);
+      }
+    }).toList();
+
+    notifyListeners();
+
+    return synced;
   }
 }

@@ -45,7 +45,7 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
         String? songId = audio.player.songId;
         if (songId == null) return SizedBox.shrink();
 
-        Song current = songProvider.byId(songId);
+        Song current = songProvider.byId(songId)!;
 
         return Column(
           mainAxisSize: MainAxisSize.min,

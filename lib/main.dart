@@ -6,7 +6,9 @@ import 'package:app/providers/cache_provider.dart';
 import 'package:app/providers/data_provider.dart';
 import 'package:app/providers/interaction_provider.dart';
 import 'package:app/providers/media_info_provider.dart';
+import 'package:app/providers/overview_provider.dart';
 import 'package:app/providers/playlist_provider.dart';
+import 'package:app/providers/recently_played_provider.dart';
 import 'package:app/providers/search_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/ui/app.dart';
@@ -26,11 +28,16 @@ List<SingleChildWidget> _providers = [
       artistProvider: context.read<ArtistProvider>(),
     ),
   ),
-  Provider(
+  ChangeNotifierProvider(
     create: (context) => SongProvider(
       artistProvider: context.read<ArtistProvider>(),
       albumProvider: context.read<AlbumProvider>(),
       cacheProvider: context.read<CacheProvider>(),
+    ),
+  ),
+  ChangeNotifierProvider(
+    create: (context) => RecentlyPlayedProvider(
+      songProvider: context.read<SongProvider>(),
     ),
   ),
   ChangeNotifierProvider(
@@ -58,10 +65,15 @@ List<SingleChildWidget> _providers = [
   ),
   ChangeNotifierProvider(
     create: (context) => DataProvider(
-      songProvider: context.read<SongProvider>(),
-      artistProvider: context.read<ArtistProvider>(),
-      albumProvider: context.read<AlbumProvider>(),
       playlistProvider: context.read<PlaylistProvider>(),
+    ),
+  ),
+  ChangeNotifierProvider(
+    create: (context) => OverviewProvider(
+      songProvider: context.read<SongProvider>(),
+      albumProvider: context.read<AlbumProvider>(),
+      artistProvider: context.read<ArtistProvider>(),
+      recentlyPlayedProvider: context.read<RecentlyPlayedProvider>(),
     ),
   ),
 ];
@@ -71,7 +83,9 @@ Future<void> main() async {
     return true;
   });
 
-  await GetStorage.init();
+  await GetStorage.init('Preferences');
+  await GetStorage.init('Cache');
+  GetStorage('Cache').erase();
 
   runApp(
     MultiProvider(

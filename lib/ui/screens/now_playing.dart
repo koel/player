@@ -43,7 +43,7 @@ class NowPlayingScreen extends StatelessWidget {
 
         String? songId = audio.player.songId;
         if (songId == null) return const SizedBox.shrink();
-        Song song = songProvider.byId(songId);
+        Song song = songProvider.byId(songId)!;
 
         final Widget frostGlassBackground = SizedBox(
           width: double.infinity,
