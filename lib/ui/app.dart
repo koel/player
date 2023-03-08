@@ -1,8 +1,7 @@
-import 'package:app/constants/strings.dart';
+import 'package:app/constants/constants.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/screens/initial.dart';
 import 'package:app/ui/theme_data.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

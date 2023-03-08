@@ -1,7 +1,6 @@
-import 'package:app/constants/images.dart';
-import 'package:app/exceptions/unsupported_type_exception.dart';
-import 'package:app/models/album.dart';
-import 'package:app/models/artist.dart';
+import 'package:app/constants/constants.dart';
+import 'package:app/exceptions/exceptions.dart';
+import 'package:app/models/models.dart';
 import 'package:app/utils/preferences.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';

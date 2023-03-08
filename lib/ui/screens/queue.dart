@@ -1,4 +1,4 @@
-import 'package:app/providers/audio_provider.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list_buttons.dart';

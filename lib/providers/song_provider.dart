@@ -1,21 +1,10 @@
-import 'package:app/models/album.dart';
-import 'package:app/models/artist.dart';
-import 'package:app/models/song.dart';
-import 'package:app/providers/album_provider.dart';
-import 'package:app/providers/artist_provider.dart';
+import 'package:app/enums.dart';
+import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/utils/api_request.dart';
-import 'package:app/values/parse_result.dart';
+import 'package:app/values/values.dart';
 import 'package:flutter/foundation.dart';
-
-import 'cache_provider.dart';
-
-ParseResult parseSongs(List<dynamic> data) {
-  ParseResult result = ParseResult();
-  data.forEach((json) => result.add(Song.fromJson(json), json['id']));
-
-  return result;
-}
 
 class SongProvider with ChangeNotifier {
   late ArtistProvider artistProvider;
@@ -32,7 +21,7 @@ class SongProvider with ChangeNotifier {
     required this.cacheProvider,
   });
 
-  syncWithVault(dynamic _songs) {
+  List<Song> syncWithVault(dynamic _songs) {
     if (!(_songs is List<Song> || _songs is Song)) {
       throw Exception('Invalid type for songs. Must be List<Song> or Song.');
     }
@@ -45,15 +34,12 @@ class SongProvider with ChangeNotifier {
       Song? local = byId(remote.id);
 
       if (local == null) {
-        songs.add(remote);
         vault[remote.id] = remote;
         return remote;
       } else {
         return local.merge(remote);
       }
     }).toList();
-
-    notifyListeners();
 
     return synced;
   }
@@ -105,5 +91,28 @@ class SongProvider with ChangeNotifier {
         response.data.map((json) => Song.fromJson(json)).toList();
 
     return syncWithVault(songs);
+  }
+
+  Future<PaginationResult<Song>> paginate(
+    String sortField,
+    SortOrder sortOrder,
+    int page,
+  ) async {
+    // @todo - cache this
+    var response = await get(
+      'songs?page=$page&sort=$sortField&order=${sortOrder.value}',
+    );
+    List<Song> _songs =
+        response['data'].map<Song>((json) => Song.fromJson(json)).toList();
+    List<Song> synced = syncWithVault(_songs);
+
+    songs = [...songs, ...synced].toSet().toList();
+    notifyListeners();
+
+    return new PaginationResult(
+      items: synced,
+      nextPage:
+          response['links']['next'] ? ++response['meta']['current_page'] : null,
+    );
   }
 }

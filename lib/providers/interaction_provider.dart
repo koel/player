@@ -1,6 +1,5 @@
-import 'package:app/models/interaction.dart';
-import 'package:app/models/song.dart';
-import 'package:app/providers/song_provider.dart';
+import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:flutter/foundation.dart';
 

@@ -1,8 +1,8 @@
 import 'dart:ui';
 
-import 'package:app/constants/dimensions.dart';
-import 'package:app/models/song.dart';
-import 'package:app/providers/media_info_provider.dart';
+import 'package:app/constants/constants.dart';
+import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/album_thumbnail.dart';
 import 'package:app/ui/widgets/artist_thumbnail.dart';
 import 'package:app/ui/widgets/spinner.dart';
@@ -179,7 +179,7 @@ class ArtistInfoPane extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  song.artist.name,
+                  song.artistName,
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,

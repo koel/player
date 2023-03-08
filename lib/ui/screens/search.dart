@@ -1,9 +1,6 @@
-import 'package:app/constants/colors.dart';
-import 'package:app/constants/dimensions.dart';
-import 'package:app/models/album.dart';
-import 'package:app/models/artist.dart';
-import 'package:app/models/song.dart';
-import 'package:app/providers/search_provider.dart';
+import 'package:app/constants/constants.dart';
+import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/album_card.dart';
 import 'package:app/ui/widgets/artist_card.dart';
 import 'package:app/ui/widgets/bottom_space.dart';

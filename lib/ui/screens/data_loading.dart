@@ -1,4 +1,4 @@
-import 'package:app/providers/data_provider.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/root.dart';
 import 'package:app/ui/widgets/oops_box.dart';
 import 'package:app/ui/widgets/spinner.dart';

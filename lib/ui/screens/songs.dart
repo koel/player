@@ -1,11 +1,11 @@
-import 'package:app/models/song.dart';
-import 'package:app/providers/song_provider.dart';
+import 'package:app/enums.dart';
+import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list_buttons.dart';
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/sortable_song_list.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
@@ -23,6 +23,15 @@ class SongsScreen extends StatefulWidget {
 
 class _SongsScreenState extends State<SongsScreen> {
   OrderBy _sortOrder = _currentSortOrder;
+  List<Song> _songs = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    var songProvider = context.read<SongProvider>();
+    songProvider.paginate('title', SortOrder.asc, 0);
+  }
 
   @override
   Widget build(BuildContext context) {

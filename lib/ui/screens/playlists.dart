@@ -1,7 +1,6 @@
-import 'package:app/constants/colors.dart';
-import 'package:app/constants/dimensions.dart';
-import 'package:app/models/playlist.dart';
-import 'package:app/providers/playlist_provider.dart';
+import 'package:app/constants/constants.dart';
+import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/playlist_row.dart';

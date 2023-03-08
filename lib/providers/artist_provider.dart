@@ -1,13 +1,5 @@
-import 'package:app/models/artist.dart';
-import 'package:app/values/parse_result.dart';
+import 'package:app/models/models.dart';
 import 'package:flutter/foundation.dart';
-
-ParseResult parseArtists(List<dynamic> data) {
-  ParseResult result = ParseResult();
-  data.forEach((json) => result.add(Artist.fromJson(json), json['id']));
-
-  return result;
-}
 
 class ArtistProvider with ChangeNotifier {
   List<Artist> artists = [];

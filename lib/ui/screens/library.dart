@@ -1,7 +1,5 @@
-import 'package:app/constants/colors.dart';
-import 'package:app/constants/dimensions.dart';
-import 'package:app/models/song.dart';
-import 'package:app/providers/song_provider.dart';
+import 'package:app/constants/constants.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/albums.dart';
 import 'package:app/ui/screens/artists.dart';
 import 'package:app/ui/screens/downloaded.dart';
@@ -22,9 +20,10 @@ class LibraryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SongProvider songProvider = context.watch();
-    List<Song> recentlyAddedSongs = songProvider.recentlyAdded(limit: 10);
-    List<Song> mostPlayedSongs = songProvider.mostPlayed(limit: 10);
+    var overviewProvider = context.watch<OverviewProvider>();
+
+    var recentlyAddedSongs = overviewProvider.recentlyAddedSongs;
+    var mostPlayedSongs = overviewProvider.mostPlayedSongs;
 
     List<Widget> menuItems = ListTile.divideTiles(
       context: context,

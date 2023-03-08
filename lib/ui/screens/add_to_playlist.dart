@@ -1,6 +1,5 @@
-import 'package:app/models/playlist.dart';
-import 'package:app/models/song.dart';
-import 'package:app/providers/playlist_provider.dart';
+import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/screens/playlists.dart';
 import 'package:app/ui/widgets/bottom_space.dart';

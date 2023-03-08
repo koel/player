@@ -1,5 +1,5 @@
-import 'package:app/models/song.dart';
-import 'package:app/providers/audio_provider.dart';
+import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:flutter/material.dart';

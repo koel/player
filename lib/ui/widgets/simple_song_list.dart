@@ -1,4 +1,4 @@
-import 'package:app/models/song.dart';
+import 'package:app/models/models.dart';
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/typography.dart';
 import 'package:flutter/cupertino.dart';

@@ -1,5 +1,5 @@
-import 'package:app/constants/dimensions.dart';
-import 'package:app/providers/auth_provider.dart';
+import 'package:app/constants/constants.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/data_loading.dart';
 import 'package:app/ui/widgets/spinner.dart';
 import 'package:app/utils/preferences.dart' as preferences;

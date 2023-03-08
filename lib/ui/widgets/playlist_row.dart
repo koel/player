@@ -1,9 +1,8 @@
-import 'package:app/constants/images.dart';
-import 'package:app/extensions/string.dart';
+import 'package:app/constants/constants.dart';
+import 'package:app/extensions/extensions.dart';
 import 'package:app/mixins/stream_subscriber.dart';
-import 'package:app/models/playlist.dart';
-import 'package:app/models/song.dart';
-import 'package:app/providers/playlist_provider.dart';
+import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/playlist_details.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:cached_network_image/cached_network_image.dart';

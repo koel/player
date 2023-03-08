@@ -1,5 +1,4 @@
-import 'package:app/constants/colors.dart';
-import 'package:app/constants/dimensions.dart';
+import 'package:app/constants/constants.dart';
 import 'package:app/utils/full_width_slider_track_shape.dart';
 import 'package:flutter/material.dart';
 

@@ -1,11 +1,9 @@
 import 'dart:async';
 
-import 'package:app/extensions/assets_audio_player.dart';
-import 'package:app/extensions/audio.dart';
+import 'package:app/extensions/extensions.dart';
 import 'package:app/mixins/stream_subscriber.dart';
-import 'package:app/models/song.dart';
-import 'package:app/providers/interaction_provider.dart';
-import 'package:app/providers/song_provider.dart';
+import 'package:app/models/models.dart' hide Playlist;
+import 'package:app/providers/providers.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart';

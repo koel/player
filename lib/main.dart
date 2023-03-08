@@ -1,16 +1,4 @@
-import 'package:app/providers/album_provider.dart';
-import 'package:app/providers/artist_provider.dart';
-import 'package:app/providers/audio_provider.dart';
-import 'package:app/providers/auth_provider.dart';
-import 'package:app/providers/cache_provider.dart';
-import 'package:app/providers/data_provider.dart';
-import 'package:app/providers/interaction_provider.dart';
-import 'package:app/providers/media_info_provider.dart';
-import 'package:app/providers/overview_provider.dart';
-import 'package:app/providers/playlist_provider.dart';
-import 'package:app/providers/recently_played_provider.dart';
-import 'package:app/providers/search_provider.dart';
-import 'package:app/providers/song_provider.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/ui/app.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +21,11 @@ List<SingleChildWidget> _providers = [
       artistProvider: context.read<ArtistProvider>(),
       albumProvider: context.read<AlbumProvider>(),
       cacheProvider: context.read<CacheProvider>(),
+    ),
+  ),
+  ChangeNotifierProvider(
+    create: (context) => FavoriteProvider(
+      songProvider: context.read<SongProvider>(),
     ),
   ),
   ChangeNotifierProvider(

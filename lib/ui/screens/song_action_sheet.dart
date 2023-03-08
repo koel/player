@@ -1,9 +1,8 @@
 import 'dart:ui';
 
-import 'package:app/extensions/assets_audio_player.dart';
-import 'package:app/models/song.dart';
-import 'package:app/providers/audio_provider.dart';
-import 'package:app/providers/interaction_provider.dart';
+import 'package:app/extensions/extensions.dart';
+import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/screens/add_to_playlist.dart';
 import 'package:app/ui/widgets/message_overlay.dart';

@@ -1,9 +1,8 @@
-import 'package:app/constants/dimensions.dart';
-import 'package:app/models/song.dart';
-import 'package:app/providers/audio_provider.dart';
+import 'package:app/constants/constants.dart';
+import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/full_width_primary_icon_button.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 enum SongListContext {

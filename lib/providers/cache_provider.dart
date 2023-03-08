@@ -1,4 +1,4 @@
-import 'package:app/models/song.dart';
+import 'package:app/models/models.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:rxdart/rxdart.dart';
@@ -14,12 +14,15 @@ class CacheProvider with ChangeNotifier {
   List<Song> songs = [];
 
   final BehaviorSubject<bool> _cacheCleared = BehaviorSubject();
+
   ValueStream<bool> get cacheClearedStream => _cacheCleared.stream;
 
   final BehaviorSubject<Song> _singleCacheRemoved = BehaviorSubject();
+
   ValueStream<Song> get singleCacheRemovedStream => _singleCacheRemoved.stream;
 
   final BehaviorSubject<SongCached> _songCached = BehaviorSubject();
+
   ValueStream<SongCached> get songCachedStream => _songCached.stream;
 
   static CacheManager _cache = DefaultCacheManager();

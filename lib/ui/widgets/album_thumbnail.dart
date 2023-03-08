@@ -1,4 +1,4 @@
-import 'package:app/constants/images.dart';
+import 'package:app/constants/constants.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';

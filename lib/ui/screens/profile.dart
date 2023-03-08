@@ -1,13 +1,8 @@
 import 'dart:ui';
 
-import 'package:app/constants/dimensions.dart';
-import 'package:app/models/user.dart';
-import 'package:app/providers/audio_provider.dart';
-import 'package:app/providers/auth_provider.dart';
-import 'package:app/providers/cache_provider.dart';
-import 'package:app/providers/interaction_provider.dart';
-import 'package:app/providers/playlist_provider.dart';
-import 'package:app/providers/song_provider.dart';
+import 'package:app/constants/constants.dart';
+import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/favorites.dart';
 import 'package:app/ui/screens/login.dart';
 import 'package:app/ui/screens/playlists.dart';

@@ -1,5 +1,5 @@
-import 'package:app/constants/dimensions.dart';
-import 'package:app/providers/interaction_provider.dart';
+import 'package:app/constants/constants.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list_buttons.dart';
@@ -8,17 +8,32 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
-class FavoritesScreen extends StatelessWidget {
+class FavoritesScreen extends StatefulWidget {
   static const routeName = '/favorites';
 
   const FavoritesScreen({Key? key}) : super(key: key);
 
   @override
+  _FavoritesScreenState createState() => _FavoritesScreenState();
+}
+
+class _FavoritesScreenState extends State<FavoritesScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    var favoriteProvider = context.read<FavoriteProvider>();
+    if (favoriteProvider.songs.isEmpty) {
+      favoriteProvider.fetch();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer<InteractionProvider>(
+      body: Consumer<FavoriteProvider>(
         builder: (_, provider, __) {
-          if (provider.favorites.isEmpty) {
+          if (provider.songs.isEmpty) {
             return Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppDimensions.horizontalPadding,
@@ -35,7 +50,7 @@ class FavoritesScreen extends StatelessWidget {
                     const SizedBox(height: 16.0),
                     Text(
                       'No favorites',
-                      style: Theme.of(context).textTheme.headline5,
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 16.0),
                     RichText(
@@ -70,10 +85,10 @@ class FavoritesScreen extends StatelessWidget {
             slivers: <Widget>[
               AppBar(
                 headingText: 'Favorites',
-                coverImage: CoverImageStack(songs: provider.favorites),
+                coverImage: CoverImageStack(songs: provider.songs),
               ),
               SliverToBoxAdapter(
-                child: SongListButtons(songs: provider.favorites),
+                child: SongListButtons(songs: provider.songs),
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
@@ -81,7 +96,7 @@ class FavoritesScreen extends StatelessWidget {
                     return Dismissible(
                       direction: DismissDirection.endToStart,
                       onDismissed: (DismissDirection direction) =>
-                          provider.unlike(song: provider.favorites[index]),
+                          provider.unlike(song: provider.songs[index]),
                       background: Container(
                         alignment: AlignmentDirectional.centerEnd,
                         color: Colors.red,
@@ -90,11 +105,11 @@ class FavoritesScreen extends StatelessWidget {
                           child: Icon(CupertinoIcons.heart_slash),
                         ),
                       ),
-                      key: ValueKey(provider.favorites[index]),
-                      child: SongRow(song: provider.favorites[index]),
+                      key: ValueKey(provider.songs[index]),
+                      child: SongRow(song: provider.songs[index]),
                     );
                   },
-                  childCount: provider.favorites.length,
+                  childCount: provider.songs.length,
                 ),
               ),
               const BottomSpace(),

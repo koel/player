@@ -1,5 +1,5 @@
-import 'package:app/extensions/assets_audio_player.dart';
-import 'package:app/providers/audio_provider.dart';
+import 'package:app/extensions/extensions.dart';
+import 'package:app/providers/providers.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';

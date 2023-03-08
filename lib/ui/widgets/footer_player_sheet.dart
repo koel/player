@@ -1,9 +1,8 @@
 import 'dart:ui';
 
-import 'package:app/extensions/assets_audio_player.dart';
-import 'package:app/models/song.dart';
-import 'package:app/providers/audio_provider.dart';
-import 'package:app/providers/song_provider.dart';
+import 'package:app/extensions/extensions.dart';
+import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
@@ -87,12 +86,12 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  current.artist.name,
+                                  current.artistName,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     color: Theme.of(context)
                                         .textTheme
-                                        .caption
+                                        .bodySmall
                                         ?.color,
                                   ),
                                 )

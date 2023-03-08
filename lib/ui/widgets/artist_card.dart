@@ -1,4 +1,4 @@
-import 'package:app/models/artist.dart';
+import 'package:app/models/models.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/artist_thumbnail.dart';
 import 'package:flutter/cupertino.dart';

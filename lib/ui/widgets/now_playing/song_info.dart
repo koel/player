@@ -1,6 +1,4 @@
-import 'dart:ui';
-
-import 'package:app/models/song.dart';
+import 'package:app/models/models.dart';
 import 'package:flutter/material.dart';
 
 class SongInfo extends StatelessWidget {
@@ -23,7 +21,7 @@ class SongInfo extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          song.artist.name,
+          song.artistName,
           style: const TextStyle(
             color: Colors.white70,
             fontSize: 18,

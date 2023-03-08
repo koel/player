@@ -1,16 +1,8 @@
-import 'package:app/models/album.dart';
+import 'package:app/models/models.dart';
 import 'package:app/utils/api_request.dart';
-import 'package:app/values/parse_result.dart';
 import 'package:flutter/foundation.dart';
 
 import 'artist_provider.dart';
-
-ParseResult parseAlbums(List<dynamic> data) {
-  ParseResult result = ParseResult();
-  data.forEach((json) => result.add(Album.fromJson(json), json['id']));
-
-  return result;
-}
 
 class AlbumProvider with ChangeNotifier {
   late ArtistProvider artistProvider;

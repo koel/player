@@ -1,4 +1,4 @@
-import 'package:app/models/song.dart';
+import 'package:app/models/models.dart';
 import 'package:faker/faker.dart';
 
 class Playlist {

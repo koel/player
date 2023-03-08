@@ -1,4 +1,4 @@
-import 'package:app/models/user.dart';
+import 'package:app/models/models.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 
@@ -14,9 +14,9 @@ class AuthProvider {
     };
 
     try {
-      final responseData = await post('me', data: loginData);
-      preferences.apiToken = responseData['token'];
-      preferences.audioToken = responseData['audioToken'];
+      final response = await post('me', data: loginData);
+      preferences.apiToken = response['token'];
+      preferences.audioToken = response['audio-token'];
       return true;
     } catch (err) {
       print(err);

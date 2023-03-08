@@ -1,7 +1,7 @@
-import 'package:app/extensions/duration.dart';
+import 'package:app/extensions/extensions.dart';
 import 'package:app/mixins/stream_subscriber.dart';
-import 'package:app/models/song.dart';
-import 'package:app/providers/audio_provider.dart';
+import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

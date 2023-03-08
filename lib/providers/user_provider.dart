@@ -1,4 +1,4 @@
-import 'package:app/models/user.dart';
+import 'package:app/models/models.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:flutter/foundation.dart';

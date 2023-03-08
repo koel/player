@@ -1,4 +1,4 @@
-import 'package:app/providers/audio_provider.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';

@@ -1,4 +1,4 @@
-import 'package:app/models/album.dart';
+import 'package:app/models/models.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/album_thumbnail.dart';
 import 'package:flutter/material.dart';

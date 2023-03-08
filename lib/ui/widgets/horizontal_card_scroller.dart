@@ -1,6 +1,5 @@
-import 'package:app/constants/dimensions.dart';
+import 'package:app/constants/constants.dart';
 import 'package:app/ui/widgets/typography.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class HorizontalCardScroller extends StatelessWidget {

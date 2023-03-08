@@ -1,6 +1,6 @@
-import 'package:app/constants/dimensions.dart';
-import 'package:app/models/song.dart';
-import 'package:app/providers/cache_provider.dart';
+import 'package:app/constants/constants.dart';
+import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list_buttons.dart';
@@ -40,7 +40,7 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                   children: <Widget>[
                     Text(
                       'No downloaded songs',
-                      style: Theme.of(context).textTheme.headline5,
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 16.0),
                     RichText(

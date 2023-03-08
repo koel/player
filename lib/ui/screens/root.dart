@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:app/providers/audio_provider.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/home.dart';
 import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/screens/search.dart';

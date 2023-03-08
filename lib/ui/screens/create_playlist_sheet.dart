@@ -1,6 +1,5 @@
-import 'package:app/constants/colors.dart';
-import 'package:app/constants/dimensions.dart';
-import 'package:app/providers/playlist_provider.dart';
+import 'package:app/constants/constants.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/message_overlay.dart';
 import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/cupertino.dart';

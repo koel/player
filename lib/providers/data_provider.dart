@@ -1,4 +1,4 @@
-import 'package:app/providers/playlist_provider.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:flutter/widgets.dart';
 

@@ -1,6 +1,5 @@
-import 'package:app/constants/dimensions.dart';
-import 'package:app/models/song.dart';
-import 'package:app/providers/overview_provider.dart';
+import 'package:app/constants/constants.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/albums.dart';
 import 'package:app/ui/screens/artists.dart';
 import 'package:app/ui/screens/profile.dart';
@@ -16,60 +15,85 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   static const routeName = '/home';
 
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
+  State<StatefulWidget> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<OverviewProvider>().fetchOverview();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Consumer<OverviewProvider>(
       builder: (_, overviewProvider, __) {
-        overviewProvider.fetchOverview();
-
-        List<Widget> homeBlocks = <Widget>[
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppDimensions.horizontalPadding,
+        var homeBlocks = <Widget>[
+          if (overviewProvider.recentlyPlayedSongs.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.horizontalPadding,
+              ),
+              child: SimpleSongList(
+                songs: overviewProvider.recentlyPlayedSongs.getRange(0, 4),
+              ),
             ),
-            child: SimpleSongList(songs: overviewProvider.recentlyPlayedSongs),
-          ),
-          HorizontalCardScroller(
-            headingText: 'Most played songs',
-            cards: <Widget>[
-              ...overviewProvider.mostPlayedSongs
-                  .map((song) => SongCard(song: song)),
-              PlaceholderCard(
-                icon: CupertinoIcons.music_note,
-                onPressed: () => Navigator.of(context)
-                    .push(CupertinoPageRoute(builder: (_) => SongsScreen())),
+          if (overviewProvider.mostPlayedSongs.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.horizontalPadding,
               ),
-            ],
-          ),
-          HorizontalCardScroller(
-            headingText: 'Top albums',
-            cards: <Widget>[
-              ...overviewProvider.mostPlayedAlbums
-                  .map((album) => AlbumCard(album: album)),
-              PlaceholderCard(
-                icon: CupertinoIcons.music_albums,
-                onPressed: () => Navigator.of(context)
-                    .push(CupertinoPageRoute(builder: (_) => AlbumsScreen())),
+              child: SimpleSongList(
+                headingText: 'Most played',
+                songs: overviewProvider.mostPlayedSongs,
               ),
-            ],
-          ),
-          HorizontalCardScroller(
-            headingText: 'Top artists',
-            cards: <Widget>[
-              ...overviewProvider.mostPlayedArtists
-                  .map((artist) => ArtistCard(artist: artist)),
-              PlaceholderCard(
-                icon: CupertinoIcons.music_mic,
-                onPressed: () => Navigator.of(context)
-                    .push(CupertinoPageRoute(builder: (_) => ArtistsScreen())),
-              ),
-            ],
-          ),
+            ),
+          if (overviewProvider.mostPlayedSongs.isNotEmpty)
+            HorizontalCardScroller(
+              headingText: 'Most played songs',
+              cards: <Widget>[
+                ...overviewProvider.mostPlayedSongs
+                    .map((song) => SongCard(song: song)),
+                PlaceholderCard(
+                  icon: CupertinoIcons.music_note,
+                  onPressed: () => Navigator.of(context)
+                      .push(CupertinoPageRoute(builder: (_) => SongsScreen())),
+                ),
+              ],
+            ),
+          if (overviewProvider.mostPlayedAlbums.isNotEmpty)
+            HorizontalCardScroller(
+              headingText: 'Top albums',
+              cards: <Widget>[
+                ...overviewProvider.mostPlayedAlbums
+                    .map((album) => AlbumCard(album: album)),
+                PlaceholderCard(
+                  icon: CupertinoIcons.music_albums,
+                  onPressed: () => Navigator.of(context)
+                      .push(CupertinoPageRoute(builder: (_) => AlbumsScreen())),
+                ),
+              ],
+            ),
+          if (overviewProvider.mostPlayedArtists.isNotEmpty)
+            HorizontalCardScroller(
+              headingText: 'Top artists',
+              cards: <Widget>[
+                ...overviewProvider.mostPlayedArtists
+                    .map((artist) => ArtistCard(artist: artist)),
+                PlaceholderCard(
+                  icon: CupertinoIcons.music_mic,
+                  onPressed: () => Navigator.of(context).push(
+                      CupertinoPageRoute(builder: (_) => ArtistsScreen())),
+                ),
+              ],
+            ),
         ]
             .map(
               (widget) => Padding(
@@ -108,51 +132,6 @@ class HomeScreen extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class MostPlayedSongs extends StatelessWidget {
-  final List<Song> songs;
-  final BuildContext context;
-
-  const MostPlayedSongs({
-    Key? key,
-    required this.songs,
-    required this.context,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(left: AppDimensions.horizontalPadding),
-          child: const Heading5(text: 'Most played'),
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              ...songs.expand(
-                (song) => [
-                  const SizedBox(width: AppDimensions.horizontalPadding),
-                  SongCard(song: song),
-                ],
-              ),
-              const SizedBox(width: AppDimensions.horizontalPadding),
-              PlaceholderCard(
-                icon: CupertinoIcons.music_note,
-                onPressed: () => Navigator.of(context, rootNavigator: true)
-                    .pushNamed(SongsScreen.routeName),
-              ),
-              const SizedBox(width: AppDimensions.horizontalPadding),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

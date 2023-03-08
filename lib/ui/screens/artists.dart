@@ -1,5 +1,5 @@
-import 'package:app/models/artist.dart';
-import 'package:app/providers/artist_provider.dart';
+import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/artist_thumbnail.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
