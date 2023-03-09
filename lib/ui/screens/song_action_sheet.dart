@@ -173,8 +173,10 @@ class SongActionSheet extends StatelessWidget {
                         ),
                         onTap: () {
                           Navigator.pop(context);
-                          AppRouter().gotoArtistDetailsScreen(context,
-                              artist: song.artist);
+                          AppRouter().gotoArtistDetailsScreen(
+                            context,
+                            artistId: song.artistId,
+                          );
                         },
                         hideSheetOnTap: false,
                       ),

@@ -24,118 +24,100 @@ class ArtistDetailsScreen extends StatefulWidget {
 
 class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
   OrderBy _sortOrder = _currentSortOrder;
-  bool _loading = false;
-  late SongProvider _songProvider;
-  List<Song> _songs = [];
-  late Artist _artist;
-
-  @override
-  void initState() {
-    super.initState();
-    _songProvider = context.read<SongProvider>();
-  }
-
-  @override
-  didChangeDependencies() {
-    super.didChangeDependencies();
-
-    _artist = ModalRoute.of(context)!.settings.arguments as Artist;
-    fetchSongs();
-  }
-
-  Future<void> fetchSongs() async {
-    if (_loading) return;
-
-    setState(() => _loading = true);
-    List<Song> fetched = await _songProvider.fetchForArtist(_artist);
-
-    setState(() {
-      _songs = fetched;
-      _loading = false;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
-    List<Song> songs = sortSongs(_songs, orderBy: _sortOrder);
+    int artistId = ModalRoute.of(context)!.settings.arguments as int;
+
     return Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          AppBar(
-            headingText: _artist.name,
-            actions: [
-              SortButton(
-                options: {
-                  OrderBy.title: 'Song title',
-                  OrderBy.album: 'Album',
-                  OrderBy.recentlyAdded: 'Recently added',
-                },
-                currentOrder: _sortOrder,
-                onActionSheetActionPressed: (OrderBy order) {
-                  _currentSortOrder = order;
-                  setState(() => _sortOrder = order);
-                },
+      body: FutureBuilder(
+        future: Future.wait([
+          context.read<ArtistProvider>().resolve(artistId),
+          context.read<SongProvider>().fetchForArtist(artistId),
+        ]),
+        builder: (_, AsyncSnapshot<List<dynamic>> snapshot) {
+          if (!snapshot.hasData || snapshot.hasError) {
+            return const Center(child: const Spinner());
+          }
+
+          var artist = snapshot.data![0] as Artist;
+          var songs = sortSongs(
+            snapshot.data![1] as List<Song>,
+            orderBy: _sortOrder,
+          );
+
+          return CustomScrollView(
+            slivers: <Widget>[
+              AppBar(
+                headingText: artist.name,
+                actions: [
+                  SortButton(
+                    options: {
+                      OrderBy.title: 'Song title',
+                      OrderBy.album: 'Album',
+                      OrderBy.recentlyAdded: 'Recently added',
+                    },
+                    currentOrder: _sortOrder,
+                    onActionSheetActionPressed: (OrderBy order) {
+                      _currentSortOrder = order;
+                      setState(() => _sortOrder = order);
+                    },
+                  ),
+                ],
+                backgroundImage: SizedBox(
+                  width: double.infinity,
+                  height: double.infinity,
+                  child: ImageFiltered(
+                    imageFilter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: artist.image,
+                          fit: BoxFit.cover,
+                          alignment: Alignment.topCenter,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                coverImage: Hero(
+                  tag: "artist-hero-${artist.id}",
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: artist.image,
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                      ),
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(16),
+                      ),
+                      boxShadow: const <BoxShadow>[
+                        const BoxShadow(
+                          color: Colors.black38,
+                          blurRadius: 10.0,
+                          offset: Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
+              if (songs.isNotEmpty)
+                SliverToBoxAdapter(child: SongListButtons(songs: songs)),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (_, int index) => SongRow(
+                    song: songs[index],
+                    listContext: SongListContext.artist,
+                  ),
+                  childCount: songs.length,
+                ),
+              ),
+              const BottomSpace(),
             ],
-            backgroundImage: SizedBox(
-              width: double.infinity,
-              height: double.infinity,
-              child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: _artist.image,
-                      fit: BoxFit.cover,
-                      alignment: Alignment.topCenter,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            coverImage: Hero(
-              tag: "artist-hero-${_artist.id}",
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: _artist.image,
-                    fit: BoxFit.cover,
-                    alignment: Alignment.topCenter,
-                  ),
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(16),
-                  ),
-                  boxShadow: const <BoxShadow>[
-                    const BoxShadow(
-                      color: Colors.black38,
-                      blurRadius: 10.0,
-                      offset: Offset(0, 6),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          if (!_loading && songs.isNotEmpty)
-            SliverToBoxAdapter(child: SongListButtons(songs: songs)),
-          if (_loading)
-            SliverFillRemaining(
-              child: Center(
-                child: Spinner(),
-              ),
-            )
-          else
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (_, int index) => SongRow(
-                  song: songs[index],
-                  listContext: SongListContext.artist,
-                ),
-                childCount: songs.length,
-              ),
-            ),
-          const BottomSpace(),
-        ],
+          );
+        },
       ),
     );
   }

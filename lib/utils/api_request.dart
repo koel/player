@@ -60,6 +60,7 @@ Future<dynamic> request(
   switch (response.statusCode) {
     case 200:
       return json.decode(response.body);
+    case 201:
     case 204:
       return;
     default:

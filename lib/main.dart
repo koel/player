@@ -13,9 +13,7 @@ List<SingleChildWidget> _providers = [
   Provider(create: (_) => MediaInfoProvider()),
   ChangeNotifierProvider(create: (_) => CacheProvider()),
   ChangeNotifierProvider(
-    create: (context) => AlbumProvider(
-      artistProvider: context.read<ArtistProvider>(),
-    ),
+    create: (context) => AlbumProvider(),
   ),
   ChangeNotifierProvider(
     create: (context) => SongProvider(

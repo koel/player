@@ -27,12 +27,13 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
   late AppStateProvider _appStateProvider;
   late ScrollController _scrollController;
   late double _currentScrollOffset;
+  double _scrollThreshold = 64;
   bool _loading = false;
 
   void _scrollListener() {
     _currentScrollOffset = _scrollController.offset;
 
-    if (_scrollController.position.pixels ==
+    if (_scrollController.position.pixels + _scrollThreshold >=
         _scrollController.position.maxScrollExtent) {
       fetchData();
     }
@@ -50,8 +51,8 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
   void initState() {
     super.initState();
 
-    _artistProvider = context.read<ArtistProvider>();
-    _appStateProvider = context.read<AppStateProvider>();
+    _artistProvider = context.read();
+    _appStateProvider = context.read();
     _currentScrollOffset = _appStateProvider.get('artists.scrollOffSet') ?? 0.0;
 
     _scrollController = ScrollController(
@@ -79,9 +80,7 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
       body: Consumer<ArtistProvider>(
         builder: (_, provider, __) {
           return CupertinoTheme(
-            data: CupertinoThemeData(
-              primaryColor: Colors.white,
-            ),
+            data: CupertinoThemeData(primaryColor: Colors.white),
             child: CustomScrollView(
               controller: _scrollController,
               slivers: [
@@ -98,7 +97,7 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
                     return InkWell(
                       onTap: () => widget.router.gotoArtistDetailsScreen(
                         context,
-                        artist: artist,
+                        artistId: artist.id,
                       ),
                       child: ListTile(
                         shape: Border(
@@ -117,10 +116,10 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
                     ? SliverToBoxAdapter(
                         child: Container(
                           height: 72,
-                          child: Center(child: Spinner(size: 16)),
+                          child: Center(child: const Spinner(size: 16)),
                         ),
                       )
-                    : SliverToBoxAdapter(),
+                    : const SliverToBoxAdapter(),
                 const BottomSpace(),
               ],
             ),

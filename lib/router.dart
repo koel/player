@@ -61,11 +61,11 @@ class AppRouter {
 
   Future<void> gotoArtistDetailsScreen(
     BuildContext context, {
-    required Artist artist,
+    required int artistId,
   }) async {
     await Navigator.of(context).push(CupertinoPageRoute(
       builder: (_) => const ArtistDetailsScreen(),
-      settings: RouteSettings(arguments: artist),
+      settings: RouteSettings(arguments: artistId),
     ));
   }
 

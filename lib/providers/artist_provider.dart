@@ -4,21 +4,29 @@ import 'package:flutter/foundation.dart';
 
 class ArtistProvider with ChangeNotifier {
   List<Artist> artists = [];
-  Map<int, Artist> vault = {};
-  int page = 1;
+  Map<int, Artist> _vault = {};
+  int _page = 1;
 
-  Artist? byId(int id) => vault[id];
+  Artist? byId(int id) => _vault[id];
 
   List<Artist> byIds(List<int> ids) {
     List<Artist> artists = [];
 
     ids.forEach((id) {
-      if (vault.containsKey(id)) {
-        artists.add(vault[id]!);
+      if (_vault.containsKey(id)) {
+        artists.add(_vault[id]!);
       }
     });
 
     return artists;
+  }
+
+  Future<Artist> resolve(int id) async {
+    if (!_vault.containsKey(id)) {
+      _vault[id] = Artist.fromJson(await get('artists/$id'));
+    }
+
+    return _vault[id]!;
   }
 
   List<Artist> syncWithVault(dynamic _artists) {
@@ -36,7 +44,7 @@ class ArtistProvider with ChangeNotifier {
       Artist? local = byId(remote.id);
 
       if (local == null) {
-        vault[remote.id] = remote;
+        _vault[remote.id] = remote;
         return remote;
       } else {
         return local.merge(remote);
@@ -50,18 +58,16 @@ class ArtistProvider with ChangeNotifier {
 
   Future<void> paginate() async {
     // @todo - cache this
-    var response = await get('artists?page=$page');
+    var res = await get('artists?page=$_page');
 
-    List<Artist> _artists = (response['data'] as List)
+    List<Artist> _artists = (res['data'] as List)
         .map<Artist>((artist) => Artist.fromJson(artist))
         .toList();
 
     List<Artist> synced = syncWithVault(_artists);
     artists = [...artists, ...synced].toSet().toList();
 
-    page = response['links']['next'] == null
-        ? 1
-        : ++response['meta']['current_page'];
+    _page = res['links']['next'] == null ? 1 : ++res['meta']['current_page'];
 
     notifyListeners();
   }

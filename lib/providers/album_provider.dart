@@ -2,23 +2,19 @@ import 'package:app/models/models.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:flutter/foundation.dart';
 
-import 'artist_provider.dart';
-
 class AlbumProvider with ChangeNotifier {
-  late ArtistProvider artistProvider;
   List<Album> albums = [];
-  Map<int, Album> vault = {};
+  Map<int, Album> _vault = {};
+  int _page = 1;
 
-  AlbumProvider({required this.artistProvider});
-
-  Album? byId(int id) => vault[id];
+  Album? byId(int id) => _vault[id];
 
   List<Album> byIds(List<int> ids) {
     List<Album> albums = [];
 
     ids.forEach((id) {
-      if (vault.containsKey(id)) {
-        albums.add(vault[id]!);
+      if (_vault.containsKey(id)) {
+        albums.add(_vault[id]!);
       }
     });
 
@@ -26,17 +22,11 @@ class AlbumProvider with ChangeNotifier {
   }
 
   Future<Album> resolve(int id) async {
-    if (vault.containsKey(id)) {
-      return vault[id]!;
+    if (!_vault.containsKey(id)) {
+      _vault[id] = Album.fromJson(await get('albums/$id'));
     }
 
-    var json = await get('albums/$id');
-    Album album = Album.fromJson(json);
-    albums.add(album);
-    vault[album.id] = album;
-    notifyListeners();
-
-    return album;
+    return _vault[id]!;
   }
 
   List<Album> syncWithVault(dynamic _albums) {
@@ -52,8 +42,7 @@ class AlbumProvider with ChangeNotifier {
       Album? local = byId(remote.id);
 
       if (local == null) {
-        albums.add(remote);
-        vault[remote.id] = remote;
+        _vault[remote.id] = remote;
         return remote;
       } else {
         return local.merge(remote);
@@ -63,5 +52,21 @@ class AlbumProvider with ChangeNotifier {
     notifyListeners();
 
     return synced;
+  }
+
+  Future<void> paginate() async {
+    // @todo - cache this
+    var res = await get('albums?page=$_page');
+
+    List<Album> _albums = (res['data'] as List)
+        .map<Album>((album) => Album.fromJson(album))
+        .toList();
+
+    List<Album> synced = syncWithVault(_albums);
+    albums = [...albums, ...synced].toSet().toList();
+
+    _page = res['links']['next'] == null ? 1 : ++res['meta']['current_page'];
+
+    notifyListeners();
   }
 }

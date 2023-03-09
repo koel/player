@@ -30,7 +30,7 @@ class _ArtistCardState extends State<ArtistCard> {
       onTapCancel: () => setState(() => _opacity = 1.0),
       onTap: () => widget.router.gotoArtistDetailsScreen(
         context,
-        artist: widget.artist,
+        artistId: widget.artist.id,
       ),
       behavior: HitTestBehavior.opaque,
       child: AnimatedOpacity(

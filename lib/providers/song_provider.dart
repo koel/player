@@ -14,7 +14,7 @@ class SongProvider with ChangeNotifier {
   late CoverImageStack coverImageStack;
 
   List<Song> songs = [];
-  Map<String, Song> vault = {};
+  Map<String, Song> _vault = {};
 
   SongProvider({
     required this.artistProvider,
@@ -36,7 +36,7 @@ class SongProvider with ChangeNotifier {
       Song? local = byId(remote.id);
 
       if (local == null) {
-        vault[remote.id] = remote;
+        _vault[remote.id] = remote;
         return remote;
       } else {
         return local.merge(remote);
@@ -46,53 +46,18 @@ class SongProvider with ChangeNotifier {
     return synced;
   }
 
-  List<Song> recentlyAdded({int limit = 5}) {
-    List<Song> clone = List<Song>.from(songs);
-    clone.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return clone.take(limit).toList();
-  }
-
-  List<Song> mostPlayed({int limit = 15}) {
-    List<Song> clone = List<Song>.from(songs);
-    clone.sort((a, b) => b.playCount.compareTo(a.playCount));
-    return clone.take(limit).toList();
-  }
-
-  List<Song> leastPlayed({int limit = 15}) {
-    List<Song> clone = List<Song>.from(songs);
-    clone.sort((a, b) => a.playCount.compareTo(b.playCount));
-    return clone.take(limit).toList();
-  }
-
-  Song? byId(String id) => vault[id];
+  Song? byId(String id) => _vault[id];
 
   List<Song> byIds(List<String> ids) {
     List<Song> songs = [];
 
     ids.forEach((id) {
-      if (vault.containsKey(id)) {
-        songs.add(vault[id]!);
+      if (_vault.containsKey(id)) {
+        songs.add(_vault[id]!);
       }
     });
 
     return songs;
-  }
-
-  List<Song> byArtist(Artist artist) =>
-      songs.where((song) => song.artistId == artist.id).toList();
-
-  List<Song> byAlbum(Album album) =>
-      songs.where((song) => song.albumId == album.id).toList();
-
-  List<Song> favorites() => songs.where((song) => song.liked).toList();
-
-  Future<List<Song>> fetchForAlbum(int albumId) async {
-    // @todo - cache this
-    var response = await get('albums/$albumId/songs');
-    List<Song> songs =
-        response.data.map((json) => Song.fromJson(json)).toList();
-
-    return syncWithVault(songs);
   }
 
   Future<PaginationResult<Song>> paginate(
@@ -100,12 +65,14 @@ class SongProvider with ChangeNotifier {
     SortOrder sortOrder,
     int page,
   ) async {
-    // @todo - cache this
-    var res =
-        await get('songs?page=$page&sort=$sortField&order=${sortOrder.value}');
-    List<Song> _songs =
+    var res = await get(
+      'songs?page=$page&sort=$sortField&order=${sortOrder.value}',
+    );
+
+    List<Song> items =
         res['data'].map<Song>((json) => Song.fromJson(json)).toList();
-    List<Song> synced = syncWithVault(_songs);
+
+    List<Song> synced = syncWithVault(items);
 
     songs = [...songs, ...synced].toSet().toList();
     notifyListeners();
@@ -116,15 +83,19 @@ class SongProvider with ChangeNotifier {
     );
   }
 
-  Future<List<Song>> fetchForArtist(Artist artist) async {
-    var url = 'artists/${artist.id}/songs';
+  Future<List<Song>> fetchForArtist(int artistId) async {
+    return _stateAwareFetch('artists/$artistId/songs');
+  }
 
-    if (appState.doesNotHave(url)) {
-      var res = await get(url);
-      List<Song> _songs = res.map<Song>((j) => Song.fromJson(j)).toList();
-      appState.set(url, _songs);
-    }
+  Future<List<Song>> fetchForAlbum(int albumId) async {
+    return _stateAwareFetch('albums/$albumId/songs');
+  }
 
-    return syncWithVault(appState.get(url));
+  Future<List<Song>> _stateAwareFetch(String url) async {
+    var res = await get(url);
+    List<Song> items = res.map<Song>((json) => Song.fromJson(json)).toList();
+    appState.set(url, items);
+
+    return syncWithVault(items);
   }
 }

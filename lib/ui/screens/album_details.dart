@@ -7,6 +7,7 @@ import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list_buttons.dart';
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/sortable_song_list.dart';
+import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
@@ -22,37 +23,27 @@ class AlbumDetailsScreen extends StatefulWidget {
 
 class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
   OrderBy _sortOrder = _currentSortOrder;
-  late AlbumProvider albumProvider;
-  late SongProvider songProvider;
-  late Album album;
-  late List<Song> songs;
-
-  @override
-  void initState() {
-    super.initState();
-
-    albumProvider = context.read();
-    songProvider = context.read();
-  }
 
   @override
   Widget build(BuildContext context) {
     int albumId = ModalRoute.of(context)!.settings.arguments as int;
-    Future<Album> futureAlbum = albumProvider.resolve(albumId);
-    Future<List<Song>> futureSongs = songProvider.fetchForAlbum(albumId);
 
     return Scaffold(
       body: FutureBuilder(
-        future: Future.wait([futureAlbum, futureSongs]),
+        future: Future.wait([
+          context.read<AlbumProvider>().resolve(albumId),
+          context.read<SongProvider>().fetchForAlbum(albumId),
+        ]),
         builder: (_, AsyncSnapshot<List<dynamic>> snapshot) {
           if (!snapshot.hasData || snapshot.hasError) {
-            return const Center(child: const CircularProgressIndicator());
+            return const Center(child: const Spinner());
           }
 
-          album = snapshot.data![0] as Album;
-          songs = snapshot.data![1] as List<Song>;
-
-          songs = sortSongs(songs, orderBy: _sortOrder);
+          var album = snapshot.data![0] as Album;
+          var songs = sortSongs(
+            snapshot.data![1] as List<Song>,
+            orderBy: _sortOrder,
+          );
 
           return CustomScrollView(
             slivers: <Widget>[
@@ -111,7 +102,8 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                   ),
                 ),
               ),
-              SliverToBoxAdapter(child: SongListButtons(songs: songs)),
+              if (songs.isNotEmpty)
+                SliverToBoxAdapter(child: SongListButtons(songs: songs)),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (_, int index) => SongRow(
