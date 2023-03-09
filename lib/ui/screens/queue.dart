@@ -17,7 +17,6 @@ class QueueScreen extends StatelessWidget {
     return Scaffold(
       body: Consumer<AudioProvider>(
         builder: (_, provider, __) {
-          print('called');
           return CustomScrollView(
             slivers: <Widget>[
               AppBar(

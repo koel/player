@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 List<SingleChildWidget> _providers = [
+  Provider(create: (_) => AppStateProvider()),
   Provider(create: (_) => AuthProvider()),
   ChangeNotifierProvider(create: (_) => ArtistProvider()),
   Provider(create: (_) => MediaInfoProvider()),
@@ -21,6 +22,7 @@ List<SingleChildWidget> _providers = [
       artistProvider: context.read<ArtistProvider>(),
       albumProvider: context.read<AlbumProvider>(),
       cacheProvider: context.read<CacheProvider>(),
+      appState: context.read<AppStateProvider>(),
     ),
   ),
   ChangeNotifierProvider(
@@ -77,8 +79,6 @@ Future<void> main() async {
   });
 
   await GetStorage.init('Preferences');
-  await GetStorage.init('Cache');
-  GetStorage('Cache').erase();
 
   runApp(
     MultiProvider(

@@ -90,7 +90,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 PlaceholderCard(
                   icon: CupertinoIcons.music_mic,
                   onPressed: () => Navigator.of(context).push(
-                      CupertinoPageRoute(builder: (_) => ArtistsScreen())),
+                    CupertinoPageRoute(builder: (_) => const ArtistsScreen()),
+                  ),
                 ),
               ],
             ),
@@ -126,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 SliverList(delegate: SliverChildListDelegate.fixed(homeBlocks)),
-                const BottomSpace(height: 128),
+                const BottomSpace(height: 192),
               ],
             ),
           ),

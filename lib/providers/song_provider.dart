@@ -7,9 +7,10 @@ import 'package:app/values/values.dart';
 import 'package:flutter/foundation.dart';
 
 class SongProvider with ChangeNotifier {
-  late ArtistProvider artistProvider;
-  late AlbumProvider albumProvider;
-  late CacheProvider cacheProvider;
+  ArtistProvider artistProvider;
+  AlbumProvider albumProvider;
+  CacheProvider cacheProvider;
+  AppStateProvider appState;
   late CoverImageStack coverImageStack;
 
   List<Song> songs = [];
@@ -19,6 +20,7 @@ class SongProvider with ChangeNotifier {
     required this.artistProvider,
     required this.albumProvider,
     required this.cacheProvider,
+    required this.appState,
   });
 
   List<Song> syncWithVault(dynamic _songs) {
@@ -99,11 +101,10 @@ class SongProvider with ChangeNotifier {
     int page,
   ) async {
     // @todo - cache this
-    var response = await get(
-      'songs?page=$page&sort=$sortField&order=${sortOrder.value}',
-    );
+    var res =
+        await get('songs?page=$page&sort=$sortField&order=${sortOrder.value}');
     List<Song> _songs =
-        response['data'].map<Song>((json) => Song.fromJson(json)).toList();
+        res['data'].map<Song>((json) => Song.fromJson(json)).toList();
     List<Song> synced = syncWithVault(_songs);
 
     songs = [...songs, ...synced].toSet().toList();
@@ -111,8 +112,19 @@ class SongProvider with ChangeNotifier {
 
     return new PaginationResult(
       items: synced,
-      nextPage:
-          response['links']['next'] ? ++response['meta']['current_page'] : null,
+      nextPage: res['links']['next'] ? ++res['meta']['current_page'] : null,
     );
+  }
+
+  Future<List<Song>> fetchForArtist(Artist artist) async {
+    var url = 'artists/${artist.id}/songs';
+
+    if (appState.doesNotHave(url)) {
+      var res = await get(url);
+      List<Song> _songs = res.map<Song>((j) => Song.fromJson(j)).toList();
+      appState.set(url, _songs);
+    }
+
+    return syncWithVault(appState.get(url));
   }
 }
