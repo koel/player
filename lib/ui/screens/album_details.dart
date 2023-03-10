@@ -11,7 +11,7 @@ import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
-OrderBy _currentSortOrder = OrderBy.trackNumber;
+SortField _currentSortOrder = SortField.trackNumber;
 
 class AlbumDetailsScreen extends StatefulWidget {
   static const routeName = '/album';
@@ -22,7 +22,7 @@ class AlbumDetailsScreen extends StatefulWidget {
 }
 
 class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
-  OrderBy _sortOrder = _currentSortOrder;
+  SortField _sortOrder = _currentSortOrder;
 
   @override
   Widget build(BuildContext context) {
@@ -52,12 +52,12 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                 actions: [
                   SortButton(
                     options: {
-                      OrderBy.trackNumber: 'Track number',
-                      OrderBy.title: 'Song title',
-                      OrderBy.recentlyAdded: 'Recently added',
+                      SortField.trackNumber: 'Track number',
+                      SortField.title: 'Song title',
+                      SortField.recentlyAdded: 'Recently added',
                     },
-                    currentOrder: _sortOrder,
-                    onActionSheetActionPressed: (OrderBy order) {
+                    currentSortField: _sortOrder,
+                    onActionSheetActionPressed: (SortField order) {
                       _currentSortOrder = order;
                       setState(() => _sortOrder = order);
                     },

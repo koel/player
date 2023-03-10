@@ -1,16 +1,16 @@
 import 'package:app/enums.dart';
-import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list_buttons.dart';
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/sortable_song_list.dart';
+import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
 // Keep track of the sort orders between revisits
-OrderBy _currentSortOrder = OrderBy.recentlyAdded;
+SortField _currentSortOrder = SortField.title;
 
 class SongsScreen extends StatefulWidget {
   static const routeName = '/songs';
@@ -22,15 +22,65 @@ class SongsScreen extends StatefulWidget {
 }
 
 class _SongsScreenState extends State<SongsScreen> {
-  OrderBy _sortOrder = _currentSortOrder;
-  List<Song> _songs = [];
+  SortField _sortField = _currentSortOrder;
+
+  late SongProvider _songProvider;
+  late AppStateProvider _appState;
+  late SongPaginationConfig _paginationConfig;
+  late ScrollController _scrollController;
+  late double _currentScrollOffset;
+  double _scrollThreshold = 64;
+  bool _loading = false;
+
+  void _scrollListener() {
+    _currentScrollOffset = _scrollController.offset;
+
+    if (_scrollController.position.pixels + _scrollThreshold >=
+        _scrollController.position.maxScrollExtent) {
+      fetchMoreSongs();
+    }
+  }
 
   @override
   void initState() {
     super.initState();
 
-    var songProvider = context.read<SongProvider>();
-    songProvider.paginate('title', SortOrder.asc, 0);
+    _songProvider = context.read<SongProvider>();
+    _appState = context.read<AppStateProvider>();
+    _paginationConfig =
+        _appState.get('songs.paginationConfig') ?? SongPaginationConfig();
+
+    _currentScrollOffset = _appState.get('songs.scrollOffSet') ?? 0.0;
+
+    _scrollController = ScrollController(
+      initialScrollOffset: _currentScrollOffset,
+    );
+
+    _scrollController.addListener(_scrollListener);
+
+    fetchMoreSongs();
+  }
+
+  Future<void> fetchMoreSongs() async {
+    if (_loading || _paginationConfig.page == null) return;
+
+    setState(() => _loading = true);
+
+    var result = await _songProvider.paginate(_paginationConfig);
+    _paginationConfig.page = result.nextPage;
+
+    setState(() => _loading = false);
+  }
+
+  @override
+  void dispose() {
+    _loading = false;
+    _appState.set('songs.scrollOffSet', _currentScrollOffset);
+    _appState.set('songs.paginationConfig', _paginationConfig);
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
+
+    super.dispose();
   }
 
   @override
@@ -38,38 +88,63 @@ class _SongsScreenState extends State<SongsScreen> {
     return Scaffold(
       body: Consumer<SongProvider>(
         builder: (_, provider, __) {
-          List<Song> songs = sortSongs(provider.songs, orderBy: _sortOrder);
-
           return CustomScrollView(
+            controller: _scrollController,
             slivers: [
               AppBar(
                 headingText: 'All songs',
                 actions: [
                   SortButton(
                     options: {
-                      OrderBy.artist: 'Artist',
-                      OrderBy.title: 'Song title',
-                      OrderBy.recentlyAdded: 'Recently added',
+                      SortField.artist: 'Artist',
+                      SortField.title: 'Song title',
+                      SortField.recentlyAdded: 'Recently added',
                     },
-                    currentOrder: _sortOrder,
-                    onActionSheetActionPressed: (OrderBy order) {
-                      _currentSortOrder = order;
-                      setState(() => _sortOrder = order);
+                    currentSortField: _sortField,
+                    onActionSheetActionPressed: (SortField order) {
+                      setState(() => _sortField = order);
+
+                      switch (order) {
+                        case SortField.artist:
+                          _paginationConfig.sortField = 'artist_name';
+                          break;
+                        case SortField.title:
+                          _paginationConfig.sortField = 'title';
+                          break;
+                        case SortField.recentlyAdded:
+                          _paginationConfig.sortField = 'created_at';
+                          _paginationConfig.sortOrder = SortOrder.desc;
+                          break;
+                        default:
+                          break;
+                      }
+
+                      _songProvider.songs.clear();
+
+                      fetchMoreSongs();
                     },
                   ),
                 ],
-                coverImage: provider.coverImageStack,
+                coverImage: CoverImageStack(songs: provider.songs),
               ),
-              SliverToBoxAdapter(child: SongListButtons(songs: songs)),
+              SliverToBoxAdapter(child: SongListButtons(songs: provider.songs)),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (_, int index) => SongRow(
-                    song: songs[index],
+                    song: provider.songs[index],
                     listContext: SongListContext.allSongs,
                   ),
-                  childCount: songs.length,
+                  childCount: provider.songs.length,
                 ),
               ),
+              _loading
+                  ? SliverToBoxAdapter(
+                      child: Container(
+                        height: 72,
+                        child: Center(child: const Spinner(size: 16)),
+                      ),
+                    )
+                  : const SliverToBoxAdapter(),
               const BottomSpace(),
             ],
           );

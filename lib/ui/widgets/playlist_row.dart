@@ -1,5 +1,4 @@
 import 'package:app/constants/constants.dart';
-import 'package:app/extensions/extensions.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
@@ -30,20 +29,6 @@ class _PlaylistRowState extends State<PlaylistRow> with StreamSubscriber {
     super.initState();
     playlistProvider = context.read();
     setState(() => _playlist = widget.playlist);
-
-    subscribe(
-      playlistProvider.playlistPopulatedStream.listen((playlist) {
-        if (playlist.id == _playlist.id) {
-          setState(() => _playlist = playlist);
-        }
-      }),
-    );
-  }
-
-  @override
-  dispose() {
-    unsubscribeAll();
-    super.dispose();
   }
 
   void _defaultOnTap() => gotoDetailsScreen(context, playlist: _playlist);
@@ -52,14 +37,6 @@ class _PlaylistRowState extends State<PlaylistRow> with StreamSubscriber {
   Widget build(BuildContext context) {
     String subtitle =
         _playlist.isSmart ? 'Smart playlist' : 'Standard playlist';
-
-    if (_playlist.populated) {
-      subtitle += _playlist.isEmpty
-          ? ' • Empty'
-          : ' • ${_playlist.songs.length} song'.pluralize(
-              _playlist.songs.length,
-            );
-    }
 
     return InkWell(
       onTap: widget.onTap ?? _defaultOnTap,
@@ -80,18 +57,6 @@ class PlaylistThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    late String? thumbnailUrl;
-
-    if (!playlist.isEmpty) {
-      Song songWithCustomImage = playlist.songs.firstWhere((song) {
-        return song.hasCustomImage;
-      }, orElse: () => playlist.songs[0]);
-
-      thumbnailUrl = songWithCustomImage.albumCoverUrl;
-    } else {
-      thumbnailUrl = preferences.defaultImageUrl;
-    }
-
     return playlist.populated
         ? ClipRRect(
             borderRadius: BorderRadius.circular(6),
@@ -101,7 +66,7 @@ class PlaylistThumbnail extends StatelessWidget {
               height: 40,
               placeholder: (_, __) => defaultImage,
               errorWidget: (_, __, ___) => defaultImage,
-              imageUrl: thumbnailUrl ?? preferences.defaultImageUrl,
+              imageUrl: preferences.defaultImageUrl,
             ),
           )
         : const Icon(

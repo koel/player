@@ -4,6 +4,7 @@ import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list_buttons.dart';
 import 'package:app/ui/widgets/song_row.dart';
+import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
@@ -18,54 +19,50 @@ class PlaylistDetailsScreen extends StatefulWidget {
 }
 
 class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
-  late Playlist playlist;
-  late PlaylistProvider playlistProvider;
-  late Future<Playlist> futurePlaylist;
+  late Playlist _playlist;
+  late PlaylistProvider _playlistProvider;
+  late SongProvider _songProvider;
 
   @override
   void initState() {
     super.initState();
-    playlistProvider = context.read();
+    _playlistProvider = context.read();
+    _songProvider = context.read();
   }
 
   @override
   Widget build(BuildContext context) {
-    playlist = ModalRoute.of(context)!.settings.arguments as Playlist;
-    futurePlaylist = playlistProvider.populatePlaylist(
-      playlist: playlist,
-    );
+    _playlist = ModalRoute.of(context)!.settings.arguments as Playlist;
 
     return Scaffold(
       body: FutureBuilder(
-        future: futurePlaylist,
-        builder: (BuildContext context, AsyncSnapshot<Playlist> snapshot) {
-          if (!snapshot.hasData || snapshot.hasError) {
-            return CustomScrollView(
-              slivers: <Widget>[
-                AppBar(
-                  headingText: playlist.name,
-                  coverImage: CoverImageStack(
-                    songs: playlist.songs,
-                  ),
-                ),
-              ],
+        future: _songProvider.fetchForPlaylist(_playlist.id),
+        builder: (BuildContext context, AsyncSnapshot<List<Song>> snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: const Spinner());
+          }
+
+          if (snapshot.hasError) {
+            return GestureDetector(
+              child: Center(child: const Text('Error. Tap to try again.')),
+              onTap: () => setState(() {}),
             );
           }
 
-          Playlist populatedPlaylist = snapshot.data!;
+          var songs = snapshot.data!;
 
           return CustomScrollView(
             slivers: <Widget>[
               AppBar(
-                headingText: populatedPlaylist.name,
-                coverImage: CoverImageStack(songs: populatedPlaylist.songs),
+                headingText: _playlist.name,
+                coverImage: CoverImageStack(songs: songs),
               ),
               SliverToBoxAdapter(
-                child: playlist.isEmpty
+                child: songs.isEmpty
                     ? const SizedBox.shrink()
-                    : SongListButtons(songs: playlist.songs),
+                    : SongListButtons(songs: songs),
               ),
-              if (playlist.isEmpty)
+              if (songs.isEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 32),
@@ -81,15 +78,15 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (_, int index) {
-                      final bool dismissible = populatedPlaylist.isStandard;
-                      final Song song = populatedPlaylist.songs[index];
+                      final bool dismissible = _playlist.isStandard;
+                      final Song song = songs[index];
                       return dismissible
                           ? Dismissible(
                               direction: DismissDirection.endToStart,
                               onDismissed: (DismissDirection direction) {
-                                playlistProvider.removeSongFromPlaylist(
+                                _playlistProvider.removeSongFromPlaylist(
                                   song: song,
-                                  playlist: populatedPlaylist,
+                                  playlist: _playlist,
                                 );
                               },
                               background: Container(
@@ -108,7 +105,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                             )
                           : SongRow(song: song);
                     },
-                    childCount: playlist.songs.length,
+                    childCount: songs.length,
                   ),
                 ),
               const BottomSpace(),

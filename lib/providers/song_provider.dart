@@ -60,13 +60,9 @@ class SongProvider with ChangeNotifier {
     return songs;
   }
 
-  Future<PaginationResult<Song>> paginate(
-    String sortField,
-    SortOrder sortOrder,
-    int page,
-  ) async {
+  Future<PaginationResult<Song>> paginate(SongPaginationConfig config) async {
     var res = await get(
-      'songs?page=$page&sort=$sortField&order=${sortOrder.value}',
+      'songs?page=${config.page}&sort=${config.sortField}&order=${config.sortOrder.value}',
     );
 
     List<Song> items =
@@ -79,23 +75,73 @@ class SongProvider with ChangeNotifier {
 
     return new PaginationResult(
       items: synced,
-      nextPage: res['links']['next'] ? ++res['meta']['current_page'] : null,
+      nextPage:
+          res['links']['next'] == null ? null : ++res['meta']['current_page'],
     );
   }
 
   Future<List<Song>> fetchForArtist(int artistId) async {
-    return _stateAwareFetch('artists/$artistId/songs');
+    return _stateAwareFetch(
+      'artists/$artistId/songs',
+      ['artist.songs', artistId],
+    );
   }
 
   Future<List<Song>> fetchForAlbum(int albumId) async {
-    return _stateAwareFetch('albums/$albumId/songs');
+    return _stateAwareFetch(
+      'albums/$albumId/songs',
+      ['album.songs', albumId],
+    );
   }
 
-  Future<List<Song>> _stateAwareFetch(String url) async {
+  Future<List<Song>> fetchForPlaylist(int playlistId) async {
+    return _stateAwareFetch(
+      'playlists/$playlistId/songs',
+      ['playlist.songs', playlistId],
+    );
+  }
+
+  Future<List<Song>> _stateAwareFetch(String url, Object stateKey) async {
+    if (appState.has(stateKey)) return appState.get(stateKey);
+
     var res = await get(url);
     List<Song> items = res.map<Song>((json) => Song.fromJson(json)).toList();
-    appState.set(url, items);
+    appState.set(stateKey, items);
 
     return syncWithVault(items);
+  }
+}
+
+class SongPaginationConfig {
+  String _sortField;
+  SortOrder _sortOrder;
+  int? page;
+
+  SongPaginationConfig({
+    String sortField = 'title',
+    SortOrder sortOrder = SortOrder.asc,
+    this.page = 1,
+  })  : _sortField = sortField,
+        _sortOrder = sortOrder;
+
+  String get sortField => _sortField;
+
+  SortOrder get sortOrder => _sortOrder;
+
+  set sortField(String field) {
+    if (field != _sortField) {
+      _sortOrder = SortOrder.asc;
+      page = 1;
+    }
+
+    _sortField = field;
+  }
+
+  set sortOrder(SortOrder order) {
+    if (order != _sortOrder) {
+      page = 1;
+    }
+
+    _sortOrder = order;
   }
 }

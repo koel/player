@@ -24,7 +24,7 @@ class AlbumsScreen extends StatefulWidget {
 
 class _AlbumsScreenState extends State<AlbumsScreen> {
   late AlbumProvider _albumProvider;
-  late AppStateProvider _appStateProvider;
+  late AppStateProvider _appState;
   late ScrollController _scrollController;
   late double _currentScrollOffset;
   double _scrollThreshold = 64;
@@ -35,7 +35,7 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
 
     if (_scrollController.position.pixels + _scrollThreshold >=
         _scrollController.position.maxScrollExtent) {
-      fetchData();
+      fetchMoreAlbums();
     }
   }
 
@@ -44,8 +44,8 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
     super.initState();
 
     _albumProvider = context.read<AlbumProvider>();
-    _appStateProvider = context.read<AppStateProvider>();
-    _currentScrollOffset = _appStateProvider.get('albums.scrollOffSet') ?? 0.0;
+    _appState = context.read<AppStateProvider>();
+    _currentScrollOffset = _appState.get('albums.scrollOffSet') ?? 0.0;
 
     _scrollController = ScrollController(
       initialScrollOffset: _currentScrollOffset,
@@ -53,10 +53,10 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
 
     _scrollController.addListener(_scrollListener);
 
-    fetchData();
+    fetchMoreAlbums();
   }
 
-  Future<void> fetchData() async {
+  Future<void> fetchMoreAlbums() async {
     if (_loading) return;
 
     setState(() => _loading = true);
@@ -67,7 +67,7 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
   @override
   void dispose() {
     _loading = false;
-    _appStateProvider.set('albums.scrollOffSet', _currentScrollOffset);
+    _appState.set('albums.scrollOffSet', _currentScrollOffset);
     _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
 

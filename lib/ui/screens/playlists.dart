@@ -45,13 +45,18 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
               );
             }
 
+            var playlists = provider.playlists
+              ..sort(
+                (a, b) => a.name.compareTo(b.name),
+              );
+
             return CustomScrollView(
               slivers: <Widget>[
                 navigationBar!,
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
-                      Playlist playlist = provider.playlists[index];
+                      Playlist playlist = playlists[index];
 
                       return Dismissible(
                         direction: DismissDirection.endToStart,
@@ -74,7 +79,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
                         child: PlaylistRow(playlist: playlist),
                       );
                     },
-                    childCount: provider.playlists.length,
+                    childCount: playlists.length,
                   ),
                 ),
                 const BottomSpace(),

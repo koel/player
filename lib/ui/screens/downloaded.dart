@@ -19,10 +19,10 @@ class DownloadedScreen extends StatefulWidget {
   State<StatefulWidget> createState() => _DownloadedScreenState();
 }
 
-OrderBy _currentSortOrder = OrderBy.title;
+SortField _currentSortOrder = SortField.title;
 
 class _DownloadedScreenState extends State<DownloadedScreen> {
-  OrderBy _sortOrder = _currentSortOrder;
+  SortField _sortOrder = _currentSortOrder;
 
   @override
   Widget build(BuildContext context) {
@@ -81,12 +81,12 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                 actions: [
                   SortButton(
                     options: {
-                      OrderBy.artist: 'Artist',
-                      OrderBy.title: 'Song title',
-                      OrderBy.recentlyAdded: 'Recently added',
+                      SortField.artist: 'Artist',
+                      SortField.title: 'Song title',
+                      SortField.recentlyAdded: 'Recently added',
                     },
-                    currentOrder: _sortOrder,
-                    onActionSheetActionPressed: (OrderBy order) {
+                    currentSortField: _sortOrder,
+                    onActionSheetActionPressed: (SortField order) {
                       _currentSortOrder = order;
                       setState(() => _sortOrder = order);
                     },

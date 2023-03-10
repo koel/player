@@ -14,6 +14,7 @@ ParseResult parsePlaylists(List<dynamic> data) {
 
 class PlaylistProvider with ChangeNotifier {
   SongProvider _songProvider;
+  AppStateProvider _appState;
   late List<Playlist> _playlists;
 
   final BehaviorSubject<Playlist> _playlistPopulated = BehaviorSubject();
@@ -21,8 +22,11 @@ class PlaylistProvider with ChangeNotifier {
   ValueStream<Playlist> get playlistPopulatedStream =>
       _playlistPopulated.stream;
 
-  PlaylistProvider({required SongProvider songProvider})
-      : _songProvider = songProvider;
+  PlaylistProvider({
+    required SongProvider songProvider,
+    required AppStateProvider appState,
+  })  : _songProvider = songProvider,
+        _appState = appState;
 
   Future<void> init(List<dynamic> playlistData) async {
     ParseResult result = await compute(parsePlaylists, playlistData);
@@ -83,10 +87,19 @@ class PlaylistProvider with ChangeNotifier {
   }) async {
     assert(!playlist.isSmart, 'Cannot manually mutate smart playlists.');
 
-    if (!playlist.songs.contains(song)) return;
-
     try {
-      await _syncPlaylist(playlist: playlist..songs.remove(song));
+      await delete('playlists/${playlist.id}/songs', data: {
+        'songs': [song.id],
+      });
+
+      // remove the song from the playlist's songs cache
+      _appState.set(
+        ['playlist.songs', playlist.id],
+        _appState
+            .get<List<Song>>(['playlist.songs', playlist.id])!
+            .where((s) => s.id != song.id)
+            .toList(),
+      );
     } catch (err) {
       print(err);
       // not the end of the world

@@ -1,11 +1,15 @@
+import 'dart:convert';
+
 class AppStateProvider {
   Map<String, dynamic> _state = {};
 
-  get<T>(String key) => _state[key] as T;
+  String _normalizeKey(Object key) => jsonEncode(key);
 
-  set(String key, dynamic value) => _state[key] = value;
+  get<T>(Object key) => _state[_normalizeKey(key)] as T;
 
-  bool has(String key) => _state.containsKey(key);
+  set(Object key, dynamic value) => _state[_normalizeKey(key)] = value;
 
-  bool doesNotHave(String key) => !has(key);
+  bool has(Object key) => _state.containsKey(_normalizeKey(key));
+
+  void delete(Object key) => _state.remove(_normalizeKey(key));
 }
