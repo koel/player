@@ -18,7 +18,7 @@ class SongActionSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    InteractionProvider interactionProvider = context.read();
+    FavoriteProvider favoriteProvider = context.read();
     AudioProvider audio = context.read();
 
     bool isCurrent = audio.player.songId == song.id;
@@ -146,7 +146,7 @@ class SongActionSheet extends StatelessWidget {
                                 ? CupertinoIcons.heart_slash
                                 : CupertinoIcons.heart_fill,
                           );
-                          interactionProvider.toggleLike(song: song);
+                          favoriteProvider.toggleOne(song: song);
                         },
                       ),
                       const Divider(indent: 16, endIndent: 16),

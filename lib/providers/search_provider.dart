@@ -29,15 +29,19 @@ class SearchProvider with ChangeNotifier {
         _albumProvider = albumProvider;
 
   Future<SearchResult> searchExcerpts({required String keywords}) async {
-    var results = await get('search?q=$keywords');
-    List<String> songIds = results['results']['songs'].cast<String>();
-    List<int> artistIds = results['results']['artists'].cast<int>();
-    List<int> albumIds = results['results']['albums'].cast<int>();
+    var res = await get('search?q=$keywords');
+
+    List<Song> songs = _songProvider.syncWithVault(
+        res['songs'].map<Song>((j) => Song.fromJson(j)).toList());
+    List<Artist> artists = _artistProvider.syncWithVault(
+        res['artists'].map<Artist>((j) => Artist.fromJson(j)).toList());
+    List<Album> albums = _albumProvider.syncWithVault(
+        res['albums'].map<Album>((j) => Album.fromJson(j)).toList());
 
     return SearchResult(
-      songs: _songProvider.byIds(songIds),
-      artists: _artistProvider.byIds(artistIds),
-      albums: _albumProvider.byIds(albumIds),
+      songs: songs,
+      artists: artists,
+      albums: albums,
     );
   }
 }
