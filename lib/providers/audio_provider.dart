@@ -7,12 +7,14 @@ import 'package:app/providers/providers.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:mutex/mutex.dart';
 import 'package:rxdart/rxdart.dart';
 
 class AudioProvider with StreamSubscriber, ChangeNotifier {
   SongProvider _songProvider;
   InteractionProvider _interactionProvider;
+  DownloadProvider _downloadProvider;
   Mutex _mutex;
 
   late AssetsAudioPlayer _player;
@@ -22,8 +24,10 @@ class AudioProvider with StreamSubscriber, ChangeNotifier {
   AudioProvider({
     required SongProvider songProvider,
     required InteractionProvider interactionProvider,
+    required DownloadProvider downloadProvider,
   })  : _songProvider = songProvider,
         _interactionProvider = interactionProvider,
+        _downloadProvider = downloadProvider,
         _mutex = Mutex();
 
   Future<void> init() async {
@@ -70,7 +74,7 @@ class AudioProvider with StreamSubscriber, ChangeNotifier {
   Future<bool> queued(Song song) async => await indexInQueue(song) != -1;
 
   Future<int> indexInQueue(Song song) async {
-    return _player.playlist?.audios.indexOf(await song.asAudio()) ?? -1;
+    return _player.playlist?.audios.indexOf(await _getAudio(song)) ?? -1;
   }
 
   Future<void> play({Song? song}) async {
@@ -103,21 +107,37 @@ class AudioProvider with StreamSubscriber, ChangeNotifier {
 
   Future<int> queueToTop({required Song song}) async {
     if (_player.playlist == null) {
-      await _openPlayer(await song.asAudio());
+      await _openPlayer(await _getAudio(song));
       return 0;
     }
 
-    _player.playlist!.insert(0, await song.asAudio());
+    _player.playlist!.insert(0, await _getAudio(song));
     notifyListeners();
     return 0;
   }
 
+  Future<Audio> _getAudio(Song song) async {
+    Metas metas = Metas(
+      title: song.title,
+      album: song.albumName,
+      artist: song.artistName,
+      image: song.metaImage,
+      extra: {'songId': song.id},
+    );
+
+    FileInfo? download = await _downloadProvider.get(song: song);
+
+    return download == null
+        ? Audio.network(song.sourceUrl, metas: metas)
+        : Audio.file(download.file.path, metas: metas);
+  }
+
   Future<int> queueToBottom({required Song song}) async {
     if (_player.playlist == null) {
-      await _openPlayer(await song.asAudio());
+      await _openPlayer(await _getAudio(song));
     }
 
-    _player.playlist!.add(await song.asAudio());
+    _player.playlist!.add(await _getAudio(song));
     notifyListeners();
 
     return _player.playlist!.numberOfItems - 1;
@@ -125,11 +145,11 @@ class AudioProvider with StreamSubscriber, ChangeNotifier {
 
   Future<int> queueAfterCurrent({required Song song}) async {
     if (_player.playlist == null) {
-      await _openPlayer(await song.asAudio());
+      await _openPlayer(await _getAudio(song));
       return 0;
     }
 
-    Audio audio = await song.asAudio();
+    Audio audio = await _getAudio(song);
     int currentSongIndex = _player.current.value?.index ?? -1;
     _player.playlist!.insert(currentSongIndex + 1, audio);
     notifyListeners();
@@ -143,7 +163,7 @@ class AudioProvider with StreamSubscriber, ChangeNotifier {
 
   Future<void> replaceQueue(List<Song> songs, {shuffle = false}) async {
     List<Audio> audios = await Future.wait(
-      songs.map((song) async => await song.asAudio()),
+      songs.map((song) async => await _getAudio(song)),
     );
 
     if (shuffle) {
@@ -173,7 +193,7 @@ class AudioProvider with StreamSubscriber, ChangeNotifier {
   }
 
   Future<void> removeFromQueue({required Song song}) async {
-    _player.playlist?.audios.remove(await song.asAudio());
+    _player.playlist?.audios.remove(await _getAudio(song));
     notifyListeners();
   }
 

@@ -6,7 +6,6 @@ import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:uuid/uuid.dart';
 
 class Song {
@@ -77,23 +76,7 @@ class Song {
     return _sourceUrl!;
   }
 
-  Future<Audio> asAudio() async {
-    Metas metas = Metas(
-      title: title,
-      album: albumName,
-      artist: artistName,
-      image: _metaImage,
-      extra: {'songId': id},
-    );
-
-    FileInfo? cache = await DefaultCacheManager().getFileFromCache(cacheKey);
-
-    return cache == null
-        ? Audio.network(sourceUrl, metas: metas)
-        : Audio.file(cache.file.path, metas: metas);
-  }
-
-  MetasImage get _metaImage {
+  MetasImage get metaImage {
     if (image is CachedNetworkImageProvider) {
       return MetasImage.network((image as CachedNetworkImageProvider).url);
     }
@@ -160,9 +143,30 @@ class Song {
       albumArtistId: json['album_artist_id'],
       albumArtistName: json['album_artist_name'],
       disc: json['disc'] ?? 1,
-      year: json['year'] == null ? null : int.parse(json['year']),
+      year: json['year'] == null ? null : int.parse(json['year'].toString()),
       genre: json['genre'] ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'lyrics': lyrics,
+      'length': length,
+      'track': track,
+      'created_at': createdAt.toIso8601String(),
+      'artist_id': artistId,
+      'artist_name': artistName,
+      'album_id': albumId,
+      'album_name': albumName,
+      'album_cover': albumCoverUrl,
+      'album_artist_id': albumArtistId,
+      'album_artist_name': albumArtistName,
+      'disc': disc,
+      'year': year,
+      'genre': genre,
+    };
   }
 
   factory Song.fake({

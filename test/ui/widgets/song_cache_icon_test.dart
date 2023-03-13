@@ -1,5 +1,5 @@
 import 'package:app/models/song.dart';
-import 'package:app/providers/cache_provider.dart';
+import 'package:app/providers/download_provider.dart';
 import 'package:app/ui/widgets/song_cache_icon.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -12,12 +12,12 @@ import 'package:rxdart/rxdart.dart';
 import '../../extensions/widget_tester_extension.dart';
 import 'song_cache_icon_test.mocks.dart';
 
-@GenerateMocks([CacheProvider, FileInfo])
+@GenerateMocks([DownloadProvider, FileInfo])
 void main() {
   late MockCacheProvider cacheMock;
   late Song song;
   late BehaviorSubject<bool> cacheCleared;
-  late BehaviorSubject<SongCached> songCached;
+  late BehaviorSubject<Download> songCached;
   late BehaviorSubject<Song> singleCacheRemoved;
 
   setUp(() {
@@ -25,10 +25,11 @@ void main() {
     song = Song.fake();
 
     cacheCleared = BehaviorSubject();
-    when(cacheMock.cacheClearedStream).thenAnswer((_) => cacheCleared.stream);
+    when(cacheMock.downloadsClearedStream)
+        .thenAnswer((_) => cacheCleared.stream);
 
     songCached = BehaviorSubject();
-    when(cacheMock.songCachedStream).thenAnswer((_) => songCached.stream);
+    when(cacheMock.songDownloadedStream).thenAnswer((_) => songCached.stream);
 
     singleCacheRemoved = BehaviorSubject();
     when(cacheMock.singleCacheRemovedStream)
@@ -37,7 +38,7 @@ void main() {
 
   Future<void> _mount(WidgetTester tester) async {
     await tester.pumpAppWidget(
-      ChangeNotifierProvider<CacheProvider>.value(
+      ChangeNotifierProvider<DownloadProvider>.value(
         value: cacheMock,
         child: SongCacheIcon(song: song),
       ),
@@ -97,7 +98,7 @@ void main() {
     await _mount(tester);
     _assertCacheStatus(hasCache: false);
 
-    songCached.add(SongCached(song: song, info: MockFileInfo()));
+    songCached.add(Download(song: song, file: MockFileInfo()));
     await tester.pumpAndSettle();
     _assertCacheStatus(hasCache: true);
   });

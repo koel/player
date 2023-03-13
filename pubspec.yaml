@@ -48,6 +48,7 @@ dependencies:
   golden_toolkit: ^0.12.0
   fake_async: ^1.2.0
   mutex: ^3.0.0
+  path_provider: ^2.0.13
 
 dev_dependencies:
   flutter_test:

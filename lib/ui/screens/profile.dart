@@ -181,7 +181,7 @@ class ClearCacheButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    CacheProvider cache = context.watch();
+    DownloadProvider downloads = context.watch();
 
     return Expanded(
       child: OutlinedButton(
@@ -202,7 +202,7 @@ class ClearCacheButton extends StatelessWidget {
                     child: const Text('Confirm'),
                     isDestructiveAction: true,
                     onPressed: () async {
-                      await cache.clear();
+                      await downloads.clear();
                       Navigator.pop(context);
                       showCupertinoDialog(
                         context: context,

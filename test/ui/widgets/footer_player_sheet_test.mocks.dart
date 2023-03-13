@@ -11,7 +11,7 @@ import 'package:app/models/song.dart' as _i9;
 import 'package:app/providers/album_provider.dart' as _i5;
 import 'package:app/providers/artist_provider.dart' as _i4;
 import 'package:app/providers/audio_provider.dart' as _i10;
-import 'package:app/providers/cache_provider.dart' as _i6;
+import 'package:app/providers/download_provider.dart' as _i6;
 import 'package:app/providers/song_provider.dart' as _i13;
 import 'package:app/router.dart' as _i16;
 import 'package:app/ui/widgets/app_bar.dart' as _i7;
@@ -37,7 +37,7 @@ class _FakeArtistProvider extends _i1.Fake implements _i4.ArtistProvider {}
 
 class _FakeAlbumProvider extends _i1.Fake implements _i5.AlbumProvider {}
 
-class _FakeCacheProvider extends _i1.Fake implements _i6.CacheProvider {}
+class _FakeCacheProvider extends _i1.Fake implements _i6.DownloadProvider {}
 
 class _FakeCoverImageStack extends _i1.Fake implements _i7.CoverImageStack {
   @override
@@ -197,32 +197,32 @@ class MockSongProvider extends _i1.Mock implements _i13.SongProvider {
   }
 
   @override
-  _i4.ArtistProvider get artistProvider =>
+  _i4.ArtistProvider get _artistProvider =>
       (super.noSuchMethod(Invocation.getter(#artistProvider),
           returnValue: _FakeArtistProvider()) as _i4.ArtistProvider);
 
   @override
-  set artistProvider(_i4.ArtistProvider? _artistProvider) =>
+  set _artistProvider(_i4.ArtistProvider? _artistProvider) =>
       super.noSuchMethod(Invocation.setter(#artistProvider, _artistProvider),
           returnValueForMissingStub: null);
 
   @override
-  _i5.AlbumProvider get albumProvider =>
+  _i5.AlbumProvider get _albumProvider =>
       (super.noSuchMethod(Invocation.getter(#albumProvider),
           returnValue: _FakeAlbumProvider()) as _i5.AlbumProvider);
 
   @override
-  set albumProvider(_i5.AlbumProvider? _albumProvider) =>
+  set _albumProvider(_i5.AlbumProvider? _albumProvider) =>
       super.noSuchMethod(Invocation.setter(#albumProvider, _albumProvider),
           returnValueForMissingStub: null);
 
   @override
-  _i6.CacheProvider get cacheProvider =>
+  _i6.DownloadProvider get _downloadProvider =>
       (super.noSuchMethod(Invocation.getter(#cacheProvider),
-          returnValue: _FakeCacheProvider()) as _i6.CacheProvider);
+          returnValue: _FakeCacheProvider()) as _i6.DownloadProvider);
 
   @override
-  set cacheProvider(_i6.CacheProvider? _cacheProvider) =>
+  set _downloadProvider(_i6.DownloadProvider? _cacheProvider) =>
       super.noSuchMethod(Invocation.setter(#cacheProvider, _cacheProvider),
           returnValueForMissingStub: null);
 

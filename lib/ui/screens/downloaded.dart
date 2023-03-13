@@ -27,7 +27,7 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer<CacheProvider>(
+      body: Consumer<DownloadProvider>(
         builder: (_, provider, __) {
           if (provider.songs.length == 0) {
             return Padding(

@@ -15,7 +15,7 @@ class SongCacheIcon extends StatefulWidget {
 }
 
 class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
-  late CacheProvider cache;
+  late DownloadProvider cache;
   bool _downloading = false;
   bool? _hasCache;
 
@@ -24,7 +24,7 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
     super.initState();
     cache = context.read();
 
-    subscribe(cache.cacheClearedStream.listen((_) {
+    subscribe(cache.downloadsClearedStream.listen((_) {
       setState(() => _hasCache = false);
     }));
 
@@ -34,15 +34,13 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
       }
     }));
 
-    subscribe(cache.songCachedStream.listen((event) {
+    subscribe(cache.songDownloadedStream.listen((event) {
       if (event.song == widget.song) {
         setState(() => _hasCache = true);
       }
     }));
 
-    cache.has(song: widget.song).then((value) {
-      setState(() => _hasCache = value);
-    });
+    setState(() => _hasCache = cache.has(song: widget.song));
   }
 
   /// Since this widget is rendered inside NowPlayingScreen, change to current
@@ -56,8 +54,8 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
     _resolveCacheStatus();
   }
 
-  Future<void> _resolveCacheStatus() async {
-    bool hasState = await cache.has(song: widget.song);
+  void _resolveCacheStatus() {
+    bool hasState = cache.has(song: widget.song);
     setState(() => _hasCache = hasState);
   }
 
@@ -69,7 +67,7 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
 
   Future<void> _cache() async {
     setState(() => _downloading = true);
-    await cache.cache(song: widget.song);
+    await cache.download(song: widget.song);
     setState(() {
       _downloading = false;
       _hasCache = true;

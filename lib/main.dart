@@ -11,15 +11,13 @@ List<SingleChildWidget> _providers = [
   Provider(create: (_) => AuthProvider()),
   ChangeNotifierProvider(create: (_) => ArtistProvider()),
   Provider(create: (_) => MediaInfoProvider()),
-  ChangeNotifierProvider(create: (_) => CacheProvider()),
+  ChangeNotifierProvider(create: (_) => DownloadProvider()),
   ChangeNotifierProvider(
     create: (context) => AlbumProvider(),
   ),
   ChangeNotifierProvider(
     create: (context) => SongProvider(
-      artistProvider: context.read<ArtistProvider>(),
-      albumProvider: context.read<AlbumProvider>(),
-      cacheProvider: context.read<CacheProvider>(),
+      downloadProvider: context.read<DownloadProvider>(),
       appState: context.read<AppStateProvider>(),
     ),
   ),
@@ -48,6 +46,7 @@ List<SingleChildWidget> _providers = [
     create: (context) => AudioProvider(
       songProvider: context.read<SongProvider>(),
       interactionProvider: context.read<InteractionProvider>(),
+      downloadProvider: context.read<DownloadProvider>(),
     ),
   ),
   ChangeNotifierProvider(
@@ -78,6 +77,7 @@ Future<void> main() async {
   });
 
   await GetStorage.init('Preferences');
+  await GetStorage.init(DownloadProvider.serializedSongContainer);
 
   runApp(
     MultiProvider(

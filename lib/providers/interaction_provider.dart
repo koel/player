@@ -46,8 +46,6 @@ class InteractionProvider with ChangeNotifier {
     int oldCount = song.playCount;
     song
       ..playCount = interaction.playCount
-      ..album.playCount += song.playCount - oldCount
-      ..artist.playCount += song.playCount - oldCount
       // might as well
       ..liked = interaction.liked;
   }

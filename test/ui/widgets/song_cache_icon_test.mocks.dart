@@ -6,7 +6,7 @@ import 'dart:async' as _i6;
 import 'dart:ui' as _i8;
 
 import 'package:app/models/song.dart' as _i5;
-import 'package:app/providers/cache_provider.dart' as _i4;
+import 'package:app/providers/download_provider.dart' as _i4;
 import 'package:file/file.dart' as _i3;
 import 'package:flutter_cache_manager/flutter_cache_manager.dart' as _i7;
 import 'package:mockito/mockito.dart' as _i1;
@@ -29,69 +29,83 @@ class _FakeDateTime extends _i1.Fake implements DateTime {}
 /// A class which mocks [CacheProvider].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockCacheProvider extends _i1.Mock implements _i4.CacheProvider {
+class MockCacheProvider extends _i1.Mock implements _i4.DownloadProvider {
   MockCacheProvider() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  List<_i5.Song> get songs =>
+  List<_i5.Song> get downloads =>
       (super.noSuchMethod(Invocation.getter(#songs), returnValue: <_i5.Song>[])
           as List<_i5.Song>);
+
   @override
-  set songs(List<_i5.Song>? _songs) =>
+  set downloads(List<_i5.Song>? _songs) =>
       super.noSuchMethod(Invocation.setter(#songs, _songs),
           returnValueForMissingStub: null);
+
   @override
-  _i2.ValueStream<bool> get cacheClearedStream =>
+  _i2.ValueStream<bool> get downloadsClearedStream =>
       (super.noSuchMethod(Invocation.getter(#cacheClearedStream),
           returnValue: _FakeValueStream<bool>()) as _i2.ValueStream<bool>);
+
   @override
   _i2.ValueStream<_i5.Song> get singleCacheRemovedStream => (super.noSuchMethod(
       Invocation.getter(#singleCacheRemovedStream),
       returnValue: _FakeValueStream<_i5.Song>()) as _i2.ValueStream<_i5.Song>);
+
   @override
-  _i2.ValueStream<_i4.SongCached> get songCachedStream =>
+  _i2.ValueStream<_i4.Download> get songDownloadedStream =>
       (super.noSuchMethod(Invocation.getter(#songCachedStream),
-              returnValue: _FakeValueStream<_i4.SongCached>())
-          as _i2.ValueStream<_i4.SongCached>);
+              returnValue: _FakeValueStream<_i4.Download>())
+          as _i2.ValueStream<_i4.Download>);
+
   @override
   bool get hasListeners =>
       (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
           as bool);
+
   @override
-  _i6.Future<void> cache({_i5.Song? song}) =>
+  _i6.Future<void> download({_i5.Song? song}) =>
       (super.noSuchMethod(Invocation.method(#cache, [], {#song: song}),
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i6.Future<void>);
+
   @override
   _i6.Future<_i7.FileInfo?> get({_i5.Song? song}) => (super.noSuchMethod(
       Invocation.method(#get, [], {#song: song}),
       returnValue: Future<_i7.FileInfo?>.value()) as _i6.Future<_i7.FileInfo?>);
+
   @override
   _i6.Future<bool> has({_i5.Song? song}) =>
       (super.noSuchMethod(Invocation.method(#has, [], {#song: song}),
           returnValue: Future<bool>.value(false)) as _i6.Future<bool>);
+
   @override
   _i6.Future<void> remove({_i5.Song? song}) =>
       (super.noSuchMethod(Invocation.method(#remove, [], {#song: song}),
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i6.Future<void>);
+
   @override
   _i6.Future<void> clear() => (super.noSuchMethod(Invocation.method(#clear, []),
       returnValue: Future<void>.value(),
       returnValueForMissingStub: Future<void>.value()) as _i6.Future<void>);
+
   @override
   void addListener(_i8.VoidCallback? listener) =>
       super.noSuchMethod(Invocation.method(#addListener, [listener]),
           returnValueForMissingStub: null);
+
   @override
   void removeListener(_i8.VoidCallback? listener) =>
       super.noSuchMethod(Invocation.method(#removeListener, [listener]),
           returnValueForMissingStub: null);
+
   @override
   void dispose() => super.noSuchMethod(Invocation.method(#dispose, []),
       returnValueForMissingStub: null);
+
   @override
   void notifyListeners() =>
       super.noSuchMethod(Invocation.method(#notifyListeners, []),
@@ -110,12 +124,15 @@ class MockFileInfo extends _i1.Mock implements _i7.FileInfo {
   _i3.File get file =>
       (super.noSuchMethod(Invocation.getter(#file), returnValue: _FakeFile())
           as _i3.File);
+
   @override
   _i7.FileSource get source => (super.noSuchMethod(Invocation.getter(#source),
       returnValue: _i7.FileSource.NA) as _i7.FileSource);
+
   @override
   DateTime get validTill => (super.noSuchMethod(Invocation.getter(#validTill),
       returnValue: _FakeDateTime()) as DateTime);
+
   @override
   String get originalUrl =>
       (super.noSuchMethod(Invocation.getter(#originalUrl), returnValue: '')

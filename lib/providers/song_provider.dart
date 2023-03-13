@@ -7,21 +7,27 @@ import 'package:app/values/values.dart';
 import 'package:flutter/foundation.dart';
 
 class SongProvider with ChangeNotifier {
-  ArtistProvider artistProvider;
-  AlbumProvider albumProvider;
-  CacheProvider cacheProvider;
-  AppStateProvider appState;
+  late DownloadProvider _downloadProvider;
+  late AppStateProvider _appState;
   late CoverImageStack coverImageStack;
 
   List<Song> songs = [];
   Map<String, Song> _vault = {};
 
   SongProvider({
-    required this.artistProvider,
-    required this.albumProvider,
-    required this.cacheProvider,
-    required this.appState,
-  });
+    required DownloadProvider downloadProvider,
+    required AppStateProvider appState,
+  }) {
+    _downloadProvider = downloadProvider;
+    _appState = appState;
+
+    syncDownloadedSongs();
+  }
+
+  Future<void> syncDownloadedSongs() async {
+    await _downloadProvider.collectDownloads();
+    syncWithVault(_downloadProvider.songs);
+  }
 
   List<Song> syncWithVault(dynamic _songs) {
     if (!(_songs is List<Song> || _songs is Song)) {
@@ -102,11 +108,11 @@ class SongProvider with ChangeNotifier {
   }
 
   Future<List<Song>> _stateAwareFetch(String url, Object stateKey) async {
-    if (appState.has(stateKey)) return appState.get(stateKey);
+    if (_appState.has(stateKey)) return _appState.get(stateKey);
 
     var res = await get(url);
     List<Song> items = res.map<Song>((json) => Song.fromJson(json)).toList();
-    appState.set(stateKey, items);
+    _appState.set(stateKey, items);
 
     return syncWithVault(items);
   }
