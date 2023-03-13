@@ -54,26 +54,12 @@ class SongProvider with ChangeNotifier {
 
   Song? byId(String id) => _vault[id];
 
-  List<Song> byIds(List<String> ids) {
-    List<Song> songs = [];
-
-    ids.forEach((id) {
-      if (_vault.containsKey(id)) {
-        songs.add(_vault[id]!);
-      }
-    });
-
-    return songs;
-  }
-
   Future<PaginationResult<Song>> paginate(SongPaginationConfig config) async {
     var res = await get(
       'songs?page=${config.page}&sort=${config.sortField}&order=${config.sortOrder.value}',
     );
 
-    List<Song> items =
-        res['data'].map<Song>((json) => Song.fromJson(json)).toList();
-
+    List<Song> items = res['data'].map<Song>((j) => Song.fromJson(j)).toList();
     List<Song> synced = syncWithVault(items);
 
     songs = [...songs, ...synced].toSet().toList();

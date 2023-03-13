@@ -10,6 +10,7 @@ import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/horizontal_card_scroller.dart';
 import 'package:app/ui/widgets/simple_song_list.dart';
 import 'package:app/ui/widgets/song_card.dart';
+import 'package:app/ui/widgets/spinner.dart';
 import 'package:app/ui/widgets/typography.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -25,16 +26,28 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool _loading = false;
+
   @override
   void initState() {
     super.initState();
-    context.read<OverviewProvider>().fetchOverview();
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    setState(() => _loading = true);
+    await context.read<OverviewProvider>().fetchOverview();
+    setState(() => _loading = false);
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<OverviewProvider>(
       builder: (_, overviewProvider, __) {
+        if (_loading) {
+          return const Center(child: const Spinner());
+        }
+
         var homeBlocks = <Widget>[
           if (overviewProvider.recentlyPlayedSongs.isNotEmpty)
             Padding(
@@ -109,26 +122,33 @@ class _HomeScreenState extends State<HomeScreen> {
             data: CupertinoThemeData(
               primaryColor: Colors.white,
             ),
-            child: CustomScrollView(
-              slivers: <Widget>[
-                CupertinoSliverNavigationBar(
-                  backgroundColor: Colors.black,
-                  largeTitle: const LargeTitle(text: 'Home'),
-                  trailing: IconButton(
-                    onPressed: () => Navigator.of(context).push(
-                      new CupertinoPageRoute(
-                        builder: (_) => const ProfileScreen(),
+            child: RefreshIndicator(
+              color: Colors.white,
+              displacement: 0,
+              edgeOffset: 60,
+              onRefresh: () => context.read<OverviewProvider>().fetchOverview(),
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  CupertinoSliverNavigationBar(
+                    backgroundColor: Colors.black,
+                    largeTitle: const LargeTitle(text: 'Home'),
+                    trailing: IconButton(
+                      onPressed: () => Navigator.of(context).push(
+                        new CupertinoPageRoute(
+                          builder: (_) => const ProfileScreen(),
+                        ),
+                      ),
+                      icon: const Icon(
+                        CupertinoIcons.person_alt_circle,
+                        size: 24,
                       ),
                     ),
-                    icon: const Icon(
-                      CupertinoIcons.person_alt_circle,
-                      size: 24,
-                    ),
                   ),
-                ),
-                SliverList(delegate: SliverChildListDelegate.fixed(homeBlocks)),
-                const BottomSpace(height: 192),
-              ],
+                  SliverList(
+                      delegate: SliverChildListDelegate.fixed(homeBlocks)),
+                  const BottomSpace(height: 192),
+                ],
+              ),
             ),
           ),
         );
