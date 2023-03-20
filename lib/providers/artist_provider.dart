@@ -21,8 +21,8 @@ class ArtistProvider with ChangeNotifier {
     return artists;
   }
 
-  Future<Artist> resolve(int id) async {
-    if (!_vault.containsKey(id)) {
+  Future<Artist> resolve(int id, {bool forceRefresh = false}) async {
+    if (!_vault.containsKey(id) || forceRefresh) {
       _vault[id] = Artist.fromJson(await get('artists/$id'));
     }
 

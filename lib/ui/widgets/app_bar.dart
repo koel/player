@@ -39,6 +39,8 @@ class AppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverAppBar(
       pinned: true,
+      snap: true,
+      floating: true,
       expandedHeight: 290,
       actions: actions,
       flexibleSpace: FlexibleSpaceBar(

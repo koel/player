@@ -8,6 +8,7 @@ import 'package:app/ui/widgets/album_card.dart';
 import 'package:app/ui/widgets/artist_card.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/horizontal_card_scroller.dart';
+import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/simple_song_list.dart';
 import 'package:app/ui/widgets/song_card.dart';
 import 'package:app/ui/widgets/spinner.dart';
@@ -122,10 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
             data: CupertinoThemeData(
               primaryColor: Colors.white,
             ),
-            child: RefreshIndicator(
-              color: Colors.white,
-              displacement: 0,
-              edgeOffset: 60,
+            child: PullToRefresh(
               onRefresh: () => context.read<OverviewProvider>().fetchOverview(),
               child: CustomScrollView(
                 slivers: <Widget>[

@@ -72,21 +72,36 @@ class SongProvider with ChangeNotifier {
     );
   }
 
-  Future<List<Song>> fetchForArtist(int artistId) async {
+  Future<List<Song>> fetchForArtist(
+    int artistId, {
+    bool forceRefresh = false,
+  }) async {
+    if (forceRefresh) _appState.delete(['artist.songs', artistId]);
+
     return _stateAwareFetch(
       'artists/$artistId/songs',
       ['artist.songs', artistId],
     );
   }
 
-  Future<List<Song>> fetchForAlbum(int albumId) async {
+  Future<List<Song>> fetchForAlbum(
+    int albumId, {
+    bool forceRefresh = false,
+  }) async {
+    if (forceRefresh) _appState.delete(['album.songs', albumId]);
+
     return _stateAwareFetch(
       'albums/$albumId/songs',
       ['album.songs', albumId],
     );
   }
 
-  Future<List<Song>> fetchForPlaylist(int playlistId) async {
+  Future<List<Song>> fetchForPlaylist(
+    int playlistId, {
+    bool forceRefresh = false,
+  }) async {
+    if (forceRefresh) _appState.delete(['playlist.songs', playlistId]);
+
     return _stateAwareFetch(
       'playlists/$playlistId/songs',
       ['playlist.songs', playlistId],

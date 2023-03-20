@@ -21,8 +21,8 @@ class AlbumProvider with ChangeNotifier {
     return albums;
   }
 
-  Future<Album> resolve(int id) async {
-    if (!_vault.containsKey(id)) {
+  Future<Album> resolve(int id, {bool forceRefresh = false}) async {
+    if (!_vault.containsKey(id) || forceRefresh) {
       _vault[id] = Album.fromJson(await get('albums/$id'));
     }
 
