@@ -13,32 +13,28 @@ const sortFields = {
   'length': 'Length',
 };
 
-List<Song> sortSongs(
-  List<Song> songs, {
-  required String field,
-  SortOrder? order = SortOrder.asc,
-}) {
-  assert(sortFields.containsKey(field));
-
-  switch (field) {
+List<Song> sortSongs(List<Song> songs, {required SongSortConfig config}) {
+  switch (config.field) {
     case 'title':
       return songs
         ..sort(
-          (a, b) => order == SortOrder.asc
+          (a, b) => config.order == SortOrder.asc
               ? a.title.compareTo(b.title)
               : b.title.compareTo(a.title),
         );
     case 'artist_name':
       return songs
         ..sort(
-          (a, b) => order == SortOrder.asc
-              ? a.artistName.compareTo(b.artistName)
-              : b.artistName.compareTo(a.artistName),
+          (a, b) => config.order == SortOrder.asc
+              ? '${a.artistName}${a.albumName}${a.track}'
+                  .compareTo('${b.artistName}${b.albumName}${b.track}')
+              : '${b.artistName}${b.albumName}${b.title}'
+                  .compareTo('${a.artistName}${a.albumName}${a.track}'),
         );
     case 'album_name':
       return songs
         ..sort(
-          (a, b) => order == SortOrder.asc
+          (a, b) => config.order == SortOrder.asc
               ? '${a.albumName}${a.albumId}${a.track}'
                   .compareTo('${b.albumName}${b.albumId}${b.track}')
               : '${b.albumName}${b.albumId}${b.track}'
@@ -47,7 +43,7 @@ List<Song> sortSongs(
     case 'created_at':
       return songs
         ..sort(
-          (a, b) => order == SortOrder.asc
+          (a, b) => config.order == SortOrder.asc
               ? a.createdAt.compareTo(b.createdAt)
               : b.createdAt.compareTo(a.createdAt),
         );
@@ -55,7 +51,7 @@ List<Song> sortSongs(
       // @todo add sort by disc
       return songs
         ..sort(
-          (a, b) => order == SortOrder.asc
+          (a, b) => config.order == SortOrder.asc
               ? a.track.compareTo(b.track)
               : b.track.compareTo(a.track),
         );

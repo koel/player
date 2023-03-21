@@ -36,8 +36,8 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    int artistId = ModalRoute.of(context)!.settings.arguments as int;
-    AppStateProvider appState = context.read();
+    final int artistId = ModalRoute.of(context)!.settings.arguments as int;
+    final AppStateProvider appState = context.read();
     SongSortConfig sortConfig = appState.get('artist.sort') ??
         SongSortConfig(field: 'title', order: SortOrder.asc);
 
@@ -49,11 +49,10 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
             return const Center(child: const Spinner());
           }
 
-          var artist = snapshot.data![0] as Artist;
-          var songs = sortSongs(
+          final artist = snapshot.data![0] as Artist;
+          final songs = sortSongs(
             snapshot.data![1] as List<Song>,
-            field: sortConfig.field,
-            order: sortConfig.order,
+            config: sortConfig,
           );
 
           return PullToRefresh(

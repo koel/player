@@ -23,7 +23,7 @@ class DownloadedScreen extends StatefulWidget {
 class _DownloadedScreenState extends State<DownloadedScreen> {
   @override
   Widget build(BuildContext context) {
-    AppStateProvider appState = context.read();
+    final AppStateProvider appState = context.read();
     SongSortConfig sortConfig = appState.get('downloaded.sort') ??
         SongSortConfig(
           field: 'title',
@@ -75,11 +75,7 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
             );
           }
 
-          List<Song> songs = sortSongs(
-            provider.songs,
-            field: sortConfig.field,
-            order: sortConfig.order,
-          );
+          final songs = sortSongs(provider.songs, config: sortConfig);
 
           return CustomScrollView(
             slivers: <Widget>[

@@ -35,8 +35,8 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    int albumId = ModalRoute.of(context)!.settings.arguments as int;
-    AppStateProvider appState = context.read();
+    final int albumId = ModalRoute.of(context)!.settings.arguments as int;
+    final AppStateProvider appState = context.read();
     SongSortConfig sortConfig = appState.get('album.sort') ??
         SongSortConfig(field: 'track', order: SortOrder.asc);
 
@@ -44,15 +44,13 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
       body: FutureBuilder(
         future: buildRequest(albumId),
         builder: (_, AsyncSnapshot<List<Object>> snapshot) {
-          if (!snapshot.hasData || snapshot.hasError) {
+          if (!snapshot.hasData || snapshot.hasError)
             return const Center(child: const Spinner());
-          }
 
-          var album = snapshot.data![0] as Album;
-          var songs = sortSongs(
+          final album = snapshot.data![0] as Album;
+          final songs = sortSongs(
             snapshot.data![1] as List<Song>,
-            field: sortConfig.field,
-            order: sortConfig.order,
+            config: sortConfig,
           );
 
           return PullToRefresh(

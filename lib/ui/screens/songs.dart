@@ -19,11 +19,11 @@ class SongsScreen extends StatefulWidget {
 }
 
 class _SongsScreenState extends State<SongsScreen> {
-  late SongProvider _songProvider;
-  late AppStateProvider _appState;
-  late SongPaginationConfig _paginationConfig;
-  late ScrollController _scrollController;
-  late double _currentScrollOffset;
+  late final SongProvider _songProvider;
+  late final AppStateProvider _appState;
+  late final SongPaginationConfig _paginationConfig;
+  late final ScrollController _scrollController;
+  late final double _currentScrollOffset;
   double _scrollThreshold = 64;
   bool _loading = false;
 
