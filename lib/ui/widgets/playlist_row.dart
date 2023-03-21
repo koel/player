@@ -57,21 +57,9 @@ class PlaylistThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return playlist.populated
-        ? ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: CachedNetworkImage(
-              fit: BoxFit.cover,
-              width: 40,
-              height: 40,
-              placeholder: (_, __) => defaultImage,
-              errorWidget: (_, __, ___) => defaultImage,
-              imageUrl: preferences.defaultImageUrl,
-            ),
-          )
-        : const Icon(
-            CupertinoIcons.music_note_list,
-            color: Colors.white54,
-          );
+    return const Icon(
+      CupertinoIcons.music_note_list,
+      color: Colors.white54,
+    );
   }
 }

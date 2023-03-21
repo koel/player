@@ -20,6 +20,22 @@ class SongThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget albumCover = song.albumCoverUrl == null
+        ? Image.asset(
+            'assets/images/unknown-album.png',
+            fit: BoxFit.cover,
+            width: width,
+            height: height,
+          )
+        : CachedNetworkImage(
+            fit: BoxFit.cover,
+            width: width,
+            height: height,
+            placeholder: (_, __) => defaultImage,
+            errorWidget: (_, __, ___) => defaultImage,
+            imageUrl: song.albumCoverUrl ?? '',
+          );
+
     return this.playing
         ? PlayingSongThumbnail(
             width: width,
@@ -29,14 +45,7 @@ class SongThumbnail extends StatelessWidget {
           )
         : ClipRRect(
             borderRadius: BorderRadius.circular(borderRadius),
-            child: CachedNetworkImage(
-              fit: BoxFit.cover,
-              width: width,
-              height: height,
-              placeholder: (_, __) => defaultImage,
-              errorWidget: (_, __, ___) => defaultImage,
-              imageUrl: song.albumCoverUrl ?? preferences.defaultImageUrl,
-            ),
+            child: albumCover,
           );
   }
 

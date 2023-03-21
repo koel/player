@@ -1,6 +1,5 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/models/models.dart';
-import 'package:app/utils/preferences.dart' as preferences;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -93,7 +92,7 @@ class CoverImageStack extends StatelessWidget {
 
     // fill up to 4 images
     for (int i = images.length; i < imageCount; ++i) {
-      images.insert(0, preferences.defaultImageUrl);
+      images.insert(0, null);
     }
 
     return Stack(
@@ -142,9 +141,9 @@ class CoverImage extends StatelessWidget {
               Colors.black.withOpacity(overlayOpacity),
               BlendMode.srcOver,
             ),
-            image: CachedNetworkImageProvider(
-              imageUrl ?? preferences.defaultImageUrl,
-            ),
+            image: imageUrl == null
+                ? AssetImage('assets/images/unknown-album.png') as ImageProvider
+                : CachedNetworkImageProvider(imageUrl!),
             fit: BoxFit.cover,
             alignment: Alignment.topCenter,
           ),
