@@ -1,4 +1,5 @@
 import 'package:app/constants/constants.dart';
+import 'package:app/enums.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/app_bar.dart';
@@ -19,13 +20,16 @@ class DownloadedScreen extends StatefulWidget {
   State<StatefulWidget> createState() => _DownloadedScreenState();
 }
 
-SortField _currentSortOrder = SortField.title;
-
 class _DownloadedScreenState extends State<DownloadedScreen> {
-  SortField _sortOrder = _currentSortOrder;
-
   @override
   Widget build(BuildContext context) {
+    AppStateProvider appState = context.read();
+    SongSortConfig sortConfig = appState.get('downloaded.sort') ??
+        SongSortConfig(
+          field: 'title',
+          order: SortOrder.asc,
+        );
+
     return Scaffold(
       body: Consumer<DownloadProvider>(
         builder: (_, provider, __) {
@@ -71,7 +75,11 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
             );
           }
 
-          List<Song> songs = sortSongs(provider.songs, orderBy: _sortOrder);
+          List<Song> songs = sortSongs(
+            provider.songs,
+            field: sortConfig.field,
+            order: sortConfig.order,
+          );
 
           return CustomScrollView(
             slivers: <Widget>[
@@ -80,15 +88,12 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                 coverImage: CoverImageStack(songs: songs),
                 actions: [
                   SortButton(
-                    options: {
-                      SortField.artist: 'Artist',
-                      SortField.title: 'Song title',
-                      SortField.recentlyAdded: 'Recently added',
-                    },
-                    currentSortField: _sortOrder,
-                    onActionSheetActionPressed: (SortField order) {
-                      _currentSortOrder = order;
-                      setState(() => _sortOrder = order);
+                    fields: ['title', 'artist_name', 'created_at'],
+                    currentField: sortConfig.field,
+                    currentOrder: sortConfig.order,
+                    onActionSheetActionPressed: (_sortConfig) {
+                      setState(() => sortConfig = _sortConfig);
+                      appState.set('downloaded.sort', _sortConfig);
                     },
                   ),
                 ],

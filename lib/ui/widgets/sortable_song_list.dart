@@ -1,49 +1,92 @@
+import 'package:app/enums.dart';
 import 'package:app/models/models.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-enum SortField {
-  trackNumber,
-  artist,
-  album,
-  title,
-  recentlyAdded,
-}
+const sortFields = {
+  'track': 'Track number',
+  'disc': 'Disc number',
+  'title': 'Title',
+  'album_name': 'Album',
+  'artist_name': 'Artist',
+  'created_at': 'Recently added',
+  'length': 'Length',
+};
 
-List<Song> sortSongs(List<Song> songs, {required SortField orderBy}) {
-  switch (orderBy) {
-    case SortField.title:
-      return songs..sort((a, b) => a.title.compareTo(b.title));
-    case SortField.artist:
-      return songs..sort((a, b) => a.artistName.compareTo(b.artistName));
-    case SortField.album:
+List<Song> sortSongs(
+  List<Song> songs, {
+  required String field,
+  SortOrder? order = SortOrder.asc,
+}) {
+  assert(sortFields.containsKey(field));
+
+  switch (field) {
+    case 'title':
       return songs
-        ..sort((a, b) => '${a.albumName}${a.albumId}${a.track}'
-            .compareTo('${b.albumName}${b.albumId}${b.track}'));
-    case SortField.recentlyAdded:
-      return songs..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    case SortField.trackNumber:
-      return songs..sort((a, b) => a.track.compareTo(b.track));
+        ..sort(
+          (a, b) => order == SortOrder.asc
+              ? a.title.compareTo(b.title)
+              : b.title.compareTo(a.title),
+        );
+    case 'artist_name':
+      return songs
+        ..sort(
+          (a, b) => order == SortOrder.asc
+              ? a.artistName.compareTo(b.artistName)
+              : b.artistName.compareTo(a.artistName),
+        );
+    case 'album_name':
+      return songs
+        ..sort(
+          (a, b) => order == SortOrder.asc
+              ? '${a.albumName}${a.albumId}${a.track}'
+                  .compareTo('${b.albumName}${b.albumId}${b.track}')
+              : '${b.albumName}${b.albumId}${b.track}'
+                  .compareTo('${a.albumName}${a.albumId}${a.track}'),
+        );
+    case 'created_at':
+      return songs
+        ..sort(
+          (a, b) => order == SortOrder.asc
+              ? a.createdAt.compareTo(b.createdAt)
+              : b.createdAt.compareTo(a.createdAt),
+        );
+    case 'track':
+      // @todo add sort by disc
+      return songs
+        ..sort(
+          (a, b) => order == SortOrder.asc
+              ? a.track.compareTo(b.track)
+              : b.track.compareTo(a.track),
+        );
+    // @todo sort by disc and length
     default:
-      throw Exception('Invalid order.');
+      throw Exception('Invalid sort field.');
   }
 }
 
 class SortButton extends StatelessWidget {
-  final Map<SortField, String> options;
-  final void Function(SortField order)? onActionSheetActionPressed;
-  final SortField currentSortField;
+  final List<String> fields;
+  final void Function(SongSortConfig sortConfig)? onActionSheetActionPressed;
+  final String currentField;
+  final SortOrder currentOrder;
 
-  const SortButton({
+  SortButton({
     Key? key,
-    required this.options,
-    required this.currentSortField,
+    required this.fields,
+    required this.currentField,
+    required this.currentOrder,
     this.onActionSheetActionPressed,
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(fields.isNotEmpty);
+    assert(fields.every((field) => sortFields.containsKey(field)));
+    assert(fields.contains(currentField));
+  }
 
   @override
   Widget build(BuildContext context) {
-    SortField _currentOrder = currentSortField;
+    String _currentField = currentField;
+    SortOrder _order = currentOrder;
 
     return IconButton(
       onPressed: () {
@@ -51,16 +94,32 @@ class SortButton extends StatelessWidget {
           context: context,
           builder: (BuildContext context) => CupertinoActionSheet(
             title: const Text('Sort by'),
-            actions: options.entries
+            actions: fields
                 .map(
-                  (entry) => CupertinoActionSheetAction(
+                  (field) => CupertinoActionSheetAction(
                     onPressed: () {
-                      _currentOrder = entry.key;
-                      onActionSheetActionPressed?.call(entry.key);
+                      if (field == _currentField) {
+                        _order = _order == SortOrder.asc
+                            ? SortOrder.desc
+                            : SortOrder.asc;
+                      } else {
+                        _order = SortOrder.asc;
+                      }
+
+                      _currentField = field;
+                      onActionSheetActionPressed?.call(
+                        SongSortConfig(
+                          field: field,
+                          order: _order,
+                        ),
+                      );
                       Navigator.pop(context);
                     },
                     child: Text(
-                      (entry.key == _currentOrder ? '✓ ' : ' ') + entry.value,
+                      (field == _currentField
+                              ? (_order == SortOrder.asc ? '↓ ' : '↑ ')
+                              : ' ') +
+                          sortFields[field]!,
                       style: const TextStyle(color: Colors.white70),
                     ),
                   ),
@@ -72,4 +131,14 @@ class SortButton extends StatelessWidget {
       icon: Icon(CupertinoIcons.sort_down),
     );
   }
+}
+
+class SongSortConfig {
+  String field;
+  SortOrder order;
+
+  SongSortConfig({
+    required this.field,
+    required this.order,
+  });
 }

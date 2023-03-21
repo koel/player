@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:app/enums.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/app_bar.dart';
@@ -12,8 +13,6 @@ import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
-SortField _currentSortOrder = SortField.title;
-
 class ArtistDetailsScreen extends StatefulWidget {
   static const routeName = '/artist';
 
@@ -24,8 +23,6 @@ class ArtistDetailsScreen extends StatefulWidget {
 }
 
 class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
-  SortField _sortOrder = _currentSortOrder;
-
   Future<List<Object>> buildRequest(int artistId, {bool forceRefresh = false}) {
     return Future.wait([
       context
@@ -40,6 +37,9 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     int artistId = ModalRoute.of(context)!.settings.arguments as int;
+    AppStateProvider appState = context.read();
+    SongSortConfig sortConfig = appState.get('artist.sort') ??
+        SongSortConfig(field: 'title', order: SortOrder.asc);
 
     return Scaffold(
       body: FutureBuilder(
@@ -52,7 +52,8 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
           var artist = snapshot.data![0] as Artist;
           var songs = sortSongs(
             snapshot.data![1] as List<Song>,
-            orderBy: _sortOrder,
+            field: sortConfig.field,
+            order: sortConfig.order,
           );
 
           return PullToRefresh(
@@ -63,15 +64,12 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                   headingText: artist.name,
                   actions: [
                     SortButton(
-                      options: {
-                        SortField.title: 'Song title',
-                        SortField.album: 'Album',
-                        SortField.recentlyAdded: 'Recently added',
-                      },
-                      currentSortField: _sortOrder,
-                      onActionSheetActionPressed: (SortField order) {
-                        _currentSortOrder = order;
-                        setState(() => _sortOrder = order);
+                      fields: ['title', 'album_name', 'created_at'],
+                      currentField: sortConfig.field,
+                      currentOrder: sortConfig.order,
+                      onActionSheetActionPressed: (_sortConfig) {
+                        setState(() => sortConfig = _sortConfig);
+                        appState.set('artist.sort', sortConfig);
                       },
                     ),
                   ],

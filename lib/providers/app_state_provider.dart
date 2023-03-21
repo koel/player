@@ -5,7 +5,7 @@ class AppStateProvider {
 
   String _normalizeKey(Object key) => jsonEncode(key);
 
-  get<T>(Object key) => _state[_normalizeKey(key)] as T;
+  T? get<T>(Object key) => _state[_normalizeKey(key)];
 
   set(Object key, dynamic value) => _state[_normalizeKey(key)] = value;
 

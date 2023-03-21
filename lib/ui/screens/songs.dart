@@ -9,9 +9,6 @@ import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
-// Keep track of the sort orders between revisits
-SortField _currentSortOrder = SortField.title;
-
 class SongsScreen extends StatefulWidget {
   static const routeName = '/songs';
 
@@ -22,8 +19,6 @@ class SongsScreen extends StatefulWidget {
 }
 
 class _SongsScreenState extends State<SongsScreen> {
-  SortField _sortField = _currentSortOrder;
-
   late SongProvider _songProvider;
   late AppStateProvider _appState;
   late SongPaginationConfig _paginationConfig;
@@ -95,32 +90,14 @@ class _SongsScreenState extends State<SongsScreen> {
                 headingText: 'All songs',
                 actions: [
                   SortButton(
-                    options: {
-                      SortField.artist: 'Artist',
-                      SortField.title: 'Song title',
-                      SortField.recentlyAdded: 'Recently added',
-                    },
-                    currentSortField: _sortField,
-                    onActionSheetActionPressed: (SortField order) {
-                      setState(() => _sortField = order);
-
-                      switch (order) {
-                        case SortField.artist:
-                          _paginationConfig.sortField = 'artist_name';
-                          break;
-                        case SortField.title:
-                          _paginationConfig.sortField = 'title';
-                          break;
-                        case SortField.recentlyAdded:
-                          _paginationConfig.sortField = 'created_at';
-                          _paginationConfig.sortOrder = SortOrder.desc;
-                          break;
-                        default:
-                          break;
-                      }
+                    fields: ['title', 'artist_name', 'created_at'],
+                    currentField: _paginationConfig.sortField,
+                    currentOrder: _paginationConfig.sortOrder,
+                    onActionSheetActionPressed: (sortConfig) {
+                      _paginationConfig.sortField = sortConfig.field;
+                      _paginationConfig.sortOrder = sortConfig.order;
 
                       _songProvider.songs.clear();
-
                       fetchMoreSongs();
                     },
                   ),
