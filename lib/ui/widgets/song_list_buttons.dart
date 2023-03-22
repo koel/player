@@ -15,37 +15,62 @@ enum SongListContext {
   other,
 }
 
+class ButtonConfig {
+  final String label;
+  final Widget icon;
+  final void Function()? onPressed;
+
+  const ButtonConfig({
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+  });
+}
+
 class SongListButtons extends StatelessWidget {
-  static final Key playAllButtonKey = UniqueKey();
-  static final Key shuffleAllButtonKey = UniqueKey();
-
   final List<Song> songs;
+  final List<ButtonConfig> buttons;
 
-  const SongListButtons({Key? key, required this.songs}) : super(key: key);
+  const SongListButtons({
+    Key? key,
+    required this.songs,
+    this.buttons = const [],
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    AudioProvider audio = context.read();
+    final AudioProvider audio = context.read();
+
+    var _buttons = this.buttons;
+    if (_buttons.isEmpty) {
+      _buttons = [
+        ButtonConfig(
+          label: 'Play All',
+          icon: const Icon(CupertinoIcons.play_fill),
+          onPressed: () async => await audio.replaceQueue(songs),
+        ),
+        ButtonConfig(
+          label: 'Shuffle All',
+          icon: const Icon(CupertinoIcons.shuffle),
+          onPressed: () async => await audio.replaceQueue(songs, shuffle: true),
+        ),
+      ];
+    }
+
+    List<Widget> buttonWidgets = [];
+    _buttons.forEach((element) {
+      buttonWidgets
+        ..add(FullWidthPrimaryIconButton(
+          icon: element.icon,
+          label: element.label,
+          onPressed: element.onPressed,
+        ))
+        ..add(SizedBox(width: 12));
+    });
+
     return Container(
       padding: const EdgeInsets.all(AppDimensions.horizontalPadding),
-      child: Row(
-        children: <Widget>[
-          FullWidthPrimaryIconButton(
-            key: SongListButtons.playAllButtonKey,
-            icon: CupertinoIcons.play_fill,
-            label: 'Play All',
-            onPressed: () async => await audio.replaceQueue(songs),
-          ),
-          const SizedBox(width: 12),
-          FullWidthPrimaryIconButton(
-            key: SongListButtons.shuffleAllButtonKey,
-            icon: CupertinoIcons.shuffle,
-            label: 'Shuffle All',
-            onPressed: () async =>
-                await audio.replaceQueue(songs, shuffle: true),
-          ),
-        ],
-      ),
+      child: Row(children: buttonWidgets..removeLast()),
     );
   }
 }

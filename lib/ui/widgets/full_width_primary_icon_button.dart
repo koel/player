@@ -1,8 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class FullWidthPrimaryIconButton extends StatelessWidget {
-  final IconData icon;
+  final dynamic icon;
   final String label;
   final void Function()? onPressed;
 
@@ -20,7 +19,7 @@ class FullWidthPrimaryIconButton extends StatelessWidget {
         onPressed: onPressed,
         child: Row(
           children: <Widget>[
-            Icon(icon, size: 20),
+            if (icon is IconData) Icon(icon, size: 20) else icon,
             Expanded(child: Text(label, textAlign: TextAlign.center)),
           ],
         ),

@@ -30,13 +30,13 @@ void main() {
 
   testWidgets('plays all', (WidgetTester tester) async {
     await _mount(tester);
-    await tester.tap(find.byKey(SongListButtons.playAllButtonKey));
+    await tester.tap(find.byKey(SongListButtons.firstButtonKey));
     verify(audioMock.replaceQueue(songs)).called(1);
   });
 
   testWidgets('shuffles all', (WidgetTester tester) async {
     await _mount(tester);
-    await tester.tap(find.byKey(SongListButtons.shuffleAllButtonKey));
+    await tester.tap(find.byKey(SongListButtons.secondButtonKey));
     verify(audioMock.replaceQueue(songs, shuffle: true)).called(1);
   });
 }

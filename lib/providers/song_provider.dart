@@ -117,6 +117,26 @@ class SongProvider with ChangeNotifier {
 
     return syncWithVault(items);
   }
+
+  Future<List<Song>> fetchRandom({int limit = 500}) async {
+    var res = await get('queue/fetch?order=rand&limit=$limit');
+    List<Song> items = res.map<Song>((json) => Song.fromJson(json)).toList();
+
+    return syncWithVault(items);
+  }
+
+  Future<List<Song>> fetchInOrder({
+    String sortField = 'title',
+    SortOrder order = SortOrder.asc,
+    int limit = 500,
+  }) async {
+    var res = await get(
+      'queue/fetch?order=${order.value}&sort=$sortField&limit=$limit',
+    );
+    List<Song> items = res.map<Song>((json) => Song.fromJson(json)).toList();
+
+    return syncWithVault(items);
+  }
 }
 
 class SongPaginationConfig {
