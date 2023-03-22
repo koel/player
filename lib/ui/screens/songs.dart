@@ -1,4 +1,3 @@
-import 'package:app/enums.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
@@ -23,7 +22,7 @@ class _SongsScreenState extends State<SongsScreen> {
   late final AppStateProvider _appState;
   late final SongPaginationConfig _paginationConfig;
   late final ScrollController _scrollController;
-  late final double _currentScrollOffset;
+  late double _currentScrollOffset;
   double _scrollThreshold = 64;
   bool _loading = false;
 
