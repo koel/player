@@ -1,3 +1,4 @@
+import 'package:app/constants/constants.dart';
 import 'package:app/extensions/extensions.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
@@ -69,7 +70,10 @@ class _SongRowState extends State<SongRow> {
       },
       child: ListTile(
         key: UniqueKey(),
-        contentPadding: widget.padding,
+        contentPadding: widget.padding ??
+            const EdgeInsets.only(
+              left: AppDimensions.horizontalPadding,
+            ),
         shape: widget.bordered
             ? Border(bottom: Divider.createBorderSide(context))
             : null,

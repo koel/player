@@ -1,12 +1,13 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/enums.dart';
-import 'package:app/models/models.dart';
+import 'package:app/extensions/extensions.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list_buttons.dart';
 import 'package:app/ui/widgets/song_row.dart';
-import 'package:app/ui/widgets/sortable_song_list.dart';
+import 'package:app/ui/widgets/song_list_sort_button.dart';
+import 'package:app/values/values.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
@@ -21,6 +22,9 @@ class DownloadedScreen extends StatefulWidget {
 }
 
 class _DownloadedScreenState extends State<DownloadedScreen> {
+  String _searchQuery = '';
+  CoverImageStack _cover = CoverImageStack(songs: []);
+
   @override
   Widget build(BuildContext context) {
     final AppStateProvider appState = context.read();
@@ -75,13 +79,18 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
             );
           }
 
-          final songs = sortSongs(provider.songs, config: sortConfig);
+          if (_cover.isEmpty) {
+            _cover = CoverImageStack(songs: provider.songs);
+          }
+
+          final displayedSongs =
+              provider.songs.$sort(sortConfig).$filter(_searchQuery);
 
           return CustomScrollView(
             slivers: <Widget>[
               AppBar(
                 headingText: 'Downloaded',
-                coverImage: CoverImageStack(songs: songs),
+                coverImage: _cover,
                 actions: [
                   SortButton(
                     fields: ['title', 'artist_name', 'created_at'],
@@ -94,14 +103,21 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                   ),
                 ],
               ),
-              SliverToBoxAdapter(child: SongListButtons(songs: songs)),
+              SliverToBoxAdapter(
+                child: SongListButtons(
+                  songs: displayedSongs,
+                  onSearchChanged: (String query) {
+                    setState(() => _searchQuery = query);
+                  },
+                ),
+              ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (_, int index) {
                     return Dismissible(
                       direction: DismissDirection.endToStart,
                       onDismissed: (DismissDirection direction) =>
-                          provider.remove(song: songs[index]),
+                          provider.remove(song: displayedSongs[index]),
                       background: Container(
                         alignment: AlignmentDirectional.centerEnd,
                         color: Colors.red,
@@ -110,11 +126,11 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                           child: Icon(CupertinoIcons.delete),
                         ),
                       ),
-                      key: ValueKey(songs[index]),
-                      child: SongRow(song: songs[index]),
+                      key: ValueKey(displayedSongs[index]),
+                      child: SongRow(song: displayedSongs[index]),
                     );
                   },
-                  childCount: songs.length,
+                  childCount: displayedSongs.length,
                 ),
               ),
               const BottomSpace(),

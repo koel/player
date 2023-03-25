@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:app/enums.dart';
+import 'package:app/extensions/extensions.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/app_bar.dart';
@@ -8,8 +9,9 @@ import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/song_list_buttons.dart';
 import 'package:app/ui/widgets/song_row.dart';
-import 'package:app/ui/widgets/sortable_song_list.dart';
+import 'package:app/ui/widgets/song_list_sort_button.dart';
 import 'package:app/ui/widgets/spinner.dart';
+import 'package:app/values/values.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
@@ -23,6 +25,9 @@ class ArtistDetailsScreen extends StatefulWidget {
 }
 
 class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
+  String _searchQuery = '';
+  CoverImageStack cover = CoverImageStack(songs: []);
+
   Future<List<Object>> buildRequest(int artistId, {bool forceRefresh = false}) {
     return Future.wait([
       context
@@ -49,11 +54,16 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
             return const Center(child: const Spinner());
           }
 
+          final songs = snapshot.data![1] as List<Song>;
+
+          if (cover.isEmpty) {
+            cover = CoverImageStack(
+              songs: snapshot.data![1] as List<Song>,
+            );
+          }
+
           final artist = snapshot.data![0] as Artist;
-          final songs = sortSongs(
-            snapshot.data![1] as List<Song>,
-            config: sortConfig,
-          );
+          final displayedSongs = songs.$sort(sortConfig).$filter(_searchQuery);
 
           return PullToRefresh(
             onRefresh: () => buildRequest(artistId, forceRefresh: true),
@@ -112,14 +122,21 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                   ),
                 ),
                 if (songs.isNotEmpty)
-                  SliverToBoxAdapter(child: SongListButtons(songs: songs)),
+                  SliverToBoxAdapter(
+                    child: SongListButtons(
+                      songs: displayedSongs,
+                      onSearchChanged: (String query) {
+                        setState(() => _searchQuery = query);
+                      },
+                    ),
+                  ),
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (_, int index) => SongRow(
-                      song: songs[index],
+                      song: displayedSongs[index],
                       listContext: SongListContext.artist,
                     ),
-                    childCount: songs.length,
+                    childCount: displayedSongs.length,
                   ),
                 ),
                 const BottomSpace(),

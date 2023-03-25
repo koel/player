@@ -3,10 +3,11 @@ import 'package:app/utils/full_width_slider_track_shape.dart';
 import 'package:flutter/material.dart';
 
 ThemeData themeData(BuildContext context) => ThemeData(
-      brightness: Brightness.dark,
       dividerColor: Colors.white30,
       scaffoldBackgroundColor: Colors.black,
-      backgroundColor: AppColors.primaryBgr,
+      colorScheme: ColorScheme.dark(
+        background: AppColors.primaryBgr,
+      ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: AppColors.primaryBgr.withOpacity(.8),
         elevation: 0,
@@ -32,56 +33,56 @@ ThemeData themeData(BuildContext context) => ThemeData(
       textTheme: Theme.of(context)
           .textTheme
           .copyWith(
-            headline1: const TextStyle(
+            displayLarge: const TextStyle(
               fontWeight: FontWeight.w100,
               fontSize: 96,
             ),
-            headline2: const TextStyle(
+            displayMedium: const TextStyle(
               fontWeight: FontWeight.w100,
               fontSize: 60,
             ),
-            headline3: const TextStyle(
+            displaySmall: const TextStyle(
               fontWeight: FontWeight.w400,
               fontSize: 48,
             ),
-            headline4: const TextStyle(
+            headlineMedium: const TextStyle(
               fontWeight: FontWeight.w400,
               fontSize: 34,
             ),
-            headline5: const TextStyle(
+            headlineSmall: const TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 24,
             ),
-            headline6: const TextStyle(
+            titleLarge: const TextStyle(
               fontWeight: FontWeight.w500,
               fontSize: 20,
             ),
-            subtitle1: const TextStyle(
+            titleMedium: const TextStyle(
               fontWeight: FontWeight.w400,
               fontSize: 16,
             ),
-            subtitle2: const TextStyle(
+            titleSmall: const TextStyle(
               fontWeight: FontWeight.w500,
               fontSize: 14,
             ),
-            bodyText1: const TextStyle(
+            bodyLarge: const TextStyle(
               fontWeight: FontWeight.w400,
               fontSize: 16,
             ),
-            bodyText2: const TextStyle(
+            bodyMedium: const TextStyle(
               fontWeight: FontWeight.w400,
               fontSize: 14,
               color: Colors.white24,
             ),
-            button: const TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 14,
-            ),
-            caption: const TextStyle(
+            bodySmall: const TextStyle(
               fontWeight: FontWeight.w400,
               fontSize: 12,
             ),
-            overline: const TextStyle(
+            labelLarge: const TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+            ),
+            labelSmall: const TextStyle(
               fontWeight: FontWeight.w400,
               fontSize: 10,
             ),
@@ -114,7 +115,7 @@ ThemeData themeData(BuildContext context) => ThemeData(
       // The default theme for OutlinedButton widgets.
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          primary: AppColors.primaryText,
+          foregroundColor: AppColors.primaryText,
           side: const BorderSide(color: Colors.white54),
           textStyle: const TextStyle(
             fontSize: 16.0,

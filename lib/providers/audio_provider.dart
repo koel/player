@@ -162,7 +162,7 @@ class AudioProvider with StreamSubscriber, ChangeNotifier {
 
   Future<void> playOrPause() async => await _player.playOrPause();
 
-  Future<void> replaceQueue(List<Song> songs, {shuffle = false}) async {
+  Future<void> replaceQueue(List<Song> songs, {bool shuffle = false}) async {
     List<Audio> audios = await Future.wait(
       songs.map((song) async => await _getAudio(song)),
     );

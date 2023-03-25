@@ -1,11 +1,10 @@
 import 'package:app/enums.dart';
-import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list_buttons.dart';
 import 'package:app/ui/widgets/song_row.dart';
-import 'package:app/ui/widgets/sortable_song_list.dart';
+import 'package:app/ui/widgets/song_list_sort_button.dart';
 import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
@@ -109,8 +108,9 @@ class _SongsScreenState extends State<SongsScreen> {
               ),
               SliverToBoxAdapter(
                 child: SongListPrimaryButtons(
-                    sortField: _paginationConfig.sortField,
-                    sortOrder: _paginationConfig.sortOrder),
+                  sortField: _paginationConfig.sortField,
+                  sortOrder: _paginationConfig.sortOrder,
+                ),
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
@@ -139,10 +139,10 @@ class _SongsScreenState extends State<SongsScreen> {
 }
 
 class SongListPrimaryButtons extends StatefulWidget {
-  String sortField;
-  SortOrder sortOrder;
+  final String sortField;
+  final SortOrder sortOrder;
 
-  SongListPrimaryButtons({
+  const SongListPrimaryButtons({
     Key? key,
     required this.sortField,
     required this.sortOrder,
@@ -174,7 +174,9 @@ class _SongListPrimaryButtonsState extends State<SongListPrimaryButtons> {
 
             setState(() => _fetchingSongsToPlayAll = true);
             final songs = await songProvider.fetchInOrder(
-                sortField: widget.sortField, order: widget.sortOrder);
+              sortField: widget.sortField,
+              order: widget.sortOrder,
+            );
             setState(() => _fetchingSongsToPlayAll = false);
             await audio.replaceQueue(songs);
           },

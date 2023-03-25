@@ -6,11 +6,13 @@ import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/song_list_buttons.dart';
 import 'package:app/ui/widgets/song_row.dart';
-import 'package:app/ui/widgets/sortable_song_list.dart';
+import 'package:app/ui/widgets/song_list_sort_button.dart';
 import 'package:app/ui/widgets/spinner.dart';
+import 'package:app/values/values.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
+import 'package:app/extensions/extensions.dart';
 
 class PlaylistDetailsScreen extends StatefulWidget {
   static const routeName = '/playlist';
@@ -23,6 +25,8 @@ class PlaylistDetailsScreen extends StatefulWidget {
 
 class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
   late PlaylistProvider _playlistProvider;
+  String _searchQuery = '';
+  CoverImageStack _cover = CoverImageStack(songs: []);
 
   @override
   void initState() {
@@ -60,7 +64,14 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
             );
           }
 
-          var songs = sortSongs(snapshot.data ?? [], config: sortConfig);
+          List<Song> songs = snapshot.data == null ? [] : snapshot.data!;
+
+          if (_cover.isEmpty && songs.isNotEmpty) {
+            _cover = CoverImageStack(songs: snapshot.data!);
+          }
+
+          var displayedSongs =
+              songs.$sort(sortConfig).$filter(_searchQuery) ?? [];
 
           return PullToRefresh(
             onRefresh: () => buildRequest(playlist.id, forceRefresh: true),
@@ -68,7 +79,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
               slivers: <Widget>[
                 AppBar(
                   headingText: playlist.name,
-                  coverImage: CoverImageStack(songs: songs),
+                  coverImage: _cover,
                   actions: [
                     SortButton(
                       fields: ['title', 'artist_name', 'created_at'],
@@ -84,7 +95,12 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                 SliverToBoxAdapter(
                   child: songs.isEmpty
                       ? const SizedBox.shrink()
-                      : SongListButtons(songs: songs),
+                      : SongListButtons(
+                          songs: displayedSongs,
+                          onSearchChanged: (String query) {
+                            setState(() => _searchQuery = query);
+                          },
+                        ),
                 ),
                 if (songs.isEmpty)
                   SliverToBoxAdapter(
@@ -103,7 +119,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                     delegate: SliverChildBuilderDelegate(
                       (_, int index) {
                         final bool dismissible = playlist.isStandard;
-                        final Song song = songs[index];
+                        final Song song = displayedSongs[index];
                         return dismissible
                             ? Dismissible(
                                 direction: DismissDirection.endToStart,
@@ -129,7 +145,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                               )
                             : SongRow(song: song);
                       },
-                      childCount: songs.length,
+                      childCount: displayedSongs.length,
                     ),
                   ),
                 const BottomSpace(),

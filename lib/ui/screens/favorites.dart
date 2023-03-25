@@ -1,12 +1,14 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/enums.dart';
+import 'package:app/extensions/extensions.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/song_list_buttons.dart';
 import 'package:app/ui/widgets/song_row.dart';
-import 'package:app/ui/widgets/sortable_song_list.dart';
+import 'package:app/ui/widgets/song_list_sort_button.dart';
+import 'package:app/values/values.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
@@ -22,6 +24,8 @@ class FavoritesScreen extends StatefulWidget {
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
   bool _loading = false;
+  String _searchQuery = '';
+  CoverImageStack cover = CoverImageStack(songs: []);
 
   @override
   void initState() {
@@ -94,7 +98,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     return Scaffold(
       body: Consumer<FavoriteProvider>(
         builder: (_, provider, __) {
-          final songs = sortSongs(provider.songs, config: sortConfig);
+          if (cover.isEmpty) {
+            cover = CoverImageStack(songs: provider.songs);
+          }
+
+          final songs = provider.songs.$sort(sortConfig).$filter(_searchQuery);
 
           return PullToRefresh(
             onRefresh: () {
@@ -103,12 +111,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   : makeRequest(forceRefresh: true);
             },
             child: CustomScrollView(
-              slivers: songs.isEmpty
+              slivers: provider.songs.isEmpty
                   ? <Widget>[emptyWidget]
                   : <Widget>[
                       AppBar(
                         headingText: 'Favorites',
-                        coverImage: CoverImageStack(songs: songs),
+                        coverImage: cover,
                         actions: [
                           SortButton(
                             fields: ['title', 'artist_name', 'created_at'],
@@ -122,7 +130,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                         ],
                       ),
                       SliverToBoxAdapter(
-                        child: SongListButtons(songs: songs),
+                        child: SongListButtons(
+                          songs: songs,
+                          onSearchChanged: (String query) {
+                            setState(() => _searchQuery = query);
+                          },
+                        ),
                       ),
                       SliverList(
                         delegate: SliverChildBuilderDelegate(
