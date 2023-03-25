@@ -155,6 +155,11 @@ class SongPaginationConfig {
 
   SortOrder get sortOrder => _sortOrder;
 
+  SongSortConfig get sortConfig => SongSortConfig(
+        field: _sortField,
+        order: _sortOrder,
+      );
+
   set sortField(String field) {
     if (field != _sortField) {
       _sortOrder = SortOrder.asc;

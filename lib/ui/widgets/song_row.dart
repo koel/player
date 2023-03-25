@@ -5,7 +5,7 @@ import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/song_cache_icon.dart';
-import 'package:app/ui/widgets/song_list_buttons.dart';
+import 'package:app/ui/widgets/song_list_header.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart';

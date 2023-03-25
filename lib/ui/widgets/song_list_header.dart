@@ -15,39 +15,33 @@ enum SongListContext {
   other,
 }
 
-class ButtonConfig {
-  final String label;
-  final Widget icon;
-  final void Function()? onPressed;
-
-  const ButtonConfig({
-    required this.label,
-    required this.icon,
-    required this.onPressed,
-  });
-}
-
-class SongListButtons extends StatefulWidget {
+class SongListHeader extends StatefulWidget {
   final List<Song> songs;
-  final List<ButtonConfig> buttons;
-  final Function(String keywords)? onSearchChanged;
+  final Function(String keywords)? onSearchQueryChanged;
   final Function()? onPlayPressed;
   final Function()? onShufflePressed;
+  final Function()? onSearchExpanded;
+  final Function()? onSearchCollapsed;
+  final Widget? playIcon;
+  final Widget? shuffleIcon;
 
-  const SongListButtons({
+  const SongListHeader({
     Key? key,
     required this.songs,
-    this.buttons = const [],
-    this.onSearchChanged,
+    this.onSearchQueryChanged,
+    this.onSearchExpanded,
+    this.onSearchCollapsed,
     this.onPlayPressed,
     this.onShufflePressed,
+    this.playIcon,
+    this.shuffleIcon,
   }) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _SongListButtonsState();
+  State<StatefulWidget> createState() => _SongListHeaderState();
 }
 
-class _SongListButtonsState extends State<SongListButtons> {
+class _SongListHeaderState extends State<SongListHeader> {
   bool _displayingSearch = false;
   final TextEditingController _searchController = TextEditingController();
 
@@ -56,14 +50,17 @@ class _SongListButtonsState extends State<SongListButtons> {
     super.initState();
 
     _searchController.addListener(() {
-      if (widget.onSearchChanged != null) {
-        widget.onSearchChanged!(_searchController.text);
+      if (widget.onSearchQueryChanged != null) {
+        widget.onSearchQueryChanged!(_searchController.text);
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    var playIcon = widget.playIcon ?? const Icon(CupertinoIcons.play_fill);
+    var shuffleIcon = widget.shuffleIcon ?? const Icon(CupertinoIcons.shuffle);
+
     final AudioProvider audio = context.read();
 
     final double verticalPadding = _displayingSearch ? 10 : 8;
@@ -78,7 +75,10 @@ class _SongListButtonsState extends State<SongListButtons> {
       child: Row(children: <Widget>[
         if (!_displayingSearch) ...<Widget>[
           IconButton(
-            onPressed: () => setState(() => _displayingSearch = true),
+            onPressed: () {
+              setState(() => _displayingSearch = true);
+              widget.onSearchExpanded?.call();
+            },
             icon: const Icon(CupertinoIcons.search),
           ),
           const Spacer(),
@@ -98,6 +98,7 @@ class _SongListButtonsState extends State<SongListButtons> {
             onPressed: () {
               setState(() => _displayingSearch = false);
               _searchController.clear();
+              widget.onSearchCollapsed?.call();
             },
             child: Text(
               'Cancel',
@@ -114,7 +115,11 @@ class _SongListButtonsState extends State<SongListButtons> {
               }
               await audio.replaceQueue(widget.songs);
             },
-            icon: const Icon(CupertinoIcons.play_fill),
+            icon: SizedBox(
+              height: 24,
+              width: 24,
+              child: playIcon,
+            ),
           ),
           const SizedBox(width: 6),
           ElevatedButton(
@@ -125,7 +130,11 @@ class _SongListButtonsState extends State<SongListButtons> {
               }
               await audio.replaceQueue(widget.songs, shuffle: true);
             },
-            child: const Icon(CupertinoIcons.shuffle),
+            child: SizedBox(
+              height: 24,
+              width: 24,
+              child: shuffleIcon,
+            ),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.all(16),
               elevation: 0,

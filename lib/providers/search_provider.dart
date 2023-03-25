@@ -19,16 +19,22 @@ class SearchProvider with ChangeNotifier {
   SongProvider _songProvider;
   AlbumProvider _albumProvider;
   ArtistProvider _artistProvider;
+  AppStateProvider _appState;
 
   SearchProvider({
     required songProvider,
     required artistProvider,
     required albumProvider,
+    required appState,
   })  : _songProvider = songProvider,
         _artistProvider = artistProvider,
-        _albumProvider = albumProvider;
+        _albumProvider = albumProvider,
+        _appState = appState;
 
   Future<SearchResult> searchExcerpts({required String keywords}) async {
+    if (_appState.has('search.excerpts'))
+      return _appState.get('search.excerpts');
+
     var res = await get('search?q=$keywords');
 
     List<Song> songs = _songProvider.syncWithVault(
@@ -38,10 +44,24 @@ class SearchProvider with ChangeNotifier {
     List<Album> albums = _albumProvider.syncWithVault(
         res['albums'].map<Album>((j) => Album.fromJson(j)).toList());
 
-    return SearchResult(
-      songs: songs,
-      artists: artists,
-      albums: albums,
-    );
+    return _appState.set<SearchResult>(
+        'search.excerpts',
+        SearchResult(
+          songs: songs,
+          artists: artists,
+          albums: albums,
+        ));
+  }
+
+  Future<List<Song>> searchSongs(String query) async {
+    if (_appState.has(['search.songs', query]))
+      return _appState.get(['search.songs', query]);
+
+    var res = await get('search/songs?q=$query');
+
+    List<Song> songs = _songProvider
+        .syncWithVault(res.map<Song>((j) => Song.fromJson(j)).toList());
+
+    return _appState.set<List<Song>>(['search.songs', query], songs);
   }
 }

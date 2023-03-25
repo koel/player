@@ -1,12 +1,13 @@
+import 'package:app/constants/constants.dart';
 import 'package:app/enums.dart';
+import 'package:app/extensions/extensions.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
-import 'package:app/ui/widgets/song_list_buttons.dart';
+import 'package:app/ui/widgets/song_list_header.dart' as BaseSongListHeader;
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/song_list_sort_button.dart';
 import 'package:app/ui/widgets/spinner.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
@@ -21,20 +22,25 @@ class SongsScreen extends StatefulWidget {
 }
 
 class _SongsScreenState extends State<SongsScreen> {
-  late final SongProvider _songProvider;
+  late final SongListScreenProvider _provider;
   late final AppStateProvider _appState;
   late final SongPaginationConfig _paginationConfig;
   late final ScrollController _scrollController;
   late double _currentScrollOffset;
-  double _scrollThreshold = 64;
-  bool _loading = false;
+  var _scrollThreshold = 64.0;
+  var _searchQuery = '';
+  var _cover = CoverImageStack(songs: []);
+  var _loading = false;
+  var _inSearchMode = false;
 
   void _scrollListener() {
     _currentScrollOffset = _scrollController.offset;
 
+    if (_inSearchMode) return;
+
     if (_scrollController.position.pixels + _scrollThreshold >=
         _scrollController.position.maxScrollExtent) {
-      fetchMoreSongs();
+      makeRequest();
     }
   }
 
@@ -42,8 +48,8 @@ class _SongsScreenState extends State<SongsScreen> {
   void initState() {
     super.initState();
 
-    _songProvider = context.read<SongProvider>();
-    _appState = context.read<AppStateProvider>();
+    _provider = context.read();
+    _appState = context.read();
     _paginationConfig =
         _appState.get('songs.paginationConfig') ?? SongPaginationConfig();
 
@@ -55,16 +61,22 @@ class _SongsScreenState extends State<SongsScreen> {
 
     _scrollController.addListener(_scrollListener);
 
-    fetchMoreSongs();
+    makeRequest();
   }
 
-  Future<void> fetchMoreSongs() async {
-    if (_loading || _paginationConfig.page == null) return;
+  Future<void> makeRequest() async {
+    if (_loading || (_paginationConfig.page == null && !_inSearchMode)) return;
 
     setState(() => _loading = true);
 
-    var result = await _songProvider.paginate(_paginationConfig);
-    _paginationConfig.page = result.nextPage;
+    var result = await _provider.fetch(
+      paginationConfig: _paginationConfig,
+      searchQuery: _searchQuery,
+    );
+
+    if (result != null) {
+      _paginationConfig.page = result.nextPage;
+    }
 
     setState(() => _loading = false);
   }
@@ -83,8 +95,19 @@ class _SongsScreenState extends State<SongsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer<SongProvider>(
+      body: Consumer<SongListScreenProvider>(
         builder: (_, provider, __) {
+          if (_cover.isEmpty) {
+            _cover = CoverImageStack(songs: provider.songs);
+          }
+
+          var displayedSongs = provider.songs;
+
+          if (_inSearchMode) {
+            // In search mode, sorting is done from the client side.
+            displayedSongs = displayedSongs.$sort(_paginationConfig.sortConfig);
+          }
+
           return CustomScrollView(
             controller: _scrollController,
             slivers: [
@@ -96,36 +119,51 @@ class _SongsScreenState extends State<SongsScreen> {
                     currentField: _paginationConfig.sortField,
                     currentOrder: _paginationConfig.sortOrder,
                     onActionSheetActionPressed: (sortConfig) {
-                      _paginationConfig.sortField = sortConfig.field;
-                      _paginationConfig.sortOrder = sortConfig.order;
+                      setState(() {
+                        _paginationConfig.sortField = sortConfig.field;
+                        _paginationConfig.sortOrder = sortConfig.order;
+                      });
 
-                      _songProvider.songs.clear();
-                      fetchMoreSongs();
+                      if (_inSearchMode) return;
+
+                      // If we're not searching but displaying the full list,
+                      // every time we sort, we fetch a new list of songs,
+                      // since the sorting is done from the server.
+                      provider.songs.clear();
+                      makeRequest();
                     },
                   ),
                 ],
-                coverImage: CoverImageStack(songs: provider.songs),
+                coverImage: _cover,
               ),
               SliverToBoxAdapter(
-                child: SongListPrimaryButtons(
+                child: SongListHeader(
                   sortField: _paginationConfig.sortField,
                   sortOrder: _paginationConfig.sortOrder,
+                  onSearchExpanded: () => setState(() => _inSearchMode = true),
+                  onSearchCollapsed: () => setState(
+                    () => _inSearchMode = false,
+                  ),
+                  onSearchQueryChanged: (query) {
+                    setState(() => _searchQuery = query);
+                    makeRequest();
+                  },
                 ),
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (_, int index) => SongRow(
-                    song: provider.songs[index],
-                    listContext: SongListContext.allSongs,
+                    song: displayedSongs[index],
+                    listContext: BaseSongListHeader.SongListContext.allSongs,
                   ),
-                  childCount: provider.songs.length,
+                  childCount: displayedSongs.length,
                 ),
               ),
               _loading
                   ? SliverToBoxAdapter(
                       child: Container(
                         height: 72,
-                        child: Center(child: const Spinner(size: 16)),
+                        child: const Center(child: const Spinner(size: 16)),
                       ),
                     )
                   : const SliverToBoxAdapter(),
@@ -138,21 +176,27 @@ class _SongsScreenState extends State<SongsScreen> {
   }
 }
 
-class SongListPrimaryButtons extends StatefulWidget {
+class SongListHeader extends StatefulWidget {
   final String sortField;
   final SortOrder sortOrder;
+  final Function(String) onSearchQueryChanged;
+  final Function() onSearchExpanded;
+  final Function() onSearchCollapsed;
 
-  const SongListPrimaryButtons({
+  const SongListHeader({
     Key? key,
     required this.sortField,
     required this.sortOrder,
+    required this.onSearchQueryChanged,
+    required this.onSearchExpanded,
+    required this.onSearchCollapsed,
   }) : super(key: key);
 
   @override
-  _SongListPrimaryButtonsState createState() => _SongListPrimaryButtonsState();
+  _SongListHeaderState createState() => _SongListHeaderState();
 }
 
-class _SongListPrimaryButtonsState extends State<SongListPrimaryButtons> {
+class _SongListHeaderState extends State<SongListHeader> {
   bool _fetchingSongsToPlayAll = false;
   bool _fetchingSongsToShuffle = false;
 
@@ -161,41 +205,39 @@ class _SongListPrimaryButtonsState extends State<SongListPrimaryButtons> {
     final SongProvider songProvider = context.read();
     final AudioProvider audio = context.read();
 
-    return SongListButtons(
+    return BaseSongListHeader.SongListHeader(
       songs: [],
-      buttons: [
-        ButtonConfig(
-          label: 'Play All',
-          icon: _fetchingSongsToPlayAll
-              ? const SpinKitFadingCircle(color: Colors.white, size: 18)
-              : const Icon(CupertinoIcons.play_fill),
-          onPressed: () async {
-            if (_fetchingSongsToPlayAll || _fetchingSongsToShuffle) return;
+      playIcon: _fetchingSongsToPlayAll
+          ? SpinKitThreeBounce(color: AppColors.white.withOpacity(.5), size: 16)
+          : null,
+      shuffleIcon: _fetchingSongsToShuffle
+          ? SpinKitThreeBounce(color: AppColors.white.withOpacity(.5), size: 16)
+          : null,
+      onSearchExpanded: widget.onSearchExpanded,
+      onSearchCollapsed: widget.onSearchCollapsed,
+      onSearchQueryChanged: widget.onSearchQueryChanged,
+      onPlayPressed: () async {
+        if (_fetchingSongsToPlayAll || _fetchingSongsToShuffle) return;
 
-            setState(() => _fetchingSongsToPlayAll = true);
-            final songs = await songProvider.fetchInOrder(
-              sortField: widget.sortField,
-              order: widget.sortOrder,
-            );
-            setState(() => _fetchingSongsToPlayAll = false);
-            await audio.replaceQueue(songs);
-          },
-        ),
-        ButtonConfig(
-          label: 'Shuffle All',
-          icon: _fetchingSongsToShuffle
-              ? const SpinKitFadingCircle(color: Colors.white, size: 18)
-              : const Icon(CupertinoIcons.shuffle),
-          onPressed: () async {
-            if (_fetchingSongsToPlayAll || _fetchingSongsToShuffle) return;
+        setState(() => _fetchingSongsToPlayAll = true);
+        final songs = await songProvider.fetchInOrder(
+          sortField: widget.sortField,
+          order: widget.sortOrder,
+        );
+        setState(() => _fetchingSongsToPlayAll = false);
+        await audio.replaceQueue(songs);
+      },
+      onShufflePressed: () async {
+        if (_fetchingSongsToPlayAll || _fetchingSongsToShuffle) return;
 
-            setState(() => _fetchingSongsToShuffle = true);
-            final songs = await songProvider.fetchRandom();
-            setState(() => _fetchingSongsToShuffle = false);
-            await audio.replaceQueue(songs);
-          },
-        ),
-      ],
+        setState(() => _fetchingSongsToShuffle = true);
+        final songs = await songProvider.fetchInOrder(
+          sortField: widget.sortField,
+          order: widget.sortOrder,
+        );
+        setState(() => _fetchingSongsToShuffle = false);
+        await audio.replaceQueue(songs, shuffle: true);
+      },
     );
   }
 }

@@ -5,7 +5,7 @@ import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
-import 'package:app/ui/widgets/song_list_buttons.dart';
+import 'package:app/ui/widgets/song_list_header.dart';
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/song_list_sort_button.dart';
 import 'package:app/values/values.dart';
@@ -130,9 +130,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                         ],
                       ),
                       SliverToBoxAdapter(
-                        child: SongListButtons(
+                        child: SongListHeader(
                           songs: songs,
-                          onSearchChanged: (String query) {
+                          onSearchQueryChanged: (String query) {
                             setState(() => _searchQuery = query);
                           },
                         ),

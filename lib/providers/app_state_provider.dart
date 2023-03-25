@@ -7,7 +7,10 @@ class AppStateProvider {
 
   T? get<T>(Object key) => _state[_normalizeKey(key)];
 
-  set(Object key, dynamic value) => _state[_normalizeKey(key)] = value;
+  T set<T>(Object key, T value) {
+    _state[_normalizeKey(key)] = value;
+    return value;
+  }
 
   bool has(Object key) => _state.containsKey(_normalizeKey(key));
 

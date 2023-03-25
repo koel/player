@@ -55,6 +55,7 @@ List<SingleChildWidget> _providers = [
       songProvider: context.read<SongProvider>(),
       artistProvider: context.read<ArtistProvider>(),
       albumProvider: context.read<AlbumProvider>(),
+      appState: context.read<AppStateProvider>(),
     ),
   ),
   ChangeNotifierProvider(
@@ -68,6 +69,12 @@ List<SingleChildWidget> _providers = [
       albumProvider: context.read<AlbumProvider>(),
       artistProvider: context.read<ArtistProvider>(),
       recentlyPlayedProvider: context.read<RecentlyPlayedProvider>(),
+    ),
+  ),
+  ChangeNotifierProvider(
+    create: (context) => SongListScreenProvider(
+      songProvider: context.read<SongProvider>(),
+      searchProvider: context.read<SearchProvider>(),
     ),
   ),
 ];

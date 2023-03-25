@@ -4,7 +4,7 @@ import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
-import 'package:app/ui/widgets/song_list_buttons.dart';
+import 'package:app/ui/widgets/song_list_header.dart';
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/song_list_sort_button.dart';
 import 'package:app/ui/widgets/spinner.dart';
@@ -95,9 +95,9 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                 SliverToBoxAdapter(
                   child: songs.isEmpty
                       ? const SizedBox.shrink()
-                      : SongListButtons(
+                      : SongListHeader(
                           songs: displayedSongs,
-                          onSearchChanged: (String query) {
+                          onSearchQueryChanged: (String query) {
                             setState(() => _searchQuery = query);
                           },
                         ),

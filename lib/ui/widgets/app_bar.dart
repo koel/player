@@ -73,7 +73,7 @@ class CoverImageStack extends StatelessWidget {
 
   const CoverImageStack({Key? key, required this.songs}) : super(key: key);
 
-  get isEmpty => songs.isEmpty;
+  bool get isEmpty => songs.isEmpty;
 
   @override
   Widget build(BuildContext context) {
