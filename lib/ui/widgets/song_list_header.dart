@@ -45,6 +45,8 @@ class SongListHeader extends StatefulWidget {
 class _SongListHeaderState extends State<SongListHeader> {
   bool _displayingSearch = false;
   final TextEditingController _searchController = TextEditingController();
+  late Widget _buttonsHeader;
+  late Widget _searchHeader;
 
   @override
   void initState() {
@@ -55,96 +57,104 @@ class _SongListHeaderState extends State<SongListHeader> {
         widget.onSearchQueryChanged!(_searchController.text);
       }
     });
-  }
 
-  @override
-  Widget build(BuildContext context) {
     var playIcon = widget.playIcon ?? const Icon(CupertinoIcons.play_fill);
     var shuffleIcon = widget.shuffleIcon ?? const Icon(CupertinoIcons.shuffle);
 
     final AudioProvider audio = context.read();
 
+    _buttonsHeader = Row(
+      children: <Widget>[
+        IconButton(
+          onPressed: () {
+            setState(() => _displayingSearch = true);
+            widget.onSearchExpanded?.call();
+          },
+          icon: const Icon(CupertinoIcons.search),
+        ),
+        const Spacer(),
+        IconButton(
+          onPressed: () async {
+            if (widget.onPlayPressed != null) {
+              widget.onPlayPressed!();
+              return;
+            }
+            await audio.replaceQueue(widget.songs);
+          },
+          icon: SizedBox(
+            height: 24,
+            width: 24,
+            child: playIcon,
+          ),
+        ),
+        const SizedBox(width: 6),
+        ElevatedButton(
+          onPressed: () async {
+            if (widget.onShufflePressed != null) {
+              widget.onShufflePressed!();
+              return;
+            }
+            await audio.replaceQueue(widget.songs, shuffle: true);
+          },
+          child: SizedBox(
+            height: 24,
+            width: 24,
+            child: shuffleIcon,
+          ),
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.all(16),
+            elevation: 0,
+            shape: CircleBorder(),
+            backgroundColor: AppColors.highlight,
+          ),
+        ),
+      ],
+    );
+
+    _searchHeader = Row(
+      children: <Widget>[
+        Expanded(
+          child: CupertinoSearchTextField(
+            controller: _searchController,
+            style: const TextStyle(color: Colors.white),
+            autofocus: true,
+            decoration: BoxDecoration(
+              color: Colors.white10,
+              borderRadius: AppDimensions.inputBorderRadius,
+            ),
+          ),
+        ),
+        CupertinoButton(
+          onPressed: () {
+            setState(() => _displayingSearch = false);
+            _searchController.clear();
+            widget.onSearchCollapsed?.call();
+          },
+          child: const Text(
+            'Cancel',
+            style: TextStyle(color: AppColors.red),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final double verticalPadding = _displayingSearch ? 10 : 8;
 
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        _displayingSearch ? 16 : 8,
-        verticalPadding,
-        _displayingSearch ? 0 : 8,
-        verticalPadding,
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: 300),
+      child: Container(
+        key: ValueKey<bool>(_displayingSearch),
+        padding: EdgeInsets.fromLTRB(
+          _displayingSearch ? 16 : 8,
+          verticalPadding,
+          _displayingSearch ? 0 : 8,
+          verticalPadding,
+        ),
+        child: _displayingSearch ? _searchHeader : _buttonsHeader,
       ),
-      child: Row(children: <Widget>[
-        if (!_displayingSearch) ...<Widget>[
-          IconButton(
-            onPressed: () {
-              setState(() => _displayingSearch = true);
-              widget.onSearchExpanded?.call();
-            },
-            icon: const Icon(CupertinoIcons.search),
-          ),
-          const Spacer(),
-        ] else ...[
-          Expanded(
-            child: CupertinoSearchTextField(
-              controller: _searchController,
-              style: const TextStyle(color: Colors.white),
-              autofocus: true,
-              decoration: BoxDecoration(
-                color: Colors.white10,
-                borderRadius: AppDimensions.inputBorderRadius,
-              ),
-            ),
-          ),
-          CupertinoButton(
-            onPressed: () {
-              setState(() => _displayingSearch = false);
-              _searchController.clear();
-              widget.onSearchCollapsed?.call();
-            },
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: AppColors.red),
-            ),
-          ),
-        ],
-        if (!_displayingSearch) ...<Widget>[
-          IconButton(
-            onPressed: () async {
-              if (widget.onPlayPressed != null) {
-                widget.onPlayPressed!();
-                return;
-              }
-              await audio.replaceQueue(widget.songs);
-            },
-            icon: SizedBox(
-              height: 24,
-              width: 24,
-              child: playIcon,
-            ),
-          ),
-          const SizedBox(width: 6),
-          ElevatedButton(
-            onPressed: () async {
-              if (widget.onShufflePressed != null) {
-                widget.onShufflePressed!();
-                return;
-              }
-              await audio.replaceQueue(widget.songs, shuffle: true);
-            },
-            child: SizedBox(
-              height: 24,
-              width: 24,
-              child: shuffleIcon,
-            ),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.all(16),
-              elevation: 0,
-              shape: CircleBorder(),
-              backgroundColor: AppColors.highlight,
-            ),
-          ),
-        ],
-      ]),
     );
   }
 }
