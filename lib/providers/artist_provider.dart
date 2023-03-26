@@ -57,7 +57,6 @@ class ArtistProvider with ChangeNotifier {
   }
 
   Future<void> paginate() async {
-    // @todo - cache this
     var res = await get('artists?page=$_page');
 
     List<Artist> _artists = (res['data'] as List)
@@ -70,5 +69,12 @@ class ArtistProvider with ChangeNotifier {
     _page = res['links']['next'] == null ? 1 : ++res['meta']['current_page'];
 
     notifyListeners();
+  }
+
+  Future<void> reset() {
+    artists = [];
+    _page = 1;
+
+    return paginate();
   }
 }

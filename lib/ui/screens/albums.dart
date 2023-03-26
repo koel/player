@@ -3,6 +3,7 @@ import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/album_thumbnail.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
+import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/spinner.dart';
 import 'package:app/ui/widgets/typography.dart';
 import 'package:flutter/cupertino.dart';
@@ -81,59 +82,62 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
         builder: (_, provider, __) {
           return CupertinoTheme(
             data: CupertinoThemeData(primaryColor: Colors.white),
-            child: CustomScrollView(
-              controller: _scrollController,
-              slivers: <Widget>[
-                CupertinoSliverNavigationBar(
-                  backgroundColor: Colors.black,
-                  largeTitle: const LargeTitle(text: 'Albums'),
-                ),
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
-                      Album album = provider.albums[index];
-                      return Container(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: Divider.createBorderSide(context),
-                          ),
-                        ),
-                        child: InkWell(
-                          onTap: () => widget.router.gotoAlbumDetailsScreen(
-                            context,
-                            albumId: album.id,
-                          ),
-                          child: ListTile(
-                            leading: AlbumThumbnail(
-                              albumId: album.id,
-                              albumCoverUrl: album.cover,
-                              asHero: true,
-                            ),
-                            title: Text(
-                              album.name,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            subtitle: Text(
-                              album.artistName,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                    childCount: provider.albums.length,
+            child: PullToRefresh(
+              onRefresh: () => _albumProvider.refresh(),
+              child: CustomScrollView(
+                controller: _scrollController,
+                slivers: <Widget>[
+                  CupertinoSliverNavigationBar(
+                    backgroundColor: Colors.black,
+                    largeTitle: const LargeTitle(text: 'Albums'),
                   ),
-                ),
-                _loading
-                    ? SliverToBoxAdapter(
-                        child: Container(
-                          height: 72,
-                          child: Center(child: const Spinner(size: 16)),
-                        ),
-                      )
-                    : const SliverToBoxAdapter(),
-                const BottomSpace(),
-              ],
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        Album album = provider.albums[index];
+                        return Container(
+                          decoration: BoxDecoration(
+                            border: Border(
+                              bottom: Divider.createBorderSide(context),
+                            ),
+                          ),
+                          child: InkWell(
+                            onTap: () => widget.router.gotoAlbumDetailsScreen(
+                              context,
+                              albumId: album.id,
+                            ),
+                            child: ListTile(
+                              leading: AlbumThumbnail(
+                                albumId: album.id,
+                                albumCoverUrl: album.cover,
+                                asHero: true,
+                              ),
+                              title: Text(
+                                album.name,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              subtitle: Text(
+                                album.artistName,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      childCount: provider.albums.length,
+                    ),
+                  ),
+                  _loading
+                      ? SliverToBoxAdapter(
+                          child: Container(
+                            height: 72,
+                            child: Center(child: const Spinner(size: 16)),
+                          ),
+                        )
+                      : const SliverToBoxAdapter(),
+                  const BottomSpace(),
+                ],
+              ),
             ),
           );
         },

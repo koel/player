@@ -3,6 +3,7 @@ import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/artist_thumbnail.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
+import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/spinner.dart';
 import 'package:app/ui/widgets/typography.dart';
 import 'package:flutter/cupertino.dart';
@@ -81,47 +82,51 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
         builder: (_, provider, __) {
           return CupertinoTheme(
             data: CupertinoThemeData(primaryColor: Colors.white),
-            child: CustomScrollView(
-              controller: _scrollController,
-              slivers: [
-                CupertinoSliverNavigationBar(
-                  backgroundColor: Colors.black,
-                  largeTitle: const LargeTitle(text: 'Artists'),
-                ),
-                SliverList(
-                  delegate: SliverChildBuilderDelegate((
-                    BuildContext context,
-                    int index,
-                  ) {
-                    Artist artist = provider.artists[index];
-                    return InkWell(
-                      onTap: () => widget.router.gotoArtistDetailsScreen(
-                        context,
-                        artistId: artist.id,
-                      ),
-                      child: ListTile(
-                        shape: Border(
-                          bottom: Divider.createBorderSide(context),
+            child: PullToRefresh(
+              onRefresh: () => _artistProvider.reset(),
+              child: CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  CupertinoSliverNavigationBar(
+                    backgroundColor: Colors.black,
+                    largeTitle: const LargeTitle(text: 'Artists'),
+                  ),
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate((
+                      BuildContext context,
+                      int index,
+                    ) {
+                      Artist artist = provider.artists[index];
+                      return InkWell(
+                        onTap: () => widget.router.gotoArtistDetailsScreen(
+                          context,
+                          artistId: artist.id,
                         ),
-                        leading: ArtistThumbnail(artist: artist, asHero: true),
-                        title: Text(
-                          artist.name,
-                          overflow: TextOverflow.ellipsis,
+                        child: ListTile(
+                          shape: Border(
+                            bottom: Divider.createBorderSide(context),
+                          ),
+                          leading:
+                              ArtistThumbnail(artist: artist, asHero: true),
+                          title: Text(
+                            artist.name,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                    );
-                  }, childCount: provider.artists.length),
-                ),
-                _loading
-                    ? SliverToBoxAdapter(
-                        child: Container(
-                          height: 72,
-                          child: Center(child: const Spinner(size: 16)),
-                        ),
-                      )
-                    : const SliverToBoxAdapter(),
-                const BottomSpace(),
-              ],
+                      );
+                    }, childCount: provider.artists.length),
+                  ),
+                  _loading
+                      ? SliverToBoxAdapter(
+                          child: Container(
+                            height: 72,
+                            child: Center(child: const Spinner(size: 16)),
+                          ),
+                        )
+                      : const SliverToBoxAdapter(),
+                  const BottomSpace(),
+                ],
+              ),
             ),
           );
         },

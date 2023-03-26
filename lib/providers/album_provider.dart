@@ -55,7 +55,6 @@ class AlbumProvider with ChangeNotifier {
   }
 
   Future<void> paginate() async {
-    // @todo - cache this
     var res = await get('albums?page=$_page');
 
     List<Album> _albums = (res['data'] as List)
@@ -68,5 +67,12 @@ class AlbumProvider with ChangeNotifier {
     _page = res['links']['next'] == null ? 1 : ++res['meta']['current_page'];
 
     notifyListeners();
+  }
+
+  Future<void> refresh() {
+    albums = [];
+    _page = 1;
+
+    return paginate();
   }
 }
