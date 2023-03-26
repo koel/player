@@ -1,6 +1,7 @@
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
+import 'package:app/ui/placeholders/artist_screen_placeholder.dart';
 import 'package:app/ui/widgets/artist_thumbnail.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
@@ -80,6 +81,9 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
     return Scaffold(
       body: Consumer<ArtistProvider>(
         builder: (_, provider, __) {
+          if (provider.artists.isEmpty && _loading)
+            return const ArtistScreenPlaceholder();
+
           return CupertinoTheme(
             data: CupertinoThemeData(primaryColor: Colors.white),
             child: PullToRefresh(

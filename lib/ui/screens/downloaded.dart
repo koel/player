@@ -37,7 +37,7 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
     return Scaffold(
       body: Consumer<DownloadProvider>(
         builder: (_, provider, __) {
-          if (provider.songs.length == 0) {
+          if (provider.songs.isEmpty) {
             return Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppDimensions.horizontalPadding,

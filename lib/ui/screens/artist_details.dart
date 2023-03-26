@@ -4,13 +4,13 @@ import 'package:app/enums.dart';
 import 'package:app/extensions/extensions.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
+import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/song_list_header.dart';
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/song_list_sort_button.dart';
-import 'package:app/ui/widgets/spinner.dart';
 import 'package:app/values/values.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
@@ -51,7 +51,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
         future: buildRequest(artistId),
         builder: (_, AsyncSnapshot<List<dynamic>> snapshot) {
           if (!snapshot.hasData || snapshot.hasError) {
-            return const Center(child: const Spinner());
+            return const SongListScreenPlaceholder();
           }
 
           final songs = snapshot.data![1] as List<Song>;

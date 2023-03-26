@@ -2,13 +2,13 @@ import 'package:app/constants/constants.dart';
 import 'package:app/enums.dart';
 import 'package:app/extensions/extensions.dart';
 import 'package:app/providers/providers.dart';
+import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/song_list_header.dart';
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/song_list_sort_button.dart';
-import 'package:app/ui/widgets/spinner.dart';
 import 'package:app/values/values.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
@@ -99,9 +99,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     return Scaffold(
       body: Consumer<FavoriteProvider>(
         builder: (_, provider, __) {
-          if (provider.songs.isEmpty && _loading) {
-            return const Center(child: const Spinner());
-          }
+          if (provider.songs.isEmpty && _loading)
+            return const SongListScreenPlaceholder();
 
           if (cover.isEmpty) {
             cover = CoverImageStack(songs: provider.songs);

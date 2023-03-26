@@ -1,6 +1,7 @@
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
+import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/album_thumbnail.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
@@ -80,6 +81,9 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
     return Scaffold(
       body: Consumer<AlbumProvider>(
         builder: (_, provider, __) {
+          if (provider.albums.isEmpty && _loading)
+            return const AlbumScreenPlaceholder();
+
           return CupertinoTheme(
             data: CupertinoThemeData(primaryColor: Colors.white),
             child: PullToRefresh(

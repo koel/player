@@ -2,6 +2,7 @@ import 'package:app/constants/constants.dart';
 import 'package:app/enums.dart';
 import 'package:app/extensions/extensions.dart';
 import 'package:app/providers/providers.dart';
+import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/song_list_header.dart' as BaseSongListHeader;
@@ -97,9 +98,8 @@ class _SongsScreenState extends State<SongsScreen> {
     return Scaffold(
       body: Consumer<SongListScreenProvider>(
         builder: (_, provider, __) {
-          if (provider.songs.isEmpty && _loading) {
-            return const Center(child: const Spinner());
-          }
+          if (provider.songs.isEmpty && _loading)
+            return const SongListScreenPlaceholder();
 
           if (_cover.isEmpty) {
             _cover = CoverImageStack(songs: provider.songs);
