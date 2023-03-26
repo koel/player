@@ -118,7 +118,7 @@ class _SongsScreenState extends State<SongsScreen> {
                     fields: ['title', 'artist_name', 'created_at'],
                     currentField: _paginationConfig.sortField,
                     currentOrder: _paginationConfig.sortOrder,
-                    onActionSheetActionPressed: (sortConfig) {
+                    onMenuItemSelected: (sortConfig) {
                       setState(() {
                         _paginationConfig.sortField = sortConfig.field;
                         _paginationConfig.sortOrder = sortConfig.order;

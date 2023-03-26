@@ -96,7 +96,7 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                     fields: ['title', 'artist_name', 'created_at'],
                     currentField: sortConfig.field,
                     currentOrder: sortConfig.order,
-                    onActionSheetActionPressed: (_sortConfig) {
+                    onMenuItemSelected: (_sortConfig) {
                       setState(() => sortConfig = _sortConfig);
                       appState.set('downloaded.sort', _sortConfig);
                     },

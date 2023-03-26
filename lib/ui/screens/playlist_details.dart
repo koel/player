@@ -85,7 +85,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                       fields: ['title', 'artist_name', 'created_at'],
                       currentField: sortConfig.field,
                       currentOrder: sortConfig.order,
-                      onActionSheetActionPressed: (_sortConfig) {
+                      onMenuItemSelected: (_sortConfig) {
                         setState(() => sortConfig = _sortConfig);
                         appState.set('playlist.sort', _sortConfig);
                       },

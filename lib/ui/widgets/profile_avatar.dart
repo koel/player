@@ -46,7 +46,7 @@ class ProfileAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    DownloadProvider downloads = context.read();
+    final DownloadProvider downloads = context.read();
 
     return PopupMenuButton<ProfileAvatarMenuItems>(
       onSelected: (item) {
@@ -59,23 +59,17 @@ class ProfileAvatar extends StatelessWidget {
             break;
         }
       },
-      child: const Icon(
-        CupertinoIcons.person_alt_circle,
-        size: 24,
-      ),
-      offset: Offset(0, 32),
-      padding: EdgeInsets.zero,
-      itemBuilder: (BuildContext context) => [
-        PopupMenuItem(
+      child: const Icon(CupertinoIcons.person_alt_circle, size: 24),
+      offset: const Offset(0, 32),
+      itemBuilder: (_) => [
+        const PopupMenuItem(
           value: ProfileAvatarMenuItems.clearDownloads,
           child: Text('Clear downloads'),
-          height: 32.0,
         ),
-        PopupMenuDivider(),
-        PopupMenuItem(
+        const PopupMenuDivider(height: .5),
+        const PopupMenuItem(
           value: ProfileAvatarMenuItems.logout,
           child: Text('Log out'),
-          height: 32.0,
         ),
       ],
     );
