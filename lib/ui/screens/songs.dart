@@ -97,6 +97,10 @@ class _SongsScreenState extends State<SongsScreen> {
     return Scaffold(
       body: Consumer<SongListScreenProvider>(
         builder: (_, provider, __) {
+          if (provider.songs.isEmpty && _loading) {
+            return const Center(child: const Spinner());
+          }
+
           if (_cover.isEmpty) {
             _cover = CoverImageStack(songs: provider.songs);
           }

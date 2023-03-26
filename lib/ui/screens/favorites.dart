@@ -8,6 +8,7 @@ import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/song_list_header.dart';
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/song_list_sort_button.dart';
+import 'package:app/ui/widgets/spinner.dart';
 import 'package:app/values/values.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
@@ -98,6 +99,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     return Scaffold(
       body: Consumer<FavoriteProvider>(
         builder: (_, provider, __) {
+          if (provider.songs.isEmpty && _loading) {
+            return const Center(child: const Spinner());
+          }
+
           if (cover.isEmpty) {
             cover = CoverImageStack(songs: provider.songs);
           }
