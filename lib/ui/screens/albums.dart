@@ -88,7 +88,7 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                 controller: _scrollController,
                 slivers: <Widget>[
                   CupertinoSliverNavigationBar(
-                    backgroundColor: Colors.black,
+                    backgroundColor: Colors.black54,
                     largeTitle: const LargeTitle(text: 'Albums'),
                   ),
                   SliverList(

@@ -127,7 +127,10 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                         ),
                       ),
                       key: ValueKey(displayedSongs[index]),
-                      child: SongRow(song: displayedSongs[index]),
+                      child: SongRow(
+                        song: displayedSongs[index],
+                        listContext: SongListContext.downloads,
+                      ),
                     );
                   },
                   childCount: displayedSongs.length,

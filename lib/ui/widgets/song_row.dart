@@ -181,7 +181,7 @@ class SongRowTrailingActions extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        SongCacheIcon(song: song),
+        if (listContext != SongListContext.downloads) SongCacheIcon(song: song),
         if (listContext == SongListContext.queue)
           // In a queue, the trailing control is the Drag icon
           // In other "standard" queues, it's the Actions menu trigger

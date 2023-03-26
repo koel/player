@@ -120,15 +120,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
         return Scaffold(
           body: CupertinoTheme(
-            data: CupertinoThemeData(
-              primaryColor: Colors.white,
-            ),
+            data: CupertinoThemeData(primaryColor: Colors.white),
             child: PullToRefresh(
               onRefresh: () => context.read<OverviewProvider>().fetchOverview(),
               child: CustomScrollView(
                 slivers: <Widget>[
                   CupertinoSliverNavigationBar(
-                    backgroundColor: Colors.black,
+                    backgroundColor: Colors.black54,
                     largeTitle: const LargeTitle(text: 'Home'),
                     trailing: const ProfileAvatar(),
                   ),

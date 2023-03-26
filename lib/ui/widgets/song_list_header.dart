@@ -13,6 +13,7 @@ enum SongListContext {
   playlist,
   favorites,
   other,
+  downloads,
 }
 
 class SongListHeader extends StatefulWidget {
@@ -86,7 +87,7 @@ class _SongListHeaderState extends State<SongListHeader> {
           Expanded(
             child: CupertinoSearchTextField(
               controller: _searchController,
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
               autofocus: true,
               decoration: BoxDecoration(
                 color: Colors.white10,
@@ -139,7 +140,7 @@ class _SongListHeaderState extends State<SongListHeader> {
               padding: const EdgeInsets.all(16),
               elevation: 0,
               shape: CircleBorder(),
-              backgroundColor: AppColors.white.withOpacity(0.2),
+              backgroundColor: AppColors.highlight,
             ),
           ),
         ],

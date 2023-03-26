@@ -69,7 +69,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
                         ),
                         background: Container(
                           alignment: AlignmentDirectional.centerEnd,
-                          color: Colors.red,
+                          color: AppColors.red,
                           child: const Padding(
                             padding: EdgeInsets.only(right: 28),
                             child: Icon(CupertinoIcons.delete),
@@ -87,7 +87,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
             );
           },
           child: CupertinoSliverNavigationBar(
-            backgroundColor: Colors.black,
+            backgroundColor: Colors.black54,
             largeTitle: const LargeTitle(text: 'Playlists'),
             trailing: IconButton(
               onPressed: () => widget.router.showCreatePlaylistSheet(context),
@@ -164,7 +164,7 @@ class NoPlaylistsScreen extends StatelessWidget {
               const SizedBox(height: 16.0),
               Text(
                 'No playlists',
-                style: Theme.of(context).textTheme.headline5,
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 16.0),
               const Text('Tap to create a playlist.'),

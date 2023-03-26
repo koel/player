@@ -1,3 +1,4 @@
+import 'package:app/constants/colors.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
@@ -17,7 +18,7 @@ class SongCacheIcon extends StatefulWidget {
 class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
   late DownloadProvider cache;
   bool _downloading = false;
-  bool? _hasCache;
+  bool? _downloaded;
 
   @override
   void initState() {
@@ -25,22 +26,22 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
     cache = context.read();
 
     subscribe(cache.downloadsClearedStream.listen((_) {
-      setState(() => _hasCache = false);
+      setState(() => _downloaded = false);
     }));
 
     subscribe(cache.singleCacheRemovedStream.listen((song) {
       if (song == widget.song) {
-        setState(() => _hasCache = false);
+        setState(() => _downloaded = false);
       }
     }));
 
     subscribe(cache.songDownloadedStream.listen((event) {
       if (event.song == widget.song) {
-        setState(() => _hasCache = true);
+        setState(() => _downloaded = true);
       }
     }));
 
-    setState(() => _hasCache = cache.has(song: widget.song));
+    setState(() => _downloaded = cache.has(song: widget.song));
   }
 
   /// Since this widget is rendered inside NowPlayingScreen, change to current
@@ -56,7 +57,7 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
 
   void _resolveCacheStatus() {
     bool hasState = cache.has(song: widget.song);
-    setState(() => _hasCache = hasState);
+    setState(() => _downloaded = hasState);
   }
 
   @override
@@ -70,7 +71,7 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
     await cache.download(song: widget.song);
     setState(() {
       _downloading = false;
-      _hasCache = true;
+      _downloaded = true;
     });
   }
 
@@ -82,15 +83,15 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
         child: CupertinoActivityIndicator(radius: 9),
       );
 
-    if (_hasCache == null) return const SizedBox.shrink();
+    if (_downloaded == null) return const SizedBox.shrink();
 
-    if (_hasCache!) {
+    if (_downloaded!) {
       return const Padding(
         padding: EdgeInsets.only(right: 4.0),
         child: Icon(
           CupertinoIcons.checkmark_alt_circle_fill,
           size: 18,
-          color: Colors.white24,
+          color: AppColors.green,
         ),
       );
     }
