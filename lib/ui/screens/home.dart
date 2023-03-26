@@ -2,12 +2,12 @@ import 'package:app/constants/constants.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/albums.dart';
 import 'package:app/ui/screens/artists.dart';
-import 'package:app/ui/screens/profile.dart';
 import 'package:app/ui/screens/songs.dart';
 import 'package:app/ui/widgets/album_card.dart';
 import 'package:app/ui/widgets/artist_card.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/horizontal_card_scroller.dart';
+import 'package:app/ui/widgets/profile_avatar.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/simple_song_list.dart';
 import 'package:app/ui/widgets/song_card.dart';
@@ -130,17 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   CupertinoSliverNavigationBar(
                     backgroundColor: Colors.black,
                     largeTitle: const LargeTitle(text: 'Home'),
-                    trailing: IconButton(
-                      onPressed: () => Navigator.of(context).push(
-                        new CupertinoPageRoute(
-                          builder: (_) => const ProfileScreen(),
-                        ),
-                      ),
-                      icon: const Icon(
-                        CupertinoIcons.person_alt_circle,
-                        size: 24,
-                      ),
-                    ),
+                    trailing: const ProfileAvatar(),
                   ),
                   SliverList(
                       delegate: SliverChildListDelegate.fixed(homeBlocks)),

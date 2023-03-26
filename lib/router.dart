@@ -15,7 +15,6 @@ import 'package:app/ui/screens/login.dart';
 import 'package:app/ui/screens/now_playing.dart';
 import 'package:app/ui/screens/playlist_details.dart';
 import 'package:app/ui/screens/playlists.dart';
-import 'package:app/ui/screens/profile.dart';
 import 'package:app/ui/screens/queue.dart';
 import 'package:app/ui/screens/root.dart';
 import 'package:app/ui/screens/search.dart';
@@ -44,7 +43,6 @@ class AppRouter {
     PlaylistDetailsScreen.routeName: (_) => const PlaylistDetailsScreen(),
     QueueScreen.routeName: (_) => const QueueScreen(),
     AddToPlaylistScreen.routeName: (_) => const AddToPlaylistScreen(),
-    ProfileScreen.routeName: (_) => const ProfileScreen(),
     DataLoadingScreen.routeName: (_) => const DataLoadingScreen(),
     DownloadedScreen.routeName: (_) => const DownloadedScreen(),
   };
