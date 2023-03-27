@@ -24,23 +24,12 @@ class _DataLoadingScreen extends State<DataLoadingScreen> {
   }
 
   Future<void> _loadData() async {
-    context.read<DataProvider>().init(context).then((_) async {
-      await Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (_, __, ___) => const RootScreen(),
-          transitionDuration: const Duration(seconds: 2),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return ZoomPageTransitionsBuilder().buildTransitions(
-              null,
-              context,
-              animation,
-              secondaryAnimation,
-              child,
-            );
-          },
-        ),
-      );
-    }, onError: (_) => setState(() => _hasError = true));
+    try {
+      await context.read<DataProvider>().init(context);
+      await Navigator.of(context).pushReplacementNamed(RootScreen.routeName);
+    } catch (e) {
+      setState(() => _hasError = true);
+    }
   }
 
   @override

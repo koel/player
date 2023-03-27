@@ -1,5 +1,6 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/providers/providers.dart';
+import 'package:app/ui/placeholders/home_screen_placeholder.dart';
 import 'package:app/ui/screens/albums.dart';
 import 'package:app/ui/screens/artists.dart';
 import 'package:app/ui/screens/songs.dart';
@@ -45,9 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Consumer<OverviewProvider>(
       builder: (_, overviewProvider, __) {
-        if (_loading) {
-          return const Center(child: const Spinner());
-        }
+        if (_loading) return const HomeScreenPlaceholder();
 
         var homeBlocks = <Widget>[
           if (overviewProvider.recentlyPlayedSongs.isNotEmpty)

@@ -77,15 +77,14 @@ class SortButton extends StatelessWidget {
         );
       },
       itemBuilder: (_) {
-        List<PopupMenuEntry<String>> widgets = [];
+        var widgets = fields
+            .expand<PopupMenuEntry<String>>((field) => [
+                  buildMenuItem(field, sortFields[field]!),
+                  const PopupMenuDivider(height: .5),
+                ])
+            .toList();
 
-        fields.forEach((field) {
-          widgets
-            ..add(buildMenuItem(field, sortFields[field]!))
-            ..add(const PopupMenuDivider(height: .5));
-        });
-
-        return widgets.toList()..removeLast();
+        return widgets..removeLast();
       },
     );
   }

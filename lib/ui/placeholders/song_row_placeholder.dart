@@ -17,18 +17,17 @@ class SongRowPlaceholder extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
       ),
-      shape: Border(bottom: Divider.createBorderSide(context)),
       title: Container(
         width: 200,
-        height: 16,
+        height: 14,
         color: Colors.white,
         margin: const EdgeInsets.only(right: 80),
       ),
       subtitle: Container(
         width: 200,
-        height: 16,
-        color: Colors.white,
-        margin: const EdgeInsets.only(right: 140),
+        height: 12,
+        color: Colors.white.withOpacity(.5),
+        margin: const EdgeInsets.only(right: 160),
       ),
       trailing: const RoundedButtonPlaceholder(size: 24),
     );

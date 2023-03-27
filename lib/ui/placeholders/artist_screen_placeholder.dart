@@ -10,12 +10,12 @@ class ArtistScreenPlaceholder extends StatelessWidget {
     return GradientPlaceholder(
       child: CustomScrollView(
         slivers: [
-          SliverAppBar(expandedHeight: 96),
+          const SliverAppBar(expandedHeight: 96),
           SliverToBoxAdapter(child: Container(height: 16.0)),
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (_, __) => const ArtistRowPlaceholder(),
-              childCount: 10,
+              childCount: 30,
             ),
           ),
         ],

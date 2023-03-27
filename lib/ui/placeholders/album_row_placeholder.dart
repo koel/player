@@ -18,12 +18,12 @@ class AlbumRowPlaceholder extends StatelessWidget {
       title: Container(
         height: 16,
         color: Colors.white,
-        margin: EdgeInsets.only(right: 80),
+        margin: const EdgeInsets.only(right: 80),
       ),
       subtitle: Container(
         height: 16,
         color: Colors.white,
-        margin: EdgeInsets.only(right: 140),
+        margin: const EdgeInsets.only(right: 140),
       ),
     );
   }
