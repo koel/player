@@ -7,21 +7,15 @@ class AuthProvider {
 
   User get authUser => _authUser;
 
-  Future<bool> login({required String email, required String password}) async {
+  Future<void> login({required String email, required String password}) async {
     final Map<String, String> loginData = {
       'email': email,
       'password': password,
     };
 
-    try {
-      final response = await post('me', data: loginData);
-      preferences.apiToken = response['token'];
-      preferences.audioToken = response['audio-token'];
-      return true;
-    } catch (err) {
-      print(err);
-      return false;
-    }
+    final response = await post('me', data: loginData);
+    preferences.apiToken = response['token'];
+    preferences.audioToken = response['audio-token'];
   }
 
   void setAuthUser(User user) => _authUser = user;

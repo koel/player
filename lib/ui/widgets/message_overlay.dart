@@ -39,7 +39,7 @@ class MessageOverlay extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: Theme.of(context)
                     .textTheme
-                    .headline6
+                    .titleLarge
                     ?.copyWith(color: Colors.white60),
               ),
             ],
@@ -50,7 +50,7 @@ class MessageOverlay extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: Theme.of(context)
                     .textTheme
-                    .bodyText1
+                    .bodyLarge
                     ?.copyWith(color: Colors.white60),
               ),
             ]

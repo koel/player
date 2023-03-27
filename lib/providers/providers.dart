@@ -1,7 +1,6 @@
 export 'album_provider.dart';
 export 'app_state_provider.dart';
 export 'artist_provider.dart';
-export 'audio_provider.dart';
 export 'auth_provider.dart';
 export 'download_provider.dart';
 export 'data_provider.dart';

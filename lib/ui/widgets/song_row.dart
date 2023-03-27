@@ -1,18 +1,16 @@
 import 'package:app/constants/constants.dart';
-import 'package:app/extensions/extensions.dart';
+import 'package:app/main.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
-import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/song_cache_icon.dart';
 import 'package:app/ui/widgets/song_list_header.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
-import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_html/style.dart';
-import 'package:provider/provider.dart';
 
 class SongRow extends StatefulWidget {
   final Song song;
@@ -40,14 +38,6 @@ class SongRow extends StatefulWidget {
 }
 
 class _SongRowState extends State<SongRow> {
-  late AudioProvider audio;
-
-  @override
-  void initState() {
-    super.initState();
-    audio = context.read();
-  }
-
   @override
   Widget build(BuildContext context) {
     late String subtitle;
@@ -63,7 +53,7 @@ class _SongRowState extends State<SongRow> {
     }
 
     return InkWell(
-      onTap: () async => await audio.play(song: widget.song),
+      onTap: () => audioHandler.queueAndPlay(widget.song),
       onLongPress: () {
         HapticFeedback.mediumImpact();
         widget.router.showActionSheet(context, song: widget.song);
@@ -71,9 +61,7 @@ class _SongRowState extends State<SongRow> {
       child: ListTile(
         key: UniqueKey(),
         contentPadding: widget.padding ??
-            const EdgeInsets.only(
-              left: AppDimensions.horizontalPadding,
-            ),
+            const EdgeInsets.only(left: AppDimensions.horizontalPadding),
         shape: widget.bordered
             ? Border(bottom: Divider.createBorderSide(context))
             : null,
@@ -128,22 +116,19 @@ class SongRowThumbnail extends StatefulWidget {
 
 class _SongRowThumbnailState extends State<SongRowThumbnail>
     with StreamSubscriber {
-  late AudioProvider audio;
-  PlayerState _state = PlayerState.stop;
+  PlaybackState? _state;
   bool _isCurrentSong = false;
 
   @override
   void initState() {
     super.initState();
 
-    audio = context.read();
-
-    subscribe(audio.player.playerState.listen((PlayerState state) {
-      setState(() => _state = state);
+    subscribe(audioHandler.playbackState.listen((PlaybackState value) {
+      setState(() => _state = value);
     }));
 
-    subscribe(audio.player.current.listen((Playing? current) {
-      setState(() => _isCurrentSong = audio.player.songId == widget.song.id);
+    subscribe(audioHandler.mediaItem.listen((MediaItem? value) {
+      setState(() => _isCurrentSong = value?.id == widget.song.id);
     }));
   }
 
@@ -157,7 +142,7 @@ class _SongRowThumbnailState extends State<SongRowThumbnail>
   Widget build(BuildContext context) {
     return SongThumbnail(
       song: widget.song,
-      playing: _state == PlayerState.play && _isCurrentSong,
+      playing: _state != null && _state!.playing && _isCurrentSong,
     );
   }
 }

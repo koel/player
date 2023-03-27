@@ -1,24 +1,25 @@
 import 'dart:ui';
 
-import 'package:app/extensions/extensions.dart';
+import 'package:app/main.dart';
+import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/screens/info_sheet.dart';
 import 'package:app/ui/screens/queue.dart';
 import 'package:app/ui/widgets/now_playing/audio_controls.dart';
-import 'package:app/ui/widgets/now_playing/loop_mode_button.dart';
+import 'package:app/ui/widgets/now_playing/repeat_mode_button.dart';
 import 'package:app/ui/widgets/now_playing/progress_bar.dart';
 import 'package:app/ui/widgets/now_playing/song_info.dart';
 import 'package:app/ui/widgets/now_playing/volume_slider.dart';
 import 'package:app/ui/widgets/song_cache_icon.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
-import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class NowPlayingScreen extends StatelessWidget {
+class NowPlayingScreen extends StatefulWidget {
   final AppRouter router;
 
   const NowPlayingScreen({
@@ -27,117 +28,145 @@ class NowPlayingScreen extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<StatefulWidget> createState() => _NowPlayingScreenState();
+}
+
+class _NowPlayingScreenState extends State<NowPlayingScreen>
+    with StreamSubscriber {
+  PlaybackState? _state;
+  Song? _song;
+  late SongProvider _songProvider;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _songProvider = context.read();
+
+    subscribe(audioHandler.playbackState.listen((PlaybackState value) {
+      setState(() => _state = value);
+    }));
+
+    subscribe(audioHandler.mediaItem.listen((MediaItem? value) {
+      if (value == null) return;
+      setState(() => _song = _songProvider.byId(value.id));
+    }));
+  }
+
+  @override
+  void dispose() {
+    unsubscribeAll();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final AudioProvider audio = context.watch();
-    final SongProvider songProvider = context.watch();
+    if (_song == null || _state == null) return const SizedBox.shrink();
 
     Color bottomIconColor = Colors.white54;
 
-    return StreamBuilder<Playing?>(
-      stream: audio.player.current,
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if (!snapshot.hasData) {
-          return const SizedBox.shrink();
-        }
-
-        String? songId = audio.player.songId;
-        if (songId == null) return const SizedBox.shrink();
-        Song song = songProvider.byId(songId)!;
-
-        final Widget frostGlassBackground = SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          child: ClipRect(
-            child: ImageFiltered(
-              imageFilter: ImageFilter.blur(sigmaX: 80.0, sigmaY: 80.0),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: song.image,
-                    fit: BoxFit.cover,
-                    alignment: Alignment.topCenter,
-                  ),
-                ),
+    final Widget frostGlassBackground = SizedBox(
+      width: double.infinity,
+      height: double.infinity,
+      child: ClipRect(
+        child: ImageFiltered(
+          imageFilter: ImageFilter.blur(sigmaX: 80.0, sigmaY: 80.0),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: _song!.image,
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
               ),
             ),
           ),
-        );
+        ),
+      ),
+    );
 
-        final Widget thumbnail = Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
-          child: Hero(
-            tag: 'hero-now-playing-thumbnail',
-            child: SongThumbnail(song: song, size: ThumbnailSize.xl),
-          ),
-        );
+    final Widget thumbnail = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Hero(
+        tag: 'hero-now-playing-thumbnail',
+        child: SongThumbnail(song: _song!, size: ThumbnailSize.xl),
+      ),
+    );
 
-        final Widget infoPane = Column(
+    final Widget infoPane = Column(
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
+            Expanded(child: SongInfo(song: _song!)),
+            const SizedBox(width: 8),
+            SongCacheIcon(song: _song!),
+            IconButton(
+              onPressed: () =>
+                  widget.router.showActionSheet(context, song: _song!),
+              icon: const Icon(CupertinoIcons.ellipsis),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ProgressBar(song: _song!),
+      ],
+    );
+
+    return Stack(
+      children: <Widget>[
+        Container(color: Colors.black),
+        frostGlassBackground,
+        Container(color: Colors.black54),
+        Container(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: BoxConstraints.tightFor(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                Expanded(child: SongInfo(song: song)),
-                const SizedBox(width: 8),
-                SongCacheIcon(song: song),
-                IconButton(
-                  onPressed: () => router.showActionSheet(context, song: song),
-                  icon: const Icon(CupertinoIcons.ellipsis),
+                thumbnail,
+                infoPane,
+                const AudioControls(),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const VolumeSlider(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        const RepeatModeButton(),
+                        IconButton(
+                          onPressed: () => showInfoSheet(
+                            context,
+                            song: _song!,
+                          ),
+                          icon: Icon(
+                            CupertinoIcons.text_quote,
+                            color: bottomIconColor,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () =>
+                              Navigator.of(context, rootNavigator: true)
+                                  .pushNamed(QueueScreen.routeName),
+                          icon: Icon(
+                            CupertinoIcons.list_number,
+                            color: bottomIconColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            ProgressBar(song: song),
-          ],
-        );
-
-        return Stack(
-          children: <Widget>[
-            Container(color: Colors.black),
-            frostGlassBackground,
-            Container(color: Colors.black54),
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  thumbnail,
-                  infoPane,
-                  const AudioControls(),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      const VolumeSlider(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          const LoopModeButton(),
-                          IconButton(
-                            onPressed: () => showInfoSheet(context, song: song),
-                            icon: Icon(
-                              CupertinoIcons.text_quote,
-                              color: bottomIconColor,
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: () =>
-                                Navigator.of(context, rootNavigator: true)
-                                    .pushNamed(QueueScreen.routeName),
-                            icon: Icon(
-                              CupertinoIcons.list_number,
-                              color: bottomIconColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
+          ),
+        ),
+      ],
     );
   }
 }

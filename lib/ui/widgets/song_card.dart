@@ -1,10 +1,9 @@
+import 'package:app/main.dart';
 import 'package:app/models/models.dart';
-import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 
 class SongCard extends StatefulWidget {
   final Song song;
@@ -26,14 +25,12 @@ class _SongCardState extends State<SongCard> {
 
   @override
   Widget build(BuildContext context) {
-    AudioProvider audio = context.watch();
-
     return GestureDetector(
       onTapDown: (_) => setState(() => _opacity = 0.7),
       onTapCancel: () => setState(() => _opacity = 1.0),
       onTap: () async {
         setState(() => _opacity = 1.0);
-        await audio.play(song: widget.song);
+        await audioHandler.queueAndPlay(widget.song);
       },
       onLongPress: () {
         HapticFeedback.mediumImpact();

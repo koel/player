@@ -1,5 +1,4 @@
-import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:enum_to_string/enum_to_string.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:get_storage/get_storage.dart';
 
 final GetStorage storage = GetStorage('Preferences');
@@ -36,16 +35,15 @@ set userEmail(String? email) => _set('email', email);
 
 String? get userEmail => _get<String>('email');
 
-set loopMode(LoopMode mode) => _set(
-      'loopMode',
-      EnumToString.convertToString(mode),
-    );
+set repeatMode(AudioServiceRepeatMode mode) => _set('repeatMode', mode.name);
 
-LoopMode get loopMode {
-  String? loopModeAsString = _get('loopMode');
+AudioServiceRepeatMode get repeatMode {
+  String name = _get('repeatMode') ?? AudioServiceRepeatMode.none.name;
 
-  return EnumToString.fromString(LoopMode.values, loopModeAsString ?? '') ??
-      LoopMode.none;
+  return AudioServiceRepeatMode.values.firstWhere(
+    (e) => e.toString().split('.').last == name,
+    orElse: () => AudioServiceRepeatMode.none,
+  );
 }
 
 set volume(double volume) => _set('volume', volume);

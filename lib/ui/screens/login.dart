@@ -1,4 +1,5 @@
 import 'package:app/constants/constants.dart';
+import 'package:app/exceptions/exceptions.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/data_loading.dart';
 import 'package:app/ui/widgets/spinner.dart';
@@ -35,13 +36,13 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  Future<void> showErrorDialog(BuildContext context) async {
+  Future<void> showErrorDialog(BuildContext context, {String? message}) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) => CupertinoAlertDialog(
         title: const Text('Error'),
-        content: const Text(
-          'There was a problem logging in. Please try again.',
+        content: Text(
+          message ?? 'There was a problem logging in. Please try again.',
         ),
         actions: <Widget>[
           CupertinoDialogAction(
@@ -66,21 +67,17 @@ class _LoginScreenState extends State<LoginScreen> {
       form.save();
       setState(() => _authenticating = true);
 
-      bool result = await auth.login(email: _email!, password: _password!);
+      await auth.login(email: _email!, password: _password!);
       setState(() => _authenticating = false);
 
-      if (result) {
-        // Store the email into local storage for easy login next time
-        preferences.userEmail = _email;
-        await auth.tryGetAuthUser();
+      // Store the email into local storage for easy login next time
+      preferences.userEmail = _email;
+      await auth.tryGetAuthUser();
 
-        Navigator.of(
-          context,
-          rootNavigator: true,
-        ).pushReplacementNamed(DataLoadingScreen.routeName);
-      } else {
-        throw Error();
-      }
+      Navigator.of(
+        context,
+        rootNavigator: true,
+      ).pushReplacementNamed(DataLoadingScreen.routeName);
     }
 
     InputDecoration decoration({String? label, String? hint}) {
@@ -127,8 +124,17 @@ class _LoginScreenState extends State<LoginScreen> {
       onPressed: () async {
         try {
           await attemptLogin();
+        } on HttpResponseException catch (error) {
+          await showErrorDialog(
+            context,
+            message: error.response.statusCode == 401
+                ? 'Invalid email or password.'
+                : null,
+          );
         } catch (error) {
           await showErrorDialog(context);
+        } finally {
+          setState(() => _authenticating = false);
         }
       },
     );

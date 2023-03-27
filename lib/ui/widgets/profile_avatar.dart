@@ -1,3 +1,4 @@
+import 'package:app/main.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/login.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,9 +14,6 @@ class ProfileAvatar extends StatelessWidget {
   const ProfileAvatar({Key? key}) : super(key: key);
 
   void logout(BuildContext context) {
-    AuthProvider auth = context.read();
-    AudioProvider audio = context.read();
-
     showCupertinoDialog(
       context: context,
       builder: (BuildContext context) {
@@ -30,8 +28,8 @@ class ProfileAvatar extends StatelessWidget {
               child: const Text('Confirm'),
               isDestructiveAction: true,
               onPressed: () async {
-                await auth.logout();
-                await audio.cleanUpUponLogout();
+                await context.read<AuthProvider>().logout();
+                await audioHandler.cleanUpUponLogout();
                 Navigator.of(
                   context,
                   rootNavigator: true,

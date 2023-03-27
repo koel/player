@@ -1,6 +1,7 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/enums.dart';
 import 'package:app/extensions/extensions.dart';
+import 'package:app/main.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/app_bar.dart';
@@ -204,11 +205,36 @@ class _SongListHeaderState extends State<SongListHeader> {
   bool _fetchingSongsToPlayAll = false;
   bool _fetchingSongsToShuffle = false;
 
+  late final SongProvider _songProvider;
+
+  @override
+  initState() {
+    super.initState();
+    _songProvider = context.read();
+  }
+
+  Future<void> fetchSongsToPlayAll() async {
+    setState(() => _fetchingSongsToPlayAll = true);
+    final songs = await _songProvider.fetchInOrder(
+      sortField: widget.sortField,
+      order: widget.sortOrder,
+    );
+    setState(() => _fetchingSongsToPlayAll = false);
+    audioHandler.replaceQueue(songs);
+  }
+
+  Future<void> fetchSongsToShuffleAll() async {
+    setState(() => _fetchingSongsToShuffle = true);
+    final songs = await _songProvider.fetchInOrder(
+      sortField: widget.sortField,
+      order: widget.sortOrder,
+    );
+    setState(() => _fetchingSongsToShuffle = false);
+    audioHandler.replaceQueue(songs, shuffle: true);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final SongProvider songProvider = context.read();
-    final AudioProvider audio = context.read();
-
     return BaseSongListHeader.SongListHeader(
       songs: [],
       playIcon: _fetchingSongsToPlayAll
@@ -222,25 +248,11 @@ class _SongListHeaderState extends State<SongListHeader> {
       onSearchQueryChanged: widget.onSearchQueryChanged,
       onPlayPressed: () async {
         if (_fetchingSongsToPlayAll || _fetchingSongsToShuffle) return;
-
-        setState(() => _fetchingSongsToPlayAll = true);
-        final songs = await songProvider.fetchInOrder(
-          sortField: widget.sortField,
-          order: widget.sortOrder,
-        );
-        setState(() => _fetchingSongsToPlayAll = false);
-        await audio.replaceQueue(songs);
+        await fetchSongsToPlayAll();
       },
       onShufflePressed: () async {
         if (_fetchingSongsToPlayAll || _fetchingSongsToShuffle) return;
-
-        setState(() => _fetchingSongsToShuffle = true);
-        final songs = await songProvider.fetchInOrder(
-          sortField: widget.sortField,
-          order: widget.sortOrder,
-        );
-        setState(() => _fetchingSongsToShuffle = false);
-        await audio.replaceQueue(songs, shuffle: true);
+        await fetchSongsToShuffleAll();
       },
     );
   }

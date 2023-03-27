@@ -1,9 +1,8 @@
 import 'package:app/constants/constants.dart';
+import 'package:app/main.dart';
 import 'package:app/models/models.dart';
-import 'package:app/providers/providers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 enum SongListContext {
   queue,
@@ -61,8 +60,6 @@ class _SongListHeaderState extends State<SongListHeader> {
     var playIcon = widget.playIcon ?? const Icon(CupertinoIcons.play_fill);
     var shuffleIcon = widget.shuffleIcon ?? const Icon(CupertinoIcons.shuffle);
 
-    final AudioProvider audio = context.read();
-
     _buttonsHeader = Row(
       children: <Widget>[
         IconButton(
@@ -74,12 +71,9 @@ class _SongListHeaderState extends State<SongListHeader> {
         ),
         const Spacer(),
         IconButton(
-          onPressed: () async {
-            if (widget.onPlayPressed != null) {
-              widget.onPlayPressed!();
-              return;
-            }
-            await audio.replaceQueue(widget.songs);
+          onPressed: () {
+            if (widget.onPlayPressed != null) return widget.onPlayPressed!();
+            audioHandler.replaceQueue(widget.songs);
           },
           icon: SizedBox(
             height: 24,
@@ -89,12 +83,10 @@ class _SongListHeaderState extends State<SongListHeader> {
         ),
         const SizedBox(width: 6),
         ElevatedButton(
-          onPressed: () async {
-            if (widget.onShufflePressed != null) {
-              widget.onShufflePressed!();
-              return;
-            }
-            await audio.replaceQueue(widget.songs, shuffle: true);
+          onPressed: () {
+            if (widget.onShufflePressed != null)
+              return widget.onShufflePressed!();
+            audioHandler.replaceQueue(widget.songs, shuffle: true);
           },
           child: SizedBox(
             height: 24,

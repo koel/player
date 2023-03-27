@@ -1,8 +1,7 @@
 import 'package:app/constants/constants.dart';
-import 'package:app/exceptions/exceptions.dart';
 import 'package:app/models/models.dart';
 import 'package:app/utils/preferences.dart';
-import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
@@ -51,6 +50,7 @@ class Song {
     required this.disc,
     required this.year,
     required this.genre,
+    required this.liked,
     required this.createdAt,
   });
 
@@ -76,16 +76,18 @@ class Song {
     return _sourceUrl!;
   }
 
-  MetasImage get metaImage {
-    if (image is CachedNetworkImageProvider) {
-      return MetasImage.network((image as CachedNetworkImageProvider).url);
-    }
-
-    if (image is AssetImage) {
-      return MetasImage.asset((image as AssetImage).assetName);
-    }
-
-    throw UnsupportedTypeException.fromObject(image);
+  MediaItem get mediaItem {
+    return MediaItem(
+        id: id,
+        album: albumName,
+        title: title,
+        artist: artistName,
+        duration: Duration(milliseconds: length.toInt()),
+        artUri: albumCoverUrl == null ? null : Uri.parse(albumCoverUrl!),
+        genre: genre,
+        extras: {
+          'sourceUrl': sourceUrl,
+        });
   }
 
   bool get hasCustomImage {
@@ -99,7 +101,7 @@ class Song {
     this
       ..liked = target.liked
       ..title = target.title
-      ..lyrics = target.lyrics ?? ''
+      ..lyrics = target.lyrics
       ..length = target.length
       ..albumCoverUrl = target.albumCoverUrl
       ..playCount = target.playCount
@@ -145,6 +147,7 @@ class Song {
       disc: json['disc'] ?? 1,
       year: json['year'] == null ? null : int.parse(json['year'].toString()),
       genre: json['genre'] ?? '',
+      liked: json['liked'] ?? false,
     );
   }
 
@@ -216,6 +219,7 @@ class Song {
               '',
             ],
           ),
+      liked: liked ?? faker.randomGenerator.boolean(),
     )
       ..liked = liked ?? faker.randomGenerator.boolean()
       ..playCount = playCount ?? faker.randomGenerator.integer(1000);

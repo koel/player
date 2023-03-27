@@ -1,11 +1,8 @@
-import 'package:app/extensions/assets_audio_player.dart';
 import 'package:app/models/artist.dart';
 import 'package:app/models/song.dart';
-import 'package:app/providers/audio_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/footer_player_sheet.dart';
-import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';

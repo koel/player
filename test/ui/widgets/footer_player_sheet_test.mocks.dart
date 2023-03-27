@@ -87,7 +87,7 @@ class MockAudioProvider extends _i1.Mock implements _i10.AudioProvider {
           returnValue: Future<bool>.value(false)) as _i11.Future<bool>);
 
   @override
-  _i11.Future<int> indexInQueue(_i9.Song? song) =>
+  _i11.Future<int> getQueuePosition(_i9.Song? song) =>
       (super.noSuchMethod(Invocation.method(#indexInQueue, [song]),
           returnValue: Future<int>.value(0)) as _i11.Future<int>);
 

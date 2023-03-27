@@ -1,16 +1,12 @@
 import 'dart:io';
 
+import 'package:app/main.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/home.dart';
 import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/screens/search.dart';
 import 'package:app/ui/widgets/footer_player_sheet.dart';
-import 'package:flutter/cupertino.dart'
-    show
-        CupertinoIcons,
-        CupertinoTabBar,
-        CupertinoTabScaffold,
-        CupertinoTabView;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -25,9 +21,7 @@ class RootScreen extends StatefulWidget {
 }
 
 class _RootScreenState extends State<RootScreen> {
-  late Future futureData;
   int _selectedIndex = 0;
-  late AudioProvider audio;
 
   static const List<Widget> _widgetOptions = [
     const HomeScreen(),
@@ -35,15 +29,16 @@ class _RootScreenState extends State<RootScreen> {
     const LibraryScreen(),
   ];
 
-  void _onItemTapped(int index) {
-    setState(() => _selectedIndex = index);
-  }
+  void _onItemTapped(int index) => setState(() => _selectedIndex = index);
 
   @override
   void initState() {
     super.initState();
 
-    audio = context.read()..init();
+    audioHandler.init(
+      songProvider: context.read<SongProvider>(),
+      downloadProvider: context.read<DownloadProvider>(),
+    );
   }
 
   @override
