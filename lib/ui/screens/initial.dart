@@ -23,21 +23,20 @@ class _InitialScreenState extends State<InitialScreen> {
   }
 
   Future<void> _resolveAuthenticatedUser() async {
-    context.read<AuthProvider>().tryGetAuthUser().then((user) {
+    try {
+      final user = await context.read<AuthProvider>().tryGetAuthUser();
       Navigator.of(context).pushReplacement(PageRouteBuilder(
         pageBuilder: (_, __, ___) =>
             user == null ? const LoginScreen() : const DataLoadingScreen(),
         transitionDuration: Duration.zero,
       ));
-    }, onError: (_) async {
+    } catch (e) {
       await Navigator.of(context, rootNavigator: true).pushReplacementNamed(
         LoginScreen.routeName,
       );
-    });
+    }
   }
 
   @override
-  Widget build(BuildContext context) {
-    return const ContainerWithSpinner();
-  }
+  Widget build(BuildContext context) => const ContainerWithSpinner();
 }

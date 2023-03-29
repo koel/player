@@ -34,8 +34,8 @@ class SortButton extends StatelessWidget {
   }
 
   PopupMenuItem<String> buildMenuItem(String field, String label) {
-    var active = field == currentField;
-    var style = active ? const TextStyle(color: AppColors.white) : null;
+    final active = field == currentField;
+    final style = active ? const TextStyle(color: AppColors.white) : null;
 
     return PopupMenuItem<String>(
       value: field,
@@ -77,14 +77,13 @@ class SortButton extends StatelessWidget {
         );
       },
       itemBuilder: (_) {
-        var widgets = fields
+        return fields
             .expand<PopupMenuEntry<String>>((field) => [
                   buildMenuItem(field, sortFields[field]!),
                   const PopupMenuDivider(height: .5),
                 ])
-            .toList();
-
-        return widgets..removeLast();
+            .toList()
+          ..removeLast();
       },
     );
   }

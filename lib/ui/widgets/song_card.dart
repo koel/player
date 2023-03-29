@@ -20,8 +20,8 @@ class SongCard extends StatefulWidget {
 }
 
 class _SongCardState extends State<SongCard> {
-  double _opacity = 1.0;
-  double _cardWidth = 144.0;
+  var _opacity = 1.0;
+  final _cardWidth = 144.0;
 
   @override
   Widget build(BuildContext context) {

@@ -55,11 +55,12 @@ class _PlayPauseButtonState extends State<PlayPauseButton>
 
   @override
   Widget build(BuildContext context) {
-    if (_state == null) return const SizedBox.shrink();
+    final state = _state;
+    if (state == null) return const SizedBox.shrink();
 
     return IconButton(
       onPressed: audioHandler.playOrPause,
-      icon: _state!.playing
+      icon: state.playing
           ? const Icon(CupertinoIcons.pause_solid)
           : const Icon(CupertinoIcons.play_fill),
       iconSize: 64,

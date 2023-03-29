@@ -4,8 +4,8 @@ import 'package:app/values/pagination_result.dart';
 import 'package:flutter/foundation.dart';
 
 class SongListScreenProvider with ChangeNotifier {
-  late SongProvider _songProvider;
-  late SearchProvider _searchProvider;
+  final SongProvider _songProvider;
+  final SearchProvider _searchProvider;
 
   List<Song> songs = [];
 

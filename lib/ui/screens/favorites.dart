@@ -24,9 +24,9 @@ class FavoritesScreen extends StatefulWidget {
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
-  bool _loading = false;
-  String _searchQuery = '';
-  CoverImageStack cover = CoverImageStack(songs: []);
+  var _loading = false;
+  var _searchQuery = '';
+  var cover = CoverImageStack(songs: []);
 
   @override
   void initState() {
@@ -42,11 +42,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final AppStateProvider appState = context.read();
-    SongSortConfig sortConfig = appState.get('favorites.sort') ??
+    final appState = context.read<AppStateProvider>();
+    var sortConfig = appState.get<SongSortConfig>('favorites.sort') ??
         SongSortConfig(field: 'title', order: SortOrder.asc);
 
-    var emptyWidget = SliverFillRemaining(
+    final emptyWidget = SliverFillRemaining(
       hasScrollBody: false,
       fillOverscroll: true,
       child: Padding(

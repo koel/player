@@ -29,7 +29,7 @@ class _SongsScreenState extends State<SongsScreen> {
   late final SongPaginationConfig _paginationConfig;
   late final ScrollController _scrollController;
   late double _currentScrollOffset;
-  var _scrollThreshold = 64.0;
+  final _scrollThreshold = 64.0;
   var _searchQuery = '';
   var _cover = CoverImageStack(songs: []);
   var _loading = false;
@@ -71,7 +71,7 @@ class _SongsScreenState extends State<SongsScreen> {
 
     setState(() => _loading = true);
 
-    var result = await _provider.fetch(
+    final result = await _provider.fetch(
       paginationConfig: _paginationConfig,
       searchQuery: _searchQuery,
     );

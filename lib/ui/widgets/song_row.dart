@@ -140,9 +140,11 @@ class _SongRowThumbnailState extends State<SongRowThumbnail>
 
   @override
   Widget build(BuildContext context) {
+    final state = _state;
+
     return SongThumbnail(
       song: widget.song,
-      playing: _state != null && _state!.playing && _isCurrentSong,
+      playing: state != null && state.playing && _isCurrentSong,
     );
   }
 }

@@ -144,6 +144,8 @@ class LyricsPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lyrics = this.lyrics;
+
     return lyrics == null || lyrics == ''
         ? const Padding(
             padding: const EdgeInsets.only(top: 16),
@@ -153,7 +155,7 @@ class LyricsPane extends StatelessWidget {
             ),
           )
         : InfoHtml(
-            content: lyrics!,
+            content: lyrics,
             style: Style(fontSize: FontSize.larger),
           );
   }
@@ -190,7 +192,7 @@ class ArtistInfoPane extends StatelessWidget {
             ],
           ),
         ),
-        if (info == null || info!.biography == '')
+        if (info == null || info!.biography.isEmpty)
           const Padding(
             padding: const EdgeInsets.only(top: 16),
             child: const Text(

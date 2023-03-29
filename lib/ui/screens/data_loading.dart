@@ -15,7 +15,7 @@ class DataLoadingScreen extends StatefulWidget {
 }
 
 class _DataLoadingScreen extends State<DataLoadingScreen> {
-  bool _hasError = false;
+  var _hasError = false;
 
   @override
   void initState() {

@@ -18,12 +18,12 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool _authenticating = false;
+  var _authenticating = false;
   final formKey = GlobalKey<FormState>();
 
-  String? _email = '';
-  String? _password = '';
-  String? _hostUrl = '';
+  var _email = '';
+  var _password = '';
+  var _hostUrl = '';
 
   @override
   void initState() {
@@ -31,8 +31,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Try looking for stored values in local storage
     setState(() {
-      _hostUrl = preferences.hostUrl;
-      _email = preferences.userEmail;
+      _hostUrl = preferences.hostUrl ?? '';
+      _email = preferences.userEmail ?? '';
     });
   }
 
@@ -57,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    AuthProvider auth = context.watch();
+    AuthProvider auth = context.watch<AuthProvider>();
 
     Future<void> attemptLogin() async {
       final form = formKey.currentState!;
@@ -67,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
       form.save();
       setState(() => _authenticating = true);
 
-      await auth.login(email: _email!, password: _password!);
+      await auth.login(email: _email, password: _password);
       setState(() => _authenticating = false);
 
       // Store the email into local storage for easy login next time

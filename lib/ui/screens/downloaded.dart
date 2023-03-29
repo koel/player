@@ -22,13 +22,13 @@ class DownloadedScreen extends StatefulWidget {
 }
 
 class _DownloadedScreenState extends State<DownloadedScreen> {
-  String _searchQuery = '';
-  CoverImageStack _cover = CoverImageStack(songs: []);
+  var _searchQuery = '';
+  var _cover = CoverImageStack(songs: []);
 
   @override
   Widget build(BuildContext context) {
-    final AppStateProvider appState = context.read();
-    SongSortConfig sortConfig = appState.get('downloaded.sort') ??
+    final appState = context.read<AppStateProvider>();
+    var sortConfig = appState.get<SongSortConfig>('downloaded.sort') ??
         SongSortConfig(
           field: 'title',
           order: SortOrder.asc,

@@ -29,8 +29,8 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
   late AppStateProvider _appState;
   late ScrollController _scrollController;
   late double _currentScrollOffset;
-  double _scrollThreshold = 64;
-  bool _loading = false;
+  final _scrollThreshold = 64.0;
+  var _loading = false;
 
   void _scrollListener() {
     _currentScrollOffset = _scrollController.offset;
@@ -45,8 +45,8 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
   void initState() {
     super.initState();
 
-    _albumProvider = context.read<AlbumProvider>();
-    _appState = context.read<AppStateProvider>();
+    _albumProvider = context.read();
+    _appState = context.read();
     _currentScrollOffset = _appState.get('albums.scrollOffSet') ?? 0.0;
 
     _scrollController = ScrollController(
@@ -85,15 +85,15 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
             return const AlbumScreenPlaceholder();
 
           return CupertinoTheme(
-            data: CupertinoThemeData(primaryColor: Colors.white),
+            data: const CupertinoThemeData(primaryColor: Colors.white),
             child: PullToRefresh(
-              onRefresh: () => _albumProvider.refresh(),
+              onRefresh: _albumProvider.refresh,
               child: CustomScrollView(
                 controller: _scrollController,
                 slivers: <Widget>[
-                  CupertinoSliverNavigationBar(
+                  const CupertinoSliverNavigationBar(
                     backgroundColor: Colors.black54,
-                    largeTitle: const LargeTitle(text: 'Albums'),
+                    largeTitle: LargeTitle(text: 'Albums'),
                   ),
                   SliverList(
                     delegate: SliverChildBuilderDelegate(

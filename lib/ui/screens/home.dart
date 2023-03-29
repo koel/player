@@ -12,7 +12,6 @@ import 'package:app/ui/widgets/profile_avatar.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/simple_song_list.dart';
 import 'package:app/ui/widgets/song_card.dart';
-import 'package:app/ui/widgets/spinner.dart';
 import 'package:app/ui/widgets/typography.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +27,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool _loading = false;
+  var _loading = false;
 
   @override
   void initState() {
@@ -38,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _fetchData() async {
     setState(() => _loading = true);
-    await context.read<OverviewProvider>().fetchOverview();
+    await context.read<OverviewProvider>().refresh();
     setState(() => _loading = false);
   }
 
@@ -48,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (_, overviewProvider, __) {
         if (_loading) return const HomeScreenPlaceholder();
 
-        var homeBlocks = <Widget>[
+        final blocks = <Widget>[
           if (overviewProvider.recentlyPlayedSongs.isNotEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(
@@ -119,9 +118,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
         return Scaffold(
           body: CupertinoTheme(
-            data: CupertinoThemeData(primaryColor: Colors.white),
+            data: const CupertinoThemeData(primaryColor: AppColors.white),
             child: PullToRefresh(
-              onRefresh: () => context.read<OverviewProvider>().fetchOverview(),
+              onRefresh: () => context.read<OverviewProvider>().refresh(),
               child: CustomScrollView(
                 slivers: <Widget>[
                   CupertinoSliverNavigationBar(
@@ -129,8 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     largeTitle: const LargeTitle(text: 'Home'),
                     trailing: const ProfileAvatar(),
                   ),
-                  SliverList(
-                      delegate: SliverChildListDelegate.fixed(homeBlocks)),
+                  SliverList(delegate: SliverChildListDelegate.fixed(blocks)),
                   const BottomSpace(height: 192),
                 ],
               ),

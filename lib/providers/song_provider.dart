@@ -7,24 +7,21 @@ import 'package:app/values/values.dart';
 import 'package:flutter/foundation.dart';
 
 class SongProvider with ChangeNotifier {
-  late DownloadProvider _downloadProvider;
-  late AppStateProvider _appState;
-  late CoverImageStack coverImageStack;
+  final DownloadProvider _downloadProvider;
+  final AppStateProvider _appState;
 
-  List<Song> songs = [];
-  Map<String, Song> _vault = {};
+  var songs = <Song>[];
+  final _vault = <String, Song>{};
 
   SongProvider({
-    required DownloadProvider downloadProvider,
-    required AppStateProvider appState,
-  }) {
-    _downloadProvider = downloadProvider;
-    _appState = appState;
-
-    syncDownloadedSongs();
+    required downloadProvider,
+    required appState,
+  })  : _downloadProvider = downloadProvider,
+        _appState = appState {
+    _syncDownloadedSongs();
   }
 
-  Future<void> syncDownloadedSongs() async {
+  Future<void> _syncDownloadedSongs() async {
     await _downloadProvider.collectDownloads();
     syncWithVault(_downloadProvider.songs);
   }
@@ -39,7 +36,7 @@ class SongProvider with ChangeNotifier {
     }
 
     List<Song> synced = (_songs as List<Song>).map<Song>((remote) {
-      Song? local = byId(remote.id);
+      final local = byId(remote.id);
 
       if (local == null) {
         _vault[remote.id] = remote;
@@ -55,12 +52,12 @@ class SongProvider with ChangeNotifier {
   Song? byId(String id) => _vault[id];
 
   Future<PaginationResult<Song>> paginate(SongPaginationConfig config) async {
-    var res = await get(
+    final res = await get(
       'songs?page=${config.page}&sort=${config.sortField}&order=${config.sortOrder.value}',
     );
 
-    List<Song> items = res['data'].map<Song>((j) => Song.fromJson(j)).toList();
-    List<Song> synced = syncWithVault(items);
+    final items = res['data'].map<Song>((j) => Song.fromJson(j)).toList();
+    final synced = syncWithVault(items);
 
     songs = [...songs, ...synced].toSet().toList();
     notifyListeners();
@@ -108,20 +105,19 @@ class SongProvider with ChangeNotifier {
     );
   }
 
-  Future<List<Song>> _stateAwareFetch(String url, Object stateKey) async {
-    if (_appState.has(stateKey)) return _appState.get(stateKey);
+  Future<List<Song>> _stateAwareFetch(String url, Object cacheKey) async {
+    if (_appState.has(cacheKey)) return _appState.get(cacheKey);
 
-    var res = await get(url);
-    List<Song> items = res.map<Song>((json) => Song.fromJson(json)).toList();
-    _appState.set(stateKey, items);
+    final res = await get(url);
+    final items = res.map<Song>((json) => Song.fromJson(json)).toList();
+    _appState.set(cacheKey, items);
 
     return syncWithVault(items);
   }
 
   Future<List<Song>> fetchRandom({int limit = 500}) async {
-    var res = await get('queue/fetch?order=rand&limit=$limit');
-    List<Song> items = res.map<Song>((json) => Song.fromJson(json)).toList();
-
+    final res = await get('queue/fetch?order=rand&limit=$limit');
+    final items = res.map<Song>((json) => Song.fromJson(json)).toList();
     return syncWithVault(items);
   }
 
@@ -130,11 +126,10 @@ class SongProvider with ChangeNotifier {
     SortOrder order = SortOrder.asc,
     int limit = 500,
   }) async {
-    var res = await get(
+    final res = await get(
       'queue/fetch?order=${order.value}&sort=$sortField&limit=$limit',
     );
-    List<Song> items = res.map<Song>((json) => Song.fromJson(json)).toList();
-
+    final items = res.map<Song>((json) => Song.fromJson(json)).toList();
     return syncWithVault(items);
   }
 }

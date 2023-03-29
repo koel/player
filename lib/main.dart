@@ -15,9 +15,7 @@ List<SingleChildWidget> _providers = [
   ChangeNotifierProvider(create: (_) => ArtistProvider()),
   Provider(create: (_) => MediaInfoProvider()),
   ChangeNotifierProvider(create: (_) => DownloadProvider()),
-  ChangeNotifierProvider(
-    create: (context) => AlbumProvider(),
-  ),
+  ChangeNotifierProvider(create: (context) => AlbumProvider()),
   ChangeNotifierProvider(
     create: (context) => SongProvider(
       downloadProvider: context.read<DownloadProvider>(),
@@ -31,11 +29,6 @@ List<SingleChildWidget> _providers = [
     ),
   ),
   ChangeNotifierProvider(
-    create: (context) => RecentlyPlayedProvider(
-      songProvider: context.read<SongProvider>(),
-    ),
-  ),
-  ChangeNotifierProvider(
     create: (context) => InteractionProvider(
       songProvider: context.read<SongProvider>(),
     ),
@@ -46,7 +39,6 @@ List<SingleChildWidget> _providers = [
   ),
   ChangeNotifierProvider(
     create: (context) => PlaylistProvider(
-      songProvider: context.read<SongProvider>(),
       appState: context.read<AppStateProvider>(),
     ),
   ),
@@ -68,7 +60,6 @@ List<SingleChildWidget> _providers = [
       songProvider: context.read<SongProvider>(),
       albumProvider: context.read<AlbumProvider>(),
       artistProvider: context.read<ArtistProvider>(),
-      recentlyPlayedProvider: context.read<RecentlyPlayedProvider>(),
     ),
   ),
   ChangeNotifierProvider(

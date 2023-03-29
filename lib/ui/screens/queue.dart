@@ -22,7 +22,7 @@ class QueueScreen extends StatefulWidget {
 
 class _QueueScreenState extends State<QueueScreen> with StreamSubscriber {
   late SongProvider _songProvider;
-  List<Song> _songs = [];
+  var _songs = <Song>[];
 
   @override
   void initState() {
@@ -71,7 +71,7 @@ class _QueueScreenState extends State<QueueScreen> with StreamSubscriber {
                   Center(
                     child: const Text(
                       'No songs queued.',
-                      style: const TextStyle(color: Colors.white54),
+                      style: TextStyle(color: Colors.white54),
                     ),
                   ),
                 ],

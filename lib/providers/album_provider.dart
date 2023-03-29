@@ -3,14 +3,14 @@ import 'package:app/utils/api_request.dart';
 import 'package:flutter/foundation.dart';
 
 class AlbumProvider with ChangeNotifier {
-  List<Album> albums = [];
-  Map<int, Album> _vault = {};
-  int _page = 1;
+  var albums = <Album>[];
+  final _vault = <int, Album>{};
+  var _page = 1;
 
   Album? byId(int id) => _vault[id];
 
   List<Album> byIds(List<int> ids) {
-    List<Album> albums = [];
+    final albums = <Album>[];
 
     ids.forEach((id) {
       if (_vault.containsKey(id)) {
@@ -39,7 +39,7 @@ class AlbumProvider with ChangeNotifier {
     }
 
     List<Album> synced = (_albums as List<Album>).map<Album>((remote) {
-      Album? local = byId(remote.id);
+      final local = byId(remote.id);
 
       if (local == null) {
         _vault[remote.id] = remote;
@@ -55,13 +55,13 @@ class AlbumProvider with ChangeNotifier {
   }
 
   Future<void> paginate() async {
-    var res = await get('albums?page=$_page');
+    final res = await get('albums?page=$_page');
 
-    List<Album> _albums = (res['data'] as List)
+    final List<Album> _albums = (res['data'] as List)
         .map<Album>((album) => Album.fromJson(album))
         .toList();
 
-    List<Album> synced = syncWithVault(_albums);
+    final List<Album> synced = syncWithVault(_albums);
     albums = [...albums, ...synced].toSet().toList();
 
     _page = res['links']['next'] == null ? 1 : ++res['meta']['current_page'];
@@ -70,7 +70,7 @@ class AlbumProvider with ChangeNotifier {
   }
 
   Future<void> refresh() {
-    albums = [];
+    albums.clear();
     _page = 1;
 
     return paginate();

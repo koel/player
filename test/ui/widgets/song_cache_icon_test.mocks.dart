@@ -50,7 +50,7 @@ class MockCacheProvider extends _i1.Mock implements _i4.DownloadProvider {
           returnValue: _FakeValueStream<bool>()) as _i2.ValueStream<bool>);
 
   @override
-  _i2.ValueStream<_i5.Song> get singleCacheRemovedStream => (super.noSuchMethod(
+  _i2.ValueStream<_i5.Song> get downloadRemovedStream => (super.noSuchMethod(
       Invocation.getter(#singleCacheRemovedStream),
       returnValue: _FakeValueStream<_i5.Song>()) as _i2.ValueStream<_i5.Song>);
 

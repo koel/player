@@ -5,7 +5,6 @@ class Playlist {
   dynamic id; // This might be a UUID string in the near future
   String name;
   bool isSmart;
-  bool populated = false;
   List<Song> songs = [];
 
   Playlist({required this.id, required this.name, required this.isSmart});
@@ -22,18 +21,13 @@ class Playlist {
     );
   }
 
-  factory Playlist.fake({
-    dynamic id,
-    String? name,
-    bool? isSmart,
-    bool? populated,
-  }) {
+  factory Playlist.fake({dynamic id, String? name, bool? isSmart}) {
     Faker faker = Faker();
 
     return Playlist(
       id: id ?? faker.randomGenerator.integer(100, min: 1),
       name: name ?? faker.food.cuisine(),
       isSmart: isSmart ?? false,
-    )..populated = populated ?? false;
+    );
   }
 }

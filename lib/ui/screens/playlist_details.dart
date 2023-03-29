@@ -45,10 +45,9 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Playlist playlist =
-        ModalRoute.of(context)!.settings.arguments as Playlist;
-    final AppStateProvider appState = context.read();
-    SongSortConfig sortConfig = appState.get('playlist.sort') ??
+    final playlist = ModalRoute.of(context)!.settings.arguments as Playlist;
+    final appState = context.read<AppStateProvider>();
+    var sortConfig = appState.get<SongSortConfig>('playlist.sort') ??
         SongSortConfig(field: 'title', order: SortOrder.asc);
 
     return Scaffold(
@@ -64,14 +63,13 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
             );
           }
 
-          List<Song> songs = snapshot.data == null ? [] : snapshot.data!;
+          final songs = snapshot.data == null ? <Song>[] : snapshot.requireData;
 
           if (_cover.isEmpty && songs.isNotEmpty) {
-            _cover = CoverImageStack(songs: snapshot.data!);
+            _cover = CoverImageStack(songs: songs);
           }
 
-          var displayedSongs =
-              songs.$sort(sortConfig).$filter(_searchQuery) ?? [];
+          final displayedSongs = songs.$sort(sortConfig).$filter(_searchQuery);
 
           return PullToRefresh(
             onRefresh: () => buildRequest(playlist.id, forceRefresh: true),
@@ -97,7 +95,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                       ? const SizedBox.shrink()
                       : SongListHeader(
                           songs: displayedSongs,
-                          onSearchQueryChanged: (String query) {
+                          onSearchQueryChanged: (query) {
                             setState(() => _searchQuery = query);
                           },
                         ),
@@ -118,14 +116,15 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (_, int index) {
-                        final bool dismissible = playlist.isStandard;
-                        final Song song = displayedSongs[index];
+                        final dismissible = playlist.isStandard;
+                        final song = displayedSongs[index];
+
                         return dismissible
                             ? Dismissible(
                                 direction: DismissDirection.endToStart,
                                 onDismissed: (DismissDirection direction) {
                                   _playlistProvider.removeSongFromPlaylist(
-                                    song: song,
+                                    song,
                                     playlist: playlist,
                                   );
                                 },

@@ -7,7 +7,6 @@ import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
-import 'package:app/ui/widgets/spinner.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -45,8 +44,7 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet>
     }));
 
     subscribe(audioHandler.mediaItem.listen((MediaItem? value) {
-      if (value == null) return;
-      setState(() => _song = _songProvider.byId(value.id));
+      if (value != null) setState(() => _song = _songProvider.byId(value.id));
     }));
   }
 
@@ -58,14 +56,17 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet>
 
   @override
   Widget build(BuildContext context) {
-    if (_song == null || _state == null) return SizedBox.shrink();
+    final song = _song;
+    final state = _state;
+
+    if (song == null || state == null) return SizedBox.shrink();
 
     late final Widget statusIndicator;
     late final bool isLoading;
 
-    if ((_state!.processingState == AudioProcessingState.buffering ||
-            _state!.processingState == AudioProcessingState.loading) &&
-        _state!.playing) {
+    if ((state.processingState == AudioProcessingState.buffering ||
+            state.processingState == AudioProcessingState.loading) &&
+        state.playing) {
       statusIndicator = SpinKitThreeBounce(color: AppColors.white, size: 16);
       isLoading = true;
     } else {
@@ -99,7 +100,7 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet>
                       children: [
                         Hero(
                           tag: 'hero-now-playing-thumbnail',
-                          child: SongThumbnail(song: _song!),
+                          child: SongThumbnail(song: song),
                         ),
                         if (isLoading)
                           SizedBox(
@@ -130,12 +131,12 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text(
-                              _song!.title,
+                              song.title,
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              _song!.artistName,
+                              song.artistName,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: Theme.of(context)
@@ -154,7 +155,7 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet>
                           key: FooterPlayerSheet.pauseButtonKey,
                           onPressed: audioHandler.playOrPause,
                           icon: Icon(
-                            _state!.playing
+                            state.playing
                                 ? CupertinoIcons.pause_fill
                                 : CupertinoIcons.play_fill,
                             size: 24,

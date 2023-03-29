@@ -4,9 +4,9 @@ import 'package:app/utils/api_request.dart';
 import 'package:flutter/foundation.dart';
 
 class FavoriteProvider with ChangeNotifier {
-  List<Song> songs = [];
-  late SongProvider _songProvider;
-  late AppStateProvider _appState;
+  final songs = <Song>[];
+  late final SongProvider _songProvider;
+  late final AppStateProvider _appState;
 
   FavoriteProvider({
     required SongProvider songProvider,
@@ -20,11 +20,17 @@ class FavoriteProvider with ChangeNotifier {
     if (forceRefresh) _appState.delete(['favorites']);
 
     if (_appState.has(['favorites'])) {
-      songs = _appState.get(['favorites']);
+      songs
+        ..clear()
+        ..addAll(_appState.get(['favorites']));
     } else {
-      var response = await get('songs/favorite');
-      List<Song> _songs = response.map<Song>((j) => Song.fromJson(j)).toList();
-      songs = _songProvider.syncWithVault(_songs);
+      final response = await get('songs/favorite');
+      final _songs = response.map<Song>((j) => Song.fromJson(j)).toList();
+
+      songs
+        ..clear()
+        ..addAll(_songProvider.syncWithVault(_songs));
+
       _appState.set(['favorites'], songs);
     }
 

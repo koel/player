@@ -13,13 +13,16 @@ class Artist {
   Artist({required this.id, required this.name, required this.imageUrl});
 
   ImageProvider get image {
-    if (_image == null) {
-      _image = imageUrl == null
+    var img = _image;
+    final imageUrl = this.imageUrl;
+
+    if (img == null) {
+      _image = img = imageUrl == null
           ? defaultImage.image
-          : CachedNetworkImageProvider(this.imageUrl!);
+          : CachedNetworkImageProvider(imageUrl);
     }
 
-    return _image!;
+    return img;
   }
 
   bool get isStandardArtist => !isUnknownArtist && !isVariousArtist;

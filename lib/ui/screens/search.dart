@@ -22,15 +22,15 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  bool _hasFocus = false;
-  bool _initial = true;
-  List<Song> _songs = [];
-  List<Artist> _artists = [];
-  List<Album> _albums = [];
+  var _hasFocus = false;
+  var _initial = true;
+  var _songs = <Song>[];
+  var _artists = <Artist>[];
+  var _albums = <Album>[];
 
   late SearchProvider searchProvider;
-  late TextEditingController _controller = TextEditingController(text: '');
-  FocusNode _focusNode = FocusNode();
+  final _controller = TextEditingController(text: '');
+  final _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -63,8 +63,8 @@ class _SearchScreenState extends State<SearchScreen> {
       );
 
   Widget get noResults {
-    return Padding(
-      padding: const EdgeInsets.only(left: AppDimensions.horizontalPadding),
+    return const Padding(
+      padding: EdgeInsets.only(left: AppDimensions.horizontalPadding),
       child: Text(
         'None found.',
         style: TextStyle(color: Colors.white54),

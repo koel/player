@@ -58,15 +58,15 @@ class _RootScreenState extends State<RootScreen> {
                 border: Border(top: Divider.createBorderSide(context)),
                 items: const <BottomNavigationBarItem>[
                   const BottomNavigationBarItem(
-                    icon: const Icon(CupertinoIcons.house_fill),
+                    icon: Icon(CupertinoIcons.house_fill),
                     label: 'Home',
                   ),
                   const BottomNavigationBarItem(
-                    icon: const Icon(CupertinoIcons.search),
+                    icon: Icon(CupertinoIcons.search),
                     label: 'Search',
                   ),
                   const BottomNavigationBarItem(
-                    icon: const Icon(CupertinoIcons.music_albums_fill),
+                    icon: Icon(CupertinoIcons.music_albums_fill),
                     label: 'Library',
                   ),
                 ],

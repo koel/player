@@ -23,6 +23,8 @@ class SimpleSongList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final headingText = this.headingText;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -30,7 +32,7 @@ class SimpleSongList extends StatelessWidget {
           GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: onHeaderTap,
-            child: Heading5(text: headingText!),
+            child: Heading5(text: headingText),
           ),
         ...songs.map(
           (song) => SongRow(

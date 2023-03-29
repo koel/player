@@ -19,8 +19,8 @@ class ArtistCard extends StatefulWidget {
 }
 
 class _ArtistCardState extends State<ArtistCard> {
-  double _opacity = 1.0;
-  double _cardWidth = 144.0;
+  var _opacity = 1.0;
+  final _cardWidth = 144.0;
 
   @override
   Widget build(BuildContext context) {

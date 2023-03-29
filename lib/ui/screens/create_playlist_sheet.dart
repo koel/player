@@ -18,8 +18,8 @@ class CreatePlaylistSheet extends StatefulWidget {
 
 class _AddPlaylistScreenState extends State<CreatePlaylistSheet> {
   late PlaylistProvider playlistProvider;
-  bool _enabled = true;
-  bool _working = false;
+  var _enabled = true;
+  var _working = false;
   late String _name;
   FocusNode focusNode = FocusNode();
 
@@ -32,14 +32,14 @@ class _AddPlaylistScreenState extends State<CreatePlaylistSheet> {
 
   void _onFieldValueChanged(String value) {
     _name = value;
-    setState(() => _enabled = value.trim() != '');
+    setState(() => _enabled = value.trim().isNotEmpty);
   }
 
-  final InputBorder inputBorder = const UnderlineInputBorder(
+  final inputBorder = const UnderlineInputBorder(
     borderSide: BorderSide(color: AppColors.highlight),
   );
 
-  final Widget spinner = const Center(
+  final spinner = const Center(
     child: Padding(
       padding: EdgeInsets.only(top: 18.0),
       child: Spinner(size: 16.0),
@@ -53,7 +53,7 @@ class _AddPlaylistScreenState extends State<CreatePlaylistSheet> {
 
       focusNode.unfocus();
       setState(() => _working = true);
-      bool ok = true;
+      var ok = true;
 
       try {
         await playlistProvider.create(name: _name);

@@ -1,10 +1,7 @@
-import 'package:app/constants/constants.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/playlist_details.dart';
-import 'package:app/utils/preferences.dart' as preferences;
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -35,8 +32,7 @@ class _PlaylistRowState extends State<PlaylistRow> with StreamSubscriber {
 
   @override
   Widget build(BuildContext context) {
-    String subtitle =
-        _playlist.isSmart ? 'Smart playlist' : 'Standard playlist';
+    final subtitle = _playlist.isSmart ? 'Smart playlist' : 'Standard playlist';
 
     return InkWell(
       onTap: widget.onTap ?? _defaultOnTap,

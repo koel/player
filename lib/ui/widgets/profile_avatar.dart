@@ -44,7 +44,7 @@ class ProfileAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final DownloadProvider downloads = context.read();
+    final downloads = context.read<DownloadProvider>();
 
     return PopupMenuButton<ProfileAvatarMenuItems>(
       onSelected: (item) {

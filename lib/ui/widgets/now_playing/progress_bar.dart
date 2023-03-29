@@ -14,10 +14,10 @@ class ProgressBar extends StatefulWidget {
 
 class _ProgressBarState extends State<ProgressBar> with StreamSubscriber {
   late Duration _duration;
-  late Duration _position = Duration.zero;
-  bool _shouldAutoUpdatePosition = true;
+  var _position = Duration.zero;
+  var _shouldAutoUpdatePosition = true;
 
-  TextStyle timeStampStyle = const TextStyle(
+  final timeStampStyle = const TextStyle(
     fontSize: 12,
     color: Colors.white54,
   );

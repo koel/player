@@ -29,8 +29,8 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
   late AppStateProvider _appStateProvider;
   late ScrollController _scrollController;
   late double _currentScrollOffset;
-  double _scrollThreshold = 64;
-  bool _loading = false;
+  final _scrollThreshold = 64.0;
+  var _loading = false;
 
   void _scrollListener() {
     _currentScrollOffset = _scrollController.offset;
@@ -91,9 +91,9 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
               child: CustomScrollView(
                 controller: _scrollController,
                 slivers: [
-                  CupertinoSliverNavigationBar(
+                  const CupertinoSliverNavigationBar(
                     backgroundColor: Colors.black54,
-                    largeTitle: const LargeTitle(text: 'Artists'),
+                    largeTitle: LargeTitle(text: 'Artists'),
                   ),
                   SliverList(
                     delegate: SliverChildBuilderDelegate((

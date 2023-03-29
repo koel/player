@@ -3,14 +3,14 @@ import 'package:app/utils/api_request.dart';
 import 'package:flutter/foundation.dart';
 
 class ArtistProvider with ChangeNotifier {
-  List<Artist> artists = [];
-  Map<int, Artist> _vault = {};
-  int _page = 1;
+  var artists = <Artist>[];
+  final _vault = <int, Artist>{};
+  var _page = 1;
 
   Artist? byId(int id) => _vault[id];
 
   List<Artist> byIds(List<int> ids) {
-    List<Artist> artists = [];
+    final artists = <Artist>[];
 
     ids.forEach((id) {
       if (_vault.containsKey(id)) {
@@ -41,7 +41,7 @@ class ArtistProvider with ChangeNotifier {
     }
 
     List<Artist> synced = (_artists as List<Artist>).map<Artist>((remote) {
-      Artist? local = byId(remote.id);
+      final local = byId(remote.id);
 
       if (local == null) {
         _vault[remote.id] = remote;
@@ -57,9 +57,9 @@ class ArtistProvider with ChangeNotifier {
   }
 
   Future<void> paginate() async {
-    var res = await get('artists?page=$_page');
+    final res = await get('artists?page=$_page');
 
-    List<Artist> _artists = (res['data'] as List)
+    final _artists = (res['data'] as List)
         .map<Artist>((artist) => Artist.fromJson(artist))
         .toList();
 
@@ -72,7 +72,7 @@ class ArtistProvider with ChangeNotifier {
   }
 
   Future<void> reset() {
-    artists = [];
+    artists.clear();
     _page = 1;
 
     return paginate();

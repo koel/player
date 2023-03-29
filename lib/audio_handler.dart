@@ -7,14 +7,16 @@ import 'package:app/utils/preferences.dart' as preferences;
 class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   late final DownloadProvider downloadProvider;
   late final SongProvider songProvider;
-  bool _initialized = false;
+
+  var _initialized = false;
+
+  var _currentMediaItem = MediaItem(id: '', title: '');
 
   late AudioServiceRepeatMode repeatMode;
 
   final _player = AudioPlayer();
 
   AudioPlayer get player => _player;
-  MediaItem _currentMediaItem = MediaItem(id: '', title: '');
 
   int get currentQueueIndex => queue.value.indexOf(_currentMediaItem);
 
@@ -95,8 +97,8 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   _setPlayerSource(MediaItem mediaItem) async {
     _currentMediaItem = mediaItem;
-    Song song = songProvider.byId(mediaItem.id)!;
-    var download = downloadProvider.get(song: song);
+    final song = songProvider.byId(mediaItem.id)!;
+    final download = downloadProvider.get(song: song);
 
     try {
       if (download == null) {
@@ -155,7 +157,8 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   skipToNext() async {
     if (currentQueueIndex == -1) return;
 
-    int nextIndex = currentQueueIndex + 1;
+    var nextIndex = currentQueueIndex + 1;
+
     if (nextIndex >= queue.value.length) {
       if (repeatMode == AudioServiceRepeatMode.all) {
         nextIndex = 0;
@@ -181,7 +184,8 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   skipToPrevious() async {
     if (currentQueueIndex == -1) return;
 
-    int previousIndex = currentQueueIndex - 1;
+    var previousIndex = currentQueueIndex - 1;
+
     if (previousIndex < 0) {
       if (repeatMode == AudioServiceRepeatMode.all) {
         previousIndex = queue.value.length - 1;
@@ -205,9 +209,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   @override
   Future<void> removeQueueItemAt(int index) async {
-    if (index == currentQueueIndex) {
-      await skipToNext();
-    }
+    if (index == currentQueueIndex) await skipToNext();
 
     if (index >= queue.value.length) return;
 

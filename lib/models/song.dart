@@ -55,39 +55,45 @@ class Song {
   });
 
   ImageProvider get image {
-    if (_image == null) {
-      _image = albumCoverUrl == null
+    var image = _image;
+    final albumCoverUrl = this.albumCoverUrl;
+
+    if (image == null) {
+      image = albumCoverUrl == null
           ? defaultImage.image
-          : CachedNetworkImageProvider(this.albumCoverUrl!);
+          : CachedNetworkImageProvider(albumCoverUrl);
     }
 
-    return _image!;
+    return image;
   }
 
   String get sourceUrl {
-    if (_sourceUrl == null) {
+    var src = _sourceUrl;
+
+    if (src == null) {
       String rawUrl = transcoding
           ? '$hostUrl/play/$id/1/128?t=$audioToken'
           : '$hostUrl/play/$id?t=$audioToken';
 
-      _sourceUrl = Uri.encodeFull(rawUrl);
+      _sourceUrl = src = Uri.encodeFull(rawUrl);
     }
 
-    return _sourceUrl!;
+    return src;
   }
 
   MediaItem get mediaItem {
+    final albumCoverUrl = this.albumCoverUrl;
+
     return MediaItem(
-        id: id,
-        album: albumName,
-        title: title,
-        artist: artistName,
-        duration: Duration(milliseconds: length.toInt()),
-        artUri: albumCoverUrl == null ? null : Uri.parse(albumCoverUrl!),
-        genre: genre,
-        extras: {
-          'sourceUrl': sourceUrl,
-        });
+      id: id,
+      album: albumName,
+      title: title,
+      artist: artistName,
+      duration: Duration(milliseconds: length.toInt()),
+      artUri: albumCoverUrl == null ? null : Uri.parse(albumCoverUrl),
+      genre: genre,
+      extras: {'sourceUrl': sourceUrl},
+    );
   }
 
   bool get hasCustomImage {

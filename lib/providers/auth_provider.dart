@@ -8,7 +8,7 @@ class AuthProvider {
   User get authUser => _authUser;
 
   Future<void> login({required String email, required String password}) async {
-    final Map<String, String> loginData = {
+    final loginData = <String, String>{
       'email': email,
       'password': password,
     };

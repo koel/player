@@ -20,12 +20,11 @@ class LibraryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var overviewProvider = context.watch<OverviewProvider>();
+    final overviewProvider = context.watch<OverviewProvider>();
+    final recentlyAddedSongs = overviewProvider.recentlyAddedSongs;
+    final mostPlayedSongs = overviewProvider.mostPlayedSongs;
 
-    var recentlyAddedSongs = overviewProvider.recentlyAddedSongs;
-    var mostPlayedSongs = overviewProvider.mostPlayedSongs;
-
-    List<Widget> menuItems = ListTile.divideTiles(
+    final menuItems = ListTile.divideTiles(
       context: context,
       tiles: <Widget>[
         LibraryMenuItem(

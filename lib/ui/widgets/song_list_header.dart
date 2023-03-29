@@ -42,25 +42,31 @@ class SongListHeader extends StatefulWidget {
 }
 
 class _SongListHeaderState extends State<SongListHeader> {
-  bool _displayingSearch = false;
-  final TextEditingController _searchController = TextEditingController();
-  late Widget _buttonsHeader;
-  late Widget _searchHeader;
+  var _displayingSearch = false;
+  final _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
 
     _searchController.addListener(() {
-      if (widget.onSearchQueryChanged != null) {
-        widget.onSearchQueryChanged!(_searchController.text);
-      }
+      widget.onSearchQueryChanged?.call(_searchController.text);
     });
+  }
 
-    var playIcon = widget.playIcon ?? const Icon(CupertinoIcons.play_fill);
-    var shuffleIcon = widget.shuffleIcon ?? const Icon(CupertinoIcons.shuffle);
+  @override
+  Widget build(BuildContext context) {
+    final playIcon = widget.playIcon ?? const Icon(CupertinoIcons.play_fill);
+    final shuffleIcon =
+        widget.shuffleIcon ?? const Icon(CupertinoIcons.shuffle);
 
-    _buttonsHeader = Row(
+    final onPlayPressed =
+        widget.onPlayPressed ?? () => audioHandler.replaceQueue(widget.songs);
+
+    final onShufflePressed = widget.onShufflePressed ??
+        () => audioHandler.replaceQueue(widget.songs, shuffle: true);
+
+    final Widget buttonsHeader = Row(
       children: <Widget>[
         IconButton(
           onPressed: () {
@@ -71,10 +77,7 @@ class _SongListHeaderState extends State<SongListHeader> {
         ),
         const Spacer(),
         IconButton(
-          onPressed: () {
-            if (widget.onPlayPressed != null) return widget.onPlayPressed!();
-            audioHandler.replaceQueue(widget.songs);
-          },
+          onPressed: onPlayPressed,
           icon: SizedBox(
             height: 24,
             width: 24,
@@ -83,11 +86,7 @@ class _SongListHeaderState extends State<SongListHeader> {
         ),
         const SizedBox(width: 6),
         ElevatedButton(
-          onPressed: () {
-            if (widget.onShufflePressed != null)
-              return widget.onShufflePressed!();
-            audioHandler.replaceQueue(widget.songs, shuffle: true);
-          },
+          onPressed: onShufflePressed,
           child: SizedBox(
             height: 24,
             width: 24,
@@ -103,7 +102,7 @@ class _SongListHeaderState extends State<SongListHeader> {
       ],
     );
 
-    _searchHeader = Row(
+    final Widget searchHeader = Row(
       children: <Widget>[
         Expanded(
           child: CupertinoSearchTextField(
@@ -129,10 +128,7 @@ class _SongListHeaderState extends State<SongListHeader> {
         ),
       ],
     );
-  }
 
-  @override
-  Widget build(BuildContext context) {
     final double verticalPadding = _displayingSearch ? 10 : 8;
 
     return AnimatedSwitcher(
@@ -145,7 +141,7 @@ class _SongListHeaderState extends State<SongListHeader> {
           _displayingSearch ? 0 : 8,
           verticalPadding,
         ),
-        child: _displayingSearch ? _searchHeader : _buttonsHeader,
+        child: _displayingSearch ? searchHeader : buttonsHeader,
       ),
     );
   }

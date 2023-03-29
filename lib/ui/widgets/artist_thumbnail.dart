@@ -1,6 +1,5 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/models/models.dart';
-import 'package:app/utils/preferences.dart' as preferences;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -20,7 +19,9 @@ class ArtistThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget image = artist.imageUrl == null
+    final imageUrl = artist.imageUrl;
+
+    Widget image = imageUrl == null
         ? Image.asset(
             'assets/images/unknown-album.png',
             fit: BoxFit.cover,
@@ -33,7 +34,7 @@ class ArtistThumbnail extends StatelessWidget {
             height: height,
             placeholder: (_, __) => defaultImage,
             errorWidget: (_, __, ___) => defaultImage,
-            imageUrl: artist.imageUrl!,
+            imageUrl: imageUrl,
           );
 
     return ClipRRect(

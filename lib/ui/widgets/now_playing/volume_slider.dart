@@ -11,7 +11,7 @@ class VolumeSlider extends StatefulWidget {
 }
 
 class _VolumeSliderState extends State<VolumeSlider> {
-  double _volume = .7;
+  var _volume = 0.7;
 
   @override
   void initState() {
@@ -23,7 +23,7 @@ class _VolumeSliderState extends State<VolumeSlider> {
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
-        Icon(
+        const Icon(
           CupertinoIcons.volume_mute,
           size: 16,
           color: Colors.white54,

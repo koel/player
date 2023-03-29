@@ -14,14 +14,17 @@ class HorizontalCardScroller extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final headingText = this.headingText;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         if (headingText != null)
           Padding(
-            padding:
-                const EdgeInsets.only(left: AppDimensions.horizontalPadding),
-            child: Heading5(text: headingText!),
+            padding: const EdgeInsets.only(
+              left: AppDimensions.horizontalPadding,
+            ),
+            child: Heading5(text: headingText),
           ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,

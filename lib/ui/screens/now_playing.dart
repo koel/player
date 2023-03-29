@@ -61,11 +61,13 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
 
   @override
   Widget build(BuildContext context) {
-    if (_song == null || _state == null) return const SizedBox.shrink();
+    final song = _song;
 
-    Color bottomIconColor = Colors.white54;
+    if (song == null || _state == null) return const SizedBox.shrink();
 
-    final Widget frostGlassBackground = SizedBox(
+    final bottomIconColor = Colors.white54;
+
+    final frostGlassBackground = SizedBox(
       width: double.infinity,
       height: double.infinity,
       child: ClipRect(
@@ -74,7 +76,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           child: DecoratedBox(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: _song!.image,
+                image: song.image,
                 fit: BoxFit.cover,
                 alignment: Alignment.topCenter,
               ),
@@ -84,32 +86,32 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
       ),
     );
 
-    final Widget thumbnail = Padding(
+    final thumbnail = Padding(
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: Hero(
         tag: 'hero-now-playing-thumbnail',
-        child: SongThumbnail(song: _song!, size: ThumbnailSize.xl),
+        child: SongThumbnail(song: song, size: ThumbnailSize.xl),
       ),
     );
 
-    final Widget infoPane = Column(
+    final infoPane = Column(
       children: <Widget>[
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Expanded(child: SongInfo(song: _song!)),
+            Expanded(child: SongInfo(song: song)),
             const SizedBox(width: 8),
-            SongCacheIcon(song: _song!),
+            SongCacheIcon(song: song),
             IconButton(
               onPressed: () =>
-                  widget.router.showActionSheet(context, song: _song!),
+                  widget.router.showActionSheet(context, song: song),
               icon: const Icon(CupertinoIcons.ellipsis),
             ),
           ],
         ),
         const SizedBox(height: 8),
-        ProgressBar(song: _song!),
+        ProgressBar(song: song),
       ],
     );
 
@@ -142,7 +144,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                         IconButton(
                           onPressed: () => showInfoSheet(
                             context,
-                            song: _song!,
+                            song: song,
                           ),
                           icon: Icon(
                             CupertinoIcons.text_quote,

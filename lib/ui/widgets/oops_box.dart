@@ -15,7 +15,7 @@ class OopsBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AuthProvider auth = context.watch();
+    final auth = context.watch<AuthProvider>();
 
     return Container(
       child: Center(

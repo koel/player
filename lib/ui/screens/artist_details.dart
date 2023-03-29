@@ -25,8 +25,8 @@ class ArtistDetailsScreen extends StatefulWidget {
 }
 
 class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
-  String _searchQuery = '';
-  CoverImageStack cover = CoverImageStack(songs: []);
+  var _searchQuery = '';
+  var cover = CoverImageStack(songs: []);
 
   Future<List<Object>> buildRequest(int artistId, {bool forceRefresh = false}) {
     return Future.wait([
@@ -41,9 +41,9 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final int artistId = ModalRoute.of(context)!.settings.arguments as int;
-    final AppStateProvider appState = context.read();
-    SongSortConfig sortConfig = appState.get('artist.sort') ??
+    final artistId = ModalRoute.of(context)!.settings.arguments as int;
+    final appState = context.read<AppStateProvider>();
+    var sortConfig = appState.get<SongSortConfig>('artist.sort') ??
         SongSortConfig(field: 'title', order: SortOrder.asc);
 
     return Scaffold(
@@ -54,15 +54,13 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
             return const SongListScreenPlaceholder();
           }
 
-          final songs = snapshot.data![1] as List<Song>;
+          final songs = snapshot.requireData[1] as List<Song>;
 
           if (cover.isEmpty) {
-            cover = CoverImageStack(
-              songs: snapshot.data![1] as List<Song>,
-            );
+            cover = CoverImageStack(songs: songs);
           }
 
-          final artist = snapshot.data![0] as Artist;
+          final artist = snapshot.requireData[0] as Artist;
           final displayedSongs = songs.$sort(sortConfig).$filter(_searchQuery);
 
           return PullToRefresh(

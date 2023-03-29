@@ -18,31 +18,23 @@ class SongActionSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    FavoriteProvider favoriteProvider = context.read();
-
-    bool isCurrent = audioHandler.mediaItem.value != null &&
+    final favoriteProvider = context.read<FavoriteProvider>();
+    final isCurrent = audioHandler.mediaItem.value != null &&
         audioHandler.mediaItem.value!.id == song.id;
-
-    bool queued = audioHandler.queued(song);
+    final queued = audioHandler.queued(song);
 
     return ClipRect(
       child: Container(
-        padding: const EdgeInsets.only(
-          top: 16.0,
-          bottom: 8.0,
-        ),
+        padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              SizedBox.shrink(), // to properly align the thumbnail area
+              const SizedBox.shrink(), // to properly align the thumbnail area
               Column(
                 children: [
-                  SongThumbnail(
-                    song: song,
-                    size: ThumbnailSize.lg,
-                  ),
+                  SongThumbnail(song: song, size: ThumbnailSize.lg),
                   const SizedBox(height: 16),
                   Text(
                     song.title,
@@ -217,10 +209,7 @@ class SongActionButton extends StatelessWidget {
       title: Text(text),
       onTap: () {
         onTap();
-
-        if (hideSheetOnTap) {
-          Navigator.pop(context);
-        }
+        if (hideSheetOnTap) Navigator.pop(context);
       },
     );
   }

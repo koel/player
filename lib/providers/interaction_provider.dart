@@ -7,32 +7,34 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/foundation.dart';
 
 class InteractionProvider with ChangeNotifier, StreamSubscriber {
-  late SongProvider _songProvider;
+  late final SongProvider _songProvider;
 
   InteractionProvider({required SongProvider songProvider}) {
     _songProvider = songProvider;
-    subscribeToAudioEvents();
+    _subscribeToAudioEvents();
   }
 
-  subscribeToAudioEvents() {
+  _subscribeToAudioEvents() {
     subscribe(audioHandler.playbackState.listen((state) {
       if (audioHandler.mediaItem.value == null) return;
       // every time the song completes, reset the play count registered flag
       // so that next time the song is played, the count will be registered again.
       if (state.processingState == AudioProcessingState.completed) {
-        Song? song = _songProvider.byId(audioHandler.mediaItem.value!.id);
-        if (song != null) song.playCountRegistered = false;
+        _songProvider
+            .byId(audioHandler.mediaItem.value!.id)
+            ?.playCountRegistered = false;
       }
     }));
 
     subscribe(audioHandler.player.positionStream.listen((duration) {
       if (audioHandler.mediaItem.value == null) return;
-      Song? song = _songProvider.byId(audioHandler.mediaItem.value!.id);
+      final song = _songProvider.byId(audioHandler.mediaItem.value!.id);
+
       if (song != null &&
           !song.playCountRegistered &&
           duration.inSeconds / song.length.toDouble() > .25) {
         song.playCountRegistered = true;
-        registerPlayCount(song: song);
+        _registerPlayCount(song: song);
       }
     }));
   }
@@ -56,12 +58,12 @@ class InteractionProvider with ChangeNotifier, StreamSubscriber {
     return song.liked ? _unlike(song: song) : _like(song: song);
   }
 
-  Future<void> registerPlayCount({required Song song}) async {
+  Future<void> _registerPlayCount({required Song song}) async {
     song.playCountRegistered = true;
-    dynamic json = await post('interaction/play', data: {'song': song.id});
+    final json = await post('interaction/play', data: {'song': song.id});
 
     // Use the data from the server to make sure we don't miss a play from another device.
-    Interaction interaction = Interaction.fromJson(json);
+    final interaction = Interaction.fromJson(json);
     song
       ..playCount = interaction.playCount
       ..liked = interaction.liked;

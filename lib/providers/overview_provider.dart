@@ -4,50 +4,61 @@ import 'package:app/utils/api_request.dart';
 import 'package:flutter/foundation.dart';
 
 class OverviewProvider with ChangeNotifier {
-  SongProvider songProvider;
-  AlbumProvider albumProvider;
-  ArtistProvider artistProvider;
-  RecentlyPlayedProvider recentlyPlayedProvider;
+  final SongProvider _songProvider;
+  final AlbumProvider _albumProvider;
+  final ArtistProvider _artistProvider;
 
-  List<Song> mostPlayedSongs = [];
-  List<Song> recentlyAddedSongs = [];
-  List<Song> recentlyPlayedSongs = [];
-  List<Album> recentlyAddedAlbums = [];
-  List<Album> mostPlayedAlbums = [];
-  List<Artist> mostPlayedArtists = [];
+  final mostPlayedSongs = <Song>[];
+  final recentlyAddedSongs = <Song>[];
+  final recentlyPlayedSongs = <Song>[];
+  final recentlyAddedAlbums = <Album>[];
+  final mostPlayedAlbums = <Album>[];
+  final mostPlayedArtists = <Artist>[];
 
   OverviewProvider({
-    required this.songProvider,
-    required this.albumProvider,
-    required this.artistProvider,
-    required this.recentlyPlayedProvider,
-  });
+    required songProvider,
+    required albumProvider,
+    required artistProvider,
+  })  : _songProvider = songProvider,
+        _albumProvider = albumProvider,
+        _artistProvider = artistProvider;
 
-  Future<void> fetchOverview() async {
+  Future<void> refresh() async {
     final Map<String, dynamic> response = await get('overview');
 
-    mostPlayedSongs = parseSongsFromJson(response['most_played_songs']);
-    recentlyAddedSongs = parseSongsFromJson(response['recently_added_songs']);
-    recentlyPlayedSongs = parseSongsFromJson(response['recently_played_songs']);
+    mostPlayedSongs
+      ..clear()
+      ..addAll(parseSongsFromJson(response['most_played_songs']));
 
-    List<Album> _mostPlayedAlbums = response['most_played_albums']
+    recentlyAddedSongs
+      ..clear()
+      ..addAll(parseSongsFromJson(response['recently_added_songs']));
+
+    recentlyPlayedSongs
+      ..clear()
+      ..addAll(parseSongsFromJson(response['recently_played_songs']));
+
+    final _mostPlayedAlbums = response['most_played_albums']
         .map<Album>((j) => Album.fromJson(j))
         .toList();
 
-    mostPlayedAlbums = albumProvider.syncWithVault(_mostPlayedAlbums);
+    mostPlayedAlbums
+      ..clear()
+      ..addAll(_albumProvider.syncWithVault(_mostPlayedAlbums));
 
-    List<Artist> _mostPlayedArtist = response['most_played_artists']
+    final _mostPlayedArtist = response['most_played_artists']
         .map<Artist>((j) => Artist.fromJson(j))
         .toList();
 
-    mostPlayedArtists = artistProvider.syncWithVault(_mostPlayedArtist);
+    mostPlayedArtists
+      ..clear()
+      ..addAll(_artistProvider.syncWithVault(_mostPlayedArtist));
 
     notifyListeners();
   }
 
   List<Song> parseSongsFromJson(dynamic json) {
-    List<Song> _songs = json.map<Song>((j) => Song.fromJson(j)).toList();
-
-    return songProvider.syncWithVault(_songs);
+    return _songProvider
+        .syncWithVault(json.map<Song>((j) => Song.fromJson(j)).toList());
   }
 }

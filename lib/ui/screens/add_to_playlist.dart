@@ -23,11 +23,11 @@ class AddToPlaylistScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Song song = ModalRoute.of(context)!.settings.arguments as Song;
+    final song = ModalRoute.of(context)!.settings.arguments as Song;
 
     return Scaffold(
       body: CupertinoTheme(
-        data: CupertinoThemeData(primaryColor: Colors.white),
+        data: const CupertinoThemeData(primaryColor: Colors.white),
         child: Consumer<PlaylistProvider>(
           builder: (context, provider, navigationBar) {
             if (provider.standardPlaylists.isEmpty) {
@@ -47,10 +47,7 @@ class AddToPlaylistScreen extends StatelessWidget {
                       return PlaylistRow(
                         playlist: playlist,
                         onTap: () {
-                          provider.addSongToPlaylist(
-                            song: song,
-                            playlist: playlist,
-                          );
+                          provider.addSongToPlaylist(song, playlist: playlist);
                           HapticFeedback.mediumImpact();
                           Navigator.pop(context);
                           showOverlay(

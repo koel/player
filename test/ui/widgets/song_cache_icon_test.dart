@@ -32,7 +32,7 @@ void main() {
     when(cacheMock.songDownloadedStream).thenAnswer((_) => songCached.stream);
 
     singleCacheRemoved = BehaviorSubject();
-    when(cacheMock.singleCacheRemovedStream)
+    when(cacheMock.downloadRemovedStream)
         .thenAnswer((_) => singleCacheRemoved.stream);
   });
 

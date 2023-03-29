@@ -16,32 +16,28 @@ class SongCacheIcon extends StatefulWidget {
 }
 
 class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
-  late DownloadProvider cache;
-  bool _downloading = false;
+  late DownloadProvider downloadProvider;
+  var _downloading = false;
   bool? _downloaded;
 
   @override
   void initState() {
     super.initState();
-    cache = context.read();
+    downloadProvider = context.read();
 
-    subscribe(cache.downloadsClearedStream.listen((_) {
+    subscribe(downloadProvider.downloadsClearedStream.listen((_) {
       setState(() => _downloaded = false);
     }));
 
-    subscribe(cache.singleCacheRemovedStream.listen((song) {
-      if (song == widget.song) {
-        setState(() => _downloaded = false);
-      }
+    subscribe(downloadProvider.downloadRemovedStream.listen((song) {
+      if (song == widget.song) setState(() => _downloaded = false);
     }));
 
-    subscribe(cache.songDownloadedStream.listen((event) {
-      if (event.song == widget.song) {
-        setState(() => _downloaded = true);
-      }
+    subscribe(downloadProvider.songDownloadedStream.listen((event) {
+      if (event.song == widget.song) setState(() => _downloaded = true);
     }));
 
-    setState(() => _downloaded = cache.has(song: widget.song));
+    setState(() => _downloaded = downloadProvider.has(song: widget.song));
   }
 
   /// Since this widget is rendered inside NowPlayingScreen, change to current
@@ -56,8 +52,7 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
   }
 
   void _resolveCacheStatus() {
-    bool hasState = cache.has(song: widget.song);
-    setState(() => _downloaded = hasState);
+    setState(() => _downloaded = downloadProvider.has(song: widget.song));
   }
 
   @override
@@ -68,7 +63,7 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
 
   Future<void> _cache() async {
     setState(() => _downloading = true);
-    await cache.download(song: widget.song);
+    await downloadProvider.download(song: widget.song);
     setState(() {
       _downloading = false;
       _downloaded = true;
@@ -83,9 +78,11 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
         child: CupertinoActivityIndicator(radius: 9),
       );
 
-    if (_downloaded == null) return const SizedBox.shrink();
+    final downloaded = this._downloaded;
 
-    if (_downloaded!) {
+    if (downloaded == null) return const SizedBox.shrink();
+
+    if (downloaded) {
       return const Padding(
         padding: EdgeInsets.only(right: 4.0),
         child: Icon(

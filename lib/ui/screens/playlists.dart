@@ -24,19 +24,10 @@ class PlaylistsScreen extends StatefulWidget {
 
 class _PlaylistsScreenState extends State<PlaylistsScreen> {
   @override
-  void initState() {
-    super.initState();
-
-    // Try to populate all playlists even before user interactions to update
-    // the playlist's thumbnail and song count.
-    context.read<PlaylistProvider>().populateAllPlaylists();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: CupertinoTheme(
-        data: CupertinoThemeData(primaryColor: Colors.white),
+        data: const CupertinoThemeData(primaryColor: Colors.white),
         child: Consumer<PlaylistProvider>(
           builder: (context, provider, navigationBar) {
             if (provider.playlists.isEmpty) {
@@ -45,10 +36,8 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
               );
             }
 
-            var playlists = provider.playlists
-              ..sort(
-                (a, b) => a.name.compareTo(b.name),
-              );
+            final playlists = provider.playlists
+              ..sort((a, b) => a.name.compareTo(b.name));
 
             return CustomScrollView(
               slivers: <Widget>[
@@ -64,9 +53,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
                           context,
                           playlist: playlist,
                         ),
-                        onDismissed: (_) => provider.remove(
-                          playlist: playlist,
-                        ),
+                        onDismissed: (_) => provider.remove(playlist),
                         background: Container(
                           alignment: AlignmentDirectional.centerEnd,
                           color: AppColors.red,

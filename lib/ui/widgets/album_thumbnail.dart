@@ -20,7 +20,9 @@ class AlbumThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget image = albumCoverUrl == null
+    final coverUrl = albumCoverUrl;
+
+    final image = coverUrl == null
         ? Image.asset(
             'assets/images/unknown-album.png',
             fit: BoxFit.cover,
@@ -33,7 +35,7 @@ class AlbumThumbnail extends StatelessWidget {
             height: height,
             placeholder: (_, __) => defaultImage,
             errorWidget: (_, __, ___) => defaultImage,
-            imageUrl: albumCoverUrl!,
+            imageUrl: coverUrl,
           );
 
     return ClipRRect(

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 class AppStateProvider {
-  Map<String, dynamic> _state = {};
+  final _state = <String, dynamic>{};
 
   String _normalizeKey(Object key) => jsonEncode(key);
 

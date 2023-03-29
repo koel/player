@@ -36,6 +36,8 @@ class AppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final backgroundImage = this.backgroundImage;
+
     return SliverAppBar(
       pinned: true,
       expandedHeight: 290,
@@ -52,7 +54,7 @@ class AppBar extends StatelessWidget {
         ),
         background: Stack(
           children: <Widget>[
-            if (backgroundImage != null) backgroundImage!,
+            if (backgroundImage != null) backgroundImage,
             _gradientEffect,
             Center(
               child: SizedBox(
@@ -131,6 +133,8 @@ class CoverImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imageUrl = this.imageUrl;
+
     return SizedBox(
       width: 160,
       height: 160,
@@ -143,7 +147,7 @@ class CoverImage extends StatelessWidget {
             ),
             image: imageUrl == null
                 ? AssetImage('assets/images/unknown-album.png') as ImageProvider
-                : CachedNetworkImageProvider(imageUrl!),
+                : CachedNetworkImageProvider(imageUrl),
             fit: BoxFit.cover,
             alignment: Alignment.topCenter,
           ),

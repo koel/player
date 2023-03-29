@@ -13,29 +13,28 @@ class Download {
 }
 
 class DownloadProvider with ChangeNotifier {
-  List<Download> _downloads = [];
+  final _downloads = <Download>[];
 
   List<Song> get songs => _downloads.map((d) => d.song).toList();
 
-  final BehaviorSubject<bool> _downloadsCleared = BehaviorSubject();
+  final _downloadsCleared = BehaviorSubject<bool>();
 
   ValueStream<bool> get downloadsClearedStream => _downloadsCleared.stream;
 
-  final BehaviorSubject<Song> _singleDownloadRemoved = BehaviorSubject();
+  final _downloadRemoved = BehaviorSubject<Song>();
 
-  ValueStream<Song> get singleCacheRemovedStream =>
-      _singleDownloadRemoved.stream;
+  ValueStream<Song> get downloadRemovedStream => _downloadRemoved.stream;
 
-  final BehaviorSubject<Download> _songCached = BehaviorSubject();
+  final _songDownloaded = BehaviorSubject<Download>();
 
-  ValueStream<Download> get songDownloadedStream => _songCached.stream;
+  ValueStream<Download> get songDownloadedStream => _songDownloaded.stream;
 
-  static final serializedSongContainer = 'Downloads';
-  static final serializedSongKey = 'songs';
+  static const serializedSongContainer = 'Downloads';
+  static const serializedSongKey = 'songs';
   static const downloadCacheKey = 'koel.downloaded.songs';
-  static final GetStorage _songStorage = GetStorage(serializedSongContainer);
+  static final _songStorage = GetStorage(serializedSongContainer);
 
-  static final CacheManager _downloadManager = CacheManager(
+  static final _downloadManager = CacheManager(
     Config(
       downloadCacheKey,
       stalePeriod: Duration(days: 365 * 10),
@@ -43,11 +42,11 @@ class DownloadProvider with ChangeNotifier {
   );
 
   Future<void> collectDownloads() async {
-    var songs = _songStorage.read<List<dynamic>>(serializedSongKey) ?? [];
+    final songs = _songStorage.read<List<dynamic>>(serializedSongKey) ?? [];
 
     await Future.forEach<dynamic>(songs, (json) async {
-      Song song = Song.fromJson(json);
-      var file = await _downloadManager.getFileFromCache(song.cacheKey);
+      var song = Song.fromJson(json);
+      final file = await _downloadManager.getFileFromCache(song.cacheKey);
 
       // a download is only valid if the file is still found in the cache
       // (i.e. it hasn't been deleted by the OS)
@@ -58,13 +57,13 @@ class DownloadProvider with ChangeNotifier {
   }
 
   Future<void> download({required Song song}) async {
-    FileInfo file = await _downloadManager.downloadFile(
+    final file = await _downloadManager.downloadFile(
       song.sourceUrl,
       key: song.cacheKey,
       force: true,
     );
 
-    var download = Download(song: song, file: file);
+    final download = Download(song: song, file: file);
     _songStorage.write(
       'songs',
       songs
@@ -73,7 +72,7 @@ class DownloadProvider with ChangeNotifier {
         ..toList(),
     );
 
-    _songCached.add(download);
+    _songDownloaded.add(download);
     _downloads.add(download);
 
     notifyListeners();
@@ -87,14 +86,10 @@ class DownloadProvider with ChangeNotifier {
 
   Future<void> remove({required Song song}) async {
     await _downloadManager.removeFile(song.cacheKey);
-    _singleDownloadRemoved.add(song);
+    _downloadRemoved.add(song);
 
     _downloads.removeWhere((element) => element.song.id == song.id);
-
-    _songStorage.write(
-      serializedSongKey,
-      songs..removeWhere((s) => s.id == song.id),
-    );
+    _songStorage.write(serializedSongKey, songs..remove(song));
 
     notifyListeners();
   }
