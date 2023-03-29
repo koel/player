@@ -1,23 +1,19 @@
 import 'package:app/enums.dart';
+import 'package:app/main.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
-import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:app/values/values.dart';
 import 'package:flutter/foundation.dart';
 
 class SongProvider with ChangeNotifier {
   final DownloadProvider _downloadProvider;
-  final AppStateProvider _appState;
 
   var songs = <Song>[];
   final _vault = <String, Song>{};
 
-  SongProvider({
-    required downloadProvider,
-    required appState,
-  })  : _downloadProvider = downloadProvider,
-        _appState = appState {
+  SongProvider({required downloadProvider})
+      : _downloadProvider = downloadProvider {
     _syncDownloadedSongs();
   }
 
@@ -73,7 +69,7 @@ class SongProvider with ChangeNotifier {
     int artistId, {
     bool forceRefresh = false,
   }) async {
-    if (forceRefresh) _appState.delete(['artist.songs', artistId]);
+    if (forceRefresh) appState.delete(['artist.songs', artistId]);
 
     return _stateAwareFetch(
       'artists/$artistId/songs',
@@ -85,7 +81,7 @@ class SongProvider with ChangeNotifier {
     int albumId, {
     bool forceRefresh = false,
   }) async {
-    if (forceRefresh) _appState.delete(['album.songs', albumId]);
+    if (forceRefresh) appState.delete(['album.songs', albumId]);
 
     return _stateAwareFetch(
       'albums/$albumId/songs',
@@ -97,7 +93,7 @@ class SongProvider with ChangeNotifier {
     int playlistId, {
     bool forceRefresh = false,
   }) async {
-    if (forceRefresh) _appState.delete(['playlist.songs', playlistId]);
+    if (forceRefresh) appState.delete(['playlist.songs', playlistId]);
 
     return _stateAwareFetch(
       'playlists/$playlistId/songs',
@@ -106,11 +102,11 @@ class SongProvider with ChangeNotifier {
   }
 
   Future<List<Song>> _stateAwareFetch(String url, Object cacheKey) async {
-    if (_appState.has(cacheKey)) return _appState.get(cacheKey);
+    if (appState.has(cacheKey)) return appState.get(cacheKey);
 
     final res = await get(url);
     final items = res.map<Song>((json) => Song.fromJson(json)).toList();
-    _appState.set(cacheKey, items);
+    appState.set(cacheKey, items);
 
     return syncWithVault(items);
   }

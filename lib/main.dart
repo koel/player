@@ -1,3 +1,4 @@
+import 'package:app/app_state.dart';
 import 'package:app/audio_handler.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/app.dart';
@@ -8,9 +9,9 @@ import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 late KoelAudioHandler audioHandler;
+late AppState appState;
 
 List<SingleChildWidget> _providers = [
-  Provider(create: (_) => AppStateProvider()),
   Provider(create: (_) => AuthProvider()),
   ChangeNotifierProvider(create: (_) => ArtistProvider()),
   Provider(create: (_) => MediaInfoProvider()),
@@ -19,13 +20,11 @@ List<SingleChildWidget> _providers = [
   ChangeNotifierProvider(
     create: (context) => SongProvider(
       downloadProvider: context.read<DownloadProvider>(),
-      appState: context.read<AppStateProvider>(),
     ),
   ),
   ChangeNotifierProvider(
     create: (context) => FavoriteProvider(
       songProvider: context.read<SongProvider>(),
-      appState: context.read<AppStateProvider>(),
     ),
   ),
   ChangeNotifierProvider(
@@ -38,16 +37,13 @@ List<SingleChildWidget> _providers = [
     lazy: false,
   ),
   ChangeNotifierProvider(
-    create: (context) => PlaylistProvider(
-      appState: context.read<AppStateProvider>(),
-    ),
+    create: (context) => PlaylistProvider(),
   ),
   ChangeNotifierProvider(
     create: (context) => SearchProvider(
       songProvider: context.read<SongProvider>(),
       artistProvider: context.read<ArtistProvider>(),
       albumProvider: context.read<AlbumProvider>(),
-      appState: context.read<AppStateProvider>(),
     ),
   ),
   ChangeNotifierProvider(
@@ -82,6 +78,8 @@ Future<void> main() async {
 
   await GetStorage.init('Preferences');
   await GetStorage.init(DownloadProvider.serializedSongContainer);
+
+  appState = AppState();
 
   runApp(
     MultiProvider(

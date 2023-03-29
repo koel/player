@@ -9,7 +9,9 @@ import 'package:flutter/foundation.dart';
 class InteractionProvider with ChangeNotifier, StreamSubscriber {
   late final SongProvider _songProvider;
 
-  InteractionProvider({required SongProvider songProvider}) {
+  InteractionProvider({
+    required SongProvider songProvider,
+  }) {
     _songProvider = songProvider;
     _subscribeToAudioEvents();
   }

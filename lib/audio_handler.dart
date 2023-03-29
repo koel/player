@@ -5,15 +5,15 @@ import 'package:just_audio/just_audio.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 
 class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
+  static const MAX_ERROR_COUNT = 10;
+
   late final DownloadProvider downloadProvider;
   late final SongProvider songProvider;
-
-  var _initialized = false;
-
-  var _currentMediaItem = MediaItem(id: '', title: '');
-
   late AudioServiceRepeatMode repeatMode;
 
+  var _errorCount = 0;
+  var _initialized = false;
+  var _currentMediaItem = MediaItem(id: '', title: '');
   final _player = AudioPlayer();
 
   AudioPlayer get player => _player;
@@ -100,27 +100,17 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     final song = songProvider.byId(mediaItem.id)!;
     final download = downloadProvider.get(song: song);
 
-    try {
-      if (download == null) {
-        await _player.setUrl(mediaItem.extras?['sourceUrl'] as String);
-      } else {
-        await _player.setFilePath(download.file.path);
-      }
-    } catch (e) {
-      print(e);
-      skipToNext();
+    if (download == null) {
+      await _player.setUrl(mediaItem.extras?['sourceUrl'] as String);
+    } else {
+      await _player.setFilePath(download.file.path);
     }
   }
 
   @override
   Future<void> play() async {
-    try {
-      playbackState.add(playbackState.value.copyWith(playing: true));
-      await _player.play();
-    } catch (e) {
-      print(e);
-      skipToNext();
-    }
+    playbackState.add(playbackState.value.copyWith(playing: true));
+    await _player.play();
   }
 
   @override
@@ -131,13 +121,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   Future<void> queueAndPlay(Song song) async {
     await this.queueAfterCurrent(song);
-    this.mediaItem.add(song.mediaItem);
-
-    if (song.mediaItem != _currentMediaItem) {
-      await _setPlayerSource(song.mediaItem);
-    }
-
-    await play();
+    await _playAtIndex(queue.value.indexOf(song.mediaItem));
   }
 
   Future<void> queueAfterCurrent(Song song) async {
@@ -176,8 +160,14 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     final mediaItem = queue.value[index];
     this.mediaItem.add(mediaItem);
 
-    await _setPlayerSource(mediaItem);
-    await play();
+    try {
+      await _setPlayerSource(mediaItem);
+      await play();
+    } catch (e) {
+      _errorCount++;
+    }
+
+    // Reset the error count if the song is successfully loaded.
   }
 
   @override

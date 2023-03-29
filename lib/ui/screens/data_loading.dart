@@ -25,7 +25,7 @@ class _DataLoadingScreen extends State<DataLoadingScreen> {
 
   Future<void> _loadData() async {
     try {
-      await context.read<DataProvider>().init(context);
+      await context.read<DataProvider>().init();
       await Navigator.of(context).pushReplacementNamed(RootScreen.routeName);
     } catch (e) {
       setState(() => _hasError = true);

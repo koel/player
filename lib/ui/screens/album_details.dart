@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:app/app_state.dart';
 import 'package:app/enums.dart';
 import 'package:app/extensions/extensions.dart';
 import 'package:app/models/models.dart';
@@ -40,9 +41,11 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final int albumId = ModalRoute.of(context)!.settings.arguments as int;
-    final AppStateProvider appState = context.read();
-    var sortConfig = appState.get<SongSortConfig>('album.sort') ??
-        SongSortConfig(field: 'track', order: SortOrder.asc);
+    final AppState appState = context.read();
+    var sortConfig = appState.get(
+      'album.sort',
+      SongSortConfig(field: 'track', order: SortOrder.asc),
+    )!;
 
     return Scaffold(
       body: FutureBuilder(

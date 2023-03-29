@@ -1,6 +1,7 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/enums.dart';
 import 'package:app/extensions/extensions.dart';
+import 'package:app/main.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
@@ -27,12 +28,10 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final appState = context.read<AppStateProvider>();
-    var sortConfig = appState.get<SongSortConfig>('downloaded.sort') ??
-        SongSortConfig(
-          field: 'title',
-          order: SortOrder.asc,
-        );
+    var sortConfig = appState.get(
+      'downloaded.sort',
+      SongSortConfig(field: 'title', order: SortOrder.asc),
+    )!;
 
     return Scaffold(
       body: Consumer<DownloadProvider>(

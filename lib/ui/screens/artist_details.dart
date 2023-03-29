@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:app/enums.dart';
 import 'package:app/extensions/extensions.dart';
+import 'package:app/main.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
@@ -42,9 +43,10 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final artistId = ModalRoute.of(context)!.settings.arguments as int;
-    final appState = context.read<AppStateProvider>();
-    var sortConfig = appState.get<SongSortConfig>('artist.sort') ??
-        SongSortConfig(field: 'title', order: SortOrder.asc);
+    var sortConfig = appState.get(
+      'artist.sort',
+      SongSortConfig(field: 'title', order: SortOrder.asc),
+    )!;
 
     return Scaffold(
       body: FutureBuilder(

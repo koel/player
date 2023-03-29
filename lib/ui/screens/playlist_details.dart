@@ -1,4 +1,5 @@
 import 'package:app/enums.dart';
+import 'package:app/main.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
@@ -46,9 +47,10 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final playlist = ModalRoute.of(context)!.settings.arguments as Playlist;
-    final appState = context.read<AppStateProvider>();
-    var sortConfig = appState.get<SongSortConfig>('playlist.sort') ??
-        SongSortConfig(field: 'title', order: SortOrder.asc);
+    var sortConfig = appState.get(
+      'playlist.sort',
+      SongSortConfig(field: 'title', order: SortOrder.asc),
+    )!;
 
     return Scaffold(
       body: FutureBuilder(

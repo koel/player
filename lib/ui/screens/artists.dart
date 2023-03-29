@@ -1,3 +1,4 @@
+import 'package:app/main.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
@@ -26,9 +27,8 @@ class ArtistsScreen extends StatefulWidget {
 
 class _ArtistsScreenState extends State<ArtistsScreen> {
   late ArtistProvider _artistProvider;
-  late AppStateProvider _appStateProvider;
   late ScrollController _scrollController;
-  late double _currentScrollOffset;
+  var _currentScrollOffset = appState.get('artists.scrollOffSet', 0.0)!;
   final _scrollThreshold = 64.0;
   var _loading = false;
 
@@ -54,8 +54,6 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
     super.initState();
 
     _artistProvider = context.read();
-    _appStateProvider = context.read();
-    _currentScrollOffset = _appStateProvider.get('artists.scrollOffSet') ?? 0.0;
 
     _scrollController = ScrollController(
       initialScrollOffset: _currentScrollOffset,
@@ -69,7 +67,7 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
   @override
   void dispose() {
     _loading = false;
-    _appStateProvider.set('artists.scrollOffSet', _currentScrollOffset);
+    appState.set('artists.scrollOffSet', _currentScrollOffset);
     _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
 

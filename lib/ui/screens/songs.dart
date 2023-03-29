@@ -25,10 +25,12 @@ class SongsScreen extends StatefulWidget {
 
 class _SongsScreenState extends State<SongsScreen> {
   late final SongListScreenProvider _provider;
-  late final AppStateProvider _appState;
-  late final SongPaginationConfig _paginationConfig;
+
+  final _paginationConfig =
+      appState.get('songs.paginationConfig', SongPaginationConfig())!;
+
   late final ScrollController _scrollController;
-  late double _currentScrollOffset;
+  var _currentScrollOffset = appState.get('songs.scrollOffSet', 0.0)!;
   final _scrollThreshold = 64.0;
   var _searchQuery = '';
   var _cover = CoverImageStack(songs: []);
@@ -51,11 +53,6 @@ class _SongsScreenState extends State<SongsScreen> {
     super.initState();
 
     _provider = context.read();
-    _appState = context.read();
-    _paginationConfig =
-        _appState.get('songs.paginationConfig') ?? SongPaginationConfig();
-
-    _currentScrollOffset = _appState.get('songs.scrollOffSet') ?? 0.0;
 
     _scrollController = ScrollController(
       initialScrollOffset: _currentScrollOffset,
@@ -86,8 +83,8 @@ class _SongsScreenState extends State<SongsScreen> {
   @override
   void dispose() {
     _loading = false;
-    _appState.set('songs.scrollOffSet', _currentScrollOffset);
-    _appState.set('songs.paginationConfig', _paginationConfig);
+    appState.set('songs.scrollOffSet', _currentScrollOffset);
+    appState.set('songs.paginationConfig', _paginationConfig);
     _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
 

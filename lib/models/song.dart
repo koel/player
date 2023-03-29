@@ -1,6 +1,7 @@
 import 'package:app/constants/constants.dart';
+import 'package:app/main.dart';
 import 'package:app/models/models.dart';
-import 'package:app/utils/preferences.dart';
+import 'package:app/utils/preferences.dart' as preferences;
 import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:faker/faker.dart';
@@ -71,9 +72,13 @@ class Song {
     var src = _sourceUrl;
 
     if (src == null) {
-      String rawUrl = transcoding
-          ? '$hostUrl/play/$id/1/128?t=$audioToken'
-          : '$hostUrl/play/$id?t=$audioToken';
+      var hostUrl = appState
+          .get(['app', 'cdnUrl'], preferences.hostUrl)!.replaceAll(
+              RegExp(r'/$'), '');
+
+      String rawUrl = appState.get(['app', 'transcoding'], false)!
+          ? '/play/$id/1/128?t=${preferences.audioToken}'
+          : '$hostUrl/play/$id?t=${preferences.audioToken}';
 
       _sourceUrl = src = Uri.encodeFull(rawUrl);
     }

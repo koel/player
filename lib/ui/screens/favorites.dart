@@ -1,6 +1,7 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/enums.dart';
 import 'package:app/extensions/extensions.dart';
+import 'package:app/main.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/app_bar.dart';
@@ -42,9 +43,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final appState = context.read<AppStateProvider>();
-    var sortConfig = appState.get<SongSortConfig>('favorites.sort') ??
-        SongSortConfig(field: 'title', order: SortOrder.asc);
+    var sortConfig = appState.get(
+      'favorites.sort',
+      SongSortConfig(field: 'title', order: SortOrder.asc),
+    )!;
 
     final emptyWidget = SliverFillRemaining(
       hasScrollBody: false,

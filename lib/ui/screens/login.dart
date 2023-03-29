@@ -57,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    AuthProvider auth = context.watch<AuthProvider>();
+    final auth = context.watch<AuthProvider>();
 
     Future<void> attemptLogin() async {
       final form = formKey.currentState!;

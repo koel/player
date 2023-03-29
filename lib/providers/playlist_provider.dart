@@ -1,5 +1,5 @@
+import 'package:app/main.dart';
 import 'package:app/models/models.dart';
-import 'package:app/providers/providers.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:app/values/values.dart';
 import 'package:flutter/foundation.dart';
@@ -12,10 +12,7 @@ ParseResult parsePlaylists(List<dynamic> data) {
 }
 
 class PlaylistProvider with ChangeNotifier {
-  AppStateProvider _appState;
   var _playlists = <Playlist>[];
-
-  PlaylistProvider({required AppStateProvider appState}) : _appState = appState;
 
   Future<void> init(List<dynamic> playlistData) async {
     ParseResult result = await compute(parsePlaylists, playlistData);
@@ -39,11 +36,11 @@ class PlaylistProvider with ChangeNotifier {
     });
 
     final cachedSongs =
-        _appState.get<List<Song>>(['playlist.songs', playlist.id]);
+        appState.get<List<Song>>(['playlist.songs', playlist.id]);
 
     if (cachedSongs != null && !cachedSongs.contains(song)) {
       // add the song into the playlist's songs cache
-      _appState.set(['playlist.songs', playlist.id], cachedSongs..add(song));
+      appState.set(['playlist.songs', playlist.id], cachedSongs..add(song));
     }
   }
 
@@ -58,11 +55,11 @@ class PlaylistProvider with ChangeNotifier {
     });
 
     final cachedSongs =
-        _appState.get<List<Song>>(['playlist.songs', playlist.id]);
+        appState.get<List<Song>>(['playlist.songs', playlist.id]);
 
     if (cachedSongs != null && cachedSongs.contains(song)) {
       // remove the song from the playlist's songs cache
-      _appState.set(['playlist.songs', playlist.id], cachedSongs..remove(song));
+      appState.set(['playlist.songs', playlist.id], cachedSongs..remove(song));
     }
   }
 
