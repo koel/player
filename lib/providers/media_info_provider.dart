@@ -1,3 +1,4 @@
+import 'package:app/main.dart';
 import 'package:app/models/models.dart';
 import 'package:app/utils/api_request.dart';
 
@@ -72,5 +73,28 @@ class MediaInfoProvider {
     }
 
     return _cache[song.id]!;
+  }
+
+  Future<AlbumInfo> fetchForAlbum(int albumId) async {
+    if (appState.has(['album.info', albumId])) {
+      return appState.get<AlbumInfo>(['album.info', albumId])!;
+    }
+
+    final info = AlbumInfo.fromJson(await get('albums/$albumId/information'));
+    appState.set(['album.info', albumId], info);
+    return info;
+  }
+
+  Future<ArtistInfo> fetchForArtist(int artistId) async {
+    if (appState.has(['artist.info', artistId])) {
+      return appState.get<ArtistInfo>(['artist.info', artistId])!;
+    }
+
+    final info = ArtistInfo.fromJson(
+      await get('artists/$artistId/information'),
+    );
+
+    appState.set(['artist.info', artistId], info);
+    return info;
   }
 }

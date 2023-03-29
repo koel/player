@@ -5,7 +5,7 @@ import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
-import 'package:app/ui/screens/info_sheet.dart';
+import 'package:app/ui/screens/info_sheet/info_sheet.dart';
 import 'package:app/ui/screens/queue.dart';
 import 'package:app/ui/widgets/now_playing/audio_controls.dart';
 import 'package:app/ui/widgets/now_playing/repeat_mode_button.dart';

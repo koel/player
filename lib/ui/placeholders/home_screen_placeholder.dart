@@ -13,7 +13,7 @@ class HomeScreenPlaceholder extends StatelessWidget {
         slivers: <Widget>[
           const CupertinoSliverNavigationBar(
             largeTitle: Text(''),
-            trailing: RoundedButtonPlaceholder(size: 24),
+            trailing: CirclePlaceholder(size: 24),
           ),
           SliverList(
             delegate: SliverChildListDelegate.fixed([

@@ -1,26 +1,25 @@
 import 'package:app/constants/constants.dart';
+import 'package:app/models/models.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 enum ThumbnailSize { sm, md, lg, xl }
 
 class AlbumThumbnail extends StatelessWidget {
-  final int albumId;
-  final String? albumCoverUrl;
+  final Album album;
   final ThumbnailSize size;
   final bool asHero;
 
   const AlbumThumbnail({
     Key? key,
-    required this.albumId,
-    required this.albumCoverUrl,
+    required this.album,
     this.size = ThumbnailSize.sm,
     this.asHero = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final coverUrl = albumCoverUrl;
+    final coverUrl = album.cover;
 
     final image = coverUrl == null
         ? Image.asset(
@@ -40,12 +39,7 @@ class AlbumThumbnail extends StatelessWidget {
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),
-      child: asHero
-          ? Hero(
-              tag: 'album-hero-$albumId',
-              child: image,
-            )
-          : image,
+      child: asHero ? Hero(tag: 'album-hero-${album.id}', child: image) : image,
     );
   }
 

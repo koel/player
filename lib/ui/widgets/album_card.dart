@@ -38,8 +38,7 @@ class _AlbumCardState extends State<AlbumCard> {
         child: Column(
           children: <Widget>[
             AlbumThumbnail(
-              albumId: widget.album.id,
-              albumCoverUrl: widget.album.cover,
+              album: widget.album,
               size: ThumbnailSize.md,
               asHero: true,
             ),

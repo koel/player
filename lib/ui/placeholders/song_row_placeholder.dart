@@ -1,4 +1,4 @@
-import 'package:app/ui/placeholders/rounded_button_placeholder.dart';
+import 'package:app/ui/placeholders/circle_placeholder.dart';
 import 'package:flutter/material.dart';
 
 class SongRowPlaceholder extends StatelessWidget {
@@ -29,7 +29,7 @@ class SongRowPlaceholder extends StatelessWidget {
         color: Colors.white.withOpacity(.5),
         margin: const EdgeInsets.only(right: 160),
       ),
-      trailing: const RoundedButtonPlaceholder(size: 24),
+      trailing: const CirclePlaceholder(size: 24),
     );
   }
 }

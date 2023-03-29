@@ -110,8 +110,7 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                             ),
                             child: ListTile(
                               leading: AlbumThumbnail(
-                                albumId: album.id,
-                                albumCoverUrl: album.cover,
+                                album: album,
                                 asHero: true,
                               ),
                               title: Text(

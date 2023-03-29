@@ -1,10 +1,10 @@
 import 'package:app/constants/constants.dart';
 import 'package:flutter/cupertino.dart';
 
-class RoundedButtonPlaceholder extends StatelessWidget {
+class CirclePlaceholder extends StatelessWidget {
   final double size;
 
-  const RoundedButtonPlaceholder({
+  const CirclePlaceholder({
     Key? key,
     this.size = 32,
   }) : super(key: key);

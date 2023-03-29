@@ -15,11 +15,11 @@ class SongListScreenPlaceholder extends StatelessWidget {
               padding: EdgeInsets.all(8),
               child: Row(
                 children: [
-                  const RoundedButtonPlaceholder(),
+                  const CirclePlaceholder(),
                   const Spacer(),
-                  const RoundedButtonPlaceholder(),
+                  const CirclePlaceholder(),
                   const SizedBox(width: 16),
-                  const RoundedButtonPlaceholder(size: 58),
+                  const CirclePlaceholder(size: 58),
                 ],
               ),
             ),
