@@ -1,6 +1,6 @@
 import 'package:app/models/models.dart';
 import 'package:app/router.dart';
-import 'package:app/ui/widgets/album_thumbnail.dart';
+import 'package:app/ui/widgets/album_artist_thumbnail.dart';
 import 'package:flutter/material.dart';
 
 class AlbumCard extends StatefulWidget {
@@ -37,12 +37,12 @@ class _AlbumCardState extends State<AlbumCard> {
         opacity: _opacity,
         child: Column(
           children: <Widget>[
-            AlbumThumbnail(
-              album: widget.album,
+            AlbumArtistThumbnail(
+              entity: widget.album,
               size: ThumbnailSize.md,
               asHero: true,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
             SizedBox(
               width: _cardWidth,
               child: Column(
@@ -53,7 +53,7 @@ class _AlbumCardState extends State<AlbumCard> {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   Text(
                     widget.album.artistName,
                     style: const TextStyle(color: Colors.white54),

@@ -1,6 +1,7 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/models/models.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 
 enum ThumbnailSize { sm, md, lg, xl }
@@ -35,17 +36,20 @@ class SongThumbnail extends StatelessWidget {
             imageUrl: song.albumCoverUrl ?? '',
           );
 
-    return this.playing
-        ? PlayingSongThumbnail(
-            width: width,
-            height: height,
-            song: song,
-            borderRadius: borderRadius,
-          )
-        : ClipRRect(
-            borderRadius: BorderRadius.circular(borderRadius),
-            child: albumCover,
-          );
+    return ClipSmoothRect(
+      radius: SmoothBorderRadius(
+        cornerRadius: borderRadius,
+        cornerSmoothing: 1,
+      ),
+      child: this.playing
+          ? PlayingSongThumbnail(
+              width: width,
+              height: height,
+              song: song,
+              borderRadius: borderRadius,
+            )
+          : albumCover,
+    );
   }
 
   double get width {
@@ -64,11 +68,11 @@ class SongThumbnail extends StatelessWidget {
   double get borderRadius {
     switch (size) {
       case ThumbnailSize.md:
-        return 12;
-      case ThumbnailSize.lg:
         return 16;
+      case ThumbnailSize.lg:
+        return 24;
       case ThumbnailSize.xl:
-        return 20;
+        return 32;
       default:
         return 8;
     }
@@ -103,10 +107,7 @@ class PlayingSongThumbnail extends StatelessWidget {
             width: double.infinity,
             height: double.infinity,
             child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
-                color: Colors.black54,
-              ),
+              decoration: BoxDecoration(color: Colors.black54),
             ),
           ),
           Align(

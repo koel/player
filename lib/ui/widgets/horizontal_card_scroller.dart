@@ -1,5 +1,6 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/ui/widgets/typography.dart';
+import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 
 class HorizontalCardScroller extends StatelessWidget {
@@ -58,20 +59,22 @@ class PlaceholderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
       height: 144,
       width: 144,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.white10,
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
-          border: Border.all(color: Colors.white10),
+      decoration: ShapeDecoration(
+        color: AppColors.red,
+        shape: SmoothRectangleBorder(
+          borderRadius: SmoothBorderRadius(
+            cornerRadius: 18,
+            cornerSmoothing: 1,
+          ),
         ),
-        child: IconButton(
-          onPressed: onPressed,
-          iconSize: 32,
-          icon: Icon(icon),
-        ),
+      ),
+      child: IconButton(
+        onPressed: onPressed,
+        iconSize: 32,
+        icon: Icon(icon),
       ),
     );
   }

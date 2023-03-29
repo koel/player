@@ -3,7 +3,7 @@ import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
-import 'package:app/ui/widgets/album_thumbnail.dart';
+import 'package:app/ui/widgets/album_artist_thumbnail.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/spinner.dart';
@@ -109,8 +109,8 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                               albumId: album.id,
                             ),
                             child: ListTile(
-                              leading: AlbumThumbnail(
-                                album: album,
+                              leading: AlbumArtistThumbnail(
+                                entity: album,
                                 asHero: true,
                               ),
                               title: Text(

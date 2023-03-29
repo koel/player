@@ -1,6 +1,7 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/models/models.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 
 class AppBar extends StatelessWidget {
@@ -138,27 +139,33 @@ class CoverImage extends StatelessWidget {
     return SizedBox(
       width: 160,
       height: 160,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(overlayOpacity),
-              BlendMode.srcOver,
+      child: ClipSmoothRect(
+        radius: SmoothBorderRadius(
+          cornerRadius: 20,
+          cornerSmoothing: 1,
+        ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              colorFilter: ColorFilter.mode(
+                Colors.black.withOpacity(overlayOpacity),
+                BlendMode.srcOver,
+              ),
+              image: imageUrl == null
+                  ? AssetImage('assets/images/unknown-album.png')
+                      as ImageProvider
+                  : CachedNetworkImageProvider(imageUrl),
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
             ),
-            image: imageUrl == null
-                ? AssetImage('assets/images/unknown-album.png') as ImageProvider
-                : CachedNetworkImageProvider(imageUrl),
-            fit: BoxFit.cover,
-            alignment: Alignment.topCenter,
+            boxShadow: const <BoxShadow>[
+              const BoxShadow(
+                color: Colors.black38,
+                blurRadius: 10.0,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
-          borderRadius: BorderRadius.all(Radius.circular(8)),
-          boxShadow: const <BoxShadow>[
-            const BoxShadow(
-              color: Colors.black38,
-              blurRadius: 10.0,
-              offset: const Offset(0, 6),
-            ),
-          ],
         ),
       ),
     );

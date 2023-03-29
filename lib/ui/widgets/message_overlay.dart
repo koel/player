@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:app/constants/colors.dart';
+import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -59,9 +61,14 @@ class _MessageOverlayState extends State<MessageOverlay> {
               opacity: _visible ? 1 : 0,
               duration: _animationDuration,
               child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                decoration: ShapeDecoration(
                   color: Color.fromRGBO(20, 20, 20, 1),
+                  shape: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 24,
+                      cornerSmoothing: 1,
+                    ),
+                  ),
                 ),
                 padding: EdgeInsets.all(16.0),
                 width: 256.0,

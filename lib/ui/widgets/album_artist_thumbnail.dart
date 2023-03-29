@@ -1,26 +1,31 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/models/models.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 
 enum ThumbnailSize { sm, md, lg, xl }
 
-class ArtistThumbnail extends StatelessWidget {
-  final Artist artist;
+class AlbumArtistThumbnail extends StatelessWidget {
+  final dynamic entity;
   final ThumbnailSize size;
   final bool asHero;
 
-  const ArtistThumbnail({
+  const AlbumArtistThumbnail({
     Key? key,
-    required this.artist,
+    required this.entity,
     this.size = ThumbnailSize.sm,
     this.asHero = false,
-  }) : super(key: key);
+  })  : assert(entity is Artist || entity is Album),
+        super(key: key);
+
+  get imageUrl => entity is Artist ? entity.imageUrl : entity.cover;
+
+  get heroTag =>
+      entity is Artist ? 'artist-hero-${entity.id}' : 'album-hero-${entity.id}';
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = artist.imageUrl;
-
     Widget image = imageUrl == null
         ? Image.asset(
             'assets/images/unknown-album.png',
@@ -37,14 +42,12 @@ class ArtistThumbnail extends StatelessWidget {
             imageUrl: imageUrl,
           );
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(borderRadius),
-      child: asHero
-          ? Hero(
-              tag: 'artist-hero-${artist.id}',
-              child: image,
-            )
-          : image,
+    return ClipSmoothRect(
+      radius: SmoothBorderRadius(
+        cornerRadius: borderRadius,
+        cornerSmoothing: 1,
+      ),
+      child: asHero ? Hero(tag: heroTag, child: image) : image,
     );
   }
 
@@ -64,11 +67,11 @@ class ArtistThumbnail extends StatelessWidget {
   double get borderRadius {
     switch (size) {
       case ThumbnailSize.md:
-        return 12;
-      case ThumbnailSize.lg:
         return 16;
+      case ThumbnailSize.lg:
+        return 24;
       case ThumbnailSize.xl:
-        return 20;
+        return 32;
       default:
         return 20; // rounded for sm size
     }

@@ -3,7 +3,7 @@ import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/placeholders/artist_screen_placeholder.dart';
-import 'package:app/ui/widgets/artist_thumbnail.dart';
+import 'package:app/ui/widgets/album_artist_thumbnail.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/spinner.dart';
@@ -108,8 +108,8 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
                           shape: Border(
                             bottom: Divider.createBorderSide(context),
                           ),
-                          leading:
-                              ArtistThumbnail(artist: artist, asHero: true),
+                          leading: AlbumArtistThumbnail(
+                              entity: artist, asHero: true),
                           title: Text(
                             artist.name,
                             overflow: TextOverflow.ellipsis,

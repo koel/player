@@ -1,6 +1,6 @@
 import 'package:app/models/models.dart';
 import 'package:app/router.dart';
-import 'package:app/ui/widgets/artist_thumbnail.dart';
+import 'package:app/ui/widgets/album_artist_thumbnail.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -38,12 +38,12 @@ class _ArtistCardState extends State<ArtistCard> {
         opacity: _opacity,
         child: Column(
           children: <Widget>[
-            ArtistThumbnail(
-              artist: widget.artist,
+            AlbumArtistThumbnail(
+              entity: widget.artist,
               size: ThumbnailSize.md,
               asHero: true,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             SizedBox(
               width: _cardWidth,
               child: Column(
