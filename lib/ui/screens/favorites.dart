@@ -13,6 +13,7 @@ import 'package:app/ui/widgets/song_list_sort_button.dart';
 import 'package:app/values/values.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
+import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 
 class FavoritesScreen extends StatefulWidget {
@@ -32,13 +33,13 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   @override
   void initState() {
     super.initState();
-    makeRequest();
+    WidgetsBinding.instance.addPostFrameCallback((_) => makeRequest());
   }
 
   Future<void> makeRequest({bool forceRefresh = false}) async {
-    _loading = true;
+    setState(() => _loading = true);
     await context.read<FavoriteProvider>().fetch(forceRefresh: forceRefresh);
-    _loading = false;
+    setState(() => _loading = false);
   }
 
   @override
