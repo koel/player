@@ -1,11 +1,16 @@
 import 'package:app/constants/constants.dart';
+import 'package:app/enums.dart';
 import 'package:app/exceptions/exceptions.dart';
+import 'package:app/main.dart';
+import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/data_loading.dart';
-import 'package:app/ui/widgets/spinner.dart';
+import 'package:app/ui/screens/root.dart';
 import 'package:app/utils/preferences.dart' as preferences;
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,9 +22,10 @@ class LoginScreen extends StatefulWidget {
   _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
   var _authenticating = false;
   final formKey = GlobalKey<FormState>();
+  var _offline = false;
 
   var _email = '';
   var _password = '';
@@ -29,11 +35,21 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
 
+    subscribe(Connectivity().onConnectivityChanged.listen((event) {
+      setState(() => _offline = event == ConnectivityResult.none);
+    }));
+
     // Try looking for stored values in local storage
     setState(() {
       _hostUrl = preferences.hostUrl ?? '';
       _email = preferences.userEmail ?? '';
     });
+  }
+
+  @override
+  void dispose() {
+    unsubscribeAll();
+    super.dispose();
   }
 
   Future<void> showErrorDialog(BuildContext context, {String? message}) async {
@@ -120,30 +136,27 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     final submitButton = ElevatedButton(
-      child: const Text('Log In'),
-      onPressed: () async {
-        try {
-          await attemptLogin();
-        } on HttpResponseException catch (error) {
-          await showErrorDialog(
-            context,
-            message: error.response.statusCode == 401
-                ? 'Invalid email or password.'
-                : null,
-          );
-        } catch (error) {
-          await showErrorDialog(context);
-        } finally {
-          setState(() => _authenticating = false);
-        }
-      },
-    );
-
-    final spinnerWidget = const Center(
-      child: const Padding(
-        padding: const EdgeInsets.only(top: 12),
-        child: const Spinner(size: 16),
-      ),
+      child: _authenticating
+          ? const SpinKitThreeBounce(color: Colors.white, size: 16)
+          : const Text('Log In'),
+      onPressed: _authenticating
+          ? null
+          : () async {
+              try {
+                await attemptLogin();
+              } on HttpResponseException catch (error) {
+                await showErrorDialog(
+                  context,
+                  message: error.response.statusCode == 401
+                      ? 'Invalid email or password.'
+                      : null,
+                );
+              } catch (error) {
+                await showErrorDialog(context);
+              } finally {
+                setState(() => _authenticating = false);
+              }
+            },
     );
 
     return SafeArea(
@@ -155,18 +168,42 @@ class _LoginScreenState extends State<LoginScreen> {
               key: formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  ...[
-                    Image.asset('assets/images/logo.png', width: 160),
-                    hostField,
-                    emailField,
-                    passwordField,
-                    SizedBox(
-                      width: double.infinity,
-                      child: _authenticating ? spinnerWidget : submitButton,
-                    )
-                  ].expand((widget) => [widget, const SizedBox(height: 12)]),
-                ],
+                children: _offline
+                    ? [
+                        ...<Widget>[
+                          Icon(
+                            CupertinoIcons.wifi_slash,
+                            size: 128,
+                            color: AppColors.white.withOpacity(.4),
+                          ),
+                          const SizedBox(height: 12),
+                          const Text('You are offline.'),
+                          const SizedBox(height: 12),
+                          const Text(
+                              'Please connect to the internet and try again.'),
+                          const SizedBox(height: 24),
+                          ElevatedButton(
+                            onPressed: () {
+                              appState.set('mode', AppMode.offline);
+                              Navigator.of(context).pushReplacementNamed(
+                                RootScreen.routeName,
+                              );
+                            },
+                            child: const Text('View downloaded songs'),
+                          ),
+                        ]
+                      ]
+                    : <Widget>[
+                        ...[
+                          Image.asset('assets/images/logo.png', width: 160),
+                          hostField,
+                          emailField,
+                          passwordField,
+                          SizedBox(width: double.infinity, child: submitButton),
+                        ].expand(
+                          (widget) => [widget, const SizedBox(height: 12)],
+                        ),
+                      ],
               ),
             ),
           ),

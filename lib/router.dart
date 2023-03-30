@@ -44,7 +44,7 @@ class AppRouter {
     QueueScreen.routeName: (_) => const QueueScreen(),
     AddToPlaylistScreen.routeName: (_) => const AddToPlaylistScreen(),
     DataLoadingScreen.routeName: (_) => const DataLoadingScreen(),
-    DownloadedScreen.routeName: (_) => const DownloadedScreen(),
+    DownloadedScreen.routeName: (_) => DownloadedScreen(),
   };
 
   Future<void> gotoAlbumDetailsScreen(

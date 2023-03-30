@@ -1,11 +1,17 @@
 import 'dart:io';
 
+import 'package:app/constants/constants.dart';
+import 'package:app/enums.dart';
 import 'package:app/main.dart';
+import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/providers/providers.dart';
+import 'package:app/ui/screens/downloaded.dart';
 import 'package:app/ui/screens/home.dart';
+import 'package:app/ui/screens/initial.dart';
 import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/screens/search.dart';
 import 'package:app/ui/widgets/footer_player_sheet.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,6 +28,7 @@ class RootScreen extends StatefulWidget {
 
 class _RootScreenState extends State<RootScreen> {
   int _selectedIndex = 0;
+  var _isOffline = appState.get('mode', AppMode.online) == AppMode.offline;
 
   static const List<Widget> _widgetOptions = [
     const HomeScreen(),
@@ -45,49 +52,148 @@ class _RootScreenState extends State<RootScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       child: Scaffold(
-        body: Stack(
-          children: <Widget>[
-            CupertinoTabScaffold(
-              tabBuilder: (_, index) {
-                return CupertinoTabView(builder: (_) => _widgetOptions[index]);
-              },
-              tabBar: CupertinoTabBar(
-                backgroundColor: Colors.black12,
-                iconSize: 24,
-                activeColor: Colors.white,
-                border: Border(top: Divider.createBorderSide(context)),
-                items: const <BottomNavigationBarItem>[
-                  const BottomNavigationBarItem(
-                    icon: Icon(CupertinoIcons.house_fill),
-                    label: 'Home',
-                  ),
-                  const BottomNavigationBarItem(
-                    icon: Icon(CupertinoIcons.search),
-                    label: 'Search',
-                  ),
-                  const BottomNavigationBarItem(
-                    icon: Icon(CupertinoIcons.music_albums_fill),
-                    label: 'Library',
+        body: _isOffline
+            ? Stack(
+                children: [
+                  DownloadedScreen(inOfflineMode: true),
+                  Positioned(
+                    bottom: 0,
+                    width: MediaQuery.of(context).size.width,
+                    child: Container(
+                      color: Colors.black,
+                      height: 140,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          const FooterPlayerSheet(),
+                          const Divider(height: 1),
+                          const ConnectivityInfoBox(),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
-                currentIndex: _selectedIndex,
-                onTap: _onItemTapped,
+              )
+            : Stack(
+                children: <Widget>[
+                  CupertinoTabScaffold(
+                    tabBuilder: (_, index) {
+                      return CupertinoTabView(
+                          builder: (_) => _widgetOptions[index]);
+                    },
+                    tabBar: CupertinoTabBar(
+                      backgroundColor: Colors.black12,
+                      iconSize: 24,
+                      activeColor: Colors.white,
+                      border: Border(top: Divider.createBorderSide(context)),
+                      items: const <BottomNavigationBarItem>[
+                        const BottomNavigationBarItem(
+                          icon: Icon(CupertinoIcons.house_fill),
+                          label: 'Home',
+                        ),
+                        const BottomNavigationBarItem(
+                          icon: Icon(CupertinoIcons.search),
+                          label: 'Search',
+                        ),
+                        const BottomNavigationBarItem(
+                          icon: Icon(CupertinoIcons.music_albums_fill),
+                          label: 'Library',
+                        ),
+                      ],
+                      currentIndex: _selectedIndex,
+                      onTap: _onItemTapped,
+                    ),
+                  ),
+                  Positioned(
+                    // 50 is the standard iOS (10) tab bar height.
+                    bottom: 50 + MediaQuery.of(context).padding.bottom,
+                    width: MediaQuery.of(context).size.width,
+                    child: const FooterPlayerSheet(),
+                  ),
+                ],
               ),
-            ),
-            Positioned(
-              // 50 is the standard iOS (10) tab bar height.
-              bottom: 50 + MediaQuery.of(context).padding.bottom,
-              width: MediaQuery.of(context).size.width,
-              child: const FooterPlayerSheet(),
-            ),
-          ],
-        ),
       ),
       onWillPop: () async {
         if (!Platform.isAndroid || Navigator.of(context).canPop()) return true;
         MethodChannel('dev.koel.app').invokeMethod('minimize');
         return false;
       },
+    );
+  }
+}
+
+class ConnectivityInfoBox extends StatefulWidget {
+  const ConnectivityInfoBox({Key? key}) : super(key: key);
+
+  @override
+  _ConnectivityInfoBoxState createState() => _ConnectivityInfoBoxState();
+}
+
+class _ConnectivityInfoBoxState extends State<ConnectivityInfoBox>
+    with StreamSubscriber {
+  var _offline = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    subscribe(Connectivity().onConnectivityChanged.listen((event) {
+      setState(() => _offline = event == ConnectivityResult.none);
+    }));
+  }
+
+  @override
+  void dispose() {
+    unsubscribeAll();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var padding = EdgeInsets.only(top: 16, bottom: Platform.isIOS ? 32 : 16);
+
+    return Container(
+      child: _offline
+          ? Container(
+              padding: padding,
+              child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      CupertinoIcons.wifi_slash,
+                      color: AppColors.red,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'No internet connection',
+                      style: TextStyle(color: AppColors.red),
+                    ),
+                  ]),
+            )
+          : ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                padding: padding,
+                backgroundColor: Colors.transparent,
+                foregroundColor: Colors.transparent,
+              ),
+              onPressed: () {
+                appState.delete('mode');
+                Navigator.of(context).pushReplacementNamed(
+                  InitialScreen.routeName,
+                );
+              },
+              icon: const Icon(
+                CupertinoIcons.wifi,
+                color: AppColors.green,
+                size: 20,
+              ),
+              label: const Text(
+                'Tap to refresh Koel',
+                style: TextStyle(color: AppColors.green, fontSize: 14.0),
+              ),
+            ),
     );
   }
 }

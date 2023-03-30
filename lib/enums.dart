@@ -1,7 +1,6 @@
-enum SortOrder {
-  asc,
-  desc,
-}
+enum SortOrder { asc, desc }
+
+enum AppMode { online, offline }
 
 extension SortOrderExtension on SortOrder {
   String get value => toString().split('.').last;

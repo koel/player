@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:app/enums.dart';
 import 'package:app/main.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
@@ -22,6 +23,8 @@ class SongActionSheet extends StatelessWidget {
     final isCurrent = audioHandler.mediaItem.value != null &&
         audioHandler.mediaItem.value!.id == song.id;
     final queued = audioHandler.queued(song);
+    final inOfflineMode =
+        appState.get('mode', AppMode.online) == AppMode.offline;
 
     return ClipRect(
       child: Container(
@@ -111,6 +114,7 @@ class SongActionSheet extends StatelessWidget {
                       },
                     ),
                   SongActionButton(
+                    enabled: !inOfflineMode,
                     text:
                         song.liked ? 'Remove as Favorite' : 'Mark as Favorite',
                     icon: Icon(
@@ -135,6 +139,7 @@ class SongActionSheet extends StatelessWidget {
                   ),
                   const Divider(indent: 16, endIndent: 16),
                   SongActionButton(
+                    enabled: !inOfflineMode,
                     text: 'Go to Album',
                     icon: const Icon(
                       CupertinoIcons.music_albums_fill,
@@ -150,6 +155,7 @@ class SongActionSheet extends StatelessWidget {
                     hideSheetOnTap: false,
                   ),
                   SongActionButton(
+                    enabled: !inOfflineMode,
                     text: 'Go to Artist',
                     icon: const Icon(
                       CupertinoIcons.music_mic,
@@ -166,6 +172,7 @@ class SongActionSheet extends StatelessWidget {
                   ),
                   const Divider(indent: 16, endIndent: 16),
                   SongActionButton(
+                    enabled: !inOfflineMode,
                     text: 'Add to a Playlist…',
                     icon: const Icon(
                       CupertinoIcons.text_badge_plus,
@@ -192,6 +199,7 @@ class SongActionButton extends StatelessWidget {
   final Icon icon;
   final Function onTap;
   final bool hideSheetOnTap;
+  final bool enabled;
 
   const SongActionButton({
     Key? key,
@@ -199,6 +207,7 @@ class SongActionButton extends StatelessWidget {
     required this.icon,
     required this.onTap,
     this.hideSheetOnTap = true,
+    this.enabled = true,
   }) : super(key: key);
 
   @override
@@ -206,11 +215,16 @@ class SongActionButton extends StatelessWidget {
     return ListTile(
       leading: icon,
       minLeadingWidth: 16,
-      title: Text(text),
-      onTap: () {
-        onTap();
-        if (hideSheetOnTap) Navigator.pop(context);
-      },
+      title: Text(
+        text,
+        style: enabled ? null : TextStyle(color: Colors.white30),
+      ),
+      onTap: enabled
+          ? () {
+              onTap();
+              if (hideSheetOnTap) Navigator.pop(context);
+            }
+          : null,
     );
   }
 }

@@ -66,7 +66,7 @@ class LibraryScreen extends StatelessWidget {
           icon: CupertinoIcons.cloud_download_fill,
           label: 'Downloaded',
           onTap: () => Navigator.of(context).push(
-            CupertinoPageRoute(builder: (_) => const DownloadedScreen()),
+            CupertinoPageRoute(builder: (_) => DownloadedScreen()),
           ),
         ),
       ],

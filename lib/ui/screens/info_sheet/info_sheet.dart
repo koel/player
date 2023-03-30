@@ -1,6 +1,8 @@
 import 'dart:ui';
 
 import 'package:app/constants/constants.dart';
+import 'package:app/enums.dart';
+import 'package:app/main.dart';
 import 'package:app/models/models.dart';
 import 'package:app/ui/screens/info_sheet/album_info_pane.dart';
 import 'package:app/ui/screens/info_sheet/artist_info_pane.dart';
@@ -21,12 +23,6 @@ class InfoSheet extends StatefulWidget {
 class _InfoSheetState extends State<InfoSheet> {
   var _activeIndex = 0;
 
-  final tabs = const <int, Widget>{
-    0: const Text('Lyrics'),
-    1: const Text('Artist'),
-    2: const Text('Album'),
-  };
-
   Widget getActivePane() {
     switch (_activeIndex) {
       case 1:
@@ -39,6 +35,17 @@ class _InfoSheetState extends State<InfoSheet> {
   }
 
   Widget build(BuildContext context) {
+    final inOfflineMode =
+        appState.get('mode', AppMode.online) == AppMode.offline;
+    final textStyle =
+        inOfflineMode ? const TextStyle(color: Colors.white30) : null;
+
+    final tabs = <int, Widget>{
+      0: const Text('Lyrics'),
+      1: Text('Artist', style: textStyle),
+      2: Text('Album', style: textStyle),
+    };
+
     return ClipRect(
       child: SafeArea(
         minimum: EdgeInsets.fromLTRB(
@@ -58,6 +65,7 @@ class _InfoSheetState extends State<InfoSheet> {
                   children: tabs,
                   groupValue: _activeIndex,
                   onValueChanged: (value) {
+                    if (inOfflineMode) return;
                     setState(() => _activeIndex = value ?? 0);
                   },
                 ),
