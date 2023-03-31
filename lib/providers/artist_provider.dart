@@ -30,11 +30,7 @@ class ArtistProvider with ChangeNotifier {
   }
 
   List<Artist> syncWithVault(dynamic _artists) {
-    if (!(_artists is List<Artist> || _artists is Artist)) {
-      throw Exception(
-        'Invalid type for artists. Must be List<Artist> or Artist.',
-      );
-    }
+    assert(_artists is List<Artist> || _artists is Artist);
 
     if (_artists is Artist) {
       _artists = [_artists];

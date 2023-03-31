@@ -13,6 +13,7 @@ enum SongListContext {
   favorites,
   other,
   downloads,
+  recentlyPlayed,
 }
 
 class SongListHeader extends StatefulWidget {

@@ -133,13 +133,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                            onPressed: () {
-                              Navigator.of(
-                                context,
-                                rootNavigator: true,
-                              ).pushNamed(RecentlyPlayedScreen.routeName);
-                            },
-                            icon: const Icon(CupertinoIcons.timer, size: 24)),
+                          onPressed: () {
+                            Navigator.of(
+                              context,
+                              rootNavigator: true,
+                            ).pushNamed(RecentlyPlayedScreen.routeName);
+                          },
+                          icon: const Icon(CupertinoIcons.time, size: 24),
+                        ),
                         const ProfileAvatar(),
                       ],
                     ),

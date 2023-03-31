@@ -8,11 +8,13 @@ import 'package:flutter/foundation.dart';
 
 class InteractionProvider with ChangeNotifier, StreamSubscriber {
   late final SongProvider _songProvider;
+  late final RecentlyPlayedProvider _recentlyPlayedProvider;
 
   InteractionProvider({
     required SongProvider songProvider,
-  }) {
-    _songProvider = songProvider;
+    required RecentlyPlayedProvider recentlyPlayedProvider,
+  })  : _songProvider = songProvider,
+        _recentlyPlayedProvider = recentlyPlayedProvider {
     _subscribeToAudioEvents();
   }
 
@@ -22,9 +24,11 @@ class InteractionProvider with ChangeNotifier, StreamSubscriber {
       // every time the song completes, reset the play count registered flag
       // so that next time the song is played, the count will be registered again.
       if (state.processingState == AudioProcessingState.completed) {
-        _songProvider
-            .byId(audioHandler.mediaItem.value!.id)
-            ?.playCountRegistered = false;
+        final song = _songProvider.byId(audioHandler.mediaItem.value!.id);
+        if (song == null) return; // should never happen
+
+        _recentlyPlayedProvider.add(song);
+        song.playCountRegistered = false;
       }
     }));
 

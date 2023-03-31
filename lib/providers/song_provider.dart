@@ -23,9 +23,7 @@ class SongProvider with ChangeNotifier {
   }
 
   List<Song> syncWithVault(dynamic _songs) {
-    if (!(_songs is List<Song> || _songs is Song)) {
-      throw Exception('Invalid type for songs. Must be List<Song> or Song.');
-    }
+    assert(_songs is List<Song> || _songs is Song);
 
     if (_songs is Song) {
       _songs = [_songs];

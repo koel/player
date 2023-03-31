@@ -30,9 +30,7 @@ class AlbumProvider with ChangeNotifier {
   }
 
   List<Album> syncWithVault(dynamic _albums) {
-    if (!(_albums is List<Album> || _albums is Album)) {
-      throw Exception('Invalid type for albums. Must be List<Album> or Album.');
-    }
+    assert(_albums is List<Album> || _albums is Album);
 
     if (_albums is Album) {
       _albums = [_albums];

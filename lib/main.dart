@@ -26,8 +26,14 @@ List<SingleChildWidget> _providers = [
     ),
   ),
   ChangeNotifierProvider(
+    create: (context) => RecentlyPlayedProvider(
+      songProvider: context.read<SongProvider>(),
+    ),
+  ),
+  ChangeNotifierProvider(
     create: (context) => InteractionProvider(
       songProvider: context.read<SongProvider>(),
+      recentlyPlayedProvider: context.read<RecentlyPlayedProvider>(),
     ),
     // By setting lazy to false, we ensure that the provider is initialized
     // before the app is launched. This makes sure that the provider listens
