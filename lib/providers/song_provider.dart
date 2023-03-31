@@ -1,5 +1,5 @@
+import 'package:app/app_state.dart';
 import 'package:app/enums.dart';
-import 'package:app/main.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/utils/api_request.dart';
@@ -69,7 +69,7 @@ class SongProvider with ChangeNotifier {
     int artistId, {
     bool forceRefresh = false,
   }) async {
-    if (forceRefresh) appState.delete(['artist.songs', artistId]);
+    if (forceRefresh) AppState.delete(['artist.songs', artistId]);
 
     return _stateAwareFetch(
       'artists/$artistId/songs',
@@ -81,7 +81,7 @@ class SongProvider with ChangeNotifier {
     int albumId, {
     bool forceRefresh = false,
   }) async {
-    if (forceRefresh) appState.delete(['album.songs', albumId]);
+    if (forceRefresh) AppState.delete(['album.songs', albumId]);
 
     return _stateAwareFetch(
       'albums/$albumId/songs',
@@ -93,7 +93,7 @@ class SongProvider with ChangeNotifier {
     int playlistId, {
     bool forceRefresh = false,
   }) async {
-    if (forceRefresh) appState.delete(['playlist.songs', playlistId]);
+    if (forceRefresh) AppState.delete(['playlist.songs', playlistId]);
 
     return _stateAwareFetch(
       'playlists/$playlistId/songs',
@@ -102,11 +102,11 @@ class SongProvider with ChangeNotifier {
   }
 
   Future<List<Song>> _stateAwareFetch(String url, Object cacheKey) async {
-    if (appState.has(cacheKey)) return appState.get(cacheKey);
+    if (AppState.has(cacheKey)) return AppState.get(cacheKey);
 
     final res = await get(url);
     final items = res.map<Song>((json) => Song.fromJson(json)).toList();
-    appState.set(cacheKey, items);
+    AppState.set(cacheKey, items);
 
     return syncWithVault(items);
   }

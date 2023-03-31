@@ -1,8 +1,8 @@
 import 'dart:ui';
 
+import 'package:app/app_state.dart';
 import 'package:app/constants/constants.dart';
 import 'package:app/enums.dart';
-import 'package:app/main.dart';
 import 'package:app/models/models.dart';
 import 'package:app/ui/screens/info_sheet/album_info_pane.dart';
 import 'package:app/ui/screens/info_sheet/artist_info_pane.dart';
@@ -36,7 +36,7 @@ class _InfoSheetState extends State<InfoSheet> {
 
   Widget build(BuildContext context) {
     final inOfflineMode =
-        appState.get('mode', AppMode.online) == AppMode.offline;
+        AppState.get('mode', AppMode.online) == AppMode.offline;
     final textStyle =
         inOfflineMode ? const TextStyle(color: Colors.white30) : null;
 

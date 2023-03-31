@@ -1,3 +1,4 @@
+import 'package:app/app_state.dart';
 import 'package:app/constants/constants.dart';
 import 'package:app/enums.dart';
 import 'package:app/extensions/extensions.dart';
@@ -27,10 +28,10 @@ class _SongsScreenState extends State<SongsScreen> {
   late final SongListScreenProvider _provider;
 
   final _paginationConfig =
-      appState.get('songs.paginationConfig', SongPaginationConfig())!;
+      AppState.get('songs.paginationConfig', SongPaginationConfig())!;
 
   late final ScrollController _scrollController;
-  var _currentScrollOffset = appState.get('songs.scrollOffSet', 0.0)!;
+  var _currentScrollOffset = AppState.get('songs.scrollOffSet', 0.0)!;
   final _scrollThreshold = 64.0;
   var _searchQuery = '';
   var _cover = CoverImageStack(songs: []);
@@ -83,8 +84,8 @@ class _SongsScreenState extends State<SongsScreen> {
   @override
   void dispose() {
     _loading = false;
-    appState.set('songs.scrollOffSet', _currentScrollOffset);
-    appState.set('songs.paginationConfig', _paginationConfig);
+    AppState.set('songs.scrollOffSet', _currentScrollOffset);
+    AppState.set('songs.paginationConfig', _paginationConfig);
     _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
 

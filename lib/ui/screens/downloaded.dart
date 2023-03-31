@@ -1,8 +1,7 @@
+import 'package:app/app_state.dart';
 import 'package:app/constants/constants.dart';
 import 'package:app/enums.dart';
 import 'package:app/extensions/extensions.dart';
-import 'package:app/main.dart';
-import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
@@ -13,7 +12,6 @@ import 'package:app/values/values.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 
 // ignore: must_be_immutable
 class DownloadedScreen extends StatefulWidget {
@@ -32,7 +30,7 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var sortConfig = appState.get(
+    var sortConfig = AppState.get(
       'downloaded.sort',
       SongSortConfig(field: 'title', order: SortOrder.asc),
     )!;
@@ -101,7 +99,7 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                     currentOrder: sortConfig.order,
                     onMenuItemSelected: (_sortConfig) {
                       setState(() => sortConfig = _sortConfig);
-                      appState.set('downloaded.sort', _sortConfig);
+                      AppState.set('downloaded.sort', _sortConfig);
                     },
                   ),
                 ],

@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:app/app_state.dart';
 import 'package:app/enums.dart';
 import 'package:app/extensions/extensions.dart';
 import 'package:app/main.dart';
@@ -42,7 +43,7 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
   Widget build(BuildContext context) {
     final int albumId = ModalRoute.of(context)!.settings.arguments as int;
 
-    var sortConfig = appState.get(
+    var sortConfig = AppState.get(
       'album.sort',
       SongSortConfig(field: 'track', order: SortOrder.asc),
     )!;
@@ -74,7 +75,7 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                       currentOrder: sortConfig.order,
                       onMenuItemSelected: (_sortConfig) {
                         setState(() => sortConfig = _sortConfig);
-                        appState.set('album.sort', sortConfig);
+                        AppState.set('album.sort', sortConfig);
                       },
                     ),
                   ],

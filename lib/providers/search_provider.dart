@@ -1,4 +1,4 @@
-import 'package:app/main.dart';
+import 'package:app/app_state.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/utils/api_request.dart';
@@ -31,7 +31,7 @@ class SearchProvider with ChangeNotifier {
 
   Future<SearchResult> searchExcerpts({required String keywords}) async {
     final cacheKey = ['search.excerpts', keywords];
-    if (appState.has(cacheKey)) return appState.get(cacheKey);
+    if (AppState.has(cacheKey)) return AppState.get(cacheKey);
 
     final res = await get('search?q=$keywords');
 
@@ -42,7 +42,7 @@ class SearchProvider with ChangeNotifier {
     final albums = _albumProvider.syncWithVault(
         res['albums'].map<Album>((j) => Album.fromJson(j)).toList());
 
-    return appState.set<SearchResult>(
+    return AppState.set<SearchResult>(
       cacheKey,
       SearchResult(
         songs: songs,
@@ -55,12 +55,12 @@ class SearchProvider with ChangeNotifier {
   Future<List<Song>> searchSongs(String keywords) async {
     final cacheKey = ['search.songs', keywords];
 
-    if (appState.has(cacheKey)) return appState.get(cacheKey);
+    if (AppState.has(cacheKey)) return AppState.get(cacheKey);
 
     final res = await get('search/songs?q=$keywords');
     final songs = _songProvider
         .syncWithVault(res.map<Song>((j) => Song.fromJson(j)).toList());
 
-    return appState.set(cacheKey, songs);
+    return AppState.set(cacheKey, songs);
   }
 }

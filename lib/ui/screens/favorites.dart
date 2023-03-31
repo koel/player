@@ -1,7 +1,7 @@
+import 'package:app/app_state.dart';
 import 'package:app/constants/constants.dart';
 import 'package:app/enums.dart';
 import 'package:app/extensions/extensions.dart';
-import 'package:app/main.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/app_bar.dart';
@@ -13,7 +13,6 @@ import 'package:app/ui/widgets/song_list_sort_button.dart';
 import 'package:app/values/values.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
-import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 
 class FavoritesScreen extends StatefulWidget {
@@ -44,7 +43,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var sortConfig = appState.get(
+    var sortConfig = AppState.get(
       'favorites.sort',
       SongSortConfig(field: 'title', order: SortOrder.asc),
     )!;
@@ -131,7 +130,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                             currentOrder: sortConfig.order,
                             onMenuItemSelected: (_sortConfig) {
                               setState(() => sortConfig = _sortConfig);
-                              appState.set('favorites.sort', sortConfig);
+                              AppState.set('favorites.sort', sortConfig);
                             },
                           ),
                         ],

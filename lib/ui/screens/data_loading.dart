@@ -28,6 +28,7 @@ class _DataLoadingScreen extends State<DataLoadingScreen> {
       await context.read<DataProvider>().init();
       await Navigator.of(context).pushReplacementNamed(RootScreen.routeName);
     } catch (e) {
+      print(e);
       setState(() => _hasError = true);
     }
   }

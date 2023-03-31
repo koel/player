@@ -1,5 +1,5 @@
+import 'package:app/app_state.dart';
 import 'package:app/enums.dart';
-import 'package:app/main.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
@@ -47,7 +47,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final playlist = ModalRoute.of(context)!.settings.arguments as Playlist;
-    var sortConfig = appState.get(
+    var sortConfig = AppState.get(
       'playlist.sort',
       SongSortConfig(field: 'title', order: SortOrder.asc),
     )!;
@@ -87,7 +87,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                       currentOrder: sortConfig.order,
                       onMenuItemSelected: (_sortConfig) {
                         setState(() => sortConfig = _sortConfig);
-                        appState.set('playlist.sort', _sortConfig);
+                        AppState.set('playlist.sort', _sortConfig);
                       },
                     ),
                   ],

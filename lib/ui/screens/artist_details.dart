@@ -1,8 +1,8 @@
 import 'dart:ui';
 
+import 'package:app/app_state.dart';
 import 'package:app/enums.dart';
 import 'package:app/extensions/extensions.dart';
-import 'package:app/main.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
@@ -43,7 +43,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final artistId = ModalRoute.of(context)!.settings.arguments as int;
-    var sortConfig = appState.get(
+    var sortConfig = AppState.get(
       'artist.sort',
       SongSortConfig(field: 'title', order: SortOrder.asc),
     )!;
@@ -78,7 +78,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                       currentOrder: sortConfig.order,
                       onMenuItemSelected: (_sortConfig) {
                         setState(() => sortConfig = _sortConfig);
-                        appState.set('artist.sort', sortConfig);
+                        AppState.set('artist.sort', sortConfig);
                       },
                     ),
                   ],

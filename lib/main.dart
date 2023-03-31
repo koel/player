@@ -1,4 +1,3 @@
-import 'package:app/app_state.dart';
 import 'package:app/audio_handler.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/app.dart';
@@ -9,7 +8,6 @@ import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 late KoelAudioHandler audioHandler;
-late AppState appState;
 
 List<SingleChildWidget> _providers = [
   Provider(create: (_) => AuthProvider()),
@@ -78,8 +76,6 @@ Future<void> main() async {
 
   await GetStorage.init('Preferences');
   await GetStorage.init(DownloadProvider.serializedSongContainer);
-
-  appState = AppState();
 
   runApp(
     MultiProvider(

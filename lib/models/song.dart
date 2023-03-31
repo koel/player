@@ -1,5 +1,5 @@
+import 'package:app/app_state.dart';
 import 'package:app/constants/constants.dart';
-import 'package:app/main.dart';
 import 'package:app/models/models.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:audio_service/audio_service.dart';
@@ -72,11 +72,10 @@ class Song {
     var src = _sourceUrl;
 
     if (src == null) {
-      var hostUrl = appState
-          .get(['app', 'cdnUrl'], preferences.hostUrl)!.replaceAll(
-              RegExp(r'/$'), '');
+      var hostUrl = AppState.get(['app', 'cdnUrl'], preferences.hostUrl)!
+          .replaceAll(RegExp(r'/$'), '');
 
-      String rawUrl = appState.get(['app', 'transcoding'], false)!
+      String rawUrl = AppState.get(['app', 'transcoding'], false)!
           ? '/play/$id/1/128?t=${preferences.audioToken}'
           : '$hostUrl/play/$id?t=${preferences.audioToken}';
 

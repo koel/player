@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:app/app_state.dart';
 import 'package:app/constants/constants.dart';
 import 'package:app/enums.dart';
 import 'package:app/main.dart';
@@ -28,7 +29,7 @@ class RootScreen extends StatefulWidget {
 
 class _RootScreenState extends State<RootScreen> {
   int _selectedIndex = 0;
-  var _isOffline = appState.get('mode', AppMode.online) == AppMode.offline;
+  var _isOffline = AppState.get('mode', AppMode.online) == AppMode.offline;
 
   static const List<Widget> _widgetOptions = [
     const HomeScreen(),
@@ -179,7 +180,7 @@ class _ConnectivityInfoBoxState extends State<ConnectivityInfoBox>
                 foregroundColor: Colors.transparent,
               ),
               onPressed: () {
-                appState.delete('mode');
+                AppState.delete('mode');
                 Navigator.of(context).pushReplacementNamed(
                   InitialScreen.routeName,
                 );

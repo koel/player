@@ -1,7 +1,7 @@
+import 'package:app/app_state.dart';
 import 'package:app/constants/constants.dart';
 import 'package:app/enums.dart';
 import 'package:app/exceptions/exceptions.dart';
-import 'package:app/main.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/data_loading.dart';
@@ -180,11 +180,12 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
                           const Text('You are offline.'),
                           const SizedBox(height: 12),
                           const Text(
-                              'Please connect to the internet and try again.'),
+                            'Please connect to the internet and try again.',
+                          ),
                           const SizedBox(height: 24),
                           ElevatedButton(
                             onPressed: () {
-                              appState.set('mode', AppMode.offline);
+                              AppState.set('mode', AppMode.offline);
                               Navigator.of(context).pushReplacementNamed(
                                 RootScreen.routeName,
                               );

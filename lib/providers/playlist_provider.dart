@@ -1,4 +1,4 @@
-import 'package:app/main.dart';
+import 'package:app/app_state.dart';
 import 'package:app/models/models.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:app/values/values.dart';
@@ -36,11 +36,11 @@ class PlaylistProvider with ChangeNotifier {
     });
 
     final cachedSongs =
-        appState.get<List<Song>>(['playlist.songs', playlist.id]);
+        AppState.get<List<Song>>(['playlist.songs', playlist.id]);
 
     if (cachedSongs != null && !cachedSongs.contains(song)) {
       // add the song into the playlist's songs cache
-      appState.set(['playlist.songs', playlist.id], cachedSongs..add(song));
+      AppState.set(['playlist.songs', playlist.id], cachedSongs..add(song));
     }
   }
 
@@ -55,11 +55,11 @@ class PlaylistProvider with ChangeNotifier {
     });
 
     final cachedSongs =
-        appState.get<List<Song>>(['playlist.songs', playlist.id]);
+        AppState.get<List<Song>>(['playlist.songs', playlist.id]);
 
     if (cachedSongs != null && cachedSongs.contains(song)) {
       // remove the song from the playlist's songs cache
-      appState.set(['playlist.songs', playlist.id], cachedSongs..remove(song));
+      AppState.set(['playlist.songs', playlist.id], cachedSongs..remove(song));
     }
   }
 

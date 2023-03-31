@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:app/app_state.dart';
 import 'package:app/enums.dart';
 import 'package:app/main.dart';
 import 'package:app/models/models.dart';
@@ -24,7 +25,7 @@ class SongActionSheet extends StatelessWidget {
         audioHandler.mediaItem.value!.id == song.id;
     final queued = audioHandler.queued(song);
     final inOfflineMode =
-        appState.get('mode', AppMode.online) == AppMode.offline;
+        AppState.get('mode', AppMode.online) == AppMode.offline;
 
     return ClipRect(
       child: Container(
