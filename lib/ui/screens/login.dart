@@ -1,14 +1,10 @@
-import 'package:app/app_state.dart';
 import 'package:app/constants/constants.dart';
-import 'package:app/enums.dart';
 import 'package:app/exceptions/exceptions.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/data_loading.dart';
-import 'package:app/ui/screens/root.dart';
 import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:app/utils/preferences.dart' as preferences;
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -26,7 +22,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
   var _authenticating = false;
   final formKey = GlobalKey<FormState>();
-  var _offline = false;
 
   var _email = '';
   var _password = '';
@@ -35,10 +30,6 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
   @override
   void initState() {
     super.initState();
-
-    subscribe(Connectivity().onConnectivityChanged.listen((event) {
-      setState(() => _offline = event == ConnectivityResult.none);
-    }));
 
     // Try looking for stored values in local storage
     setState(() {
@@ -170,46 +161,18 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
                 key: formKey,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: _offline
-                      ? [
-                          ...<Widget>[
-                            Icon(
-                              CupertinoIcons.wifi_slash,
-                              size: 128,
-                              color: AppColors.white.withOpacity(.4),
-                            ),
-                            const SizedBox(height: 12),
-                            const Text('You are offline.'),
-                            const SizedBox(height: 12),
-                            const Text(
-                              'Please connect to the internet and try again.',
-                            ),
-                            const SizedBox(height: 24),
-                            ElevatedButton(
-                              onPressed: () {
-                                AppState.set('mode', AppMode.offline);
-                                Navigator.of(context).pushReplacementNamed(
-                                  RootScreen.routeName,
-                                );
-                              },
-                              child: const Text('View downloaded songs'),
-                            ),
-                          ]
-                        ]
-                      : <Widget>[
-                          ...[
-                            Image.asset('assets/images/logo.png', width: 160),
-                            hostField,
-                            emailField,
-                            passwordField,
-                            SizedBox(
-                              width: double.infinity,
-                              child: submitButton,
-                            ),
-                          ].expand(
-                            (widget) => [widget, const SizedBox(height: 12)],
-                          ),
-                        ],
+                  children: <Widget>[
+                    ...[
+                      Image.asset('assets/images/logo.png', width: 160),
+                      hostField,
+                      emailField,
+                      passwordField,
+                      SizedBox(
+                        width: double.infinity,
+                        child: submitButton,
+                      ),
+                    ].expand((widget) => [widget, const SizedBox(height: 12)]),
+                  ],
                 ),
               ),
             ),

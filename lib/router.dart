@@ -12,11 +12,12 @@ import 'package:app/ui/screens/home.dart';
 import 'package:app/ui/screens/initial.dart';
 import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/screens/login.dart';
+import 'package:app/ui/screens/no_connection.dart';
 import 'package:app/ui/screens/now_playing.dart';
 import 'package:app/ui/screens/playlist_details.dart';
 import 'package:app/ui/screens/playlists.dart';
 import 'package:app/ui/screens/queue.dart';
-import 'package:app/ui/screens/root.dart';
+import 'package:app/ui/screens/main.dart';
 import 'package:app/ui/screens/search.dart';
 import 'package:app/ui/screens/song_action_sheet.dart';
 import 'package:app/ui/screens/songs.dart';
@@ -28,8 +29,9 @@ class AppRouter {
 
   static Map<String, Widget Function(BuildContext)> routes = {
     InitialScreen.routeName: (_) => const InitialScreen(),
+    NoConnectionScreen.routeName: (_) => const NoConnectionScreen(),
     LoginScreen.routeName: (_) => const LoginScreen(),
-    RootScreen.routeName: (_) => const RootScreen(),
+    MainScreen.routeName: (_) => const MainScreen(),
     HomeScreen.routeName: (_) => const HomeScreen(),
     SearchScreen.routeName: (_) => const SearchScreen(),
     LibraryScreen.routeName: (_) => const LibraryScreen(),

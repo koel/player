@@ -48,10 +48,10 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
   @override
   void didUpdateWidget(covariant SongCacheIcon oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _resolveCacheStatus();
+    _resolveDownloadStatus();
   }
 
-  void _resolveCacheStatus() {
+  void _resolveDownloadStatus() {
     setState(() => _downloaded = downloadProvider.has(song: widget.song));
   }
 
@@ -61,7 +61,7 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
     super.dispose();
   }
 
-  Future<void> _cache() async {
+  Future<void> _download() async {
     setState(() => _downloading = true);
     await downloadProvider.download(song: widget.song);
     setState(() {
@@ -75,7 +75,10 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
     if (_downloading)
       return const Padding(
         padding: EdgeInsets.only(right: 4.0),
-        child: CupertinoActivityIndicator(radius: 9),
+        child: CupertinoActivityIndicator(
+          radius: 9,
+          color: AppColors.white,
+        ),
       );
 
     final downloaded = this._downloaded;
@@ -94,7 +97,7 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
     }
 
     return IconButton(
-      onPressed: () async => await _cache(),
+      onPressed: _download,
       constraints: const BoxConstraints(),
       padding: const EdgeInsets.symmetric(horizontal: 0.0),
       icon: const Icon(

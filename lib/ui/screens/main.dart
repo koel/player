@@ -12,22 +12,23 @@ import 'package:app/ui/screens/initial.dart';
 import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/screens/search.dart';
 import 'package:app/ui/widgets/footer_player_sheet.dart';
+import 'package:app/ui/widgets/frosted_glass_background.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-class RootScreen extends StatefulWidget {
-  static const routeName = '/root';
+class MainScreen extends StatefulWidget {
+  static const routeName = '/main';
 
-  const RootScreen({Key? key}) : super(key: key);
+  const MainScreen({Key? key}) : super(key: key);
 
   @override
-  _RootScreenState createState() => _RootScreenState();
+  _MainScreenState createState() => _MainScreenState();
 }
 
-class _RootScreenState extends State<RootScreen> {
+class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   var _isOffline = AppState.get('mode', AppMode.online) == AppMode.offline;
 
@@ -61,13 +62,10 @@ class _RootScreenState extends State<RootScreen> {
                     bottom: 0,
                     width: MediaQuery.of(context).size.width,
                     child: Container(
-                      color: Colors.black,
-                      height: 140,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           const FooterPlayerSheet(),
-                          const Divider(height: .5),
                           const ConnectivityInfoBox(),
                         ],
                       ),
@@ -154,48 +152,55 @@ class _ConnectivityInfoBoxState extends State<ConnectivityInfoBox>
   Widget build(BuildContext context) {
     var padding = EdgeInsets.only(top: 16, bottom: Platform.isIOS ? 32 : 16);
 
-    return Container(
-      child: _offline
-          ? Container(
-              padding: padding,
-              child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      CupertinoIcons.wifi_slash,
-                      color: AppColors.red,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'No internet connection',
-                      style: TextStyle(color: AppColors.red),
-                    ),
-                  ]),
-            )
-          : ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
+    return FrostedGlassBackground(
+      child: Container(
+        width: double.infinity,
+        child: !_offline
+            ? Container(
                 padding: padding,
-                backgroundColor: Colors.transparent,
-                foregroundColor: Colors.transparent,
+                child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        CupertinoIcons.wifi_slash,
+                        color: AppColors.white,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'No internet connection',
+                        style: TextStyle(color: AppColors.white),
+                      ),
+                    ]),
+              )
+            : Container(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    padding: padding,
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.transparent,
+                  ),
+                  onPressed: () {
+                    AppState.delete('mode');
+                    Navigator.of(context).pushReplacementNamed(
+                      InitialScreen.routeName,
+                    );
+                  },
+                  icon: const Icon(
+                    CupertinoIcons.wifi,
+                    color: AppColors.white,
+                    size: 20,
+                  ),
+                  label: const Text(
+                    'Connection restored! Tap to refresh.',
+                    style: TextStyle(color: AppColors.white, fontSize: 14.0),
+                  ),
+                ),
               ),
-              onPressed: () {
-                AppState.delete('mode');
-                Navigator.of(context).pushReplacementNamed(
-                  InitialScreen.routeName,
-                );
-              },
-              icon: const Icon(
-                CupertinoIcons.wifi,
-                color: AppColors.green,
-                size: 20,
-              ),
-              label: const Text(
-                'Tap to refresh Koel',
-                style: TextStyle(color: AppColors.green, fontSize: 14.0),
-              ),
-            ),
+      ),
     );
   }
 }

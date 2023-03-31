@@ -7,8 +7,8 @@ import 'package:app/ui/screens/favorites.dart';
 import 'package:app/ui/screens/playlists.dart';
 import 'package:app/ui/screens/songs.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
+import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:app/ui/widgets/sliver_song_list.dart';
-import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/typography.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -75,53 +75,53 @@ class LibraryScreen extends StatelessWidget {
 
     return Scaffold(
       body: CupertinoTheme(
-        data: CupertinoThemeData(
-          primaryColor: Colors.white,
-        ),
-        child: CustomScrollView(
-          slivers: <Widget>[
-            const CupertinoSliverNavigationBar(
-              backgroundColor: AppColors.screenHeaderBackground,
-              largeTitle: const LargeTitle(text: 'Library'),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppDimensions.horizontalPadding,
+        data: CupertinoThemeData(primaryColor: Colors.white),
+        child: GradientDecoratedContainer(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              const CupertinoSliverNavigationBar(
+                backgroundColor: AppColors.screenHeaderBackground,
+                largeTitle: const LargeTitle(text: 'Library'),
               ),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate(menuItems),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.horizontalPadding,
+                ),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate(menuItems),
+                ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
-                AppDimensions.horizontalPadding,
-                24,
-                AppDimensions.horizontalPadding,
-                0,
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppDimensions.horizontalPadding,
+                  24,
+                  AppDimensions.horizontalPadding,
+                  0,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: const Heading5(text: 'Recently added'),
+                ),
               ),
-              sliver: SliverToBoxAdapter(
-                child: const Heading5(text: 'Recently added'),
+              recentlyAddedSongs.isEmpty
+                  ? const SliverToBoxAdapter(child: SizedBox.shrink())
+                  : SliverSongList(songs: recentlyAddedSongs),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppDimensions.horizontalPadding,
+                  24,
+                  AppDimensions.horizontalPadding,
+                  0,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: const Heading5(text: 'Most played'),
+                ),
               ),
-            ),
-            recentlyAddedSongs.isEmpty
-                ? const SliverToBoxAdapter(child: SizedBox.shrink())
-                : SliverSongList(songs: recentlyAddedSongs),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
-                AppDimensions.horizontalPadding,
-                24,
-                AppDimensions.horizontalPadding,
-                0,
-              ),
-              sliver: SliverToBoxAdapter(
-                child: const Heading5(text: 'Most played'),
-              ),
-            ),
-            mostPlayedSongs.isEmpty
-                ? const SliverToBoxAdapter(child: SizedBox.shrink())
-                : SliverSongList(songs: mostPlayedSongs),
-            const BottomSpace(),
-          ],
+              mostPlayedSongs.isEmpty
+                  ? const SliverToBoxAdapter(child: SizedBox.shrink())
+                  : SliverSongList(songs: mostPlayedSongs),
+              const BottomSpace(),
+            ],
+          ),
         ),
       ),
     );

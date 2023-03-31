@@ -1,5 +1,5 @@
 import 'package:app/providers/providers.dart';
-import 'package:app/ui/screens/root.dart';
+import 'package:app/ui/screens/main.dart';
 import 'package:app/ui/widgets/oops_box.dart';
 import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +26,7 @@ class _DataLoadingScreen extends State<DataLoadingScreen> {
   Future<void> _loadData() async {
     try {
       await context.read<DataProvider>().init();
-      await Navigator.of(context).pushReplacementNamed(RootScreen.routeName);
+      await Navigator.of(context).pushReplacementNamed(MainScreen.routeName);
     } catch (e) {
       print(e);
       setState(() => _hasError = true);

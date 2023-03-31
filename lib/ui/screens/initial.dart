@@ -1,7 +1,10 @@
+import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/data_loading.dart';
 import 'package:app/ui/screens/login.dart';
+import 'package:app/ui/screens/no_connection.dart';
 import 'package:app/ui/widgets/spinner.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,11 +18,20 @@ class InitialScreen extends StatefulWidget {
   _InitialScreenState createState() => _InitialScreenState();
 }
 
-class _InitialScreenState extends State<InitialScreen> {
+class _InitialScreenState extends State<InitialScreen> with StreamSubscriber {
   @override
   void initState() {
     super.initState();
-    _resolveAuthenticatedUser();
+
+    Connectivity().checkConnectivity().then((value) {
+      if (value == ConnectivityResult.none) {
+        Navigator.of(context).pushReplacementNamed(
+          NoConnectionScreen.routeName,
+        );
+      } else {
+        _resolveAuthenticatedUser();
+      }
+    });
   }
 
   Future<void> _resolveAuthenticatedUser() async {
