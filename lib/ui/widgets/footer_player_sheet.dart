@@ -77,13 +77,18 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet>
     }
 
     return FrostedGlassBackground(
+      sigma: 10.0,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           border: Border(
+            top: BorderSide(
+              color: AppColors.white.withOpacity(0.1),
+              width: .5,
+            ),
             bottom: BorderSide(
               color: AppColors.white.withOpacity(0.1),
-              width: 1,
+              width: .5,
             ),
           ),
         ),

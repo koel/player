@@ -63,7 +63,7 @@ class PlaceholderCard extends StatelessWidget {
       height: 144,
       width: 144,
       decoration: ShapeDecoration(
-        color: AppColors.red,
+        color: AppColors.highlight,
         shape: SmoothRectangleBorder(
           borderRadius: SmoothBorderRadius(
             cornerRadius: 18,
