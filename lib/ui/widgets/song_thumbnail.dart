@@ -39,7 +39,7 @@ class SongThumbnail extends StatelessWidget {
     return ClipSmoothRect(
       radius: SmoothBorderRadius(
         cornerRadius: borderRadius,
-        cornerSmoothing: 1,
+        cornerSmoothing: .5,
       ),
       child: this.playing
           ? PlayingSongThumbnail(
@@ -107,7 +107,8 @@ class PlayingSongThumbnail extends StatelessWidget {
             width: double.infinity,
             height: double.infinity,
             child: DecoratedBox(
-              decoration: BoxDecoration(color: Colors.black54),
+              decoration:
+                  BoxDecoration(color: Color(0xFF410928).withOpacity(.7)),
             ),
           ),
           Align(

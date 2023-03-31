@@ -18,6 +18,7 @@ import 'package:app/ui/screens/playlist_details.dart';
 import 'package:app/ui/screens/playlists.dart';
 import 'package:app/ui/screens/queue.dart';
 import 'package:app/ui/screens/main.dart';
+import 'package:app/ui/screens/recently_played.dart';
 import 'package:app/ui/screens/search.dart';
 import 'package:app/ui/screens/song_action_sheet.dart';
 import 'package:app/ui/screens/songs.dart';
@@ -47,6 +48,7 @@ class AppRouter {
     AddToPlaylistScreen.routeName: (_) => const AddToPlaylistScreen(),
     DataLoadingScreen.routeName: (_) => const DataLoadingScreen(),
     DownloadedScreen.routeName: (_) => DownloadedScreen(),
+    RecentlyPlayedScreen.routeName: (_) => const RecentlyPlayedScreen(),
   };
 
   Future<void> gotoAlbumDetailsScreen(

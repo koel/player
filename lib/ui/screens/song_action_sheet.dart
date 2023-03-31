@@ -8,7 +8,6 @@ import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/screens/add_to_playlist.dart';
 import 'package:app/ui/widgets/frosted_glass_background.dart';
-import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:app/ui/widgets/message_overlay.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:flutter/cupertino.dart';
@@ -217,7 +216,7 @@ class SongActionButton extends StatelessWidget {
       minLeadingWidth: 16,
       title: Text(
         text,
-        style: enabled ? null : TextStyle(color: Colors.white30),
+        style: enabled ? null : const TextStyle(color: Colors.white30),
       ),
       onTap: enabled
           ? () {

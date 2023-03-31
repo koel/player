@@ -3,6 +3,7 @@ import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/home_screen_placeholder.dart';
 import 'package:app/ui/screens/albums.dart';
 import 'package:app/ui/screens/artists.dart';
+import 'package:app/ui/screens/recently_played.dart';
 import 'package:app/ui/screens/songs.dart';
 import 'package:app/ui/widgets/album_card.dart';
 import 'package:app/ui/widgets/artist_card.dart';
@@ -128,7 +129,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 slivers: <Widget>[
                   CupertinoSliverNavigationBar(
                     largeTitle: const LargeTitle(text: 'Home'),
-                    trailing: const ProfileAvatar(),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                            onPressed: () {
+                              Navigator.of(
+                                context,
+                                rootNavigator: true,
+                              ).pushNamed(RecentlyPlayedScreen.routeName);
+                            },
+                            icon: const Icon(CupertinoIcons.timer, size: 24)),
+                        const ProfileAvatar(),
+                      ],
+                    ),
                   ),
                   SliverList(delegate: SliverChildListDelegate.fixed(blocks)),
                   const BottomSpace(height: 192),

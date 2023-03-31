@@ -45,7 +45,7 @@ class AlbumArtistThumbnail extends StatelessWidget {
     return ClipSmoothRect(
       radius: SmoothBorderRadius(
         cornerRadius: borderRadius,
-        cornerSmoothing: 1,
+        cornerSmoothing: .5,
       ),
       child: asHero ? Hero(tag: heroTag, child: image) : image,
     );

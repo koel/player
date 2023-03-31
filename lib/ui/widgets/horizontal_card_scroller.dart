@@ -67,7 +67,7 @@ class PlaceholderCard extends StatelessWidget {
         shape: SmoothRectangleBorder(
           borderRadius: SmoothBorderRadius(
             cornerRadius: 18,
-            cornerSmoothing: 1,
+            cornerSmoothing: .5,
           ),
         ),
       ),

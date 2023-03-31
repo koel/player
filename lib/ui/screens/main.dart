@@ -155,7 +155,7 @@ class _ConnectivityInfoBoxState extends State<ConnectivityInfoBox>
     return FrostedGlassBackground(
       child: Container(
         width: double.infinity,
-        child: !_offline
+        child: _offline
             ? Container(
                 padding: padding,
                 child: Row(
@@ -163,15 +163,17 @@ class _ConnectivityInfoBoxState extends State<ConnectivityInfoBox>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
+                      Icon(
                         CupertinoIcons.wifi_slash,
-                        color: AppColors.white,
+                        color: AppColors.white.withOpacity(.5),
                         size: 20,
                       ),
                       const SizedBox(width: 8),
-                      const Text(
+                      Text(
                         'No internet connection',
-                        style: TextStyle(color: AppColors.white),
+                        style: TextStyle(
+                          color: AppColors.white.withOpacity(.5),
+                        ),
                       ),
                     ]),
               )

@@ -19,7 +19,7 @@ class _PullToRefreshState extends State<PullToRefresh> {
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
-      backgroundColor: AppColors.blue.withOpacity(.8),
+      backgroundColor: AppColors.highlight.withOpacity(.8),
       onRefresh: widget.onRefresh,
       color: Colors.white,
       displacement: 0,

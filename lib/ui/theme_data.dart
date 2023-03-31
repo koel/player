@@ -5,23 +5,31 @@ import 'package:flutter/material.dart';
 
 ThemeData themeData(BuildContext context) {
   return ThemeData(
+    splashColor: AppColors.highlightAccent,
     dividerColor: Colors.white30,
     scaffoldBackgroundColor: Colors.transparent,
     colorScheme: ColorScheme.dark(
-      background: AppColors.primaryBgr,
+      background: AppColors.background,
     ),
     bottomSheetTheme: BottomSheetThemeData(
-      backgroundColor: AppColors.primaryBgr.withOpacity(.8),
+      backgroundColor: AppColors.black.withOpacity(.3),
+      shape: SmoothRectangleBorder(
+        borderRadius: SmoothBorderRadius(
+          cornerRadius: 32,
+          cornerSmoothing: .5,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
       elevation: 0,
     ),
     popupMenuTheme: PopupMenuThemeData(
       shadowColor: Colors.transparent,
       elevation: 0,
-      color: Colors.grey[900],
+      color: const Color(0xFF1B0047),
       shape: SmoothRectangleBorder(
         borderRadius: SmoothBorderRadius(
           cornerRadius: 8,
-          cornerSmoothing: 1,
+          cornerSmoothing: .5,
         ),
       ),
     ),
@@ -94,8 +102,8 @@ ThemeData themeData(BuildContext context) {
           ),
         )
         .apply(
-          displayColor: AppColors.primaryText,
-          bodyColor: AppColors.primaryText,
+          displayColor: AppColors.text,
+          bodyColor: AppColors.text,
         ),
 
     // The default theme for ElevatedButton widgets.
@@ -113,9 +121,9 @@ ThemeData themeData(BuildContext context) {
             fontWeight: FontWeight.w500,
           ),
         ),
-        backgroundColor: MaterialStateProperty.all(AppColors.blue),
+        backgroundColor: MaterialStateProperty.all(AppColors.highlight),
         foregroundColor: MaterialStateProperty.all(AppColors.white),
-        overlayColor: MaterialStateProperty.all(Colors.white12),
+        overlayColor: MaterialStateProperty.all(AppColors.highlightAccent),
         elevation: MaterialStateProperty.all(0),
         padding: MaterialStateProperty.all(AppDimensions.inputPadding),
       ),
@@ -124,7 +132,7 @@ ThemeData themeData(BuildContext context) {
     // The default theme for OutlinedButton widgets.
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.primaryText,
+        foregroundColor: AppColors.text,
         side: const BorderSide(color: Colors.white54),
         textStyle: const TextStyle(
           fontSize: 16.0,
@@ -165,7 +173,7 @@ ThemeData themeData(BuildContext context) {
           fontSize: 16.0,
           fontWeight: FontWeight.w500,
         ),
-        foregroundColor: AppColors.blue,
+        foregroundColor: AppColors.highlight,
         shape: RoundedRectangleBorder(
           borderRadius: AppDimensions.inputBorderRadius,
         ),

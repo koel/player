@@ -67,7 +67,7 @@ class _MessageOverlayState extends State<MessageOverlay> {
                   shape: SmoothRectangleBorder(
                     borderRadius: SmoothBorderRadius(
                       cornerRadius: 24,
-                      cornerSmoothing: 1,
+                      cornerSmoothing: .5,
                     ),
                   ),
                 ),

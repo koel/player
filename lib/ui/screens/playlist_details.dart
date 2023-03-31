@@ -9,7 +9,6 @@ import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/sliver_song_list.dart';
 import 'package:app/ui/widgets/song_list_header.dart';
-import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/song_list_sort_button.dart';
 import 'package:app/values/values.dart';
 import 'package:flutter/cupertino.dart';

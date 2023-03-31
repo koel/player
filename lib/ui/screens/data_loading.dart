@@ -1,5 +1,6 @@
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/main.dart';
+import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:app/ui/widgets/oops_box.dart';
 import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/material.dart';
@@ -36,12 +37,14 @@ class _DataLoadingScreen extends State<DataLoadingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _hasError
-          ? OopsBox(onRetryButtonPressed: () {
-              setState(() => _hasError = false);
-              _loadData();
-            })
-          : const ContainerWithSpinner(),
+      body: GradientDecoratedContainer(
+        child: _hasError
+            ? OopsBox(onRetryButtonPressed: () {
+                setState(() => _hasError = false);
+                _loadData();
+              })
+            : const ContainerWithSpinner(),
+      ),
     );
   }
 }
