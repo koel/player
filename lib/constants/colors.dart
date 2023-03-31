@@ -19,4 +19,6 @@ class AppColors {
   static const primaryText = Color.fromRGBO(255, 255, 255, .9);
   static const primaryBgr = AppColors.black;
   static const highlight = AppColors.orange;
+
+  static const screenHeaderBackground = Color.fromRGBO(12, 50, 89, .7);
 }

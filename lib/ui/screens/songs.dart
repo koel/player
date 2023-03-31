@@ -7,6 +7,8 @@ import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
+import 'package:app/ui/widgets/gradient_decorated_container.dart';
+import 'package:app/ui/widgets/sliver_song_list.dart';
 import 'package:app/ui/widgets/song_list_header.dart' as BaseSongListHeader;
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/song_list_sort_button.dart';
@@ -95,85 +97,84 @@ class _SongsScreenState extends State<SongsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer<SongListScreenProvider>(
-        builder: (_, provider, __) {
-          if (provider.songs.isEmpty && _loading)
-            return const SongListScreenPlaceholder();
+      body: GradientDecoratedContainer(
+        child: Consumer<SongListScreenProvider>(
+          builder: (_, provider, __) {
+            if (provider.songs.isEmpty && _loading)
+              return const SongListScreenPlaceholder();
 
-          if (_cover.isEmpty) {
-            _cover = CoverImageStack(songs: provider.songs);
-          }
+            if (_cover.isEmpty) {
+              _cover = CoverImageStack(songs: provider.songs);
+            }
 
-          var displayedSongs = provider.songs;
+            var displayedSongs = provider.songs;
 
-          if (_inSearchMode) {
-            // In search mode, sorting is done from the client side.
-            displayedSongs = displayedSongs.$sort(_paginationConfig.sortConfig);
-          }
+            if (_inSearchMode) {
+              // In search mode, sorting is done from the client side.
+              displayedSongs =
+                  displayedSongs.$sort(_paginationConfig.sortConfig);
+            }
 
-          return CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              AppBar(
-                headingText: 'All songs',
-                actions: [
-                  SortButton(
-                    fields: ['title', 'artist_name', 'created_at'],
-                    currentField: _paginationConfig.sortField,
-                    currentOrder: _paginationConfig.sortOrder,
-                    onMenuItemSelected: (sortConfig) {
-                      setState(() {
-                        _paginationConfig.sortField = sortConfig.field;
-                        _paginationConfig.sortOrder = sortConfig.order;
-                      });
+            return CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                AppBar(
+                  headingText: 'All songs',
+                  actions: [
+                    SortButton(
+                      fields: ['title', 'artist_name', 'created_at'],
+                      currentField: _paginationConfig.sortField,
+                      currentOrder: _paginationConfig.sortOrder,
+                      onMenuItemSelected: (sortConfig) {
+                        setState(() {
+                          _paginationConfig.sortField = sortConfig.field;
+                          _paginationConfig.sortOrder = sortConfig.order;
+                        });
 
-                      if (_inSearchMode) return;
+                        if (_inSearchMode) return;
 
-                      // If we're not searching but displaying the full list,
-                      // every time we sort, we fetch a new list of songs,
-                      // since the sorting is done from the server.
-                      provider.songs.clear();
+                        // If we're not searching but displaying the full list,
+                        // every time we sort, we fetch a new list of songs,
+                        // since the sorting is done from the server.
+                        provider.songs.clear();
+                        makeRequest();
+                      },
+                    ),
+                  ],
+                  coverImage: _cover,
+                ),
+                SliverToBoxAdapter(
+                  child: SongListHeader(
+                    sortField: _paginationConfig.sortField,
+                    sortOrder: _paginationConfig.sortOrder,
+                    onSearchExpanded: () =>
+                        setState(() => _inSearchMode = true),
+                    onSearchCollapsed: () => setState(
+                      () => _inSearchMode = false,
+                    ),
+                    onSearchQueryChanged: (query) {
+                      setState(() => _searchQuery = query);
                       makeRequest();
                     },
                   ),
-                ],
-                coverImage: _cover,
-              ),
-              SliverToBoxAdapter(
-                child: SongListHeader(
-                  sortField: _paginationConfig.sortField,
-                  sortOrder: _paginationConfig.sortOrder,
-                  onSearchExpanded: () => setState(() => _inSearchMode = true),
-                  onSearchCollapsed: () => setState(
-                    () => _inSearchMode = false,
-                  ),
-                  onSearchQueryChanged: (query) {
-                    setState(() => _searchQuery = query);
-                    makeRequest();
-                  },
                 ),
-              ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (_, int index) => SongRow(
-                    song: displayedSongs[index],
-                    listContext: BaseSongListHeader.SongListContext.allSongs,
-                  ),
-                  childCount: displayedSongs.length,
+                SliverSongList(
+                  songs: displayedSongs,
+                  listContext: BaseSongListHeader.SongListContext.allSongs,
                 ),
-              ),
-              _loading
-                  ? SliverToBoxAdapter(
-                      child: Container(
-                        height: 72,
-                        child: const Center(child: const Spinner(size: 16)),
-                      ),
-                    )
-                  : const SliverToBoxAdapter(),
-              const BottomSpace(),
-            ],
-          );
-        },
+                _loading
+                    ? SliverToBoxAdapter(
+                        child: Container(
+                          height: 72,
+                          child: const Center(child: const Spinner(size: 16)),
+                        ),
+                      )
+                    : const SliverToBoxAdapter(),
+                const BottomSpace(),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

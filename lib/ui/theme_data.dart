@@ -1,11 +1,12 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/utils/full_width_slider_track_shape.dart';
+import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 
 ThemeData themeData(BuildContext context) {
   return ThemeData(
     dividerColor: Colors.white30,
-    scaffoldBackgroundColor: Colors.black,
+    scaffoldBackgroundColor: Colors.transparent,
     colorScheme: ColorScheme.dark(
       background: AppColors.primaryBgr,
     ),
@@ -14,10 +15,14 @@ ThemeData themeData(BuildContext context) {
       elevation: 0,
     ),
     popupMenuTheme: PopupMenuThemeData(
-      elevation: 2,
-      color: Colors.grey.shade900,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8)),
+      shadowColor: Colors.transparent,
+      elevation: 0,
+      color: Colors.grey[900],
+      shape: SmoothRectangleBorder(
+        borderRadius: SmoothBorderRadius(
+          cornerRadius: 8,
+          cornerSmoothing: 1,
+        ),
       ),
     ),
     sliderTheme: SliderThemeData(

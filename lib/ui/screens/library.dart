@@ -7,6 +7,7 @@ import 'package:app/ui/screens/favorites.dart';
 import 'package:app/ui/screens/playlists.dart';
 import 'package:app/ui/screens/songs.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
+import 'package:app/ui/widgets/sliver_song_list.dart';
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/typography.dart';
 import 'package:flutter/cupertino.dart';
@@ -28,7 +29,7 @@ class LibraryScreen extends StatelessWidget {
       context: context,
       tiles: <Widget>[
         LibraryMenuItem(
-          icon: const Icon(CupertinoIcons.heart_fill, color: AppColors.red),
+          icon: CupertinoIcons.heart_fill,
           label: 'Favorites',
           onTap: () => Navigator.of(context).push(
             CupertinoPageRoute(builder: (_) => const FavoritesScreen()),
@@ -80,7 +81,7 @@ class LibraryScreen extends StatelessWidget {
         child: CustomScrollView(
           slivers: <Widget>[
             const CupertinoSliverNavigationBar(
-              backgroundColor: Colors.black54,
+              backgroundColor: AppColors.screenHeaderBackground,
               largeTitle: const LargeTitle(text: 'Library'),
             ),
             SliverPadding(
@@ -102,15 +103,9 @@ class LibraryScreen extends StatelessWidget {
                 child: const Heading5(text: 'Recently added'),
               ),
             ),
-            recentlyAddedSongs.length == 0
+            recentlyAddedSongs.isEmpty
                 ? const SliverToBoxAdapter(child: SizedBox.shrink())
-                : SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (_, int index) =>
-                          SongRow(song: recentlyAddedSongs[index]),
-                      childCount: recentlyAddedSongs.length,
-                    ),
-                  ),
+                : SliverSongList(songs: recentlyAddedSongs),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(
                 AppDimensions.horizontalPadding,
@@ -122,14 +117,9 @@ class LibraryScreen extends StatelessWidget {
                 child: const Heading5(text: 'Most played'),
               ),
             ),
-            mostPlayedSongs.length == 0
+            mostPlayedSongs.isEmpty
                 ? const SliverToBoxAdapter(child: SizedBox.shrink())
-                : SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (_, int index) => SongRow(song: mostPlayedSongs[index]),
-                      childCount: mostPlayedSongs.length,
-                    ),
-                  ),
+                : SliverSongList(songs: mostPlayedSongs),
             const BottomSpace(),
           ],
         ),

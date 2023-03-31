@@ -1,10 +1,11 @@
 import 'package:app/app_state.dart';
-import 'package:app/models/models.dart';
+import 'package:app/constants/constants.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/placeholders/artist_screen_placeholder.dart';
 import 'package:app/ui/widgets/album_artist_thumbnail.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
+import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/spinner.dart';
 import 'package:app/ui/widgets/typography.dart';
@@ -26,8 +27,8 @@ class ArtistsScreen extends StatefulWidget {
 }
 
 class _ArtistsScreenState extends State<ArtistsScreen> {
-  late ArtistProvider _artistProvider;
-  late ScrollController _scrollController;
+  late final ArtistProvider _artistProvider;
+  late final ScrollController _scrollController;
   var _currentScrollOffset = AppState.get('artists.scrollOffSet', 0.0)!;
   final _scrollThreshold = 64.0;
   var _loading = false;
@@ -77,61 +78,69 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer<ArtistProvider>(
-        builder: (_, provider, __) {
-          if (provider.artists.isEmpty && _loading)
-            return const ArtistScreenPlaceholder();
+      body: GradientDecoratedContainer(
+        child: Consumer<ArtistProvider>(
+          builder: (_, provider, __) {
+            if (provider.artists.isEmpty && _loading)
+              return const ArtistScreenPlaceholder();
 
-          return CupertinoTheme(
-            data: CupertinoThemeData(primaryColor: Colors.white),
-            child: PullToRefresh(
-              onRefresh: () => _artistProvider.reset(),
-              child: CustomScrollView(
-                controller: _scrollController,
-                slivers: [
-                  const CupertinoSliverNavigationBar(
-                    backgroundColor: Colors.black54,
-                    largeTitle: LargeTitle(text: 'Artists'),
-                  ),
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate((
-                      BuildContext context,
-                      int index,
-                    ) {
-                      Artist artist = provider.artists[index];
-                      return InkWell(
-                        onTap: () => widget.router.gotoArtistDetailsScreen(
-                          context,
-                          artistId: artist.id,
-                        ),
-                        child: ListTile(
-                          shape: Border(
-                            bottom: Divider.createBorderSide(context),
+            return CupertinoTheme(
+              data: CupertinoThemeData(primaryColor: Colors.white),
+              child: PullToRefresh(
+                onRefresh: _artistProvider.refresh,
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  slivers: [
+                    const CupertinoSliverNavigationBar(
+                      backgroundColor: AppColors.screenHeaderBackground,
+                      largeTitle: LargeTitle(text: 'Artists'),
+                    ),
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate((
+                        BuildContext context,
+                        int index,
+                      ) {
+                        final artist = provider.artists[index];
+
+                        return Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () => widget.router.gotoArtistDetailsScreen(
+                              context,
+                              artistId: artist.id,
+                            ),
+                            child: ListTile(
+                              shape: Border(
+                                bottom: Divider.createBorderSide(context),
+                              ),
+                              leading: AlbumArtistThumbnail(
+                                entity: artist,
+                                asHero: true,
+                              ),
+                              title: Text(
+                                artist.name,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                           ),
-                          leading: AlbumArtistThumbnail(
-                              entity: artist, asHero: true),
-                          title: Text(
-                            artist.name,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      );
-                    }, childCount: provider.artists.length),
-                  ),
-                  _loading
-                      ? SliverToBoxAdapter(
-                          child: Container(
-                            height: 72,
-                            child: Center(child: const Spinner(size: 16)),
-                          ),
-                        )
-                      : const SliverToBoxAdapter(),
-                  const BottomSpace(),
-                ],
+                        );
+                      }, childCount: provider.artists.length),
+                    ),
+                    _loading
+                        ? SliverToBoxAdapter(
+                            child: Container(
+                              height: 72,
+                              child: Center(child: const Spinner(size: 16)),
+                            ),
+                          )
+                        : const SliverToBoxAdapter(),
+                    const BottomSpace(),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

@@ -78,13 +78,13 @@ class DownloadProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  FileInfo? get({required Song song}) {
+  FileInfo? getForSong(Song song) {
     return _downloads.firstWhereOrNull((element) => element.song == song)?.file;
   }
 
-  bool has({required Song song}) => get(song: song) != null;
+  bool has({required Song song}) => getForSong(song) != null;
 
-  Future<void> remove({required Song song}) async {
+  Future<void> removeForSong(Song song) async {
     await _downloadManager.removeFile(song.cacheKey);
     _downloadRemoved.add(song);
 

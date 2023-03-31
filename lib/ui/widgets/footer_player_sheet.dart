@@ -6,6 +6,7 @@ import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
+import 'package:app/ui/widgets/frosted_glass_background.dart';
 import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/cupertino.dart';
@@ -75,109 +76,98 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet>
       isLoading = false;
     }
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        ClipRect(
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 8,
-            ),
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Colors.white, width: 0.5),
-              ),
-            ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
-              child: InkWell(
-                onTap: () => widget.router.openNowPlayingScreen(context),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Stack(
-                      children: [
-                        Hero(
-                          tag: 'hero-now-playing-thumbnail',
-                          child: SongThumbnail(song: song),
-                        ),
-                        if (isLoading)
-                          SizedBox(
-                            width: 48,
-                            height: 48,
-                            child: DecoratedBox(
-                              decoration: const BoxDecoration(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(8),
-                                ),
-                                color: Colors.black54,
-                              ),
-                            ),
-                          ),
-                        if (isLoading)
-                          SizedBox(
-                            width: 48,
-                            height: 48,
-                            child: statusIndicator,
-                          ),
-                      ],
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              song.title,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              song.artistName,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.color,
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    Row(
-                      children: <Widget>[
-                        IconButton(
-                          key: FooterPlayerSheet.pauseButtonKey,
-                          onPressed: audioHandler.playOrPause,
-                          icon: Icon(
-                            state.playing
-                                ? CupertinoIcons.pause_fill
-                                : CupertinoIcons.play_fill,
-                            size: 24,
-                          ),
-                        ),
-                        IconButton(
-                          key: FooterPlayerSheet.nextButtonKey,
-                          onPressed: audioHandler.skipToNext,
-                          icon: const Icon(
-                            CupertinoIcons.forward_fill,
-                            size: 24,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+    return FrostedGlassBackground(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: AppColors.white.withOpacity(0.1),
+              width: 1,
             ),
           ),
         ),
-      ],
+        child: InkWell(
+          onTap: () => widget.router.openNowPlayingScreen(context),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Stack(
+                children: [
+                  Hero(
+                    tag: 'hero-now-playing-thumbnail',
+                    child: SongThumbnail(song: song),
+                  ),
+                  if (isLoading)
+                    SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: DecoratedBox(
+                        decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(8),
+                          ),
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ),
+                  if (isLoading)
+                    SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: statusIndicator,
+                    ),
+                ],
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        song.title,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        song.artistName,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodySmall?.color,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              Row(
+                children: <Widget>[
+                  IconButton(
+                    key: FooterPlayerSheet.pauseButtonKey,
+                    onPressed: audioHandler.playOrPause,
+                    icon: Icon(
+                      state.playing
+                          ? CupertinoIcons.pause_fill
+                          : CupertinoIcons.play_fill,
+                      size: 24,
+                    ),
+                  ),
+                  IconButton(
+                    key: FooterPlayerSheet.nextButtonKey,
+                    onPressed: audioHandler.skipToNext,
+                    icon: const Icon(
+                      CupertinoIcons.forward_fill,
+                      size: 24,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

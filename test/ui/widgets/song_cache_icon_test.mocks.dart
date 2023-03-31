@@ -72,7 +72,7 @@ class MockCacheProvider extends _i1.Mock implements _i4.DownloadProvider {
           returnValueForMissingStub: Future<void>.value()) as _i6.Future<void>);
 
   @override
-  _i6.Future<_i7.FileInfo?> get({_i5.Song? song}) => (super.noSuchMethod(
+  _i6.Future<_i7.FileInfo?> getForSong({_i5.Song? song}) => (super.noSuchMethod(
       Invocation.method(#get, [], {#song: song}),
       returnValue: Future<_i7.FileInfo?>.value()) as _i6.Future<_i7.FileInfo?>);
 
@@ -82,7 +82,7 @@ class MockCacheProvider extends _i1.Mock implements _i4.DownloadProvider {
           returnValue: Future<bool>.value(false)) as _i6.Future<bool>);
 
   @override
-  _i6.Future<void> remove({_i5.Song? song}) =>
+  _i6.Future<void> removeForSong({_i5.Song? song}) =>
       (super.noSuchMethod(Invocation.method(#remove, [], {#song: song}),
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i6.Future<void>);

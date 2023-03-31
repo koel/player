@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:app/constants/colors.dart';
+import 'package:app/ui/widgets/frosted_glass_background.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -53,7 +53,6 @@ class _MessageOverlayState extends State<MessageOverlay> {
     return GestureDetector(
       onTap: hideOverlay,
       child: Scaffold(
-        backgroundColor: Colors.black26,
         body: SafeArea(
           child: Align(
             alignment: Alignment.center,
@@ -61,8 +60,10 @@ class _MessageOverlayState extends State<MessageOverlay> {
               opacity: _visible ? 1 : 0,
               duration: _animationDuration,
               child: Container(
+                width: 256.0,
+                height: 256.0,
+                clipBehavior: Clip.antiAlias,
                 decoration: ShapeDecoration(
-                  color: Color.fromRGBO(20, 20, 20, 1),
                   shape: SmoothRectangleBorder(
                     borderRadius: SmoothBorderRadius(
                       cornerRadius: 24,
@@ -70,37 +71,43 @@ class _MessageOverlayState extends State<MessageOverlay> {
                     ),
                   ),
                 ),
-                padding: EdgeInsets.all(16.0),
-                width: 256.0,
-                height: 256.0,
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Icon(widget.icon, size: 80.0, color: widget.iconColor),
-                      if (caption != null) ...<Widget>[
-                        const SizedBox(height: 16.0),
-                        Text(
-                          caption,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge
-                              ?.copyWith(color: Colors.white60),
-                        ),
-                      ],
-                      if (message != null) ...<Widget>[
-                        const SizedBox(height: 16.0),
-                        Text(
-                          message,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyLarge
-                              ?.copyWith(color: Colors.white60),
-                        ),
-                      ]
-                    ],
+                child: FrostedGlassBackground(
+                  child: Container(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Icon(
+                            widget.icon,
+                            size: 80.0,
+                            color: widget.iconColor,
+                          ),
+                          if (caption != null) ...<Widget>[
+                            const SizedBox(height: 16.0),
+                            Text(
+                              caption,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(color: Colors.white60),
+                            ),
+                          ],
+                          if (message != null) ...<Widget>[
+                            const SizedBox(height: 16.0),
+                            Text(
+                              message,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge
+                                  ?.copyWith(color: Colors.white60),
+                            ),
+                          ]
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),

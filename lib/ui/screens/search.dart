@@ -4,6 +4,7 @@ import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/album_card.dart';
 import 'package:app/ui/widgets/artist_card.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
+import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:app/ui/widgets/horizontal_card_scroller.dart';
 import 'package:app/ui/widgets/simple_song_list.dart';
 import 'package:app/ui/widgets/typography.dart';
@@ -28,7 +29,7 @@ class _SearchScreenState extends State<SearchScreen> {
   var _artists = <Artist>[];
   var _albums = <Album>[];
 
-  late SearchProvider searchProvider;
+  late final SearchProvider searchProvider;
   final _controller = TextEditingController(text: '');
   final _focusNode = FocusNode();
 
@@ -80,7 +81,6 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget get searchField {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.horizontalPadding),
-      color: Colors.black,
       child: Row(
         children: <Widget>[
           Expanded(
@@ -107,9 +107,9 @@ class _SearchScreenState extends State<SearchScreen> {
                   _resetSearch();
                   _focusNode.unfocus();
                 },
-                child: const Text(
+                child: Text(
                   'Cancel',
-                  style: TextStyle(color: AppColors.red),
+                  style: TextStyle(color: AppColors.white.withOpacity(.7)),
                 ),
               ),
             ),
@@ -121,59 +121,64 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            searchField,
-            if (!_initial)
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppDimensions.horizontalPadding,
+      body: GradientDecoratedContainer(
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              searchField,
+              if (!_initial)
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppDimensions.horizontalPadding,
+                          ),
+                          child: SimpleSongList(
+                            songs: _songs,
+                            bordered: true,
+                          ),
                         ),
-                        child: SimpleSongList(
-                          songs: _songs,
-                          bordered: true,
+                        const SizedBox(height: 32),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: AppDimensions.horizontalPadding,
+                          ),
+                          child: const Heading5(text: 'Albums'),
                         ),
-                      ),
-                      const SizedBox(height: 32),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: AppDimensions.horizontalPadding,
+                        if (_albums.isEmpty)
+                          noResults
+                        else
+                          HorizontalCardScroller(
+                            cards: _albums.map(
+                              (album) => AlbumCard(album: album),
+                            ),
+                          ),
+                        const SizedBox(height: 32),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: AppDimensions.horizontalPadding,
+                          ),
+                          child: const Heading5(text: 'Artists'),
                         ),
-                        child: const Heading5(text: 'Albums'),
-                      ),
-                      if (_albums.length == 0)
-                        noResults
-                      else
-                        HorizontalCardScroller(
-                          cards:
-                              _albums.map((album) => AlbumCard(album: album)),
-                        ),
-                      const SizedBox(height: 32),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            left: AppDimensions.horizontalPadding),
-                        child: const Heading5(text: 'Artists'),
-                      ),
-                      if (_artists.length == 0)
-                        noResults
-                      else
-                        HorizontalCardScroller(
-                          cards: _artists
-                              .map((artist) => ArtistCard(artist: artist)),
-                        ),
-                      const BottomSpace(asSliver: false),
-                    ],
+                        if (_artists.isEmpty)
+                          noResults
+                        else
+                          HorizontalCardScroller(
+                            cards: _artists.map(
+                              (artist) => ArtistCard(artist: artist),
+                            ),
+                          ),
+                        const BottomSpace(asSliver: false),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

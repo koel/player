@@ -1,3 +1,4 @@
+import 'package:app/constants/colors.dart';
 import 'package:flutter/material.dart';
 
 class PullToRefresh extends StatefulWidget {
@@ -18,6 +19,7 @@ class _PullToRefreshState extends State<PullToRefresh> {
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
+      backgroundColor: AppColors.blue.withOpacity(.8),
       onRefresh: widget.onRefresh,
       color: Colors.white,
       displacement: 0,

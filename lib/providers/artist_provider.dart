@@ -71,7 +71,7 @@ class ArtistProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> reset() {
+  Future<void> refresh() {
     artists.clear();
     _page = 1;
 

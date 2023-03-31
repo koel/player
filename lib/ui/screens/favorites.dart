@@ -6,9 +6,10 @@ import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
+import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
+import 'package:app/ui/widgets/sliver_song_list.dart';
 import 'package:app/ui/widgets/song_list_header.dart';
-import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/song_list_sort_button.dart';
 import 'package:app/values/values.dart';
 import 'package:flutter/cupertino.dart';
@@ -99,77 +100,64 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     );
 
     return Scaffold(
-      body: Consumer<FavoriteProvider>(
-        builder: (_, provider, __) {
-          if (provider.songs.isEmpty && _loading)
-            return const SongListScreenPlaceholder();
+      body: GradientDecoratedContainer(
+        child: Consumer<FavoriteProvider>(
+          builder: (_, provider, __) {
+            if (provider.songs.isEmpty && _loading)
+              return const SongListScreenPlaceholder();
 
-          if (cover.isEmpty) {
-            cover = CoverImageStack(songs: provider.songs);
-          }
+            if (cover.isEmpty) {
+              cover = CoverImageStack(songs: provider.songs);
+            }
 
-          final songs = provider.songs.$sort(sortConfig).$filter(_searchQuery);
+            final songs =
+                provider.songs.$sort(sortConfig).$filter(_searchQuery);
 
-          return PullToRefresh(
-            onRefresh: () {
-              return _loading
-                  ? Future(() => null)
-                  : makeRequest(forceRefresh: true);
-            },
-            child: CustomScrollView(
-              slivers: provider.songs.isEmpty
-                  ? <Widget>[emptyWidget]
-                  : <Widget>[
-                      AppBar(
-                        headingText: 'Favorites',
-                        coverImage: cover,
-                        actions: [
-                          SortButton(
-                            fields: ['title', 'artist_name', 'created_at'],
-                            currentField: sortConfig.field,
-                            currentOrder: sortConfig.order,
-                            onMenuItemSelected: (_sortConfig) {
-                              setState(() => sortConfig = _sortConfig);
-                              AppState.set('favorites.sort', sortConfig);
+            return PullToRefresh(
+              onRefresh: () {
+                return _loading
+                    ? Future(() => null)
+                    : makeRequest(forceRefresh: true);
+              },
+              child: CustomScrollView(
+                slivers: provider.songs.isEmpty
+                    ? <Widget>[emptyWidget]
+                    : <Widget>[
+                        AppBar(
+                          headingText: 'Favorites',
+                          coverImage: cover,
+                          actions: [
+                            SortButton(
+                              fields: ['title', 'artist_name', 'created_at'],
+                              currentField: sortConfig.field,
+                              currentOrder: sortConfig.order,
+                              onMenuItemSelected: (_sortConfig) {
+                                setState(() => sortConfig = _sortConfig);
+                                AppState.set('favorites.sort', sortConfig);
+                              },
+                            ),
+                          ],
+                        ),
+                        SliverToBoxAdapter(
+                          child: SongListHeader(
+                            songs: songs,
+                            onSearchQueryChanged: (String query) {
+                              setState(() => _searchQuery = query);
                             },
                           ),
-                        ],
-                      ),
-                      SliverToBoxAdapter(
-                        child: SongListHeader(
+                        ),
+                        SliverSongList(
                           songs: songs,
-                          onSearchQueryChanged: (String query) {
-                            setState(() => _searchQuery = query);
-                          },
+                          listContext: SongListContext.favorites,
+                          onDismissed: provider.unlike,
+                          dismissIcon: const Icon(CupertinoIcons.heart_slash),
                         ),
-                      ),
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (_, int index) {
-                            return Dismissible(
-                              direction: DismissDirection.endToStart,
-                              onDismissed: (DismissDirection direction) =>
-                                  provider.unlike(song: songs[index]),
-                              background: Container(
-                                alignment: AlignmentDirectional.centerEnd,
-                                color: Colors.red,
-                                child: const Padding(
-                                  padding: EdgeInsets.only(right: 28),
-                                  child: Icon(CupertinoIcons.heart_slash),
-                                ),
-                              ),
-                              key: ValueKey(songs[index]),
-                              child: SongRow(song: songs[index]),
-                            );
-                          },
-                          childCount: songs.length,
-                        ),
-                      ),
-                      const BottomSpace(),
-                    ],
-            ),
-          );
-        },
+                        const BottomSpace(),
+                      ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

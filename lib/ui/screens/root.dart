@@ -67,7 +67,7 @@ class _RootScreenState extends State<RootScreen> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           const FooterPlayerSheet(),
-                          const Divider(height: 1),
+                          const Divider(height: .5),
                           const ConnectivityInfoBox(),
                         ],
                       ),
@@ -86,6 +86,7 @@ class _RootScreenState extends State<RootScreen> {
                       backgroundColor: Colors.black12,
                       iconSize: 24,
                       activeColor: Colors.white,
+                      inactiveColor: Colors.white.withOpacity(0.5),
                       border: Border(top: Divider.createBorderSide(context)),
                       items: const <BottomNavigationBarItem>[
                         const BottomNavigationBarItem(

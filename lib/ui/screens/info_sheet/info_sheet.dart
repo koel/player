@@ -7,6 +7,7 @@ import 'package:app/models/models.dart';
 import 'package:app/ui/screens/info_sheet/album_info_pane.dart';
 import 'package:app/ui/screens/info_sheet/artist_info_pane.dart';
 import 'package:app/ui/screens/info_sheet/lyrics_pane.dart';
+import 'package:app/ui/widgets/frosted_glass_background.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -46,7 +47,8 @@ class _InfoSheetState extends State<InfoSheet> {
       2: Text('Album', style: textStyle),
     };
 
-    return ClipRect(
+    return FrostedGlassBackground(
+      sigma: 40.0,
       child: SafeArea(
         minimum: EdgeInsets.fromLTRB(
           AppDimensions.horizontalPadding,
@@ -54,40 +56,38 @@ class _InfoSheetState extends State<InfoSheet> {
           AppDimensions.horizontalPadding,
           MediaQuery.of(context).padding.bottom,
         ),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 40.0, sigmaY: 40.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              SizedBox(
-                width: double.infinity,
-                child: CupertinoSlidingSegmentedControl<int>(
-                  children: tabs,
-                  groupValue: _activeIndex,
-                  onValueChanged: (value) {
-                    if (inOfflineMode) return;
-                    setState(() => _activeIndex = value ?? 0);
-                  },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            SizedBox(
+              width: double.infinity,
+              child: CupertinoSlidingSegmentedControl<int>(
+                thumbColor: AppColors.highlight,
+                children: tabs,
+                groupValue: _activeIndex,
+                onValueChanged: (value) {
+                  if (inOfflineMode) return;
+                  setState(() => _activeIndex = value ?? 0);
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: SingleChildScrollView(
+                child: getActivePane(),
+              ),
+            ),
+            Center(
+              child: IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(
+                  CupertinoIcons.multiply_circle,
+                  size: 32,
+                  color: Colors.white54,
                 ),
               ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: getActivePane(),
-                ),
-              ),
-              Center(
-                child: IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(
-                    CupertinoIcons.multiply_circle,
-                    size: 32,
-                    color: Colors.white54,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

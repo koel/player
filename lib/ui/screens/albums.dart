@@ -1,10 +1,11 @@
 import 'package:app/app_state.dart';
-import 'package:app/models/models.dart';
+import 'package:app/constants/constants.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/album_artist_thumbnail.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
+import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/spinner.dart';
 import 'package:app/ui/widgets/typography.dart';
@@ -26,8 +27,8 @@ class AlbumsScreen extends StatefulWidget {
 }
 
 class _AlbumsScreenState extends State<AlbumsScreen> {
-  late AlbumProvider _albumProvider;
-  late ScrollController _scrollController;
+  late final AlbumProvider _albumProvider;
+  late final ScrollController _scrollController;
   var _currentScrollOffset = AppState.get('albums.scrollOffSet', 0.0)!;
   final _scrollThreshold = 64.0;
   var _loading = false;
@@ -77,71 +78,73 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer<AlbumProvider>(
-        builder: (_, provider, __) {
-          if (provider.albums.isEmpty && _loading)
-            return const AlbumScreenPlaceholder();
+      body: GradientDecoratedContainer(
+        child: Consumer<AlbumProvider>(
+          builder: (_, provider, __) {
+            if (provider.albums.isEmpty && _loading)
+              return const AlbumScreenPlaceholder();
 
-          return CupertinoTheme(
-            data: const CupertinoThemeData(primaryColor: Colors.white),
-            child: PullToRefresh(
-              onRefresh: _albumProvider.refresh,
-              child: CustomScrollView(
-                controller: _scrollController,
-                slivers: <Widget>[
-                  const CupertinoSliverNavigationBar(
-                    backgroundColor: Colors.black54,
-                    largeTitle: LargeTitle(text: 'Albums'),
-                  ),
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) {
-                        Album album = provider.albums[index];
-                        return Container(
-                          decoration: BoxDecoration(
-                            border: Border(
-                              bottom: Divider.createBorderSide(context),
-                            ),
-                          ),
-                          child: InkWell(
-                            onTap: () => widget.router.gotoAlbumDetailsScreen(
-                              context,
-                              albumId: album.id,
-                            ),
-                            child: ListTile(
-                              leading: AlbumArtistThumbnail(
-                                entity: album,
-                                asHero: true,
-                              ),
-                              title: Text(
-                                album.name,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              subtitle: Text(
-                                album.artistName,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      childCount: provider.albums.length,
+            return CupertinoTheme(
+              data: const CupertinoThemeData(primaryColor: Colors.white),
+              child: PullToRefresh(
+                onRefresh: _albumProvider.refresh,
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  slivers: <Widget>[
+                    const CupertinoSliverNavigationBar(
+                      backgroundColor: AppColors.screenHeaderBackground,
+                      largeTitle: LargeTitle(text: 'Albums'),
                     ),
-                  ),
-                  _loading
-                      ? SliverToBoxAdapter(
-                          child: Container(
-                            height: 72,
-                            child: Center(child: const Spinner(size: 16)),
-                          ),
-                        )
-                      : const SliverToBoxAdapter(),
-                  const BottomSpace(),
-                ],
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int index) {
+                          final album = provider.albums[index];
+
+                          return Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () => widget.router.gotoAlbumDetailsScreen(
+                                context,
+                                albumId: album.id,
+                              ),
+                              child: ListTile(
+                                shape: Border(
+                                  bottom: Divider.createBorderSide(context),
+                                ),
+                                leading: AlbumArtistThumbnail(
+                                  entity: album,
+                                  asHero: true,
+                                ),
+                                title: Text(
+                                  album.name,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                subtitle: Text(
+                                  album.artistName,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        childCount: provider.albums.length,
+                      ),
+                    ),
+                    _loading
+                        ? SliverToBoxAdapter(
+                            child: Container(
+                              height: 72,
+                              child: Center(child: const Spinner(size: 16)),
+                            ),
+                          )
+                        : const SliverToBoxAdapter(),
+                    const BottomSpace(),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

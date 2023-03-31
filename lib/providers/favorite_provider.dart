@@ -28,7 +28,7 @@ class FavoriteProvider with ChangeNotifier {
     return songs;
   }
 
-  Future<void> unlike({required Song song}) async {
+  Future<void> unlike(Song song) async {
     song.liked = false;
     songs.remove(song);
     notifyListeners();

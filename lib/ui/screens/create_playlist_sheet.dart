@@ -1,5 +1,6 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/providers/providers.dart';
+import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:app/ui/widgets/message_overlay.dart';
 import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/cupertino.dart';
@@ -17,11 +18,11 @@ class CreatePlaylistSheet extends StatefulWidget {
 }
 
 class _AddPlaylistScreenState extends State<CreatePlaylistSheet> {
-  late PlaylistProvider playlistProvider;
+  late final PlaylistProvider playlistProvider;
   var _enabled = true;
   var _working = false;
   late String _name;
-  FocusNode focusNode = FocusNode();
+  final focusNode = FocusNode();
 
   @override
   void initState() {
@@ -87,8 +88,7 @@ class _AddPlaylistScreenState extends State<CreatePlaylistSheet> {
       }
     }
 
-    return Container(
-      color: AppColors.black,
+    return GradientDecoratedContainer(
       padding: EdgeInsets.only(
         left: AppDimensions.horizontalPadding,
         right: AppDimensions.horizontalPadding,

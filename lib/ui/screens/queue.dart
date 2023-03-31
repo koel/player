@@ -4,6 +4,7 @@ import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
+import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:app/ui/widgets/song_list_header.dart';
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:audio_service/audio_service.dart';
@@ -47,64 +48,66 @@ class _QueueScreenState extends State<QueueScreen> with StreamSubscriber {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          AppBar(
-            headingText: 'Current Queue',
-            coverImage: CoverImageStack(songs: _songs),
-            actions: <Widget>[
-              if (_songs.isNotEmpty)
-                TextButton(
-                  onPressed: audioHandler.clearQueue,
-                  child: const Text(
-                    'Clear',
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                ),
-            ],
-          ),
-          if (_songs.isEmpty)
-            SliverToBoxAdapter(
-              child: Column(
-                children: <Widget>[
-                  const SizedBox(height: 128),
-                  Center(
+      body: GradientDecoratedContainer(
+        child: CustomScrollView(
+          slivers: <Widget>[
+            AppBar(
+              headingText: 'Current Queue',
+              coverImage: CoverImageStack(songs: _songs),
+              actions: <Widget>[
+                if (_songs.isNotEmpty)
+                  TextButton(
+                    onPressed: audioHandler.clearQueue,
                     child: const Text(
-                      'No songs queued.',
-                      style: TextStyle(color: Colors.white54),
+                      'Clear',
+                      style: const TextStyle(color: Colors.red),
                     ),
                   ),
-                ],
-              ),
-            )
-          else
-            SliverReorderableList(
-              itemCount: _songs.length,
-              itemBuilder: (BuildContext context, int index) {
-                return Dismissible(
-                  direction: DismissDirection.endToStart,
-                  onDismissed: (_) => audioHandler.removeQueueItemAt(index),
-                  background: Container(
-                    alignment: AlignmentDirectional.centerEnd,
-                    color: Colors.red,
-                    child: const Padding(
-                      padding: EdgeInsets.only(right: 16),
-                      child: Icon(CupertinoIcons.delete_simple),
-                    ),
-                  ),
-                  key: ValueKey(_songs[index]),
-                  child: SongRow(
-                    index: index,
-                    key: ValueKey(_songs[index]),
-                    song: _songs[index],
-                    listContext: SongListContext.queue,
-                  ),
-                );
-              },
-              onReorder: audioHandler.moveQueueItem,
+              ],
             ),
-          const BottomSpace(),
-        ],
+            if (_songs.isEmpty)
+              SliverToBoxAdapter(
+                child: Column(
+                  children: <Widget>[
+                    const SizedBox(height: 128),
+                    Center(
+                      child: const Text(
+                        'No songs queued.',
+                        style: TextStyle(color: Colors.white54),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              SliverReorderableList(
+                itemCount: _songs.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Dismissible(
+                    direction: DismissDirection.endToStart,
+                    onDismissed: (_) => audioHandler.removeQueueItemAt(index),
+                    background: Container(
+                      alignment: AlignmentDirectional.centerEnd,
+                      color: Colors.red,
+                      child: const Padding(
+                        padding: EdgeInsets.only(right: 16),
+                        child: Icon(CupertinoIcons.delete),
+                      ),
+                    ),
+                    key: ValueKey(_songs[index]),
+                    child: SongRow(
+                      index: index,
+                      key: ValueKey(_songs[index]),
+                      song: _songs[index],
+                      listContext: SongListContext.queue,
+                    ),
+                  );
+                },
+                onReorder: audioHandler.moveQueueItem,
+              ),
+            const BottomSpace(),
+          ],
+        ),
       ),
     );
   }

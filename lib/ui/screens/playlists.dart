@@ -3,6 +3,7 @@ import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
+import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:app/ui/widgets/playlist_row.dart';
 import 'package:app/ui/widgets/typography.dart';
 import 'package:flutter/cupertino.dart';
@@ -28,57 +29,62 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
     return Scaffold(
       body: CupertinoTheme(
         data: const CupertinoThemeData(primaryColor: Colors.white),
-        child: Consumer<PlaylistProvider>(
-          builder: (context, provider, navigationBar) {
-            if (provider.playlists.isEmpty) {
-              return NoPlaylistsScreen(
-                onTap: () => widget.router.showCreatePlaylistSheet(context),
-              );
-            }
+        child: GradientDecoratedContainer(
+          child: Consumer<PlaylistProvider>(
+            builder: (context, provider, navigationBar) {
+              if (provider.playlists.isEmpty) {
+                return NoPlaylistsScreen(
+                  onTap: () => widget.router.showCreatePlaylistSheet(context),
+                );
+              }
 
-            final playlists = provider.playlists
-              ..sort((a, b) => a.name.compareTo(b.name));
+              final playlists = provider.playlists
+                ..sort((a, b) => a.name.compareTo(b.name));
 
-            return CustomScrollView(
-              slivers: <Widget>[
-                navigationBar!,
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
-                      Playlist playlist = playlists[index];
+              return CustomScrollView(
+                slivers: <Widget>[
+                  navigationBar!,
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        Playlist playlist = playlists[index];
 
-                      return Dismissible(
-                        direction: DismissDirection.endToStart,
-                        confirmDismiss: (_) async => await confirmDelete(
-                          context,
-                          playlist: playlist,
-                        ),
-                        onDismissed: (_) => provider.remove(playlist),
-                        background: Container(
-                          alignment: AlignmentDirectional.centerEnd,
-                          color: AppColors.red,
-                          child: const Padding(
-                            padding: EdgeInsets.only(right: 28),
-                            child: Icon(CupertinoIcons.delete),
+                        return Material(
+                          color: Colors.transparent,
+                          child: Dismissible(
+                            direction: DismissDirection.endToStart,
+                            confirmDismiss: (_) async => await confirmDelete(
+                              context,
+                              playlist: playlist,
+                            ),
+                            onDismissed: (_) => provider.remove(playlist),
+                            background: Container(
+                              alignment: AlignmentDirectional.centerEnd,
+                              color: AppColors.red,
+                              child: const Padding(
+                                padding: EdgeInsets.only(right: 28),
+                                child: Icon(CupertinoIcons.delete),
+                              ),
+                            ),
+                            key: ValueKey(playlist),
+                            child: PlaylistRow(playlist: playlist),
                           ),
-                        ),
-                        key: ValueKey(playlist),
-                        child: PlaylistRow(playlist: playlist),
-                      );
-                    },
-                    childCount: playlists.length,
+                        );
+                      },
+                      childCount: playlists.length,
+                    ),
                   ),
-                ),
-                const BottomSpace(),
-              ],
-            );
-          },
-          child: CupertinoSliverNavigationBar(
-            backgroundColor: Colors.black54,
-            largeTitle: const LargeTitle(text: 'Playlists'),
-            trailing: IconButton(
-              onPressed: () => widget.router.showCreatePlaylistSheet(context),
-              icon: const Icon(CupertinoIcons.add_circled),
+                  const BottomSpace(),
+                ],
+              );
+            },
+            child: CupertinoSliverNavigationBar(
+              backgroundColor: AppColors.screenHeaderBackground,
+              largeTitle: const LargeTitle(text: 'Playlists'),
+              trailing: IconButton(
+                onPressed: () => widget.router.showCreatePlaylistSheet(context),
+                icon: const Icon(CupertinoIcons.add_circled),
+              ),
             ),
           ),
         ),

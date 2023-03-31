@@ -58,27 +58,33 @@ class _SongRowState extends State<SongRow> {
         HapticFeedback.mediumImpact();
         widget.router.showActionSheet(context, song: widget.song);
       },
-      child: ListTile(
-        key: UniqueKey(),
-        contentPadding: widget.padding ??
-            const EdgeInsets.only(left: AppDimensions.horizontalPadding),
-        shape: widget.bordered
-            ? Border(bottom: Divider.createBorderSide(context))
-            : null,
-        leading: widget.listContext == SongListContext.album
-            ? SongRowTrackNumber(song: widget.song)
-            : SongRowThumbnail(song: widget.song),
-        minLeadingWidth: widget.listContext == SongListContext.album ? 0 : null,
-        title: Text(widget.song.title, overflow: TextOverflow.ellipsis),
-        subtitle: Text(
-          subtitle,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(color: Colors.white60),
-        ),
-        trailing: SongRowTrailingActions(
-          song: widget.song,
-          listContext: widget.listContext,
-          index: widget.index,
+      child: Material(
+        color: Colors.transparent,
+        child: ListTile(
+          key: UniqueKey(),
+          contentPadding: widget.padding ??
+              const EdgeInsets.symmetric(
+                horizontal: AppDimensions.horizontalPadding,
+              ),
+          shape: widget.bordered
+              ? Border(bottom: Divider.createBorderSide(context))
+              : null,
+          leading: widget.listContext == SongListContext.album
+              ? SongRowTrackNumber(song: widget.song)
+              : SongRowThumbnail(song: widget.song),
+          minLeadingWidth:
+              widget.listContext == SongListContext.album ? 0 : null,
+          title: Text(widget.song.title, overflow: TextOverflow.ellipsis),
+          subtitle: Text(
+            subtitle,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: Colors.white60),
+          ),
+          trailing: SongRowTrailingActions(
+            song: widget.song,
+            listContext: widget.listContext,
+            index: widget.index,
+          ),
         ),
       ),
     );
@@ -144,7 +150,11 @@ class _SongRowThumbnailState extends State<SongRowThumbnail>
 
     return SongThumbnail(
       song: widget.song,
-      playing: state != null && state.playing && _isCurrentSong,
+      playing: state != null &&
+          state.playing &&
+          state.processingState != AudioProcessingState.completed &&
+          state.processingState != AudioProcessingState.error &&
+          _isCurrentSong,
     );
   }
 }
@@ -175,16 +185,15 @@ class SongRowTrailingActions extends StatelessWidget {
           ReorderableDragStartListener(
             index: index,
             child: Container(
-              padding: EdgeInsets.only(left: 12),
-              child: Icon(
-                CupertinoIcons.bars,
-                color: Colors.white54,
-              ),
+              padding: const EdgeInsets.only(left: 12),
+              child: const Icon(CupertinoIcons.bars, color: Colors.white54),
             ),
           )
         else
           IconButton(
             icon: const Icon(CupertinoIcons.ellipsis, size: 20),
+            padding: const EdgeInsets.fromLTRB(8, 8, 0, 8),
+            constraints: BoxConstraints(),
             onPressed: () => router.showActionSheet(
               context,
               song: song,

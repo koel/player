@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:app/constants/constants.dart';
 import 'package:app/models/models.dart';
+import 'package:app/ui/widgets/frosted_glass_background.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +31,7 @@ class AppBar extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: [
             Colors.transparent,
-            Colors.black,
+            AppColors.screenHeaderBackground,
           ],
         ),
       ),
@@ -43,28 +46,32 @@ class AppBar extends StatelessWidget {
       pinned: true,
       expandedHeight: 290,
       actions: actions,
-      flexibleSpace: FlexibleSpaceBar(
-        title: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.horizontalPadding,
-          ),
-          child: Text(
-            headingText,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        background: Stack(
-          children: <Widget>[
-            if (backgroundImage != null) backgroundImage,
-            _gradientEffect,
-            Center(
-              child: SizedBox(
-                width: 192,
-                height: 192,
-                child: coverImage,
-              ),
+      backgroundColor: AppColors.screenHeaderBackground,
+      shadowColor: Colors.transparent,
+      flexibleSpace: FrostedGlassBackground(
+        child: FlexibleSpaceBar(
+          title: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.horizontalPadding,
             ),
-          ],
+            child: Text(
+              headingText,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          background: Stack(
+            children: <Widget>[
+              if (backgroundImage != null) backgroundImage,
+              _gradientEffect,
+              Center(
+                child: SizedBox(
+                  width: 192,
+                  height: 192,
+                  child: coverImage,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -148,7 +155,7 @@ class CoverImage extends StatelessWidget {
           decoration: BoxDecoration(
             image: DecorationImage(
               colorFilter: ColorFilter.mode(
-                Colors.black.withOpacity(overlayOpacity),
+                AppColors.screenHeaderBackground.withOpacity(overlayOpacity),
                 BlendMode.srcOver,
               ),
               image: imageUrl == null
@@ -160,7 +167,7 @@ class CoverImage extends StatelessWidget {
             ),
             boxShadow: const <BoxShadow>[
               const BoxShadow(
-                color: Colors.black38,
+                color: AppColors.screenHeaderBackground,
                 blurRadius: 10.0,
                 offset: const Offset(0, 6),
               ),

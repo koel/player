@@ -6,6 +6,7 @@ import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/data_loading.dart';
 import 'package:app/ui/screens/root.dart';
+import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
@@ -161,50 +162,55 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
 
     return SafeArea(
       child: Scaffold(
-        body: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppDimensions.horizontalPadding),
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: _offline
-                    ? [
-                        ...<Widget>[
-                          Icon(
-                            CupertinoIcons.wifi_slash,
-                            size: 128,
-                            color: AppColors.white.withOpacity(.4),
-                          ),
-                          const SizedBox(height: 12),
-                          const Text('You are offline.'),
-                          const SizedBox(height: 12),
-                          const Text(
-                            'Please connect to the internet and try again.',
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton(
-                            onPressed: () {
-                              AppState.set('mode', AppMode.offline);
-                              Navigator.of(context).pushReplacementNamed(
-                                RootScreen.routeName,
-                              );
-                            },
-                            child: const Text('View downloaded songs'),
-                          ),
+        body: GradientDecoratedContainer(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(AppDimensions.horizontalPadding),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: _offline
+                      ? [
+                          ...<Widget>[
+                            Icon(
+                              CupertinoIcons.wifi_slash,
+                              size: 128,
+                              color: AppColors.white.withOpacity(.4),
+                            ),
+                            const SizedBox(height: 12),
+                            const Text('You are offline.'),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'Please connect to the internet and try again.',
+                            ),
+                            const SizedBox(height: 24),
+                            ElevatedButton(
+                              onPressed: () {
+                                AppState.set('mode', AppMode.offline);
+                                Navigator.of(context).pushReplacementNamed(
+                                  RootScreen.routeName,
+                                );
+                              },
+                              child: const Text('View downloaded songs'),
+                            ),
+                          ]
                         ]
-                      ]
-                    : <Widget>[
-                        ...[
-                          Image.asset('assets/images/logo.png', width: 160),
-                          hostField,
-                          emailField,
-                          passwordField,
-                          SizedBox(width: double.infinity, child: submitButton),
-                        ].expand(
-                          (widget) => [widget, const SizedBox(height: 12)],
-                        ),
-                      ],
+                      : <Widget>[
+                          ...[
+                            Image.asset('assets/images/logo.png', width: 160),
+                            hostField,
+                            emailField,
+                            passwordField,
+                            SizedBox(
+                              width: double.infinity,
+                              child: submitButton,
+                            ),
+                          ].expand(
+                            (widget) => [widget, const SizedBox(height: 12)],
+                          ),
+                        ],
+                ),
               ),
             ),
           ),

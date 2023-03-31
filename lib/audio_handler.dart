@@ -98,7 +98,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   _setPlayerSource(MediaItem mediaItem) async {
     _currentMediaItem = mediaItem;
     final song = songProvider.byId(mediaItem.id)!;
-    final download = downloadProvider.get(song: song);
+    final download = downloadProvider.getForSong(song);
 
     if (download == null) {
       await _player.setUrl(mediaItem.extras?['sourceUrl'] as String);

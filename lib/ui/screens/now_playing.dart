@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:app/constants/constants.dart';
 import 'package:app/main.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
@@ -7,6 +8,7 @@ import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/screens/info_sheet/info_sheet.dart';
 import 'package:app/ui/screens/queue.dart';
+import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:app/ui/widgets/now_playing/audio_controls.dart';
 import 'package:app/ui/widgets/now_playing/repeat_mode_button.dart';
 import 'package:app/ui/widgets/now_playing/progress_bar.dart';
@@ -67,7 +69,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
 
     final bottomIconColor = Colors.white54;
 
-    final frostGlassBackground = SizedBox(
+    final frostBackground = SizedBox(
       width: double.infinity,
       height: double.infinity,
       child: ClipRect(
@@ -117,9 +119,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
 
     return Stack(
       children: <Widget>[
-        Container(color: Colors.black),
-        frostGlassBackground,
-        Container(color: Colors.black54),
+        const GradientDecoratedContainer(),
+        frostBackground,
+        Container(color: Colors.black38),
         Container(
           padding: const EdgeInsets.all(24),
           child: ConstrainedBox(
