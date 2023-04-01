@@ -28,7 +28,7 @@ class AlbumArtistThumbnail extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget image = imageUrl == null
         ? Image.asset(
-            'assets/images/unknown-album.png',
+            'assets/images/default-image.webp',
             fit: BoxFit.cover,
             width: width,
             height: height,

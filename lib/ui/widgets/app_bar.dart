@@ -159,8 +159,7 @@ class CoverImage extends StatelessWidget {
                 BlendMode.srcOver,
               ),
               image: imageUrl == null
-                  ? AssetImage('assets/images/unknown-album.png')
-                      as ImageProvider
+                  ? defaultImage.image
                   : CachedNetworkImageProvider(imageUrl),
               fit: BoxFit.cover,
               alignment: Alignment.center,

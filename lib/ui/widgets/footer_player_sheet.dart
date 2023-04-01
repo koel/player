@@ -139,9 +139,7 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet>
                       Text(
                         song.artistName,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Theme.of(context).textTheme.bodySmall?.color,
-                        ),
+                        style: TextStyle(color: Colors.white60),
                       )
                     ],
                   ),
