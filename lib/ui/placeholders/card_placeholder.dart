@@ -26,7 +26,7 @@ class CardPlaceholder extends StatelessWidget {
         Container(
           width: 64,
           height: 12,
-          color: Colors.white.withOpacity(.5),
+          color: Colors.white54,
         ),
       ],
     );

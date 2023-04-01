@@ -39,10 +39,13 @@ class _DataLoadingScreen extends State<DataLoadingScreen> {
     return Scaffold(
       body: GradientDecoratedContainer(
         child: _hasError
-            ? OopsBox(onRetryButtonPressed: () {
-                setState(() => _hasError = false);
-                _loadData();
-              })
+            ? OopsBox(
+                showLogOutButton: true,
+                onRetry: () {
+                  setState(() => _hasError = false);
+                  _loadData();
+                },
+              )
             : const ContainerWithSpinner(),
       ),
     );

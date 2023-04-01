@@ -119,16 +119,10 @@ class _AddPlaylistScreenState extends State<CreatePlaylistSheet> {
               const SizedBox(height: 24.0),
               _working
                   ? spinner
-                  : ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        minWidth: double.infinity,
-                      ),
-                      child: ElevatedButton(
-                        key: CreatePlaylistSheet.submitButtonKey,
-                        style: ElevatedButton.styleFrom(onSurface: Colors.grey),
-                        onPressed: _enabled ? () async => await submit() : null,
-                        child: const Text('Create Playlist'),
-                      ),
+                  : ElevatedButton(
+                      key: CreatePlaylistSheet.submitButtonKey,
+                      onPressed: _enabled ? () async => await submit() : null,
+                      child: const Text('Save'),
                     ),
             ],
           ),

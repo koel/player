@@ -10,6 +10,7 @@ class HomeScreenPlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     return GradientPlaceholder(
       child: CustomScrollView(
+        physics: NeverScrollableScrollPhysics(),
         slivers: <Widget>[
           const CupertinoSliverNavigationBar(
             largeTitle: Text(''),

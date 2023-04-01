@@ -6,6 +6,7 @@ import 'package:app/ui/placeholders/artist_screen_placeholder.dart';
 import 'package:app/ui/widgets/album_artist_thumbnail.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/gradient_decorated_container.dart';
+import 'package:app/ui/widgets/oops_box.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/spinner.dart';
 import 'package:app/ui/widgets/typography.dart';
@@ -32,6 +33,7 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
   var _currentScrollOffset = AppState.get('artists.scrollOffSet', 0.0)!;
   final _scrollThreshold = 64.0;
   var _loading = false;
+  var _errored = false;
 
   void _scrollListener() {
     _currentScrollOffset = _scrollController.offset;
@@ -45,9 +47,18 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
   Future<void> fetchData() async {
     if (_loading) return;
 
-    setState(() => _loading = true);
-    await _artistProvider.paginate();
-    setState(() => _loading = false);
+    setState(() {
+      _errored = false;
+      _loading = true;
+    });
+
+    try {
+      await _artistProvider.paginate();
+    } catch (_) {
+      setState(() => _errored = true);
+    } finally {
+      setState(() => _loading = false);
+    }
   }
 
   @override
@@ -81,8 +92,10 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
       body: GradientDecoratedContainer(
         child: Consumer<ArtistProvider>(
           builder: (_, provider, __) {
-            if (provider.artists.isEmpty && _loading)
-              return const ArtistScreenPlaceholder();
+            if (provider.artists.isEmpty) {
+              if (_loading) return const ArtistScreenPlaceholder();
+              if (_errored) return OopsBox(onRetry: fetchData);
+            }
 
             return CupertinoTheme(
               data: CupertinoThemeData(primaryColor: Colors.white),

@@ -9,6 +9,7 @@ import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/gradient_decorated_container.dart';
+import 'package:app/ui/widgets/oops_box.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/sliver_song_list.dart';
 import 'package:app/ui/widgets/song_list_header.dart';
@@ -54,9 +55,11 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
         child: FutureBuilder(
           future: buildRequest(artistId),
           builder: (_, AsyncSnapshot<List<dynamic>> snapshot) {
-            if (!snapshot.hasData || snapshot.hasError) {
+            if (snapshot.connectionState != ConnectionState.done)
               return const SongListScreenPlaceholder();
-            }
+
+            if (snapshot.hasError)
+              return OopsBox(onRetry: () => setState(() {}));
 
             final songs = snapshot.requireData[1] as List<Song>;
 

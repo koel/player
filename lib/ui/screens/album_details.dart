@@ -3,17 +3,16 @@ import 'dart:ui';
 import 'package:app/app_state.dart';
 import 'package:app/enums.dart';
 import 'package:app/extensions/extensions.dart';
-import 'package:app/main.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/gradient_decorated_container.dart';
+import 'package:app/ui/widgets/oops_box.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/sliver_song_list.dart';
 import 'package:app/ui/widgets/song_list_header.dart';
-import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/song_list_sort_button.dart';
 import 'package:app/values/values.dart';
 import 'package:flutter/material.dart' hide AppBar;
@@ -55,8 +54,11 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
         child: FutureBuilder(
           future: buildRequest(albumId),
           builder: (_, AsyncSnapshot<List<Object>> snapshot) {
-            if (!snapshot.hasData || snapshot.hasError)
+            if (snapshot.connectionState != ConnectionState.done)
               return const SongListScreenPlaceholder();
+
+            if (snapshot.hasError)
+              return OopsBox(onRetry: () => setState(() {}));
 
             final songs = snapshot.data == null
                 ? <Song>[]

@@ -1,3 +1,4 @@
+import 'package:app/constants/constants.dart';
 import 'package:app/ui/placeholders/circle_placeholder.dart';
 import 'package:flutter/material.dart';
 
@@ -7,7 +8,10 @@ class SongRowPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.horizontalPadding,
+        vertical: 4,
+      ),
       leading: Container(
         width: 48,
         height: 48,

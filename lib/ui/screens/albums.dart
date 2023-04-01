@@ -6,6 +6,7 @@ import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/album_artist_thumbnail.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/gradient_decorated_container.dart';
+import 'package:app/ui/widgets/oops_box.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/spinner.dart';
 import 'package:app/ui/widgets/typography.dart';
@@ -31,6 +32,7 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
   late final ScrollController _scrollController;
   var _currentScrollOffset = AppState.get('albums.scrollOffSet', 0.0)!;
   final _scrollThreshold = 64.0;
+  var _errored = false;
   var _loading = false;
 
   void _scrollListener() {
@@ -38,7 +40,24 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
 
     if (_scrollController.position.pixels + _scrollThreshold >=
         _scrollController.position.maxScrollExtent) {
-      fetchMoreAlbums();
+      fetchData();
+    }
+  }
+
+  Future<void> fetchData() async {
+    if (_loading) return;
+
+    setState(() {
+      _errored = false;
+      _loading = true;
+    });
+
+    try {
+      await _albumProvider.paginate();
+    } catch (_) {
+      setState(() => _errored = true);
+    } finally {
+      setState(() => _loading = false);
     }
   }
 
@@ -54,15 +73,7 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
 
     _scrollController.addListener(_scrollListener);
 
-    fetchMoreAlbums();
-  }
-
-  Future<void> fetchMoreAlbums() async {
-    if (_loading) return;
-
-    setState(() => _loading = true);
-    await _albumProvider.paginate();
-    setState(() => _loading = false);
+    fetchData();
   }
 
   @override
@@ -81,8 +92,10 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
       body: GradientDecoratedContainer(
         child: Consumer<AlbumProvider>(
           builder: (_, provider, __) {
-            if (provider.albums.isEmpty && _loading)
-              return const AlbumScreenPlaceholder();
+            if (provider.albums.isEmpty) {
+              if (_loading) return const AlbumScreenPlaceholder();
+              if (_errored) return OopsBox(onRetry: fetchData);
+            }
 
             return CupertinoTheme(
               data: const CupertinoThemeData(primaryColor: Colors.white),

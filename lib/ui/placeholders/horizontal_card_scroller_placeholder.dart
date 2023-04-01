@@ -22,6 +22,7 @@ class HorizontalCardScrollerPlaceholder extends StatelessWidget {
           ),
         ),
         SingleChildScrollView(
+          physics: NeverScrollableScrollPhysics(),
           scrollDirection: Axis.horizontal,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,

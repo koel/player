@@ -1,5 +1,4 @@
-import 'package:app/constants/constants.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 class GradientPlaceholder extends StatelessWidget {
@@ -10,8 +9,8 @@ class GradientPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: AppColors.white.withOpacity(.1),
-      highlightColor: AppColors.white.withOpacity(.2),
+      baseColor: Colors.white12,
+      highlightColor: Colors.white24,
       child: child,
     );
   }

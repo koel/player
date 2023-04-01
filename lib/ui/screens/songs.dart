@@ -8,9 +8,9 @@ import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/gradient_decorated_container.dart';
+import 'package:app/ui/widgets/oops_box.dart';
 import 'package:app/ui/widgets/sliver_song_list.dart';
 import 'package:app/ui/widgets/song_list_header.dart' as BaseSongListHeader;
-import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/song_list_sort_button.dart';
 import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/material.dart' hide AppBar;
@@ -38,6 +38,7 @@ class _SongsScreenState extends State<SongsScreen> {
   var _searchQuery = '';
   var _cover = CoverImageStack(songs: []);
   var _loading = false;
+  var _errored = false;
   var _inSearchMode = false;
 
   void _scrollListener() {
@@ -69,18 +70,25 @@ class _SongsScreenState extends State<SongsScreen> {
   Future<void> makeRequest() async {
     if (_loading || (_paginationConfig.page == null && !_inSearchMode)) return;
 
-    setState(() => _loading = true);
+    setState(() {
+      _errored = false;
+      _loading = true;
+    });
 
-    final result = await _provider.fetch(
-      paginationConfig: _paginationConfig,
-      searchQuery: _searchQuery,
-    );
+    try {
+      final result = await _provider.fetch(
+        paginationConfig: _paginationConfig,
+        searchQuery: _searchQuery,
+      );
 
-    if (result != null) {
-      _paginationConfig.page = result.nextPage;
+      if (result != null) {
+        _paginationConfig.page = result.nextPage;
+      }
+    } catch (_) {
+      setState(() => _errored = true);
+    } finally {
+      setState(() => _loading = false);
     }
-
-    setState(() => _loading = false);
   }
 
   @override
@@ -100,8 +108,10 @@ class _SongsScreenState extends State<SongsScreen> {
       body: GradientDecoratedContainer(
         child: Consumer<SongListScreenProvider>(
           builder: (_, provider, __) {
-            if (provider.songs.isEmpty && _loading)
-              return const SongListScreenPlaceholder();
+            if (provider.songs.isEmpty) {
+              if (_loading) return const SongListScreenPlaceholder();
+              if (_errored) return OopsBox(onRetry: makeRequest);
+            }
 
             if (_cover.isEmpty) {
               _cover = CoverImageStack(songs: provider.songs);

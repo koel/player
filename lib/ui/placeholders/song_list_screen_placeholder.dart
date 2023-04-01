@@ -1,3 +1,4 @@
+import 'package:app/constants/constants.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:flutter/material.dart';
 
@@ -8,11 +9,12 @@ class SongListScreenPlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     return GradientPlaceholder(
       child: CustomScrollView(
+        physics: const NeverScrollableScrollPhysics(),
         slivers: [
-          SliverAppBar(expandedHeight: 144),
+          const SliverAppBar(expandedHeight: 144),
           SliverToBoxAdapter(
             child: Container(
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(AppDimensions.horizontalPadding),
               child: Row(
                 children: [
                   const CirclePlaceholder(),

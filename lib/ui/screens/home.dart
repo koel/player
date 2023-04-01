@@ -9,6 +9,7 @@ import 'package:app/ui/widgets/album_card.dart';
 import 'package:app/ui/widgets/artist_card.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/horizontal_card_scroller.dart';
+import 'package:app/ui/widgets/oops_box.dart';
 import 'package:app/ui/widgets/profile_avatar.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/simple_song_list.dart';
@@ -29,17 +30,29 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   var _loading = false;
+  var _errored = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchData();
+    fetchData();
   }
 
-  Future<void> _fetchData() async {
-    setState(() => _loading = true);
-    await context.read<OverviewProvider>().refresh();
-    setState(() => _loading = false);
+  Future<void> fetchData() async {
+    if (_loading) return;
+
+    setState(() {
+      _errored = false;
+      _loading = true;
+    });
+
+    try {
+      await context.read<OverviewProvider>().refresh();
+    } catch (_) {
+      setState(() => _errored = true);
+    } finally {
+      setState(() => _loading = false);
+    }
   }
 
   @override
@@ -47,6 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Consumer<OverviewProvider>(
       builder: (_, overviewProvider, __) {
         if (_loading) return const HomeScreenPlaceholder();
+        if (_errored) return OopsBox(onRetry: fetchData);
 
         final blocks = <Widget>[
           if (overviewProvider.recentlyPlayedSongs.isNotEmpty)

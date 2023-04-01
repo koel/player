@@ -7,6 +7,7 @@ import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/gradient_decorated_container.dart';
+import 'package:app/ui/widgets/oops_box.dart';
 import 'package:app/ui/widgets/pull_to_refresh.dart';
 import 'package:app/ui/widgets/sliver_song_list.dart';
 import 'package:app/ui/widgets/song_list_header.dart';
@@ -26,6 +27,7 @@ class FavoritesScreen extends StatefulWidget {
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
+  var _errored = false;
   var _loading = false;
   var _searchQuery = '';
   var cover = CoverImageStack(songs: []);
@@ -37,9 +39,20 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   Future<void> makeRequest({bool forceRefresh = false}) async {
-    setState(() => _loading = true);
-    await context.read<FavoriteProvider>().fetch(forceRefresh: forceRefresh);
-    setState(() => _loading = false);
+    if (_loading) return;
+
+    setState(() {
+      _errored = false;
+      _loading = true;
+    });
+
+    try {
+      await context.read<FavoriteProvider>().fetch(forceRefresh: forceRefresh);
+    } catch (_) {
+      setState(() => _errored = true);
+    } finally {
+      setState(() => _loading = false);
+    }
   }
 
   @override
@@ -103,8 +116,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       body: GradientDecoratedContainer(
         child: Consumer<FavoriteProvider>(
           builder: (_, provider, __) {
-            if (provider.songs.isEmpty && _loading)
-              return const SongListScreenPlaceholder();
+            if (provider.songs.isEmpty) {
+              if (_loading) return const SongListScreenPlaceholder();
+              if (_errored) return OopsBox(onRetry: makeRequest);
+            }
 
             if (cover.isEmpty) {
               cover = CoverImageStack(songs: provider.songs);

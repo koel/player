@@ -138,32 +138,19 @@ class NoPlaylistsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.horizontalPadding,
-      ),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const Icon(
-                CupertinoIcons.exclamationmark_square,
-                size: 56.0,
-                color: AppColors.red,
-              ),
-              const SizedBox(height: 16.0),
-              Text(
-                'No playlists',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 16.0),
-              const Text('Tap to create a playlist.'),
-            ],
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const Icon(
+            CupertinoIcons.exclamationmark_square,
+            size: 56.0,
           ),
-        ),
+          const SizedBox(height: 16.0),
+          const Text('You have no playlists in your library.'),
+          const SizedBox(height: 16.0),
+          ElevatedButton(onPressed: onTap, child: Text('Create Playlist')),
+        ],
       ),
     );
   }

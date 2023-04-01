@@ -5,6 +5,7 @@ import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/app_bar.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/gradient_decorated_container.dart';
+import 'package:app/ui/widgets/oops_box.dart';
 import 'package:app/ui/widgets/sliver_song_list.dart';
 import 'package:app/ui/widgets/song_list_header.dart';
 import 'package:flutter/cupertino.dart';
@@ -21,7 +22,9 @@ class RecentlyPlayedScreen extends StatefulWidget {
 }
 
 class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
+  late final RecentlyPlayedProvider _recentlyPlayedProvider;
   var _loading = false;
+  var _errored = false;
   var _searchQuery = '';
   var _cover = CoverImageStack(songs: []);
 
@@ -29,15 +32,30 @@ class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
   void initState() {
     super.initState();
 
-    var provider = context.read<RecentlyPlayedProvider>();
+    _recentlyPlayedProvider = context.read();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (provider.songs.isEmpty) {
-        setState(() => _loading = true);
-        await provider.fetch();
-        setState(() => _loading = false);
+      if (_recentlyPlayedProvider.songs.isEmpty) {
+        await fetchData();
       }
     });
+  }
+
+  Future<void> fetchData() async {
+    if (_loading) return;
+
+    setState(() {
+      _errored = false;
+      _loading = true;
+    });
+
+    try {
+      await _recentlyPlayedProvider.fetch();
+    } catch (_) {
+      setState(() => _errored = true);
+    } finally {
+      setState(() => _loading = false);
+    }
   }
 
   @override
@@ -46,9 +64,10 @@ class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
       body: GradientDecoratedContainer(
         child: Consumer<RecentlyPlayedProvider>(
           builder: (_, provider, __) {
-            if (_loading) return const SongListScreenPlaceholder();
-
             if (provider.songs.isEmpty) {
+              if (_loading) return const SongListScreenPlaceholder();
+              if (_errored) return OopsBox(onRetry: fetchData);
+
               return Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppDimensions.horizontalPadding,
