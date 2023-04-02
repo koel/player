@@ -1,4 +1,5 @@
 import 'package:app/constants/constants.dart';
+import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/home_screen_placeholder.dart';
 import 'package:app/ui/screens/albums.dart';
@@ -63,15 +64,6 @@ class _HomeScreenState extends State<HomeScreen> {
         if (_errored) return OopsBox(onRetry: fetchData);
 
         final blocks = <Widget>[
-          if (overviewProvider.recentlyPlayedSongs.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppDimensions.horizontalPadding,
-              ),
-              child: SimpleSongList(
-                songs: overviewProvider.recentlyPlayedSongs.getRange(0, 4),
-              ),
-            ),
           if (overviewProvider.mostPlayedSongs.isNotEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(
@@ -90,8 +82,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     .map((song) => SongCard(song: song)),
                 PlaceholderCard(
                   icon: CupertinoIcons.music_note,
-                  onPressed: () => Navigator.of(context)
-                      .push(CupertinoPageRoute(builder: (_) => SongsScreen())),
+                  onPressed: () => Navigator.of(context).push(
+                    CupertinoPageRoute(builder: (_) => SongsScreen()),
+                  ),
                 ),
               ],
             ),
@@ -103,8 +96,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     .map((album) => AlbumCard(album: album)),
                 PlaceholderCard(
                   icon: CupertinoIcons.music_albums,
-                  onPressed: () => Navigator.of(context)
-                      .push(CupertinoPageRoute(builder: (_) => AlbumsScreen())),
+                  onPressed: () => Navigator.of(context).push(
+                    CupertinoPageRoute(builder: (_) => AlbumsScreen()),
+                  ),
                 ),
               ],
             ),
@@ -159,12 +153,51 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
-                  SliverList(delegate: SliverChildListDelegate.fixed(blocks)),
+                  SliverList(
+                    delegate: SliverChildListDelegate.fixed([
+                      HomeRecentlyPlayedSection(
+                        initialSongs: overviewProvider.recentlyPlayedSongs,
+                      ),
+                      ...blocks,
+                    ]),
+                  ),
                   const BottomSpace(height: 192),
                 ],
               ),
             ),
           ),
+        );
+      },
+    );
+  }
+}
+
+class HomeRecentlyPlayedSection extends StatefulWidget {
+  final List<Song> initialSongs;
+
+  const HomeRecentlyPlayedSection({Key? key, required this.initialSongs})
+      : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => _HomeRecentlyPlayedSectionState();
+}
+
+class _HomeRecentlyPlayedSectionState extends State<HomeRecentlyPlayedSection> {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<RecentlyPlayedProvider>(
+      builder: (_, overviewProvider, __) {
+        final songs = overviewProvider.songs.isNotEmpty
+            ? overviewProvider.songs.getRange(0, 4)
+            : widget.initialSongs.getRange(0, 4);
+
+        if (songs.isEmpty) return SizedBox.shrink();
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.horizontalPadding,
+          ),
+          child: SimpleSongList(songs: songs),
         );
       },
     );
