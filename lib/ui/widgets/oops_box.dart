@@ -1,4 +1,3 @@
-import 'package:app/constants/constants.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/login.dart';
 import 'package:flutter/material.dart';

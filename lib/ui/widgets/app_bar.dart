@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:app/constants/constants.dart';
 import 'package:app/models/models.dart';
 import 'package:app/ui/widgets/frosted_glass_background.dart';
