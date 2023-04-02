@@ -29,6 +29,13 @@ class LibraryScreen extends StatelessWidget {
       context: context,
       tiles: <Widget>[
         LibraryMenuItem(
+          icon: CupertinoIcons.music_note,
+          label: 'Songs',
+          onTap: () => Navigator.of(context).push(
+            CupertinoPageRoute(builder: (_) => const SongsScreen()),
+          ),
+        ),
+        LibraryMenuItem(
           icon: CupertinoIcons.heart_fill,
           label: 'Favorites',
           onTap: () => Navigator.of(context).push(
@@ -54,13 +61,6 @@ class LibraryScreen extends StatelessWidget {
           label: 'Albums',
           onTap: () => Navigator.of(context).push(
             CupertinoPageRoute(builder: (_) => const AlbumsScreen()),
-          ),
-        ),
-        LibraryMenuItem(
-          icon: CupertinoIcons.music_note,
-          label: 'Songs',
-          onTap: () => Navigator.of(context).push(
-            CupertinoPageRoute(builder: (_) => const SongsScreen()),
           ),
         ),
         LibraryMenuItem(

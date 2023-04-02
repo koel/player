@@ -1,7 +1,5 @@
-export 'artist_row_placeholder.dart';
-export 'artist_screen_placeholder.dart';
-export 'album_row_placeholder.dart';
-export 'album_screen_placeholder.dart';
+export 'albums_screen_placeholder.dart';
+export 'artists_screen_placeholder.dart';
 export 'card_placeholder.dart';
 export 'circle_placeholder.dart';
 export 'gradient_placeholder.dart';

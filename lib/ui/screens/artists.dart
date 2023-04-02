@@ -2,7 +2,7 @@ import 'package:app/app_state.dart';
 import 'package:app/constants/constants.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
-import 'package:app/ui/placeholders/artist_screen_placeholder.dart';
+import 'package:app/ui/placeholders/artists_screen_placeholder.dart';
 import 'package:app/ui/widgets/album_artist_thumbnail.dart';
 import 'package:app/ui/widgets/bottom_space.dart';
 import 'package:app/ui/widgets/gradient_decorated_container.dart';
@@ -93,7 +93,7 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
         child: Consumer<ArtistProvider>(
           builder: (_, provider, __) {
             if (provider.artists.isEmpty) {
-              if (_loading) return const ArtistScreenPlaceholder();
+              if (_loading) return const ArtistsScreenPlaceholder();
               if (_errored) return OopsBox(onRetry: fetchData);
             }
 

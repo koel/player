@@ -4,9 +4,10 @@ import 'package:app/utils/api_request.dart';
 import 'package:flutter/widgets.dart';
 
 class DataProvider with ChangeNotifier {
-  final PlaylistProvider playlistProvider;
+  final PlaylistProvider _playlistProvider;
 
-  DataProvider({required this.playlistProvider});
+  DataProvider({required playlistProvider})
+      : _playlistProvider = playlistProvider;
 
   Future<void> init() async {
     final Map<String, dynamic> data = await get('data');
@@ -16,6 +17,6 @@ class DataProvider with ChangeNotifier {
     AppState.set(['app', 'cdnUrl'], data['cdn_url']);
     AppState.set(['app', 'transcoding'], data['transcoding']);
 
-    await playlistProvider.init(data['playlists']);
+    await _playlistProvider.init(data['playlists']);
   }
 }

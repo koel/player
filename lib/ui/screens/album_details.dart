@@ -42,7 +42,7 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final int albumId = ModalRoute.of(context)!.settings.arguments as int;
+    final albumId = ModalRoute.of(context)!.settings.arguments as int;
 
     var sortConfig = AppState.get(
       'album.sort',
@@ -90,8 +90,10 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                       width: double.infinity,
                       height: double.infinity,
                       child: ImageFiltered(
-                        imageFilter:
-                            ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+                        imageFilter: ImageFilter.blur(
+                          sigmaX: 20.0,
+                          sigmaY: 20.0,
+                        ),
                         child: DecoratedBox(
                           decoration: BoxDecoration(
                             image: DecorationImage(

@@ -93,8 +93,10 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                       width: double.infinity,
                       height: double.infinity,
                       child: ImageFiltered(
-                        imageFilter:
-                            ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+                        imageFilter: ImageFilter.blur(
+                          sigmaX: 20.0,
+                          sigmaY: 20.0,
+                        ),
                         child: DecoratedBox(
                           decoration: BoxDecoration(
                             image: DecorationImage(

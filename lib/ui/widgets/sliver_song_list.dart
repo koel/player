@@ -1,3 +1,4 @@
+import 'package:app/constants/colors.dart';
 import 'package:app/models/models.dart';
 import 'package:app/ui/widgets/song_list_header.dart';
 import 'package:app/ui/widgets/song_row.dart';
@@ -30,7 +31,7 @@ class SliverSongList extends StatelessWidget {
                   onDismissed: (_) => onDismissed?.call(songs[index]),
                   background: Container(
                     alignment: AlignmentDirectional.centerEnd,
-                    color: Colors.red,
+                    color: AppColors.highlightAccent,
                     child: Padding(
                       padding: const EdgeInsets.only(right: 28),
                       child: dismissIcon,

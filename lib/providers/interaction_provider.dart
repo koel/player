@@ -38,15 +38,12 @@ class InteractionProvider with ChangeNotifier, StreamSubscriber {
 
       if (song != null &&
           !song.playCountRegistered &&
-          duration.inSeconds / song.length.toDouble() > .25) {
+          duration.inSeconds / song.length > .25) {
         song.playCountRegistered = true;
         _registerPlayCount(song: song);
       }
     }));
   }
-
-  List<Song> get favorites =>
-      _songProvider.songs.where((song) => song.liked).toList();
 
   Future<void> _like({required Song song}) async {
     song.liked = true;

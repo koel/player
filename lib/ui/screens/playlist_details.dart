@@ -106,8 +106,8 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                   ),
                   if (songs.isEmpty)
                     SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 32),
+                      child: const Padding(
+                        padding: EdgeInsets.only(top: 32),
                         child: Center(
                           child: Text(
                             'The playlist is empty.',

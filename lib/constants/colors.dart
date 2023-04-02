@@ -10,7 +10,7 @@ class AppColors {
   static const text = Color.fromRGBO(255, 255, 255, .9);
   static const background = AppColors.black;
   static const highlight = const Color(0xFFF80A95);
-  static const highlightAccent = const Color(0xFFB30E6D);
+  static const highlightAccent = const Color(0xFFC20C75);
 
   static const screenHeaderBackground = Color.fromRGBO(25, 0, 64, .5);
 }

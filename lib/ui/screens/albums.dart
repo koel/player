@@ -93,7 +93,7 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
         child: Consumer<AlbumProvider>(
           builder: (_, provider, __) {
             if (provider.albums.isEmpty) {
-              if (_loading) return const AlbumScreenPlaceholder();
+              if (_loading) return const AlbumsScreenPlaceholder();
               if (_errored) return OopsBox(onRetry: fetchData);
             }
 
@@ -135,6 +135,7 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                                 subtitle: Text(
                                   album.artistName,
                                   overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(color: Colors.white60),
                                 ),
                               ),
                             ),

@@ -79,7 +79,7 @@ class DownloadProvider with ChangeNotifier {
   }
 
   FileInfo? getForSong(Song song) {
-    return _downloads.firstWhereOrNull((element) => element.song == song)?.file;
+    return _downloads.firstWhereOrNull((d) => d.song == song)?.file;
   }
 
   bool has({required Song song}) => getForSong(song) != null;

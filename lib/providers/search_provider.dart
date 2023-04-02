@@ -42,7 +42,7 @@ class SearchProvider with ChangeNotifier {
     final albums = _albumProvider.syncWithVault(
         res['albums'].map<Album>((j) => Album.fromJson(j)).toList());
 
-    return AppState.set<SearchResult>(
+    return AppState.set(
       cacheKey,
       SearchResult(
         songs: songs,

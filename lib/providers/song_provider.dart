@@ -47,7 +47,10 @@ class SongProvider with ChangeNotifier {
 
   Future<PaginationResult<Song>> paginate(SongPaginationConfig config) async {
     final res = await get(
-      'songs?page=${config.page}&sort=${config.sortField}&order=${config.sortOrder.value}',
+      'songs'
+      '?page=${config.page}'
+      '&sort=${config.sortField}'
+      '&order=${config.sortOrder.value}',
     );
 
     final items = res['data'].map<Song>((j) => Song.fromJson(j)).toList();
