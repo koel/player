@@ -153,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               rootNavigator: true,
                             ).pushNamed(RecentlyPlayedScreen.routeName);
                           },
-                          icon: const Icon(CupertinoIcons.time, size: 24),
+                          icon: const Icon(CupertinoIcons.time, size: 23),
                         ),
                         const ProfileAvatar(),
                       ],

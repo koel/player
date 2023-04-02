@@ -93,7 +93,7 @@ class Song {
       album: albumName,
       title: title,
       artist: artistName,
-      duration: Duration(milliseconds: length.toInt()),
+      duration: Duration(seconds: length.toInt()),
       artUri: albumCoverUrl == null ? null : Uri.parse(albumCoverUrl),
       genre: genre,
       extras: {'sourceUrl': sourceUrl},

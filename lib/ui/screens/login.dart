@@ -23,9 +23,9 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
   var _authenticating = false;
   final formKey = GlobalKey<FormState>();
 
-  var _email = '';
-  var _password = '';
-  var _hostUrl = '';
+  var _email;
+  var _password;
+  var _hostUrl;
 
   @override
   void initState() {
@@ -103,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
       autocorrect: false,
       onSaved: (value) => preferences.hostUrl = value,
       decoration: decoration(
-        label: 'Host URL',
+        label: 'Host',
         hint: 'https://www.koel.music',
       ),
       controller: TextEditingController(text: _hostUrl),
@@ -151,29 +151,27 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
             },
     );
 
-    return SafeArea(
-      child: Scaffold(
-        body: GradientDecoratedContainer(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppDimensions.horizontalPadding),
-              child: Form(
-                key: formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    ...[
-                      Image.asset('assets/images/logo.png', width: 160),
-                      hostField,
-                      emailField,
-                      passwordField,
-                      SizedBox(
-                        width: double.infinity,
-                        child: submitButton,
-                      ),
-                    ].expand((widget) => [widget, const SizedBox(height: 12)]),
-                  ],
-                ),
+    return Scaffold(
+      body: GradientDecoratedContainer(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppDimensions.horizontalPadding),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  ...[
+                    Image.asset('assets/images/logo.png', width: 160),
+                    hostField,
+                    emailField,
+                    passwordField,
+                    SizedBox(
+                      width: double.infinity,
+                      child: submitButton,
+                    ),
+                  ].expand((widget) => [widget, const SizedBox(height: 12)]),
+                ],
               ),
             ),
           ),

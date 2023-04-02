@@ -54,7 +54,8 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
         child: FutureBuilder(
           future: buildRequest(albumId),
           builder: (_, AsyncSnapshot<List<Object>> snapshot) {
-            if (snapshot.connectionState != ConnectionState.done)
+            if (!snapshot.hasData ||
+                snapshot.connectionState == ConnectionState.active)
               return const SongListScreenPlaceholder();
 
             if (snapshot.hasError)

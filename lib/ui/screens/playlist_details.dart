@@ -58,7 +58,8 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
         child: FutureBuilder(
           future: buildRequest(playlist.id),
           builder: (BuildContext context, AsyncSnapshot<List<Song>> snapshot) {
-            if (snapshot.connectionState != ConnectionState.done)
+            if (!snapshot.hasData ||
+                snapshot.connectionState == ConnectionState.active)
               return const SongListScreenPlaceholder();
 
             if (snapshot.hasError)

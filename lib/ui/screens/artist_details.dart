@@ -55,7 +55,8 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
         child: FutureBuilder(
           future: buildRequest(artistId),
           builder: (_, AsyncSnapshot<List<dynamic>> snapshot) {
-            if (snapshot.connectionState != ConnectionState.done)
+            if (!snapshot.hasData ||
+                snapshot.connectionState == ConnectionState.active)
               return const SongListScreenPlaceholder();
 
             if (snapshot.hasError)

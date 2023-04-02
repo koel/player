@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:app/app_state.dart';
 import 'package:app/constants/constants.dart';
 import 'package:app/enums.dart';
@@ -14,8 +12,10 @@ import 'package:flutter_html/flutter_html.dart';
 
 class InfoSheet extends StatefulWidget {
   final Song song;
+  final ScrollController scroller;
 
-  const InfoSheet({Key? key, required this.song}) : super(key: key);
+  const InfoSheet({Key? key, required this.song, required this.scroller})
+      : super(key: key);
 
   @override
   _InfoSheetState createState() => _InfoSheetState();
@@ -74,17 +74,8 @@ class _InfoSheetState extends State<InfoSheet> {
             const SizedBox(height: 12),
             Expanded(
               child: SingleChildScrollView(
+                controller: widget.scroller,
                 child: getActivePane(),
-              ),
-            ),
-            Center(
-              child: IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(
-                  CupertinoIcons.multiply_circle,
-                  size: 32,
-                  color: Colors.white54,
-                ),
               ),
             ),
           ],
@@ -122,12 +113,15 @@ Future<void> showInfoSheet(BuildContext context, {required Song song}) {
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (BuildContext context) {
-      return SafeArea(
-        child: Container(
-          height: MediaQuery.of(context).size.height,
-          child: InfoSheet(song: song),
-        ),
+    builder: (_) {
+      return DraggableScrollableSheet(
+        initialChildSize: 1,
+        minChildSize: .5,
+        snap: true,
+        snapAnimationDuration: const Duration(milliseconds: 100),
+        builder: (BuildContext context, ScrollController scrollController) {
+          return InfoSheet(song: song, scroller: scrollController);
+        },
       );
     },
   );

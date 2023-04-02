@@ -19,16 +19,6 @@ class GradientDecoratedContainer extends StatelessWidget {
           fit: BoxFit.cover,
           alignment: Alignment.bottomLeft,
         ),
-        // gradient: LinearGradient(
-        //   begin: Alignment.topRight,
-        //   end: Alignment.bottomLeft,
-        //   colors: [
-        //     Color.fromRGBO(10, 53, 159, 1),
-        //     Color.fromRGBO(57, 87, 98, 1),
-        //     Color.fromRGBO(188, 30, 13, 1),
-        //   ],
-        //   stops: [0.0, 0.4, 1.0],
-        // ),
       ),
     );
   }

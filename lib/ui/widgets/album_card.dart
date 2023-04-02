@@ -42,7 +42,7 @@ class _AlbumCardState extends State<AlbumCard> {
               size: ThumbnailSize.md,
               asHero: true,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             SizedBox(
               width: _cardWidth,
               child: Column(
@@ -53,7 +53,7 @@ class _AlbumCardState extends State<AlbumCard> {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
                     widget.album.artistName,
                     style: const TextStyle(color: Colors.white54),
