@@ -1,8 +1,6 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/providers/providers.dart';
-import 'package:app/ui/widgets/gradient_decorated_container.dart';
-import 'package:app/ui/widgets/message_overlay.dart';
-import 'package:app/ui/widgets/spinner.dart';
+import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

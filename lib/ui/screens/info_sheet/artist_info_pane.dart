@@ -5,7 +5,7 @@ import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/screens/info_sheet/info_sheet.dart';
-import 'package:app/ui/widgets/album_artist_thumbnail.dart';
+import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

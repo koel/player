@@ -1,6 +1,7 @@
+import 'package:app/enums.dart';
 import 'package:app/models/models.dart';
 import 'package:app/router.dart';
-import 'package:app/ui/widgets/album_artist_thumbnail.dart';
+import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 

@@ -1,6 +1,6 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/models/models.dart';
-import 'package:app/ui/widgets/frosted_glass_background.dart';
+import 'package:app/ui/widgets/widgets.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';

@@ -1,9 +1,7 @@
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/providers/providers.dart';
-import 'package:app/ui/screens/data_loading.dart';
-import 'package:app/ui/screens/login.dart';
-import 'package:app/ui/screens/no_connection.dart';
-import 'package:app/ui/widgets/spinner.dart';
+import 'package:app/ui/screens/screens.dart';
+import 'package:app/ui/widgets/widgets.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

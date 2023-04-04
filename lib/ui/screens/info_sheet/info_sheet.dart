@@ -1,11 +1,9 @@
-import 'package:app/app_state.dart';
 import 'package:app/constants/constants.dart';
-import 'package:app/enums.dart';
 import 'package:app/models/models.dart';
 import 'package:app/ui/screens/info_sheet/album_info_pane.dart';
 import 'package:app/ui/screens/info_sheet/artist_info_pane.dart';
 import 'package:app/ui/screens/info_sheet/lyrics_pane.dart';
-import 'package:app/ui/widgets/frosted_glass_background.dart';
+import 'package:app/ui/widgets/widgets.dart' hide AppBar;
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';

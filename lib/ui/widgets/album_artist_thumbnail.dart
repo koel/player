@@ -1,10 +1,9 @@
 import 'package:app/constants/constants.dart';
+import 'package:app/enums.dart';
 import 'package:app/models/models.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
-
-enum ThumbnailSize { sm, md, lg, xl }
 
 class AlbumArtistThumbnail extends StatelessWidget {
   final dynamic entity;

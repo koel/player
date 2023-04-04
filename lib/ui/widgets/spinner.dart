@@ -1,4 +1,4 @@
-import 'package:app/ui/widgets/gradient_decorated_container.dart';
+import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 

@@ -1,8 +1,8 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/router.dart';
-import 'package:app/ui/screens/initial.dart';
+import 'package:app/ui/screens/screens.dart';
 import 'package:app/ui/theme_data.dart';
-import 'package:app/ui/widgets/gradient_decorated_container.dart';
+import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

@@ -1,11 +1,8 @@
-import 'package:app/constants/constants.dart';
 import 'package:app/main.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/router.dart';
-import 'package:app/ui/widgets/song_cache_icon.dart';
-import 'package:app/ui/widgets/song_list_header.dart';
-import 'package:app/ui/widgets/song_thumbnail.dart';
+import 'package:app/ui/widgets/widgets.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

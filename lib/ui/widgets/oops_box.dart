@@ -1,5 +1,5 @@
 import 'package:app/providers/providers.dart';
-import 'package:app/ui/screens/login.dart';
+import 'package:app/ui/screens/screens.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

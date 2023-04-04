@@ -1,13 +1,7 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
-import 'package:app/ui/widgets/album_card.dart';
-import 'package:app/ui/widgets/artist_card.dart';
-import 'package:app/ui/widgets/bottom_space.dart';
-import 'package:app/ui/widgets/gradient_decorated_container.dart';
-import 'package:app/ui/widgets/horizontal_card_scroller.dart';
-import 'package:app/ui/widgets/simple_song_list.dart';
-import 'package:app/ui/widgets/typography.dart';
+import 'package:app/ui/widgets/widgets.dart';
 import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

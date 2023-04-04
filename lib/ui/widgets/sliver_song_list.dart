@@ -1,9 +1,7 @@
-import 'package:app/constants/colors.dart';
+import 'package:app/constants/constants.dart';
 import 'package:app/models/models.dart';
-import 'package:app/ui/widgets/song_list_header.dart';
-import 'package:app/ui/widgets/song_row.dart';
+import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 class SliverSongList extends StatelessWidget {
   final List<Song> songs;

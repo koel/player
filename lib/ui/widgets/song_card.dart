@@ -1,7 +1,8 @@
+import 'package:app/enums.dart';
 import 'package:app/main.dart';
 import 'package:app/models/models.dart';
 import 'package:app/router.dart';
-import 'package:app/ui/widgets/song_thumbnail.dart';
+import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

@@ -1,5 +1,5 @@
 import 'package:app/constants/constants.dart';
-import 'package:app/ui/widgets/typography.dart';
+import 'package:app/ui/widgets/widgets.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 

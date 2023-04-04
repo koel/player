@@ -1,15 +1,7 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/providers/providers.dart';
-import 'package:app/ui/screens/albums.dart';
-import 'package:app/ui/screens/artists.dart';
-import 'package:app/ui/screens/downloaded.dart';
-import 'package:app/ui/screens/favorites.dart';
-import 'package:app/ui/screens/playlists.dart';
-import 'package:app/ui/screens/songs.dart';
-import 'package:app/ui/widgets/bottom_space.dart';
-import 'package:app/ui/widgets/gradient_decorated_container.dart';
-import 'package:app/ui/widgets/sliver_song_list.dart';
-import 'package:app/ui/widgets/typography.dart';
+import 'package:app/ui/screens/screens.dart';
+import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

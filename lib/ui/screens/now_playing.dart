@@ -1,20 +1,13 @@
 import 'dart:ui';
 
+import 'package:app/enums.dart';
 import 'package:app/main.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
-import 'package:app/ui/screens/info_sheet/info_sheet.dart';
-import 'package:app/ui/screens/queue.dart';
-import 'package:app/ui/widgets/gradient_decorated_container.dart';
-import 'package:app/ui/widgets/now_playing/audio_controls.dart';
-import 'package:app/ui/widgets/now_playing/repeat_mode_button.dart';
-import 'package:app/ui/widgets/now_playing/progress_bar.dart';
-import 'package:app/ui/widgets/now_playing/song_info.dart';
-import 'package:app/ui/widgets/now_playing/volume_slider.dart';
-import 'package:app/ui/widgets/song_cache_icon.dart';
-import 'package:app/ui/widgets/song_thumbnail.dart';
+import 'package:app/ui/screens/screens.dart';
+import 'package:app/ui/widgets/widgets.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
