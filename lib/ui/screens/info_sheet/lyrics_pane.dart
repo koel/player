@@ -18,9 +18,12 @@ class LyricsPane extends StatelessWidget {
               style: const TextStyle(color: Colors.white54),
             ),
           )
-        : InfoHtml(
-            content: song.lyrics.replaceAll('\n', '<br>'),
-            style: Style(fontSize: FontSize.larger),
+        : Padding(
+            padding: EdgeInsets.only(top: 4.0),
+            child: InfoHtml(
+              content: song.lyrics.replaceAll('\n', '<br>'),
+              style: Style(fontSize: FontSize.larger),
+            ),
           );
   }
 }

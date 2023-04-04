@@ -1,3 +1,6 @@
+import 'package:app/app_state.dart';
+import 'package:app/constants/constants.dart';
+import 'package:app/enums.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
@@ -13,6 +16,21 @@ class AlbumInfoPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final inOfflineMode =
+        AppState.get('mode', AppMode.online) == AppMode.offline;
+
+    if (inOfflineMode) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: AppDimensions.horizontalPadding,
+        ),
+        child: Text(
+          'No album information available.',
+          style: const TextStyle(color: Colors.white54),
+        ),
+      );
+    }
+
     return FutureBuilder(
       future: Future.wait([
         context.read<AlbumProvider>().resolve(song.albumId),
