@@ -115,8 +115,7 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
                       ) {
                         final artist = provider.artists[index];
 
-                        return Material(
-                          color: Colors.transparent,
+                        return Card(
                           child: InkWell(
                             onTap: () => widget.router.gotoArtistDetailsScreen(
                               context,

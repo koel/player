@@ -11,7 +11,7 @@ import 'package:app/ui/screens/home.dart';
 import 'package:app/ui/screens/initial.dart';
 import 'package:app/ui/screens/library.dart';
 import 'package:app/ui/screens/search.dart';
-import 'package:app/ui/widgets/footer_player_sheet.dart';
+import 'package:app/ui/widgets/mini_player.dart';
 import 'package:app/ui/widgets/frosted_glass_background.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
@@ -65,7 +65,7 @@ class _MainScreenState extends State<MainScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          const FooterPlayerSheet(),
+                          const MiniPlayer(),
                           const ConnectivityInfoBox(),
                         ],
                       ),
@@ -108,7 +108,7 @@ class _MainScreenState extends State<MainScreen> {
                     // 50 is the standard iOS (10) tab bar height.
                     bottom: 50 + MediaQuery.of(context).padding.bottom,
                     width: MediaQuery.of(context).size.width,
-                    child: const FooterPlayerSheet(),
+                    child: const MiniPlayer(),
                   ),
                 ],
               ),

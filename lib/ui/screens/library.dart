@@ -84,9 +84,7 @@ class LibraryScreen extends StatelessWidget {
                 largeTitle: const LargeTitle(text: 'Library'),
               ),
               SliverPadding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.horizontalPadding,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 0.0),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate(menuItems),
                 ),
@@ -146,19 +144,23 @@ class LibraryMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      child: ListTile(
-        contentPadding: EdgeInsets.zero,
-        horizontalTitleGap: 0,
-        leading: icon is IconData ? Icon(icon, color: Colors.white54) : icon,
-        title: Text(label, style: const TextStyle(fontSize: 20)),
-        trailing: const Icon(
-          CupertinoIcons.chevron_right,
-          size: 18,
-          color: Colors.white30,
+    return Card(
+      child: InkWell(
+        child: ListTile(
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: AppDimensions.horizontalPadding,
+          ),
+          horizontalTitleGap: 0,
+          leading: icon is IconData ? Icon(icon, color: Colors.white54) : icon,
+          title: Text(label, style: const TextStyle(fontSize: 20)),
+          trailing: const Icon(
+            CupertinoIcons.chevron_right,
+            size: 18,
+            color: Colors.white30,
+          ),
         ),
+        onTap: onTap,
       ),
-      onTap: onTap,
     );
   }
 }

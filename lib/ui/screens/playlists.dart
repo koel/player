@@ -49,8 +49,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
                       (BuildContext context, int index) {
                         Playlist playlist = playlists[index];
 
-                        return Material(
-                          color: Colors.transparent,
+                        return Card(
                           child: Dismissible(
                             direction: DismissDirection.endToStart,
                             confirmDismiss: (_) async => await confirmDelete(

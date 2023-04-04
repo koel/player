@@ -180,5 +180,13 @@ ThemeData themeData(BuildContext context) {
         padding: AppDimensions.inputPadding,
       ),
     ),
+
+    cardTheme: CardTheme(
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      elevation: 0,
+      color: Colors.transparent,
+      margin: const EdgeInsets.all(0),
+    ),
   );
 }

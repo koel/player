@@ -113,8 +113,7 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                         (BuildContext context, int index) {
                           final album = provider.albums[index];
 
-                          return Material(
-                            color: Colors.transparent,
+                          return Card(
                             child: InkWell(
                               onTap: () => widget.router.gotoAlbumDetailsScreen(
                                 context,

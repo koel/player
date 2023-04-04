@@ -59,22 +59,30 @@ class PlaceholderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 144,
-      width: 144,
-      decoration: ShapeDecoration(
-        color: AppColors.highlight,
-        shape: SmoothRectangleBorder(
-          borderRadius: SmoothBorderRadius(
-            cornerRadius: 18,
-            cornerSmoothing: .5,
-          ),
+    return Card(
+      shape: SmoothRectangleBorder(
+        borderRadius: SmoothBorderRadius(
+          cornerRadius: 18,
+          cornerSmoothing: .5,
         ),
       ),
-      child: IconButton(
-        onPressed: onPressed,
-        iconSize: 32,
-        icon: Icon(icon),
+      clipBehavior: Clip.antiAlias,
+      child: SizedBox(
+        height: 144,
+        width: 144,
+        child: ElevatedButton(
+          onPressed: onPressed,
+          child: Icon(icon, size: 32),
+          style: ElevatedButton.styleFrom(
+            shape: SmoothRectangleBorder(
+              borderRadius: SmoothBorderRadius(
+                cornerRadius: 24,
+                cornerSmoothing: .8,
+              ),
+            ),
+            backgroundColor: AppColors.highlight,
+          ),
+        ),
       ),
     );
   }

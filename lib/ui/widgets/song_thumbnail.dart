@@ -39,7 +39,7 @@ class SongThumbnail extends StatelessWidget {
     return ClipSmoothRect(
       radius: SmoothBorderRadius(
         cornerRadius: borderRadius,
-        cornerSmoothing: .5,
+        cornerSmoothing: .8,
       ),
       child: this.playing
           ? PlayingSongThumbnail(

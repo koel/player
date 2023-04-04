@@ -133,15 +133,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppDimensions.horizontalPadding,
-                          ),
-                          child: SimpleSongList(
-                            songs: _songs,
-                            bordered: true,
-                          ),
-                        ),
+                        SimpleSongList(songs: _songs, bordered: true),
                         const SizedBox(height: 32),
                         Padding(
                           padding: const EdgeInsets.only(

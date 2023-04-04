@@ -15,7 +15,6 @@ import 'package:flutter_html/style.dart';
 class SongRow extends StatefulWidget {
   final Song song;
   final bool bordered;
-  final EdgeInsetsGeometry? padding;
   final SongListContext listContext;
 
   /// The index of the row in a list, important for (Sliver) orderable lists.
@@ -27,7 +26,6 @@ class SongRow extends StatefulWidget {
     Key? key,
     required this.song,
     this.bordered = true,
-    this.padding,
     this.listContext = SongListContext.other,
     this.index = 0,
     this.router = const AppRouter(),
@@ -52,20 +50,15 @@ class _SongRowState extends State<SongRow> {
         break;
     }
 
-    return InkWell(
-      onTap: () => audioHandler.queueAndPlay(widget.song),
-      onLongPress: () {
-        HapticFeedback.mediumImpact();
-        widget.router.showActionSheet(context, song: widget.song);
-      },
-      child: Material(
-        color: Colors.transparent,
+    return Card(
+      child: InkWell(
+        onTap: () => audioHandler.queueAndPlay(widget.song),
+        onLongPress: () {
+          HapticFeedback.mediumImpact();
+          widget.router.showActionSheet(context, song: widget.song);
+        },
         child: ListTile(
           key: UniqueKey(),
-          contentPadding: widget.padding ??
-              const EdgeInsets.symmetric(
-                horizontal: AppDimensions.horizontalPadding,
-              ),
           shape: widget.bordered
               ? Border(bottom: Divider.createBorderSide(context))
               : null,

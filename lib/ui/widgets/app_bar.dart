@@ -146,8 +146,8 @@ class CoverImage extends StatelessWidget {
       height: 160,
       child: ClipSmoothRect(
         radius: SmoothBorderRadius(
-          cornerRadius: 20,
-          cornerSmoothing: .5,
+          cornerRadius: 16,
+          cornerSmoothing: .8,
         ),
         child: DecoratedBox(
           decoration: BoxDecoration(

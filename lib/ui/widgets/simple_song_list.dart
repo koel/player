@@ -1,3 +1,4 @@
+import 'package:app/constants/constants.dart';
 import 'package:app/models/models.dart';
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/typography.dart';
@@ -30,15 +31,18 @@ class SimpleSongList extends StatelessWidget {
       children: <Widget>[
         if (headingText != null)
           GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: onHeaderTap,
-            child: Heading5(text: headingText),
-          ),
+              behavior: HitTestBehavior.opaque,
+              onTap: onHeaderTap,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.horizontalPadding,
+                ),
+                child: Heading5(text: headingText),
+              )),
         ...songs.map(
           (song) => SongRow(
             song: song,
             bordered: bordered,
-            padding: const EdgeInsets.symmetric(horizontal: 0),
           ),
         )
       ],

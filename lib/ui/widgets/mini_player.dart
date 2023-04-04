@@ -12,23 +12,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 
-class FooterPlayerSheet extends StatefulWidget {
+class MiniPlayer extends StatefulWidget {
   static Key pauseButtonKey = UniqueKey();
   static Key nextButtonKey = UniqueKey();
 
   final AppRouter router;
 
-  const FooterPlayerSheet({
+  const MiniPlayer({
     Key? key,
     this.router = const AppRouter(),
   }) : super(key: key);
 
   @override
-  _FooterPlayerSheetState createState() => _FooterPlayerSheetState();
+  _MiniPlayerState createState() => _MiniPlayerState();
 }
 
-class _FooterPlayerSheetState extends State<FooterPlayerSheet>
-    with StreamSubscriber {
+class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
   late SongProvider _songProvider;
   PlaybackState? _state;
   Song? _song;
@@ -146,7 +145,7 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet>
               Row(
                 children: <Widget>[
                   IconButton(
-                    key: FooterPlayerSheet.pauseButtonKey,
+                    key: MiniPlayer.pauseButtonKey,
                     onPressed: audioHandler.playOrPause,
                     icon: Icon(
                       state.playing
@@ -156,7 +155,7 @@ class _FooterPlayerSheetState extends State<FooterPlayerSheet>
                     ),
                   ),
                   IconButton(
-                    key: FooterPlayerSheet.nextButtonKey,
+                    key: MiniPlayer.nextButtonKey,
                     onPressed: audioHandler.skipToNext,
                     icon: const Icon(
                       CupertinoIcons.forward_fill,

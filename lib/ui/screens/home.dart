@@ -65,14 +65,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
         final blocks = <Widget>[
           if (overviewProvider.mostPlayedSongs.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppDimensions.horizontalPadding,
-              ),
-              child: SimpleSongList(
-                headingText: 'Most played',
-                songs: overviewProvider.mostPlayedSongs,
-              ),
+            SimpleSongList(
+              headingText: 'Most played',
+              songs: overviewProvider.mostPlayedSongs,
             ),
           if (overviewProvider.mostPlayedSongs.isNotEmpty)
             HorizontalCardScroller(
@@ -191,14 +186,7 @@ class _HomeRecentlyPlayedSectionState extends State<HomeRecentlyPlayedSection> {
             ? overviewProvider.songs.getRange(0, 4)
             : widget.initialSongs.getRange(0, 4);
 
-        if (songs.isEmpty) return SizedBox.shrink();
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.horizontalPadding,
-          ),
-          child: SimpleSongList(songs: songs),
-        );
+        return songs.isEmpty ? SizedBox.shrink() : SimpleSongList(songs: songs);
       },
     );
   }

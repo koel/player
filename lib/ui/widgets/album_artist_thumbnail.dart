@@ -45,7 +45,7 @@ class AlbumArtistThumbnail extends StatelessWidget {
     return ClipSmoothRect(
       radius: SmoothBorderRadius(
         cornerRadius: borderRadius,
-        cornerSmoothing: .5,
+        cornerSmoothing: .8,
       ),
       child: asHero ? Hero(tag: heroTag, child: image) : image,
     );
@@ -67,11 +67,11 @@ class AlbumArtistThumbnail extends StatelessWidget {
   double get borderRadius {
     switch (size) {
       case ThumbnailSize.md:
-        return 16;
-      case ThumbnailSize.lg:
         return 24;
-      case ThumbnailSize.xl:
+      case ThumbnailSize.lg:
         return 32;
+      case ThumbnailSize.xl:
+        return 48;
       default:
         return 20; // rounded for sm size
     }
