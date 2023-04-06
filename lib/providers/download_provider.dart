@@ -1,8 +1,8 @@
+import 'dart:async';
+
 import 'package:app/models/models.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:collection/collection.dart';
 
 class Download {
@@ -12,22 +12,20 @@ class Download {
   Download({required this.song, required this.file});
 }
 
-class DownloadProvider with ChangeNotifier {
+class DownloadProvider {
   final _downloads = <Download>[];
 
   List<Song> get songs => _downloads.map((d) => d.song).toList();
 
-  final _downloadsCleared = BehaviorSubject<bool>();
+  final _downloadsCleared = StreamController<bool>.broadcast();
+  final _downloadRemoved = StreamController<Song>.broadcast();
+  final _songDownloaded = StreamController<Download>.broadcast();
 
-  ValueStream<bool> get downloadsClearedStream => _downloadsCleared.stream;
+  Stream<bool> get downloadsClearedStream => _downloadsCleared.stream;
 
-  final _downloadRemoved = BehaviorSubject<Song>();
+  Stream<Song> get downloadRemovedStream => _downloadRemoved.stream;
 
-  ValueStream<Song> get downloadRemovedStream => _downloadRemoved.stream;
-
-  final _songDownloaded = BehaviorSubject<Download>();
-
-  ValueStream<Download> get songDownloadedStream => _songDownloaded.stream;
+  Stream<Download> get songDownloadedStream => _songDownloaded.stream;
 
   static const serializedSongContainer = 'Downloads';
   static const serializedSongKey = 'songs';
@@ -74,8 +72,6 @@ class DownloadProvider with ChangeNotifier {
 
     _songDownloaded.add(download);
     _downloads.add(download);
-
-    notifyListeners();
   }
 
   FileInfo? getForSong(Song song) {
@@ -90,8 +86,6 @@ class DownloadProvider with ChangeNotifier {
 
     _downloads.removeWhere((element) => element.song.id == song.id);
     _songStorage.write(serializedSongKey, songs..remove(song));
-
-    notifyListeners();
   }
 
   Future<void> clear() async {
@@ -99,7 +93,5 @@ class DownloadProvider with ChangeNotifier {
     _downloadsCleared.add(true);
     _downloads.clear();
     _songStorage.erase();
-
-    notifyListeners();
   }
 }

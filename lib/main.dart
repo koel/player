@@ -13,7 +13,7 @@ List<SingleChildWidget> _providers = [
   Provider(create: (_) => AuthProvider()),
   ChangeNotifierProvider(create: (_) => ArtistProvider()),
   Provider(create: (_) => MediaInfoProvider()),
-  ChangeNotifierProvider(create: (_) => DownloadProvider()),
+  Provider(create: (_) => DownloadProvider()),
   ChangeNotifierProvider(create: (context) => AlbumProvider()),
   ChangeNotifierProvider(
     create: (context) => SongProvider(

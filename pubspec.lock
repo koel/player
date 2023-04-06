@@ -624,14 +624,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.4.0"
-  mutex:
-    dependency: "direct main"
-    description:
-      name: mutex
-      sha256: "03116a4e46282a671b46c12de649d72c0ed18188ffe12a8d0fc63e83f4ad88f4"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.1"
   nested:
     dependency: transitive
     description:
@@ -697,7 +689,7 @@ packages:
     source: hosted
     version: "0.2.1"
   path_provider:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: path_provider
       sha256: c7edf82217d4b2952b2129a61d3ad60f1075b9299e629e149a8d2e39c2e6aad4
@@ -825,7 +817,7 @@ packages:
     source: hosted
     version: "3.2.1"
   rxdart:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: rxdart
       sha256: "0c7c0cedd93788d996e33041ffecda924cc54389199cde4e6a34b440f50044cb"

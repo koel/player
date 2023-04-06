@@ -30,7 +30,6 @@ dependencies:
   cupertino_icons: ^1.0.2
   provider: ^6.0.3
   http: ^0.13.3
-  rxdart: ^0.27.5
   easy_debounce: ^2.0.0
   flutter_html: ^2.1.0
   flutter_spinkit: ^5.0.0
@@ -41,8 +40,6 @@ dependencies:
   cached_network_image: ^3.0.0
   build_runner: ^2.0.6
   uuid: ^3.0.4
-  mutex: ^3.0.0
-  path_provider: ^2.0.13
   shimmer: ^2.0.0
   just_audio: ^0.9.32
   audio_service: ^0.18.9
