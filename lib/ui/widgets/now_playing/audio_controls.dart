@@ -13,7 +13,7 @@ class AudioControls extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
         IconButton(
-          onPressed: audioHandler.skipToPrevious,
+          onPressed: () async => await audioHandler.skipToPrevious(),
           icon: const Icon(CupertinoIcons.backward_fill),
           iconSize: 48,
         ),

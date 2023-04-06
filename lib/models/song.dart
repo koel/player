@@ -61,7 +61,7 @@ class Song {
 
     if (image == null) {
       image = albumCoverUrl == null
-          ? defaultImage.image
+          ? AppImages.defaultImage.image
           : CachedNetworkImageProvider(albumCoverUrl);
     }
 
@@ -85,7 +85,7 @@ class Song {
     return src;
   }
 
-  MediaItem get mediaItem {
+  Future<MediaItem> asMediaItem() async {
     final albumCoverUrl = this.albumCoverUrl;
 
     return MediaItem(
@@ -94,7 +94,9 @@ class Song {
       title: title,
       artist: artistName,
       duration: Duration(seconds: length.toInt()),
-      artUri: albumCoverUrl == null ? null : Uri.parse(albumCoverUrl),
+      artUri: albumCoverUrl == null
+          ? await AppImages.getDefaultArtUri()
+          : Uri.parse(albumCoverUrl),
       genre: genre,
       extras: {'sourceUrl': sourceUrl},
     );

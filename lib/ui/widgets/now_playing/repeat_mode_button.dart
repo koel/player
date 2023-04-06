@@ -25,8 +25,9 @@ class _RepeatModeButtonState extends State<RepeatModeButton> {
       color: _repeatMode == AudioServiceRepeatMode.none
           ? Colors.white24
           : Colors.white,
-      onPressed: () {
-        setState(() => _repeatMode = audioHandler.rotateRepeatMode());
+      onPressed: () async {
+        final repeatMode = await audioHandler.rotateRepeatMode();
+        setState(() => _repeatMode = repeatMode);
       },
       icon: Icon(
         _repeatMode == AudioServiceRepeatMode.one

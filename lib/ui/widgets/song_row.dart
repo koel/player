@@ -49,7 +49,7 @@ class _SongRowState extends State<SongRow> {
 
     return Card(
       child: InkWell(
-        onTap: () => audioHandler.queueAndPlay(widget.song),
+        onTap: () async => await audioHandler.maybeQueueAndPlay(widget.song),
         onLongPress: () {
           HapticFeedback.mediumImpact();
           widget.router.showActionSheet(context, song: widget.song);

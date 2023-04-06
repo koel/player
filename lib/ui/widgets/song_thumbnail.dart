@@ -21,7 +21,7 @@ class SongThumbnail extends StatelessWidget {
   Widget build(BuildContext context) {
     final albumCover = song.albumCoverUrl == null
         ? Image.asset(
-            'assets/images/default-image.webp',
+            AppImages.defaultImageAssetName,
             fit: BoxFit.cover,
             width: width,
             height: height,
@@ -30,8 +30,8 @@ class SongThumbnail extends StatelessWidget {
             fit: BoxFit.cover,
             width: width,
             height: height,
-            placeholder: (_, __) => defaultImage,
-            errorWidget: (_, __, ___) => defaultImage,
+            placeholder: (_, __) => AppImages.defaultImage,
+            errorWidget: (_, __, ___) => AppImages.defaultImage,
             imageUrl: song.albumCoverUrl ?? '',
           );
 

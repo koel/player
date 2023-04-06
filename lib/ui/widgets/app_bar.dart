@@ -157,7 +157,7 @@ class CoverImage extends StatelessWidget {
                 BlendMode.srcOver,
               ),
               image: imageUrl == null
-                  ? defaultImage.image
+                  ? AppImages.defaultImage.image
                   : CachedNetworkImageProvider(imageUrl),
               fit: BoxFit.cover,
               alignment: Alignment.center,

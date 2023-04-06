@@ -53,7 +53,7 @@ class _QueueScreenState extends State<QueueScreen> with StreamSubscriber {
               actions: <Widget>[
                 if (_songs.isNotEmpty)
                   TextButton(
-                    onPressed: audioHandler.clearQueue,
+                    onPressed: () async => await audioHandler.clearQueue(),
                     child: const Text(
                       'Clear',
                       style: const TextStyle(color: Colors.red),
@@ -81,7 +81,9 @@ class _QueueScreenState extends State<QueueScreen> with StreamSubscriber {
                 itemBuilder: (BuildContext context, int index) {
                   return Dismissible(
                     direction: DismissDirection.endToStart,
-                    onDismissed: (_) => audioHandler.removeQueueItemAt(index),
+                    onDismissed: (_) async {
+                      await audioHandler.removeQueueItemAt(index);
+                    },
                     background: Container(
                       alignment: AlignmentDirectional.centerEnd,
                       color: Colors.red,

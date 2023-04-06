@@ -22,16 +22,16 @@ class Album {
   });
 
   ImageProvider get image {
-    var img = _image;
+    var image = _image;
     final cover = this.cover;
 
-    if (img == null) {
-      _image = img = cover == null
-          ? defaultImage.image
+    if (image == null) {
+      _image = image = cover == null
+          ? AppImages.defaultImage.image
           : CachedNetworkImageProvider(cover);
     }
 
-    return img;
+    return image;
   }
 
   bool get isStandardAlbum => !isUnknownAlbum;

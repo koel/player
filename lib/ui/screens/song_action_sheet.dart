@@ -10,17 +10,32 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class SongActionSheet extends StatelessWidget {
+class SongActionSheet extends StatefulWidget {
   final Song song;
 
   const SongActionSheet({Key? key, required this.song}) : super(key: key);
 
   @override
+  _SongActionSheetState createState() => _SongActionSheetState();
+}
+
+class _SongActionSheetState extends State<SongActionSheet> {
+  var _queued = false;
+
+  initState() {
+    super.initState();
+
+    audioHandler.queued(widget.song).then((queued) {
+      setState(() => _queued = queued);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final song = widget.song;
     final favoriteProvider = context.read<FavoriteProvider>();
     final isCurrent = audioHandler.mediaItem.value != null &&
         audioHandler.mediaItem.value!.id == song.id;
-    final queued = audioHandler.queued(song);
     final inOfflineMode =
         AppState.get('mode', AppMode.online) == AppMode.offline;
 
@@ -66,8 +81,8 @@ class SongActionSheet extends StatelessWidget {
                       CupertinoIcons.arrow_right_circle_fill,
                       color: Colors.white30,
                     ),
-                    onTap: () {
-                      audioHandler.queueAfterCurrent(song);
+                    onTap: () async {
+                      await audioHandler.queueAfterCurrent(song);
                       showOverlay(
                         context,
                         icon: CupertinoIcons.arrow_right_circle_fill,
@@ -83,8 +98,8 @@ class SongActionSheet extends StatelessWidget {
                       CupertinoIcons.arrow_down_right_circle_fill,
                       color: Colors.white30,
                     ),
-                    onTap: () {
-                      audioHandler.queueToBottom(song);
+                    onTap: () async {
+                      await audioHandler.queueToBottom(song);
                       showOverlay(
                         context,
                         icon: CupertinoIcons.arrow_down_right_circle_fill,
@@ -93,15 +108,15 @@ class SongActionSheet extends StatelessWidget {
                       );
                     },
                   ),
-                if (queued)
+                if (_queued)
                   SongActionButton(
                     text: 'Remove from Queue',
                     icon: const Icon(
                       CupertinoIcons.text_badge_minus,
                       color: Colors.white30,
                     ),
-                    onTap: () {
-                      audioHandler.removeFromQueue(song);
+                    onTap: () async {
+                      await audioHandler.removeFromQueue(song);
                       showOverlay(
                         context,
                         icon: CupertinoIcons.text_badge_minus,
