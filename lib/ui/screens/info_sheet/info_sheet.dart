@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:app/constants/constants.dart';
 import 'package:app/models/models.dart';
 import 'package:app/ui/screens/info_sheet/album_info_pane.dart';
@@ -107,10 +109,12 @@ Future<void> showInfoSheet(BuildContext context, {required Song song}) {
         snapAnimationDuration: const Duration(milliseconds: 100),
         builder: (BuildContext context, ScrollController scrollController) {
           return ClipSmoothRect(
-            radius: SmoothBorderRadius(
-              cornerRadius: 32,
-              cornerSmoothing: .5,
-            ),
+            radius: Platform.isIOS
+                ? SmoothBorderRadius(
+                    cornerRadius: 32,
+                    cornerSmoothing: .5,
+                  )
+                : SmoothBorderRadius.zero,
             child: InfoSheet(song: song, scroller: scrollController),
           );
         },

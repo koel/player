@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:app/constants/constants.dart';
 import 'package:app/utils/full_width_slider_track_shape.dart';
 import 'package:figma_squircle/figma_squircle.dart';
@@ -13,12 +15,14 @@ ThemeData themeData(BuildContext context) {
     ),
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: AppColors.black.withOpacity(.3),
-      shape: SmoothRectangleBorder(
-        borderRadius: SmoothBorderRadius(
-          cornerRadius: 32,
-          cornerSmoothing: .5,
-        ),
-      ),
+      shape: Platform.isIOS
+          ? SmoothRectangleBorder(
+              borderRadius: SmoothBorderRadius(
+                cornerRadius: 32,
+                cornerSmoothing: .5,
+              ),
+            )
+          : null,
       clipBehavior: Clip.antiAlias,
       elevation: 0,
     ),
