@@ -60,7 +60,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       fillOverscroll: true,
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppDimensions.horizontalPadding,
+          horizontal: AppDimensions.hPadding,
         ),
         child: Center(
           child: Column(

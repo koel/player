@@ -20,20 +20,23 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
-  var _authenticating = false;
   final formKey = GlobalKey<FormState>();
+  var _authenticating = false;
+  var _showPassword = false;
+  late final AuthProvider _auth;
 
-  var _email;
-  var _password;
-  var _hostUrl;
+  late String _email;
+  late String _password;
+  late String _host;
 
   @override
   void initState() {
     super.initState();
+    _auth = context.read();
 
     // Try looking for stored values in local storage
     setState(() {
-      _hostUrl = preferences.hostUrl ?? '';
+      _host = preferences.hostUrl ?? '';
       _email = preferences.userEmail ?? '';
     });
   }
@@ -63,99 +66,66 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+  String standardizeHost(String host) {
+    host = host.trim().replaceAll(RegExp(r'/+$'), '');
 
-    Future<void> attemptLogin() async {
-      final form = formKey.currentState!;
+    if (!host.startsWith("http://") && !host.startsWith("https://")) {
+      host = "https://" + host;
+    }
 
-      if (!form.validate()) return;
+    return host;
+  }
 
-      form.save();
-      setState(() => _authenticating = true);
+  Future<void> attemptLogin() async {
+    final form = formKey.currentState!;
+    var successful = false;
 
-      await auth.login(email: _email, password: _password);
+    if (!form.validate()) return;
+
+    form.save();
+    setState(() => _authenticating = true);
+
+    try {
+      _host = standardizeHost(_host);
+      await _auth.login(host: _host, email: _email, password: _password);
+      await _auth.tryGetAuthUser();
+      successful = true;
+    } on HttpResponseException catch (error) {
+      await showErrorDialog(
+        context,
+        message: error.response.statusCode == 401
+            ? 'Invalid email or password.'
+            : null,
+      );
+    } catch (error) {
+      await showErrorDialog(context);
+    } finally {
       setState(() => _authenticating = false);
+    }
 
-      // Store the email into local storage for easy login next time
+    if (successful) {
+      preferences.hostUrl = _host;
       preferences.userEmail = _email;
-      await auth.tryGetAuthUser();
 
       Navigator.of(
         context,
         rootNavigator: true,
       ).pushReplacementNamed(DataLoadingScreen.routeName);
     }
+  }
 
-    InputDecoration decoration({String? label, String? hint}) {
-      return InputDecoration(
-        labelText: label,
-        hintText: hint,
-      );
-    }
-
+  @override
+  Widget build(BuildContext context) {
     String? requireValue(value) =>
         value == null || value.isEmpty ? 'This field is required' : null;
-
-    Widget hostField = TextFormField(
-      keyboardType: TextInputType.url,
-      autocorrect: false,
-      onSaved: (value) => preferences.hostUrl = value,
-      decoration: decoration(
-        label: 'Host',
-        hint: 'https://www.koel.music',
-      ),
-      controller: TextEditingController(text: _hostUrl),
-      validator: requireValue,
-    );
-
-    final emailField = TextFormField(
-      keyboardType: TextInputType.emailAddress,
-      autocorrect: false,
-      onSaved: (value) => _email = value ?? '',
-      decoration: decoration(label: 'Email', hint: 'you@koel.music'),
-      controller: TextEditingController(text: _email),
-      validator: requireValue,
-    );
-
-    final passwordField = TextFormField(
-      obscureText: true,
-      keyboardType: TextInputType.visiblePassword,
-      onSaved: (value) => _password = value ?? '',
-      decoration: decoration(label: 'Password'),
-      validator: requireValue,
-    );
-
-    final submitButton = ElevatedButton(
-      child: _authenticating
-          ? const SpinKitThreeBounce(color: Colors.white, size: 16)
-          : const Text('Log In'),
-      onPressed: _authenticating
-          ? null
-          : () async {
-              try {
-                await attemptLogin();
-              } on HttpResponseException catch (error) {
-                await showErrorDialog(
-                  context,
-                  message: error.response.statusCode == 401
-                      ? 'Invalid email or password.'
-                      : null,
-                );
-              } catch (error) {
-                await showErrorDialog(context);
-              } finally {
-                setState(() => _authenticating = false);
-              }
-            },
-    );
 
     return Scaffold(
       body: GradientDecoratedContainer(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppDimensions.horizontalPadding),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.hPadding,
+            ),
             child: Form(
               key: formKey,
               child: Column(
@@ -163,12 +133,61 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
                 children: <Widget>[
                   ...[
                     Image.asset('assets/images/logo.png', width: 160),
-                    hostField,
-                    emailField,
-                    passwordField,
+                    TextFormField(
+                      keyboardType: TextInputType.url,
+                      autocorrect: false,
+                      onChanged: (value) => _host = value,
+                      onSaved: (value) => _host = value ?? '',
+                      decoration: InputDecoration(
+                        labelText: 'Host',
+                        hintText: 'https://www.koel.music',
+                      ),
+                      controller: TextEditingController(text: _host),
+                      validator: requireValue,
+                    ),
+                    TextFormField(
+                      keyboardType: TextInputType.emailAddress,
+                      autocorrect: false,
+                      onChanged: (value) => _email = value,
+                      onSaved: (value) => _email = value ?? '',
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        hintText: 'you@koel.music',
+                      ),
+                      controller: TextEditingController(text: _email),
+                      validator: requireValue,
+                    ),
+                    TextFormField(
+                      obscureText: !_showPassword,
+                      keyboardType: TextInputType.visiblePassword,
+                      onChanged: (value) => _password = value,
+                      onSaved: (value) => _password = value ?? '',
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _showPassword
+                                ? CupertinoIcons.eye_slash_fill
+                                : CupertinoIcons.eye_fill,
+                          ),
+                          onPressed: () {
+                            setState(() => _showPassword = !_showPassword);
+                          },
+                        ),
+                      ),
+                      validator: requireValue,
+                    ),
                     SizedBox(
                       width: double.infinity,
-                      child: submitButton,
+                      child: ElevatedButton(
+                        child: _authenticating
+                            ? const SpinKitThreeBounce(
+                                color: Colors.white,
+                                size: 16,
+                              )
+                            : const Text('Log In'),
+                        onPressed: _authenticating ? null : attemptLogin,
+                      ),
                     ),
                   ].expand((widget) => [widget, const SizedBox(height: 12)]),
                 ],

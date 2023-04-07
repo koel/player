@@ -9,7 +9,7 @@ class SongRowPlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.horizontalPadding,
+        horizontal: AppDimensions.hPadding,
         vertical: 4,
       ),
       leading: Container(

@@ -43,7 +43,7 @@ class SongListWithHeadingPlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.horizontalPadding / 2,
+        horizontal: AppDimensions.hPadding / 2,
         vertical: 8.0,
       ),
       child: Column(

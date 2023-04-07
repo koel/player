@@ -23,7 +23,7 @@ class HorizontalCardScroller extends StatelessWidget {
         if (headingText != null)
           Padding(
             padding: const EdgeInsets.only(
-              left: AppDimensions.horizontalPadding,
+              left: AppDimensions.hPadding,
             ),
             child: Heading5(text: headingText),
           ),
@@ -34,11 +34,11 @@ class HorizontalCardScroller extends StatelessWidget {
             children: <Widget>[
               ...cards.expand(
                 (card) => <Widget>[
-                  const SizedBox(width: AppDimensions.horizontalPadding),
+                  const SizedBox(width: AppDimensions.hPadding),
                   card,
                 ],
               ),
-              const SizedBox(width: AppDimensions.horizontalPadding),
+              const SizedBox(width: AppDimensions.hPadding),
             ],
           ),
         ),

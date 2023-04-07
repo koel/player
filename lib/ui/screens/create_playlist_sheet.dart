@@ -88,8 +88,8 @@ class _AddPlaylistScreenState extends State<CreatePlaylistSheet> {
 
     return GradientDecoratedContainer(
       padding: EdgeInsets.only(
-        left: AppDimensions.horizontalPadding,
-        right: AppDimensions.horizontalPadding,
+        left: AppDimensions.hPadding,
+        right: AppDimensions.hPadding,
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       child: Align(

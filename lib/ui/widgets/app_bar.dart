@@ -50,7 +50,7 @@ class AppBar extends StatelessWidget {
         child: FlexibleSpaceBar(
           title: Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: AppDimensions.horizontalPadding,
+              horizontal: AppDimensions.hPadding,
             ),
             child: Text(
               headingText,

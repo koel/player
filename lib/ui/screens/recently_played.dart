@@ -65,7 +65,7 @@ class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
 
               return Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.horizontalPadding,
+                  horizontal: AppDimensions.hPadding,
                 ),
                 child: Center(
                   child: Column(

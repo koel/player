@@ -28,7 +28,7 @@ class _InfoSheetState extends State<InfoSheet> {
         controller: widget.scroller,
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.horizontalPadding,
+            horizontal: AppDimensions.hPadding,
             vertical: 8.0,
           ),
           child: pane,

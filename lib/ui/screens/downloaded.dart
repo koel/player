@@ -38,7 +38,7 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
             if (provider.songs.isEmpty) {
               return Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.horizontalPadding,
+                  horizontal: AppDimensions.hPadding,
                 ),
                 child: Center(
                   child: Column(

@@ -22,7 +22,7 @@ class AlbumInfoPane extends StatelessWidget {
     if (inOfflineMode) {
       return const Padding(
         padding: EdgeInsets.symmetric(
-          vertical: AppDimensions.horizontalPadding,
+          vertical: AppDimensions.hPadding,
         ),
         child: Text(
           'No album information available.',

@@ -7,7 +7,12 @@ class AuthProvider {
 
   User get authUser => _authUser;
 
-  Future<void> login({required String email, required String password}) async {
+  Future<void> login(
+      {required String host,
+      required String email,
+      required String password}) async {
+    preferences.hostUrl = host;
+
     final loginData = <String, String>{
       'email': email,
       'password': password,

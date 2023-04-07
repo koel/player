@@ -59,7 +59,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget get noResults {
     return const Padding(
-      padding: EdgeInsets.only(left: AppDimensions.horizontalPadding),
+      padding: EdgeInsets.only(left: AppDimensions.hPadding),
       child: Text(
         'None found.',
         style: TextStyle(color: Colors.white54),
@@ -74,7 +74,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget get searchField {
     return Container(
-      padding: const EdgeInsets.all(AppDimensions.horizontalPadding),
+      padding: const EdgeInsets.all(AppDimensions.hPadding),
       child: Row(
         children: <Widget>[
           Expanded(
@@ -131,7 +131,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         const SizedBox(height: 32),
                         Padding(
                           padding: const EdgeInsets.only(
-                            left: AppDimensions.horizontalPadding,
+                            left: AppDimensions.hPadding,
                           ),
                           child: const Heading5(text: 'Albums'),
                         ),
@@ -146,7 +146,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         const SizedBox(height: 32),
                         Padding(
                           padding: const EdgeInsets.only(
-                            left: AppDimensions.horizontalPadding,
+                            left: AppDimensions.hPadding,
                           ),
                           child: const Heading5(text: 'Artists'),
                         ),

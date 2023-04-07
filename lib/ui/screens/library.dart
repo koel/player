@@ -83,9 +83,9 @@ class LibraryScreen extends StatelessWidget {
               ),
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(
-                  AppDimensions.horizontalPadding,
+                  AppDimensions.hPadding,
                   24,
-                  AppDimensions.horizontalPadding,
+                  AppDimensions.hPadding,
                   0,
                 ),
                 sliver: SliverToBoxAdapter(
@@ -97,9 +97,9 @@ class LibraryScreen extends StatelessWidget {
                   : SliverSongList(songs: recentlyAddedSongs),
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(
-                  AppDimensions.horizontalPadding,
+                  AppDimensions.hPadding,
                   24,
-                  AppDimensions.horizontalPadding,
+                  AppDimensions.hPadding,
                   0,
                 ),
                 sliver: SliverToBoxAdapter(
@@ -140,7 +140,7 @@ class LibraryMenuItem extends StatelessWidget {
       child: InkWell(
         child: ListTile(
           contentPadding: EdgeInsets.symmetric(
-            horizontal: AppDimensions.horizontalPadding,
+            horizontal: AppDimensions.hPadding,
           ),
           horizontalTitleGap: 0,
           leading: icon is IconData ? Icon(icon, color: Colors.white54) : icon,

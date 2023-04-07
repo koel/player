@@ -34,7 +34,7 @@ class SimpleSongList extends StatelessWidget {
               onTap: onHeaderTap,
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.horizontalPadding,
+                  horizontal: AppDimensions.hPadding,
                 ),
                 child: Heading5(text: headingText),
               )),

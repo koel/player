@@ -14,7 +14,7 @@ class SongListScreenPlaceholder extends StatelessWidget {
           const SliverAppBar(expandedHeight: 144),
           SliverToBoxAdapter(
             child: Container(
-              padding: const EdgeInsets.all(AppDimensions.horizontalPadding),
+              padding: const EdgeInsets.all(AppDimensions.hPadding),
               child: Row(
                 children: [
                   const CirclePlaceholder(),
