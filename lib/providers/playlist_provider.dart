@@ -1,5 +1,7 @@
 import 'package:app/app_state.dart';
+import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
+import 'package:app/providers/auth_provider.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:app/values/values.dart';
 import 'package:flutter/foundation.dart';
@@ -11,8 +13,15 @@ ParseResult parsePlaylists(List<dynamic> data) {
   return result;
 }
 
-class PlaylistProvider with ChangeNotifier {
+class PlaylistProvider with ChangeNotifier, StreamSubscriber {
   var _playlists = <Playlist>[];
+
+  PlaylistProvider() {
+    subscribe(AuthProvider.userLoggedOutStream.listen((_) {
+      _playlists.clear();
+      notifyListeners();
+    }));
+  }
 
   Future<void> init(List<dynamic> playlistData) async {
     ParseResult result = await compute(parsePlaylists, playlistData);

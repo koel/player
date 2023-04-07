@@ -1,15 +1,21 @@
 import 'package:app/app_state.dart';
+import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:flutter/foundation.dart';
 
-class FavoriteProvider with ChangeNotifier {
+class FavoriteProvider with ChangeNotifier, StreamSubscriber {
   var songs = <Song>[];
   late final SongProvider _songProvider;
 
   FavoriteProvider({required SongProvider songProvider})
-      : _songProvider = songProvider;
+      : _songProvider = songProvider {
+    subscribe(AuthProvider.userLoggedOutStream.listen((_) {
+      songs.clear();
+      notifyListeners();
+    }));
+  }
 
   Future<List<Song>> fetch({bool forceRefresh = false}) async {
     if (forceRefresh) AppState.delete(['favorites']);

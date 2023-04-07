@@ -72,12 +72,12 @@ class Song {
     var src = _sourceUrl;
 
     if (src == null) {
-      var hostUrl = AppState.get(['app', 'cdnUrl'], preferences.hostUrl)!
+      var host = AppState.get(['app', 'cdnUrl'], preferences.host)!
           .replaceAll(RegExp(r'/$'), '');
 
       String rawUrl = AppState.get(['app', 'transcoding'], false)!
           ? '/play/$id/1/128?t=${preferences.audioToken}'
-          : '$hostUrl/play/$id?t=${preferences.audioToken}';
+          : '$host/play/$id?t=${preferences.audioToken}';
 
       _sourceUrl = src = Uri.encodeFull(rawUrl);
     }

@@ -9,11 +9,11 @@ T? _get<T>(String key) => storage.read(key);
 
 void _delete(String key) => storage.remove(key);
 
-set hostUrl(String? url) => _set('hostUrl', url);
+set host(String? url) => _set('hostUrl', url);
 
-String? get hostUrl => _get<String>('hostUrl');
+String? get host => _get<String>('hostUrl');
 
-String? get apiBaseUrl => hostUrl == null ? null : '$hostUrl/api';
+String? get apiBaseUrl => host == null ? null : '$host/api';
 
 String get apiVersion => 'v6';
 

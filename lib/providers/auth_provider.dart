@@ -1,17 +1,35 @@
+import 'dart:async';
+
+import 'package:app/app_state.dart';
+import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 
-class AuthProvider {
+class AuthProvider with StreamSubscriber {
   late User _authUser;
 
   User get authUser => _authUser;
+
+  static final _userLoggedIn = StreamController<User>.broadcast();
+  static final userLoggedInStream = _userLoggedIn.stream;
+
+  static final _userLoggedOut = StreamController<void>.broadcast();
+  static final userLoggedOutStream = _userLoggedOut.stream;
+
+  AuthProvider() {
+    subscribe(userLoggedOutStream.listen((_) {
+      preferences.apiToken = null;
+      preferences.audioToken = null;
+      AppState.clear();
+    }));
+  }
 
   Future<void> login(
       {required String host,
       required String email,
       required String password}) async {
-    preferences.hostUrl = host;
+    preferences.host = host;
 
     final loginData = <String, String>{
       'email': email,
@@ -30,7 +48,10 @@ class AuthProvider {
       return null;
     }
 
-    this.setAuthUser(User.fromJson(await get('me')));
+    var user = User.fromJson(await get('me'));
+
+    this.setAuthUser(user);
+    _userLoggedIn.add(user);
 
     return authUser;
   }
@@ -40,7 +61,6 @@ class AuthProvider {
       await delete('me');
     } catch (_) {}
 
-    preferences.apiToken = null;
-    preferences.audioToken = null;
+    _userLoggedOut.add(null);
   }
 }

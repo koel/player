@@ -1,9 +1,10 @@
+import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:flutter/foundation.dart';
 
-class OverviewProvider with ChangeNotifier {
+class OverviewProvider with ChangeNotifier, StreamSubscriber {
   final SongProvider _songProvider;
   final AlbumProvider _albumProvider;
   final ArtistProvider _artistProvider;
@@ -21,7 +22,17 @@ class OverviewProvider with ChangeNotifier {
     required artistProvider,
   })  : _songProvider = songProvider,
         _albumProvider = albumProvider,
-        _artistProvider = artistProvider;
+        _artistProvider = artistProvider {
+    subscribe(AuthProvider.userLoggedOutStream.listen((_) {
+      mostPlayedSongs.clear();
+      recentlyAddedSongs.clear();
+      recentlyPlayedSongs.clear();
+      mostPlayedAlbums.clear();
+      mostPlayedArtists.clear();
+
+      notifyListeners();
+    }));
+  }
 
   Future<void> refresh() async {
     final Map<String, dynamic> response = await get('overview');

@@ -20,4 +20,6 @@ class AppState {
   static bool has(Object key) => _state.containsKey(_normalizeKey(key));
 
   static void delete(Object key) => _state.remove(_normalizeKey(key));
+
+  static void clear() => _state.clear();
 }

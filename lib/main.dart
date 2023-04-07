@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/audio_handler.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/app.dart';
@@ -12,14 +14,16 @@ late KoelAudioHandler audioHandler;
 List<SingleChildWidget> _providers = [
   Provider(create: (_) => AuthProvider()),
   ChangeNotifierProvider(create: (_) => ArtistProvider()),
+  ChangeNotifierProvider(create: (context) => SongProvider()),
   Provider(create: (_) => MediaInfoProvider()),
-  Provider(create: (_) => DownloadProvider()),
+  // Download files should always be available to adapt to login/logout and
+  // offline mode.
+  Provider(
+      create: (context) => DownloadProvider(
+            songProvider: context.read<SongProvider>(),
+          ),
+      lazy: false),
   ChangeNotifierProvider(create: (context) => AlbumProvider()),
-  ChangeNotifierProvider(
-    create: (context) => SongProvider(
-      downloadProvider: context.read<DownloadProvider>(),
-    ),
-  ),
   ChangeNotifierProvider(
     create: (context) => FavoriteProvider(
       songProvider: context.read<SongProvider>(),

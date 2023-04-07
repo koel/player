@@ -1,25 +1,22 @@
 import 'package:app/app_state.dart';
 import 'package:app/enums.dart';
+import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:app/values/values.dart';
 import 'package:flutter/foundation.dart';
 
-class SongProvider with ChangeNotifier {
-  final DownloadProvider _downloadProvider;
-
+class SongProvider with ChangeNotifier, StreamSubscriber {
   var songs = <Song>[];
   final _vault = <String, Song>{};
 
-  SongProvider({required downloadProvider})
-      : _downloadProvider = downloadProvider {
-    _syncDownloadedSongs();
-  }
-
-  Future<void> _syncDownloadedSongs() async {
-    await _downloadProvider.collectDownloads();
-    syncWithVault(_downloadProvider.songs);
+  SongProvider() {
+    subscribe(AuthProvider.userLoggedOutStream.listen((_) {
+      songs.clear();
+      _vault.clear();
+      notifyListeners();
+    }));
   }
 
   List<Song> syncWithVault(dynamic _songs) {

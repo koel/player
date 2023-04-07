@@ -1,9 +1,10 @@
+import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/values/pagination_result.dart';
 import 'package:flutter/foundation.dart';
 
-class SongListScreenProvider with ChangeNotifier {
+class SongListScreenProvider with ChangeNotifier, StreamSubscriber {
   final SongProvider _songProvider;
   final SearchProvider _searchProvider;
 
@@ -13,7 +14,12 @@ class SongListScreenProvider with ChangeNotifier {
     required songProvider,
     required searchProvider,
   })  : _songProvider = songProvider,
-        _searchProvider = searchProvider;
+        _searchProvider = searchProvider {
+    subscribe(AuthProvider.userLoggedOutStream.listen((_) {
+      songs.clear();
+      notifyListeners();
+    }));
+  }
 
   Future<PaginationResult?> fetch({
     SongPaginationConfig? paginationConfig,

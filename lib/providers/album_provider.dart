@@ -1,13 +1,25 @@
+import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
+import 'package:app/providers/auth_provider.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:flutter/foundation.dart';
 
-class AlbumProvider with ChangeNotifier {
+class AlbumProvider with ChangeNotifier, StreamSubscriber {
   var albums = <Album>[];
   final _vault = <int, Album>{};
   var _page = 1;
 
   Album? byId(int id) => _vault[id];
+
+  AlbumProvider() {
+    subscribe(AuthProvider.userLoggedOutStream.listen((_) {
+      albums.clear();
+      _vault.clear();
+      _page = 1;
+
+      notifyListeners();
+    }));
+  }
 
   List<Album> byIds(List<int> ids) {
     final albums = <Album>[];

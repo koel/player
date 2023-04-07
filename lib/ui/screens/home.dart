@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:app/constants/constants.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
@@ -171,8 +173,10 @@ class _HomeRecentlyPlayedSectionState extends State<HomeRecentlyPlayedSection> {
     return Consumer<RecentlyPlayedProvider>(
       builder: (_, overviewProvider, __) {
         final songs = overviewProvider.songs.isNotEmpty
-            ? overviewProvider.songs.getRange(0, 4)
-            : widget.initialSongs.getRange(0, 4);
+            ? overviewProvider.songs
+                .getRange(0, min(4, overviewProvider.songs.length))
+            : widget.initialSongs
+                .getRange(0, min(4, widget.initialSongs.length));
 
         return songs.isEmpty ? SizedBox.shrink() : SimpleSongList(songs: songs);
       },

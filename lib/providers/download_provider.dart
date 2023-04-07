@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:collection/collection.dart';
+import 'package:app/utils/preferences.dart' as preferences;
 
 class Download {
   final Song song;
@@ -12,7 +15,8 @@ class Download {
   Download({required this.song, required this.file});
 }
 
-class DownloadProvider {
+class DownloadProvider with StreamSubscriber {
+  final SongProvider _songProvider;
   final _downloads = <Download>[];
 
   List<Song> get songs => _downloads.map((d) => d.song).toList();
@@ -28,7 +32,6 @@ class DownloadProvider {
   Stream<Download> get songDownloadedStream => _songDownloaded.stream;
 
   static const serializedSongContainer = 'Downloads';
-  static const serializedSongKey = 'songs';
   static const downloadCacheKey = 'koel.downloaded.songs';
   static final _songStorage = GetStorage(serializedSongContainer);
 
@@ -39,10 +42,27 @@ class DownloadProvider {
     ),
   );
 
-  Future<void> collectDownloads() async {
-    final songs = _songStorage.read<List<dynamic>>(serializedSongKey) ?? [];
+  DownloadProvider({required SongProvider songProvider})
+      : _songProvider = songProvider {
+    subscribe(AuthProvider.userLoggedOutStream.listen((_) {
+      _downloads.clear();
+    }));
 
-    await Future.forEach<dynamic>(songs, (json) async {
+    subscribe(AuthProvider.userLoggedInStream.listen((_) {
+      // re-collect downloads when the user logs in (e.g., when there's a user
+      // switch)
+      _collectDownloads();
+    }));
+
+    _collectDownloads();
+  }
+
+  Future<void> _collectDownloads() async {
+    _downloads.clear();
+    final serializedSongs =
+        _songStorage.read<List<dynamic>>(serializedSongKey) ?? [];
+
+    await Future.forEach<dynamic>(serializedSongs, (json) async {
       var song = Song.fromJson(json);
       final file = await _downloadManager.getFileFromCache(song.cacheKey);
 
@@ -52,7 +72,11 @@ class DownloadProvider {
         _downloads.add(Download(song: song, file: file));
       }
     });
+
+    _songProvider.syncWithVault(this.songs);
   }
+
+  get serializedSongKey => '${preferences.host}.${preferences.userEmail}.songs';
 
   Future<void> download({required Song song}) async {
     final file = await _downloadManager.downloadFile(
@@ -63,7 +87,7 @@ class DownloadProvider {
 
     final download = Download(song: song, file: file);
     _songStorage.write(
-      'songs',
+      serializedSongKey,
       songs
         ..add(song)
         ..toSet()
@@ -89,9 +113,12 @@ class DownloadProvider {
   }
 
   Future<void> clear() async {
-    await _downloadManager.emptyCache();
+    await Future.forEach<Song>(songs, (song) async {
+      await _downloadManager.removeFile(song.cacheKey);
+    });
+
     _downloadsCleared.add(true);
     _downloads.clear();
-    _songStorage.erase();
+    _songStorage.remove(serializedSongKey);
   }
 }

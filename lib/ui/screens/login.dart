@@ -36,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
 
     // Try looking for stored values in local storage
     setState(() {
-      _host = preferences.hostUrl ?? '';
+      _host = preferences.host ?? '';
       _email = preferences.userEmail ?? '';
     });
   }
@@ -104,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
     }
 
     if (successful) {
-      preferences.hostUrl = _host;
+      preferences.host = _host;
       preferences.userEmail = _email;
 
       Navigator.of(
