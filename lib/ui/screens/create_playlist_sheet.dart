@@ -1,8 +1,6 @@
-import 'package:app/constants/colors.dart';
-import 'package:app/constants/dimensions.dart';
-import 'package:app/providers/playlist_provider.dart';
-import 'package:app/ui/widgets/message_overlay.dart';
-import 'package:app/ui/widgets/spinner.dart';
+import 'package:app/constants/constants.dart';
+import 'package:app/providers/providers.dart';
+import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,11 +16,11 @@ class CreatePlaylistSheet extends StatefulWidget {
 }
 
 class _AddPlaylistScreenState extends State<CreatePlaylistSheet> {
-  late PlaylistProvider playlistProvider;
-  bool _enabled = true;
-  bool _working = false;
+  late final PlaylistProvider playlistProvider;
+  var _enabled = true;
+  var _working = false;
   late String _name;
-  FocusNode focusNode = FocusNode();
+  final focusNode = FocusNode();
 
   @override
   void initState() {
@@ -33,14 +31,14 @@ class _AddPlaylistScreenState extends State<CreatePlaylistSheet> {
 
   void _onFieldValueChanged(String value) {
     _name = value;
-    setState(() => _enabled = value.trim() != '');
+    setState(() => _enabled = value.trim().isNotEmpty);
   }
 
-  final InputBorder inputBorder = const UnderlineInputBorder(
+  final inputBorder = const UnderlineInputBorder(
     borderSide: BorderSide(color: AppColors.highlight),
   );
 
-  final Widget spinner = const Center(
+  final spinner = const Center(
     child: Padding(
       padding: EdgeInsets.only(top: 18.0),
       child: Spinner(size: 16.0),
@@ -54,7 +52,7 @@ class _AddPlaylistScreenState extends State<CreatePlaylistSheet> {
 
       focusNode.unfocus();
       setState(() => _working = true);
-      bool ok = true;
+      var ok = true;
 
       try {
         await playlistProvider.create(name: _name);
@@ -88,11 +86,10 @@ class _AddPlaylistScreenState extends State<CreatePlaylistSheet> {
       }
     }
 
-    return Container(
-      color: AppColors.black,
+    return GradientDecoratedContainer(
       padding: EdgeInsets.only(
-        left: AppDimensions.horizontalPadding,
-        right: AppDimensions.horizontalPadding,
+        left: AppDimensions.hPadding,
+        right: AppDimensions.hPadding,
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       child: Align(
@@ -120,16 +117,10 @@ class _AddPlaylistScreenState extends State<CreatePlaylistSheet> {
               const SizedBox(height: 24.0),
               _working
                   ? spinner
-                  : ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        minWidth: double.infinity,
-                      ),
-                      child: ElevatedButton(
-                        key: CreatePlaylistSheet.submitButtonKey,
-                        style: ElevatedButton.styleFrom(onSurface: Colors.grey),
-                        onPressed: _enabled ? () async => await submit() : null,
-                        child: const Text('Create Playlist'),
-                      ),
+                  : ElevatedButton(
+                      key: CreatePlaylistSheet.submitButtonKey,
+                      onPressed: _enabled ? () async => await submit() : null,
+                      child: const Text('Save'),
                     ),
             ],
           ),

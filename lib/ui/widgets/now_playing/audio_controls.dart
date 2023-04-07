@@ -1,49 +1,69 @@
-import 'package:app/extensions/assets_audio_player.dart';
-import 'package:app/providers/audio_provider.dart';
-import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:app/main.dart';
+import 'package:app/mixins/stream_subscriber.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class AudioControls extends StatelessWidget {
   const AudioControls({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    AudioProvider audio = context.watch();
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
         IconButton(
-          onPressed: () {
-            audio.player.currentPosition.value.inSeconds > 5
-                ? audio.player.restart()
-                : audio.player.previous();
-          },
+          onPressed: () async => await audioHandler.skipToPrevious(),
           icon: const Icon(CupertinoIcons.backward_fill),
           iconSize: 48,
         ),
-        PlayerBuilder.isPlaying(
-          player: audio.player,
-          builder: (context, isPlaying) {
-            return IconButton(
-              onPressed: () => audio.player.playOrPause(),
-              icon: Icon(
-                isPlaying
-                    ? CupertinoIcons.pause_solid
-                    : CupertinoIcons.play_fill,
-              ),
-              iconSize: 64,
-            );
-          },
-        ),
+        const PlayPauseButton(),
         IconButton(
-          onPressed: () => audio.player.next(),
+          onPressed: audioHandler.skipToNext,
           icon: const Icon(CupertinoIcons.forward_fill),
           iconSize: 48,
         ),
       ],
+    );
+  }
+}
+
+class PlayPauseButton extends StatefulWidget {
+  const PlayPauseButton({Key? key}) : super(key: key);
+
+  @override
+  _PlayPauseButtonState createState() => _PlayPauseButtonState();
+}
+
+class _PlayPauseButtonState extends State<PlayPauseButton>
+    with StreamSubscriber {
+  PlaybackState? _state;
+
+  @override
+  void initState() {
+    super.initState();
+    subscribe(audioHandler.playbackState.listen((PlaybackState value) {
+      setState(() => _state = value);
+    }));
+  }
+
+  @override
+  void dispose() {
+    unsubscribeAll();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = _state;
+    if (state == null) return const SizedBox.shrink();
+
+    return IconButton(
+      onPressed: audioHandler.playOrPause,
+      icon: state.playing
+          ? const Icon(CupertinoIcons.pause_solid)
+          : const Icon(CupertinoIcons.play_fill),
+      iconSize: 64,
     );
   }
 }

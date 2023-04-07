@@ -1,47 +1,76 @@
-import 'package:app/models/artist.dart';
-import 'package:app/values/parse_result.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:app/models/models.dart';
+import 'package:app/utils/api_request.dart';
 import 'package:flutter/foundation.dart';
 
-ParseResult parseArtists(List<dynamic> data) {
-  ParseResult result = ParseResult();
-  data.forEach((json) => result.add(Artist.fromJson(json), json['id']));
-
-  return result;
-}
-
 class ArtistProvider with ChangeNotifier {
-  late List<Artist> _artists;
-  late Map<int, Artist> _index;
+  var artists = <Artist>[];
+  final _vault = <int, Artist>{};
+  var _page = 1;
 
-  List<Artist> get artists => _artists;
-
-  Future<void> init(List<dynamic> artistData) async {
-    ParseResult result = await compute(parseArtists, artistData);
-    _artists = result.collection.cast();
-    _index = result.index.cast();
-  }
-
-  Artist byId(int id) => _index[id]!;
+  Artist? byId(int id) => _vault[id];
 
   List<Artist> byIds(List<int> ids) {
-    List<Artist> artists = [];
+    final artists = <Artist>[];
 
     ids.forEach((id) {
-      if (_index.containsKey(id)) {
-        artists.add(_index[id]!);
+      if (_vault.containsKey(id)) {
+        artists.add(_vault[id]!);
       }
     });
 
     return artists;
   }
 
-  List<Artist> mostPlayed({int limit = 15}) {
-    List<Artist> clone = List<Artist>.from(_artists)
-        .where((artist) => artist.isStandardArtist)
-        .toList()
-          ..sort((a, b) => b.playCount.compareTo(a.playCount));
+  Future<Artist> resolve(int id, {bool forceRefresh = false}) async {
+    if (!_vault.containsKey(id) || forceRefresh) {
+      _vault[id] = Artist.fromJson(await get('artists/$id'));
+    }
 
-    return clone.take(limit).toList();
+    return _vault[id]!;
+  }
+
+  List<Artist> syncWithVault(dynamic _artists) {
+    assert(_artists is List<Artist> || _artists is Artist);
+
+    if (_artists is Artist) {
+      _artists = [_artists];
+    }
+
+    List<Artist> synced = (_artists as List<Artist>).map<Artist>((remote) {
+      final local = byId(remote.id);
+
+      if (local == null) {
+        _vault[remote.id] = remote;
+        return remote;
+      } else {
+        return local.merge(remote);
+      }
+    }).toList();
+
+    notifyListeners();
+
+    return synced;
+  }
+
+  Future<void> paginate() async {
+    final res = await get('artists?page=$_page');
+
+    final _artists = (res['data'] as List)
+        .map<Artist>((artist) => Artist.fromJson(artist))
+        .toList();
+
+    List<Artist> synced = syncWithVault(_artists);
+    artists = [...artists, ...synced].toSet().toList();
+
+    _page = res['links']['next'] == null ? 1 : ++res['meta']['current_page'];
+
+    notifyListeners();
+  }
+
+  Future<void> refresh() {
+    artists.clear();
+    _page = 1;
+
+    return paginate();
   }
 }

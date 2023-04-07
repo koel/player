@@ -1,28 +1,25 @@
-import 'package:app/models/album.dart';
-import 'package:app/models/artist.dart';
-import 'package:app/models/song.dart';
-import 'package:app/providers/album_provider.dart';
-import 'package:app/providers/artist_provider.dart';
-import 'package:app/providers/song_provider.dart';
+import 'package:app/app_state.dart';
+import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:flutter/foundation.dart';
 
 class SearchResult {
-  List<Song> songs;
-  List<Artist> artists;
-  List<Album> albums;
+  var songs = <Song>[];
+  var artists = <Artist>[];
+  var albums = <Album>[];
 
   SearchResult({
-    required this.songs,
-    required this.artists,
-    required this.albums,
+    this.songs = const [],
+    this.artists = const [],
+    this.albums = const [],
   });
 }
 
 class SearchProvider with ChangeNotifier {
-  SongProvider _songProvider;
-  AlbumProvider _albumProvider;
-  ArtistProvider _artistProvider;
+  final SongProvider _songProvider;
+  final AlbumProvider _albumProvider;
+  final ArtistProvider _artistProvider;
 
   SearchProvider({
     required songProvider,
@@ -33,15 +30,37 @@ class SearchProvider with ChangeNotifier {
         _albumProvider = albumProvider;
 
   Future<SearchResult> searchExcerpts({required String keywords}) async {
-    var results = await get('search?q=$keywords');
-    List<String> songIds = results['results']['songs'].cast<String>();
-    List<int> artistIds = results['results']['artists'].cast<int>();
-    List<int> albumIds = results['results']['albums'].cast<int>();
+    final cacheKey = ['search.excerpts', keywords];
+    if (AppState.has(cacheKey)) return AppState.get(cacheKey);
 
-    return SearchResult(
-      songs: _songProvider.byIds(songIds),
-      artists: _artistProvider.byIds(artistIds),
-      albums: _albumProvider.byIds(albumIds),
+    final res = await get('search?q=$keywords');
+
+    final songs = _songProvider.syncWithVault(
+        res['songs'].map<Song>((j) => Song.fromJson(j)).toList());
+    final artists = _artistProvider.syncWithVault(
+        res['artists'].map<Artist>((j) => Artist.fromJson(j)).toList());
+    final albums = _albumProvider.syncWithVault(
+        res['albums'].map<Album>((j) => Album.fromJson(j)).toList());
+
+    return AppState.set(
+      cacheKey,
+      SearchResult(
+        songs: songs,
+        artists: artists,
+        albums: albums,
+      ),
     );
+  }
+
+  Future<List<Song>> searchSongs(String keywords) async {
+    final cacheKey = ['search.songs', keywords];
+
+    if (AppState.has(cacheKey)) return AppState.get(cacheKey);
+
+    final res = await get('search/songs?q=$keywords');
+    final songs = _songProvider
+        .syncWithVault(res.map<Song>((j) => Song.fromJson(j)).toList());
+
+    return AppState.set(cacheKey, songs);
   }
 }

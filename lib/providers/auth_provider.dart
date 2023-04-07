@@ -1,25 +1,26 @@
-import 'package:app/models/user.dart';
+import 'package:app/models/models.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 
 class AuthProvider {
   late User _authUser;
+
   User get authUser => _authUser;
 
-  Future<bool> login({required String email, required String password}) async {
-    final Map<String, String> loginData = {
+  Future<void> login(
+      {required String host,
+      required String email,
+      required String password}) async {
+    preferences.hostUrl = host;
+
+    final loginData = <String, String>{
       'email': email,
       'password': password,
     };
 
-    try {
-      final responseData = await post('me', data: loginData);
-      preferences.apiToken = responseData['token'];
-      return true;
-    } catch (err) {
-      print(err);
-      return false;
-    }
+    final response = await post('me', data: loginData);
+    preferences.apiToken = response['token'];
+    preferences.audioToken = response['audio-token'];
   }
 
   void setAuthUser(User user) => _authUser = user;
@@ -40,5 +41,6 @@ class AuthProvider {
     } catch (_) {}
 
     preferences.apiToken = null;
+    preferences.audioToken = null;
   }
 }

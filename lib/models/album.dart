@@ -1,34 +1,37 @@
-import 'package:app/models/artist.dart';
+import 'package:app/constants/constants.dart';
+import 'package:app/models/models.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
 
 class Album {
   int id;
-  bool isCompilation;
   String name;
   String? cover;
   int artistId;
-  late Artist artist;
+  String artistName;
   int playCount = 0;
-
   ImageProvider? _image;
 
   Album({
     required this.id,
     required this.name,
     required this.cover,
-    required this.isCompilation,
     required this.artistId,
+    required this.artistName,
   });
 
   ImageProvider get image {
-    if (_image == null) {
-      _image =
-          cover == null ? artist.image : CachedNetworkImageProvider(cover!);
+    var image = _image;
+    final cover = this.cover;
+
+    if (image == null) {
+      _image = image = cover == null
+          ? AppImages.defaultImage.image
+          : CachedNetworkImageProvider(cover);
     }
 
-    return _image!;
+    return image;
   }
 
   bool get isStandardAlbum => !isUnknownAlbum;
@@ -40,8 +43,8 @@ class Album {
       id: json['id'],
       name: json['name'],
       cover: json['cover'],
-      isCompilation: json['is_compilation'],
       artistId: json['artist_id'],
+      artistName: json['artist_name'],
     );
   }
 
@@ -49,7 +52,6 @@ class Album {
     int? id,
     String? name,
     String? cover,
-    bool? isCompilation,
     int? playCount,
     Artist? artist,
   }) {
@@ -61,10 +63,21 @@ class Album {
       id: id ?? faker.randomGenerator.integer(1000, min: 1),
       name: name ?? faker.lorem.words(3).join(' '),
       cover: cover ?? faker.image.image(width: 192, height: 192),
-      isCompilation: isCompilation ?? faker.randomGenerator.boolean(),
       artistId: artist.id,
-    )
-      ..artist = artist
-      ..playCount = playCount ?? faker.randomGenerator.integer(1000);
+      artistName: artist.name,
+    )..playCount = playCount ?? faker.randomGenerator.integer(1000);
+  }
+
+  Album merge(Album remote) {
+    this
+      ..artistName = remote.artistName
+      ..artistId = remote.artistId
+      ..cover = remote.cover
+      ..name = remote.name
+      ..playCount = remote.playCount ?? 0;
+
+    _image = null;
+
+    return this;
   }
 }

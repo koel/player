@@ -1,7 +1,7 @@
-import 'package:app/models/album.dart';
+import 'package:app/enums.dart';
+import 'package:app/models/models.dart';
 import 'package:app/router.dart';
-import 'package:app/ui/widgets/album_thumbnail.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
 class AlbumCard extends StatefulWidget {
@@ -19,8 +19,8 @@ class AlbumCard extends StatefulWidget {
 }
 
 class _AlbumCardState extends State<AlbumCard> {
-  double _opacity = 1.0;
-  double _cardWidth = 144.0;
+  var _opacity = 1.0;
+  final _cardWidth = 144.0;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class _AlbumCardState extends State<AlbumCard> {
       onTapCancel: () => setState(() => _opacity = 1.0),
       onTap: () => widget.router.gotoAlbumDetailsScreen(
         context,
-        album: widget.album,
+        albumId: widget.album.id,
       ),
       behavior: HitTestBehavior.opaque,
       child: AnimatedOpacity(
@@ -38,12 +38,12 @@ class _AlbumCardState extends State<AlbumCard> {
         opacity: _opacity,
         child: Column(
           children: <Widget>[
-            AlbumThumbnail(
-              album: widget.album,
+            AlbumArtistThumbnail(
+              entity: widget.album,
               size: ThumbnailSize.md,
               asHero: true,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             SizedBox(
               width: _cardWidth,
               child: Column(
@@ -54,9 +54,9 @@ class _AlbumCardState extends State<AlbumCard> {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
-                    widget.album.artist.name,
+                    widget.album.artistName,
                     style: const TextStyle(color: Colors.white54),
                     overflow: TextOverflow.ellipsis,
                   ),

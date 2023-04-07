@@ -1,106 +1,171 @@
-import 'package:app/models/album.dart';
-import 'package:app/models/artist.dart';
-import 'package:app/models/song.dart';
-import 'package:app/providers/album_provider.dart';
-import 'package:app/providers/artist_provider.dart';
-import 'package:app/ui/widgets/app_bar.dart';
-import 'package:app/values/parse_result.dart';
+import 'package:app/app_state.dart';
+import 'package:app/enums.dart';
+import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
+import 'package:app/utils/api_request.dart';
+import 'package:app/values/values.dart';
 import 'package:flutter/foundation.dart';
 
-import 'cache_provider.dart';
+class SongProvider with ChangeNotifier {
+  final DownloadProvider _downloadProvider;
 
-ParseResult parseSongs(List<dynamic> data) {
-  ParseResult result = ParseResult();
-  data.forEach((json) => result.add(Song.fromJson(json), json['id']));
+  var songs = <Song>[];
+  final _vault = <String, Song>{};
 
-  return result;
+  SongProvider({required downloadProvider})
+      : _downloadProvider = downloadProvider {
+    _syncDownloadedSongs();
+  }
+
+  Future<void> _syncDownloadedSongs() async {
+    await _downloadProvider.collectDownloads();
+    syncWithVault(_downloadProvider.songs);
+  }
+
+  List<Song> syncWithVault(dynamic _songs) {
+    assert(_songs is List<Song> || _songs is Song);
+
+    if (_songs is Song) {
+      _songs = [_songs];
+    }
+
+    List<Song> synced = (_songs as List<Song>).map<Song>((remote) {
+      final local = byId(remote.id);
+
+      if (local == null) {
+        _vault[remote.id] = remote;
+        return remote;
+      } else {
+        return local.merge(remote);
+      }
+    }).toList();
+
+    return synced;
+  }
+
+  Song? byId(String id) => _vault[id];
+
+  Future<PaginationResult<Song>> paginate(SongPaginationConfig config) async {
+    final res = await get(
+      'songs'
+      '?page=${config.page}'
+      '&sort=${config.sortField}'
+      '&order=${config.sortOrder.value}',
+    );
+
+    final items = res['data'].map<Song>((j) => Song.fromJson(j)).toList();
+    final synced = syncWithVault(items);
+
+    songs = [...songs, ...synced].toSet().toList();
+    notifyListeners();
+
+    return new PaginationResult(
+      items: synced,
+      nextPage:
+          res['links']['next'] == null ? null : ++res['meta']['current_page'],
+    );
+  }
+
+  Future<List<Song>> fetchForArtist(
+    int artistId, {
+    bool forceRefresh = false,
+  }) async {
+    if (forceRefresh) AppState.delete(['artist.songs', artistId]);
+
+    return _stateAwareFetch(
+      'artists/$artistId/songs',
+      ['artist.songs', artistId],
+    );
+  }
+
+  Future<List<Song>> fetchForAlbum(
+    int albumId, {
+    bool forceRefresh = false,
+  }) async {
+    if (forceRefresh) AppState.delete(['album.songs', albumId]);
+
+    return _stateAwareFetch(
+      'albums/$albumId/songs',
+      ['album.songs', albumId],
+    );
+  }
+
+  Future<List<Song>> fetchForPlaylist(
+    int playlistId, {
+    bool forceRefresh = false,
+  }) async {
+    if (forceRefresh) AppState.delete(['playlist.songs', playlistId]);
+
+    return _stateAwareFetch(
+      'playlists/$playlistId/songs',
+      ['playlist.songs', playlistId],
+    );
+  }
+
+  Future<List<Song>> _stateAwareFetch(String url, Object cacheKey) async {
+    if (AppState.has(cacheKey)) return AppState.get(cacheKey);
+
+    final res = await get(url);
+    final items = res.map<Song>((json) => Song.fromJson(json)).toList();
+    AppState.set(cacheKey, items);
+
+    return syncWithVault(items);
+  }
+
+  Future<List<Song>> fetchRandom({int limit = 500}) async {
+    final res = await get('queue/fetch?order=rand&limit=$limit');
+    final items = res.map<Song>((json) => Song.fromJson(json)).toList();
+    return syncWithVault(items);
+  }
+
+  Future<List<Song>> fetchInOrder({
+    String sortField = 'title',
+    SortOrder order = SortOrder.asc,
+    int limit = 500,
+  }) async {
+    final res = await get(
+      'queue/fetch?order=${order.value}&sort=$sortField&limit=$limit',
+    );
+    final items = res.map<Song>((json) => Song.fromJson(json)).toList();
+    return syncWithVault(items);
+  }
 }
 
-class SongProvider {
-  late ArtistProvider artistProvider;
-  late AlbumProvider albumProvider;
-  late CacheProvider cacheProvider;
-  late CoverImageStack coverImageStack;
+class SongPaginationConfig {
+  String _sortField;
+  SortOrder _sortOrder;
+  int? page;
 
-  late List<Song> _songs;
-  late Map<String, Song> _index;
+  SongPaginationConfig({
+    String sortField = 'title',
+    SortOrder sortOrder = SortOrder.asc,
+    this.page = 1,
+  })  : _sortField = sortField,
+        _sortOrder = sortOrder;
 
-  SongProvider({
-    required this.artistProvider,
-    required this.albumProvider,
-    required this.cacheProvider,
-  });
+  String get sortField => _sortField;
 
-  Future<void> init(List<dynamic> songData) async {
-    ParseResult result = await compute(parseSongs, songData);
-    _songs = result.collection.cast();
-    _index = result.index.cast();
+  SortOrder get sortOrder => _sortOrder;
 
-    _songs.forEach((song) async {
-      song
-        ..artist = artistProvider.byId(song.artistId)
-        ..album = albumProvider.byId(song.albumId);
+  SongSortConfig get sortConfig => SongSortConfig(
+        field: _sortField,
+        order: _sortOrder,
+      );
 
-      if (await cacheProvider.has(song: song)) {
-        cacheProvider.songs.add(song);
-      }
-    });
+  set sortField(String field) {
+    if (field != _sortField) {
+      _sortOrder = SortOrder.asc;
+      page = 1;
+    }
 
-    coverImageStack = CoverImageStack(songs: _songs);
+    _sortField = field;
   }
 
-  void initInteractions(List<dynamic> interactionData) {
-    interactionData.forEach((interaction) {
-      Song _song = byId(interaction['song_id']);
-      _song
-        ..liked = interaction['liked']
-        ..playCount = interaction['play_count']
-        ..artist.playCount += _song.playCount
-        ..album.playCount += _song.playCount;
-    });
+  set sortOrder(SortOrder order) {
+    if (order != _sortOrder) {
+      page = 1;
+    }
+
+    _sortOrder = order;
   }
-
-  List<Song> recentlyAdded({int limit = 5}) {
-    List<Song> clone = List<Song>.from(_songs);
-    clone.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return clone.take(limit).toList();
-  }
-
-  List<Song> mostPlayed({int limit = 15}) {
-    List<Song> clone = List<Song>.from(_songs);
-    clone.sort((a, b) => b.playCount.compareTo(a.playCount));
-    return clone.take(limit).toList();
-  }
-
-  List<Song> leastPlayed({int limit = 15}) {
-    List<Song> clone = List<Song>.from(_songs);
-    clone.sort((a, b) => a.playCount.compareTo(b.playCount));
-    return clone.take(limit).toList();
-  }
-
-  Song byId(String id) => _index[id]!;
-
-  Song? tryById(String id) => _index[id];
-
-  List<Song> byIds(List<String> ids) {
-    List<Song> songs = [];
-
-    ids.forEach((id) {
-      if (_index.containsKey(id)) {
-        songs.add(_index[id]!);
-      }
-    });
-
-    return songs;
-  }
-
-  List<Song> byArtist(Artist artist) =>
-      _songs.where((song) => song.artist == artist).toList();
-
-  List<Song> byAlbum(Album album) =>
-      _songs.where((song) => song.album == album).toList();
-
-  List<Song> favorites() => _songs.where((song) => song.liked).toList();
-
-  List<Song> get songs => _songs;
 }
