@@ -1,9 +1,9 @@
-import 'package:app/app_state.dart';
-import 'package:app/constants/constants.dart';
-import 'package:app/providers/providers.dart';
+import 'package:app/models/artist.dart';
+import 'package:app/providers/artist_provider.dart';
 import 'package:app/router.dart';
-import 'package:app/ui/placeholders/artists_screen_placeholder.dart';
-import 'package:app/ui/widgets/widgets.dart';
+import 'package:app/ui/widgets/artist_thumbnail.dart';
+import 'package:app/ui/widgets/bottom_space.dart';
+import 'package:app/ui/widgets/typography.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,130 +22,50 @@ class ArtistsScreen extends StatefulWidget {
 }
 
 class _ArtistsScreenState extends State<ArtistsScreen> {
-  late final ArtistProvider _artistProvider;
-  late final ScrollController _scrollController;
-  var _currentScrollOffset = AppState.get('artists.scrollOffSet', 0.0)!;
-  final _scrollThreshold = 64.0;
-  var _loading = false;
-  var _errored = false;
-
-  void _scrollListener() {
-    _currentScrollOffset = _scrollController.offset;
-
-    if (_scrollController.position.pixels + _scrollThreshold >=
-        _scrollController.position.maxScrollExtent) {
-      fetchData();
-    }
-  }
-
-  Future<void> fetchData() async {
-    if (_loading) return;
-
-    setState(() {
-      _errored = false;
-      _loading = true;
-    });
-
-    try {
-      await _artistProvider.paginate();
-    } catch (_) {
-      setState(() => _errored = true);
-    } finally {
-      setState(() => _loading = false);
-    }
-  }
+  late ArtistProvider artistProvider;
+  late List<Artist> _artists = [];
 
   @override
   void initState() {
     super.initState();
-
-    _artistProvider = context.read();
-
-    _scrollController = ScrollController(
-      initialScrollOffset: _currentScrollOffset,
-    );
-
-    _scrollController.addListener(_scrollListener);
-
-    fetchData();
-  }
-
-  @override
-  void dispose() {
-    _loading = false;
-    AppState.set('artists.scrollOffSet', _currentScrollOffset);
-    _scrollController.removeListener(_scrollListener);
-    _scrollController.dispose();
-
-    super.dispose();
+    artistProvider = context.read();
+    setState(() => _artists = artistProvider.artists);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GradientDecoratedContainer(
-        child: Consumer<ArtistProvider>(
-          builder: (_, provider, __) {
-            if (provider.artists.isEmpty) {
-              if (_loading) return const ArtistsScreenPlaceholder();
-              if (_errored) return OopsBox(onRetry: fetchData);
-            }
-
-            return CupertinoTheme(
-              data: CupertinoThemeData(primaryColor: Colors.white),
-              child: PullToRefresh(
-                onRefresh: _artistProvider.refresh,
-                child: CustomScrollView(
-                  controller: _scrollController,
-                  slivers: [
-                    const CupertinoSliverNavigationBar(
-                      backgroundColor: AppColors.screenHeaderBackground,
-                      largeTitle: LargeTitle(text: 'Artists'),
+      body: CupertinoTheme(
+        data: CupertinoThemeData(
+          primaryColor: Colors.white,
+        ),
+        child: CustomScrollView(
+          slivers: [
+            CupertinoSliverNavigationBar(
+              backgroundColor: Colors.black,
+              largeTitle: const LargeTitle(text: 'Artists'),
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  Artist artist = _artists[index];
+                  return InkWell(
+                    onTap: () => widget.router.gotoArtistDetailsScreen(
+                      context,
+                      artist: artist,
                     ),
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate((
-                        BuildContext context,
-                        int index,
-                      ) {
-                        final artist = provider.artists[index];
-
-                        return Card(
-                          child: InkWell(
-                            onTap: () => widget.router.gotoArtistDetailsScreen(
-                              context,
-                              artistId: artist.id,
-                            ),
-                            child: ListTile(
-                              shape: Border(
-                                bottom: Divider.createBorderSide(context),
-                              ),
-                              leading: AlbumArtistThumbnail(
-                                entity: artist,
-                                asHero: true,
-                              ),
-                              title: Text(
-                                artist.name,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ),
-                        );
-                      }, childCount: provider.artists.length),
+                    child: ListTile(
+                      shape: Border(bottom: Divider.createBorderSide(context)),
+                      leading: ArtistThumbnail(artist: artist, asHero: true),
+                      title: Text(artist.name, overflow: TextOverflow.ellipsis),
                     ),
-                    _loading
-                        ? SliverToBoxAdapter(
-                            child: Container(
-                              height: 72,
-                              child: Center(child: const Spinner(size: 16)),
-                            ),
-                          )
-                        : const SliverToBoxAdapter(),
-                    const BottomSpace(),
-                  ],
-                ),
+                  );
+                },
+                childCount: _artists.length,
               ),
-            );
-          },
+            ),
+            const BottomSpace(),
+          ],
         ),
       ),
     );

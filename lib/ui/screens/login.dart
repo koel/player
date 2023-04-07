@@ -1,13 +1,10 @@
-import 'package:app/constants/constants.dart';
-import 'package:app/exceptions/exceptions.dart';
-import 'package:app/mixins/stream_subscriber.dart';
-import 'package:app/providers/providers.dart';
-import 'package:app/ui/screens/screens.dart';
-import 'package:app/ui/widgets/widgets.dart';
+import 'package:app/constants/dimensions.dart';
+import 'package:app/providers/auth_provider.dart';
+import 'package:app/ui/screens/data_loading.dart';
+import 'package:app/ui/widgets/spinner.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -19,41 +16,32 @@ class LoginScreen extends StatefulWidget {
   _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
+class _LoginScreenState extends State<LoginScreen> {
+  bool _authenticating = false;
   final formKey = GlobalKey<FormState>();
-  var _authenticating = false;
-  var _showPassword = false;
-  late final AuthProvider _auth;
 
-  late String _email;
-  late String _password;
-  late String _host;
+  String? _email = '';
+  String? _password = '';
+  String? _hostUrl = '';
 
   @override
   void initState() {
     super.initState();
-    _auth = context.read();
 
     // Try looking for stored values in local storage
     setState(() {
-      _host = preferences.hostUrl ?? '';
-      _email = preferences.userEmail ?? '';
+      _hostUrl = preferences.hostUrl;
+      _email = preferences.userEmail;
     });
   }
 
-  @override
-  void dispose() {
-    unsubscribeAll();
-    super.dispose();
-  }
-
-  Future<void> showErrorDialog(BuildContext context, {String? message}) async {
+  Future<void> showErrorDialog(BuildContext context) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) => CupertinoAlertDialog(
         title: const Text('Error'),
-        content: Text(
-          message ?? 'There was a problem logging in. Please try again.',
+        content: const Text(
+          'There was a problem logging in. Please try again.',
         ),
         actions: <Widget>[
           CupertinoDialogAction(
@@ -66,66 +54,97 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
     );
   }
 
-  String standardizeHost(String host) {
-    host = host.trim().replaceAll(RegExp(r'/+$'), '');
-
-    if (!host.startsWith("http://") && !host.startsWith("https://")) {
-      host = "https://" + host;
-    }
-
-    return host;
-  }
-
-  Future<void> attemptLogin() async {
-    final form = formKey.currentState!;
-    var successful = false;
-
-    if (!form.validate()) return;
-
-    form.save();
-    setState(() => _authenticating = true);
-
-    try {
-      _host = standardizeHost(_host);
-      await _auth.login(host: _host, email: _email, password: _password);
-      await _auth.tryGetAuthUser();
-      successful = true;
-    } on HttpResponseException catch (error) {
-      await showErrorDialog(
-        context,
-        message: error.response.statusCode == 401
-            ? 'Invalid email or password.'
-            : null,
-      );
-    } catch (error) {
-      await showErrorDialog(context);
-    } finally {
-      setState(() => _authenticating = false);
-    }
-
-    if (successful) {
-      preferences.hostUrl = _host;
-      preferences.userEmail = _email;
-
-      Navigator.of(
-        context,
-        rootNavigator: true,
-      ).pushReplacementNamed(DataLoadingScreen.routeName);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    AuthProvider auth = context.watch();
+
+    Future<void> attemptLogin() async {
+      final form = formKey.currentState!;
+
+      if (!form.validate()) return;
+
+      form.save();
+      setState(() => _authenticating = true);
+
+      bool result = await auth.login(email: _email!, password: _password!);
+      setState(() => _authenticating = false);
+
+      if (result) {
+        // Store the email into local storage for easy login next time
+        preferences.userEmail = _email;
+        await auth.tryGetAuthUser();
+
+        Navigator.of(
+          context,
+          rootNavigator: true,
+        ).pushReplacementNamed(DataLoadingScreen.routeName);
+      } else {
+        throw Error();
+      }
+    }
+
+    InputDecoration decoration({String? label, String? hint}) {
+      return InputDecoration(
+        labelText: label,
+        hintText: hint,
+      );
+    }
+
     String? requireValue(value) =>
         value == null || value.isEmpty ? 'This field is required' : null;
 
-    return Scaffold(
-      body: GradientDecoratedContainer(
-        child: Center(
+    Widget hostField = TextFormField(
+      keyboardType: TextInputType.url,
+      autocorrect: false,
+      onSaved: (value) => preferences.hostUrl = value,
+      decoration: decoration(
+        label: 'Host URL',
+        hint: 'https://www.koel.music',
+      ),
+      controller: TextEditingController(text: _hostUrl),
+      validator: requireValue,
+    );
+
+    final emailField = TextFormField(
+      keyboardType: TextInputType.emailAddress,
+      autocorrect: false,
+      onSaved: (value) => _email = value ?? '',
+      decoration: decoration(label: 'Email', hint: 'you@koel.music'),
+      controller: TextEditingController(text: _email),
+      validator: requireValue,
+    );
+
+    final passwordField = TextFormField(
+      obscureText: true,
+      keyboardType: TextInputType.visiblePassword,
+      onSaved: (value) => _password = value ?? '',
+      decoration: decoration(label: 'Password'),
+      validator: requireValue,
+    );
+
+    final submitButton = ElevatedButton(
+      child: const Text('Log In'),
+      onPressed: () async {
+        try {
+          await attemptLogin();
+        } catch (error) {
+          await showErrorDialog(context);
+        }
+      },
+    );
+
+    final spinnerWidget = const Center(
+      child: const Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: const Spinner(size: 16),
+      ),
+    );
+
+    return SafeArea(
+      child: Scaffold(
+        body: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppDimensions.hPadding,
-            ),
+            padding: const EdgeInsets.all(AppDimensions.horizontalPadding),
             child: Form(
               key: formKey,
               child: Column(
@@ -133,62 +152,13 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
                 children: <Widget>[
                   ...[
                     Image.asset('assets/images/logo.png', width: 160),
-                    TextFormField(
-                      keyboardType: TextInputType.url,
-                      autocorrect: false,
-                      onChanged: (value) => _host = value,
-                      onSaved: (value) => _host = value ?? '',
-                      decoration: InputDecoration(
-                        labelText: 'Host',
-                        hintText: 'https://www.koel.music',
-                      ),
-                      controller: TextEditingController(text: _host),
-                      validator: requireValue,
-                    ),
-                    TextFormField(
-                      keyboardType: TextInputType.emailAddress,
-                      autocorrect: false,
-                      onChanged: (value) => _email = value,
-                      onSaved: (value) => _email = value ?? '',
-                      decoration: InputDecoration(
-                        labelText: 'Email',
-                        hintText: 'you@koel.music',
-                      ),
-                      controller: TextEditingController(text: _email),
-                      validator: requireValue,
-                    ),
-                    TextFormField(
-                      obscureText: !_showPassword,
-                      keyboardType: TextInputType.visiblePassword,
-                      onChanged: (value) => _password = value,
-                      onSaved: (value) => _password = value ?? '',
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _showPassword
-                                ? CupertinoIcons.eye_slash_fill
-                                : CupertinoIcons.eye_fill,
-                          ),
-                          onPressed: () {
-                            setState(() => _showPassword = !_showPassword);
-                          },
-                        ),
-                      ),
-                      validator: requireValue,
-                    ),
+                    hostField,
+                    emailField,
+                    passwordField,
                     SizedBox(
                       width: double.infinity,
-                      child: ElevatedButton(
-                        child: _authenticating
-                            ? const SpinKitThreeBounce(
-                                color: Colors.white,
-                                size: 16,
-                              )
-                            : const Text('Log In'),
-                        onPressed: _authenticating ? null : attemptLogin,
-                      ),
-                    ),
+                      child: _authenticating ? spinnerWidget : submitButton,
+                    )
                   ].expand((widget) => [widget, const SizedBox(height: 12)]),
                 ],
               ),

@@ -1,80 +1,55 @@
-import 'package:app/main.dart';
-import 'package:app/mixins/stream_subscriber.dart';
-import 'package:app/models/models.dart';
-import 'package:app/providers/providers.dart';
+import 'package:app/models/interaction.dart';
+import 'package:app/models/song.dart';
+import 'package:app/providers/song_provider.dart';
 import 'package:app/utils/api_request.dart';
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/foundation.dart';
 
-class InteractionProvider with ChangeNotifier, StreamSubscriber {
-  late final SongProvider _songProvider;
-  late final RecentlyPlayedProvider _recentlyPlayedProvider;
+class InteractionProvider with ChangeNotifier {
+  SongProvider _songProvider;
 
-  InteractionProvider({
-    required SongProvider songProvider,
-    required RecentlyPlayedProvider recentlyPlayedProvider,
-  })  : _songProvider = songProvider,
-        _recentlyPlayedProvider = recentlyPlayedProvider {
-    _subscribeToAudioEvents();
-  }
+  InteractionProvider({required SongProvider songProvider})
+      : _songProvider = songProvider;
 
-  _subscribeToAudioEvents() {
-    subscribe(audioHandler.playbackState.listen((state) {
-      if (audioHandler.mediaItem.value == null) return;
-      // every time the song completes, reset the play count registered flag
-      // so that next time the song is played, the count will be registered again.
-      if (state.processingState == AudioProcessingState.completed) {
-        final song = _songProvider.byId(audioHandler.mediaItem.value!.id);
-        if (song == null) return; // should never happen
+  List<Song> get favorites =>
+      _songProvider.songs.where((song) => song.liked).toList();
 
-        _recentlyPlayedProvider.add(song);
-        song.playCountRegistered = false;
-      }
-    }));
-
-    subscribe(audioHandler.player.positionStream.listen((duration) {
-      if (audioHandler.mediaItem.value == null) return;
-      final song = _songProvider.byId(audioHandler.mediaItem.value!.id);
-
-      if (song != null &&
-          !song.playCountRegistered &&
-          duration.inSeconds / song.length > .25) {
-        song.playCountRegistered = true;
-        _registerPlayCount(song: song);
-      }
-    }));
-  }
-
-  Future<void> _like({required Song song}) async {
+  Future<void> like({required Song song}) async {
+    // Broadcast the event first regardless
     song.liked = true;
     notifyListeners();
     await post('interaction/like', data: {'song': song.id});
   }
 
-  Future<void> _unlike({required Song song}) async {
+  Future<void> unlike({required Song song}) async {
+    // Broadcast the event first regardless
     song.liked = false;
     notifyListeners();
     await post('interaction/like', data: {'song': song.id});
   }
 
   Future<void> toggleLike({required Song song}) async {
-    return song.liked ? _unlike(song: song) : _like(song: song);
+    return song.liked ? unlike(song: song) : like(song: song);
   }
 
-  Future<void> _registerPlayCount({required Song song}) async {
+  List<Song> getRandomFavorites({int limit = 15}) {
+    List<Song> clone = List.from(favorites);
+    clone.shuffle();
+    return clone.take(limit).toList();
+  }
+
+  Future<void> registerPlayCount({required Song song}) async {
+    // Prevent continuous calls to this function
     song.playCountRegistered = true;
-    final json = await post('interaction/play', data: {'song': song.id});
+    dynamic json = await post('interaction/play', data: {'song': song.id});
 
     // Use the data from the server to make sure we don't miss a play from another device.
-    final interaction = Interaction.fromJson(json);
+    Interaction interaction = Interaction.fromJson(json);
+    int oldCount = song.playCount;
     song
       ..playCount = interaction.playCount
+      ..album.playCount += song.playCount - oldCount
+      ..artist.playCount += song.playCount - oldCount
+      // might as well
       ..liked = interaction.liked;
-  }
-
-  @override
-  dispose() {
-    super.dispose();
-    unsubscribeAll();
   }
 }

@@ -19,8 +19,8 @@ import 'package:rxdart/rxdart.dart' as _i3;
 // ignore_for_file: prefer_const_constructors
 // ignore_for_file: unnecessary_parenthesis
 
-class _FakeAssetsAudioPlayer extends _i1.Fake
-    implements _i2.AssetsAudioPlayer {}
+class _FakeAssetsAudioPlayer extends _i1.Fake implements _i2.AssetsAudioPlayer {
+}
 
 class _FakeValueStream<T> extends _i1.Fake implements _i3.ValueStream<T> {}
 
@@ -58,7 +58,7 @@ class MockAudioProvider extends _i1.Mock implements _i4.AudioProvider {
       (super.noSuchMethod(Invocation.method(#queued, [song]),
           returnValue: Future<bool>.value(false)) as _i6.Future<bool>);
   @override
-  _i6.Future<int> getQueuePosition(_i5.Song? song) =>
+  _i6.Future<int> indexInQueue(_i5.Song? song) =>
       (super.noSuchMethod(Invocation.method(#indexInQueue, [song]),
           returnValue: Future<int>.value(0)) as _i6.Future<int>);
   @override

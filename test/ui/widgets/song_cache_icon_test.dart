@@ -1,5 +1,5 @@
 import 'package:app/models/song.dart';
-import 'package:app/providers/download_provider.dart';
+import 'package:app/providers/cache_provider.dart';
 import 'package:app/ui/widgets/song_cache_icon.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -12,12 +12,12 @@ import 'package:rxdart/rxdart.dart';
 import '../../extensions/widget_tester_extension.dart';
 import 'song_cache_icon_test.mocks.dart';
 
-@GenerateMocks([DownloadProvider, FileInfo])
+@GenerateMocks([CacheProvider, FileInfo])
 void main() {
   late MockCacheProvider cacheMock;
   late Song song;
   late BehaviorSubject<bool> cacheCleared;
-  late BehaviorSubject<Download> songCached;
+  late BehaviorSubject<SongCached> songCached;
   late BehaviorSubject<Song> singleCacheRemoved;
 
   setUp(() {
@@ -25,20 +25,19 @@ void main() {
     song = Song.fake();
 
     cacheCleared = BehaviorSubject();
-    when(cacheMock.downloadsClearedStream)
-        .thenAnswer((_) => cacheCleared.stream);
+    when(cacheMock.cacheClearedStream).thenAnswer((_) => cacheCleared.stream);
 
     songCached = BehaviorSubject();
-    when(cacheMock.songDownloadedStream).thenAnswer((_) => songCached.stream);
+    when(cacheMock.songCachedStream).thenAnswer((_) => songCached.stream);
 
     singleCacheRemoved = BehaviorSubject();
-    when(cacheMock.downloadRemovedStream)
+    when(cacheMock.singleCacheRemovedStream)
         .thenAnswer((_) => singleCacheRemoved.stream);
   });
 
   Future<void> _mount(WidgetTester tester) async {
     await tester.pumpAppWidget(
-      ChangeNotifierProvider<DownloadProvider>.value(
+      ChangeNotifierProvider<CacheProvider>.value(
         value: cacheMock,
         child: SongCacheIcon(song: song),
       ),
@@ -98,7 +97,7 @@ void main() {
     await _mount(tester);
     _assertCacheStatus(hasCache: false);
 
-    songCached.add(Download(song: song, file: MockFileInfo()));
+    songCached.add(SongCached(song: song, info: MockFileInfo()));
     await tester.pumpAndSettle();
     _assertCacheStatus(hasCache: true);
   });

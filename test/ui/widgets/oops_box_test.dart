@@ -28,7 +28,7 @@ void main() {
     await tester.pumpAppWidget(
         Provider<AuthProvider>.value(
           value: authMock,
-          child: OopsBox(onRetry: retryFunction),
+          child: OopsBox(onRetryButtonPressed: retryFunction),
         ),
         routes: {
           LoginScreen.routeName: (_) => dummyLoginScreen,

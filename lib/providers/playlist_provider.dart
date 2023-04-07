@@ -1,8 +1,10 @@
-import 'package:app/app_state.dart';
-import 'package:app/models/models.dart';
+import 'package:app/models/playlist.dart';
+import 'package:app/models/song.dart';
+import 'package:app/providers/song_provider.dart';
 import 'package:app/utils/api_request.dart';
-import 'package:app/values/values.dart';
+import 'package:app/values/parse_result.dart';
 import 'package:flutter/foundation.dart';
+import 'package:rxdart/rxdart.dart';
 
 ParseResult parsePlaylists(List<dynamic> data) {
   ParseResult result = ParseResult();
@@ -12,7 +14,16 @@ ParseResult parsePlaylists(List<dynamic> data) {
 }
 
 class PlaylistProvider with ChangeNotifier {
-  var _playlists = <Playlist>[];
+  SongProvider _songProvider;
+  late List<Playlist> _playlists;
+
+  final BehaviorSubject<Playlist> _playlistPopulated = BehaviorSubject();
+
+  ValueStream<Playlist> get playlistPopulatedStream =>
+      _playlistPopulated.stream;
+
+  PlaylistProvider({required SongProvider songProvider})
+      : _songProvider = songProvider;
 
   Future<void> init(List<dynamic> playlistData) async {
     ParseResult result = await compute(parsePlaylists, playlistData);
@@ -25,46 +36,66 @@ class PlaylistProvider with ChangeNotifier {
   List<Playlist> get standardPlaylists =>
       _playlists.where((playlist) => playlist.isStandard).toList();
 
-  Future<void> addSongToPlaylist(
-    Song song, {
+  Future<Playlist> populatePlaylist({required Playlist playlist}) async {
+    if (!playlist.populated) {
+      List<dynamic> response = await get('playlist/${playlist.id}/songs');
+
+      response.cast<String>().forEach((id) {
+        Song? song = _songProvider.tryById(id);
+        if (song != null) {
+          playlist.songs.add(song);
+        }
+      });
+
+      playlist.populated = true;
+      _playlistPopulated.add(playlist);
+    }
+
+    return playlist;
+  }
+
+  void populateAllPlaylists() {
+    _playlists.forEach((playlist) => populatePlaylist(playlist: playlist));
+  }
+
+  Future<void> addSongToPlaylist({
+    required Song song,
     required Playlist playlist,
   }) async {
     assert(!playlist.isSmart, 'Cannot manually mutate smart playlists.');
 
-    await post('playlists/${playlist.id}/songs', data: {
-      'songs': [song.id],
-    });
+    if (!playlist.populated) {
+      await populatePlaylist(playlist: playlist);
+    }
 
-    final cachedSongs =
-        AppState.get<List<Song>>(['playlist.songs', playlist.id]);
+    if (playlist.songs.contains(song)) return;
 
-    if (cachedSongs != null && !cachedSongs.contains(song)) {
-      // add the song into the playlist's songs cache
-      AppState.set(['playlist.songs', playlist.id], cachedSongs..add(song));
+    try {
+      await _syncPlaylist(playlist: playlist..songs.add(song));
+    } catch (err) {
+      print(err);
+      // not the end of the world
     }
   }
 
-  Future<void> removeSongFromPlaylist(
-    Song song, {
+  Future<void> removeSongFromPlaylist({
+    required Song song,
     required Playlist playlist,
   }) async {
     assert(!playlist.isSmart, 'Cannot manually mutate smart playlists.');
 
-    await delete('playlists/${playlist.id}/songs', data: {
-      'songs': [song.id],
-    });
+    if (!playlist.songs.contains(song)) return;
 
-    final cachedSongs =
-        AppState.get<List<Song>>(['playlist.songs', playlist.id]);
-
-    if (cachedSongs != null && cachedSongs.contains(song)) {
-      // remove the song from the playlist's songs cache
-      AppState.set(['playlist.songs', playlist.id], cachedSongs..remove(song));
+    try {
+      await _syncPlaylist(playlist: playlist..songs.remove(song));
+    } catch (err) {
+      print(err);
+      // not the end of the world
     }
   }
 
   Future<Playlist> create({required String name}) async {
-    final json = await post('playlist', data: {
+    var json = await post('playlist', data: {
       'name': name,
     });
 
@@ -75,11 +106,17 @@ class PlaylistProvider with ChangeNotifier {
     return playlist;
   }
 
-  Future<void> remove(Playlist playlist) async {
-    // For a snappier experience, we don't `await` the operation.
-    delete('playlists/${playlist.id}');
-    _playlists.remove(playlist);
+  Future<void> _syncPlaylist({required Playlist playlist}) async {
+    await put('playlist/${playlist.id}/sync', data: {
+      'songs': playlist.songs.map((song) => song.id).toList(),
+    });
 
-    notifyListeners();
+    _playlistPopulated.add(playlist);
+  }
+
+  Future<void> remove({required Playlist playlist}) async {
+    // For a snappier experience, we don't `await` the operation.
+    delete('playlist/${playlist.id}');
+    _playlists.remove(playlist);
   }
 }

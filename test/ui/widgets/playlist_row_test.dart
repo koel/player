@@ -18,9 +18,15 @@ import 'playlist_row_test.mocks.dart';
 void main() {
   late MockPlaylistProvider playlistProviderMock;
   late Playlist playlist;
+  late BehaviorSubject<Playlist> playlistPopulated;
 
   setUp(() {
     playlistProviderMock = MockPlaylistProvider();
+    playlistPopulated = BehaviorSubject();
+
+    when(playlistProviderMock.playlistPopulatedStream).thenAnswer(
+      (_) => playlistPopulated.stream,
+    );
 
     playlist = Playlist.fake(name: 'A Bunch of Bananas');
   });
@@ -53,11 +59,14 @@ void main() {
         id: playlist.id,
         name: playlist.name,
         isSmart: playlist.isSmart,
+        populated: true,
       );
 
       populatedPlaylist.songs = Song.fakeMany(4);
 
       await mount(tester);
+      await tester.pumpAndSettle();
+      playlistPopulated.add(populatedPlaylist);
       await tester.pumpAndSettle();
       expect(find.text('Standard playlist • 4 songs'), findsOneWidget);
 

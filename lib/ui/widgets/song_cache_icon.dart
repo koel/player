@@ -1,7 +1,6 @@
-import 'package:app/constants/constants.dart';
 import 'package:app/mixins/stream_subscriber.dart';
-import 'package:app/models/models.dart';
-import 'package:app/providers/providers.dart';
+import 'package:app/models/song.dart';
+import 'package:app/providers/cache_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,28 +15,34 @@ class SongCacheIcon extends StatefulWidget {
 }
 
 class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
-  late DownloadProvider downloadProvider;
-  var _downloading = false;
-  bool? _downloaded;
+  late CacheProvider cache;
+  bool _downloading = false;
+  bool? _hasCache;
 
   @override
   void initState() {
     super.initState();
-    downloadProvider = context.read();
+    cache = context.read();
 
-    subscribe(downloadProvider.downloadsClearedStream.listen((_) {
-      setState(() => _downloaded = false);
+    subscribe(cache.cacheClearedStream.listen((_) {
+      setState(() => _hasCache = false);
     }));
 
-    subscribe(downloadProvider.downloadRemovedStream.listen((song) {
-      if (song == widget.song) setState(() => _downloaded = false);
+    subscribe(cache.singleCacheRemovedStream.listen((song) {
+      if (song == widget.song) {
+        setState(() => _hasCache = false);
+      }
     }));
 
-    subscribe(downloadProvider.songDownloadedStream.listen((event) {
-      if (event.song == widget.song) setState(() => _downloaded = true);
+    subscribe(cache.songCachedStream.listen((event) {
+      if (event.song == widget.song) {
+        setState(() => _hasCache = true);
+      }
     }));
 
-    setState(() => _downloaded = downloadProvider.has(song: widget.song));
+    cache.has(song: widget.song).then((value) {
+      setState(() => _hasCache = value);
+    });
   }
 
   /// Since this widget is rendered inside NowPlayingScreen, change to current
@@ -48,11 +53,12 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
   @override
   void didUpdateWidget(covariant SongCacheIcon oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _resolveDownloadStatus();
+    _resolveCacheStatus();
   }
 
-  void _resolveDownloadStatus() {
-    setState(() => _downloaded = downloadProvider.has(song: widget.song));
+  Future<void> _resolveCacheStatus() async {
+    bool hasState = await cache.has(song: widget.song);
+    setState(() => _hasCache = hasState);
   }
 
   @override
@@ -61,12 +67,12 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
     super.dispose();
   }
 
-  Future<void> _download() async {
+  Future<void> _cache() async {
     setState(() => _downloading = true);
-    await downloadProvider.download(song: widget.song);
+    await cache.cache(song: widget.song);
     setState(() {
       _downloading = false;
-      _downloaded = true;
+      _hasCache = true;
     });
   }
 
@@ -75,29 +81,24 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
     if (_downloading)
       return const Padding(
         padding: EdgeInsets.only(right: 4.0),
-        child: CupertinoActivityIndicator(
-          radius: 9,
-          color: AppColors.white,
-        ),
+        child: CupertinoActivityIndicator(radius: 9),
       );
 
-    final downloaded = this._downloaded;
+    if (_hasCache == null) return const SizedBox.shrink();
 
-    if (downloaded == null) return const SizedBox.shrink();
-
-    if (downloaded) {
+    if (_hasCache!) {
       return const Padding(
         padding: EdgeInsets.only(right: 4.0),
         child: Icon(
           CupertinoIcons.checkmark_alt_circle_fill,
           size: 18,
-          color: Color(0xFFFAD763),
+          color: Colors.white24,
         ),
       );
     }
 
     return IconButton(
-      onPressed: _download,
+      onPressed: () async => await _cache(),
       constraints: const BoxConstraints(),
       padding: const EdgeInsets.symmetric(horizontal: 0.0),
       icon: const Icon(

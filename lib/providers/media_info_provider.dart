@@ -1,5 +1,4 @@
-import 'package:app/app_state.dart';
-import 'package:app/models/models.dart';
+import 'package:app/models/song.dart';
 import 'package:app/utils/api_request.dart';
 
 class Track {
@@ -73,28 +72,5 @@ class MediaInfoProvider {
     }
 
     return _cache[song.id]!;
-  }
-
-  Future<AlbumInfo> fetchForAlbum(int albumId) async {
-    if (AppState.has(['album.info', albumId])) {
-      return AppState.get<AlbumInfo>(['album.info', albumId])!;
-    }
-
-    final info = AlbumInfo.fromJson(await get('albums/$albumId/information'));
-    AppState.set(['album.info', albumId], info);
-    return info;
-  }
-
-  Future<ArtistInfo> fetchForArtist(int artistId) async {
-    if (AppState.has(['artist.info', artistId])) {
-      return AppState.get<ArtistInfo>(['artist.info', artistId])!;
-    }
-
-    final info = ArtistInfo.fromJson(
-      await get('artists/$artistId/information'),
-    );
-
-    AppState.set(['artist.info', artistId], info);
-    return info;
   }
 }

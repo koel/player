@@ -1,4 +1,4 @@
-import 'package:app/constants/constants.dart';
+import 'package:app/constants/images.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
@@ -13,16 +13,13 @@ class Artist {
   Artist({required this.id, required this.name, required this.imageUrl});
 
   ImageProvider get image {
-    var image = _image;
-    final imageUrl = this.imageUrl;
-
-    if (image == null) {
-      _image = image = imageUrl == null
-          ? AppImages.defaultImage.image
-          : CachedNetworkImageProvider(imageUrl);
+    if (_image == null) {
+      _image = imageUrl == null
+          ? defaultImage.image
+          : CachedNetworkImageProvider(this.imageUrl!);
     }
 
-    return image;
+    return _image!;
   }
 
   bool get isStandardArtist => !isUnknownArtist && !isVariousArtist;
@@ -52,16 +49,5 @@ class Artist {
       name: name ?? faker.person.name(),
       imageUrl: imageUrl ?? faker.image.image(width: 192, height: 192),
     )..playCount = playCount ?? faker.randomGenerator.integer(1000);
-  }
-
-  Artist merge(Artist remote) {
-    this
-      ..imageUrl = remote.imageUrl
-      ..playCount = remote.playCount ?? 0
-      ..name = remote.name;
-
-    _image = null;
-
-    return this;
   }
 }
