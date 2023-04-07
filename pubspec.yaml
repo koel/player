@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.1.1+9
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.17.0-0 <3.0.0"
 
 dependencies:
   flutter:
@@ -30,26 +30,28 @@ dependencies:
   cupertino_icons: ^1.0.2
   provider: ^6.0.3
   http: ^0.13.3
-  assets_audio_player: ^3.0.3+3
-  rxdart: ^0.27.5
   easy_debounce: ^2.0.0
   flutter_html: ^2.1.0
   flutter_spinkit: ^5.0.0
-  enum_to_string: ^2.0.1
   flutter_cache_manager: ^3.1.2
   crypto: ^3.0.1
   intl: ^0.17.0
   get_storage: ^2.0.2
   cached_network_image: ^3.0.0
-  faker: ^2.0.0
-  mockito: ^5.0.12
   build_runner: ^2.0.6
   uuid: ^3.0.4
-  golden_toolkit: ^0.12.0
-  fake_async: ^1.2.0
-  mutex: ^3.0.0
+  shimmer: ^2.0.0
+  just_audio: ^0.9.32
+  audio_service: ^0.18.9
+  figma_squircle: ^0.5.3
+  connectivity_plus: ^2.1.0
+  path_provider: ^2.0.14
 
 dev_dependencies:
+  golden_toolkit: ^0.12.0
+  fake_async: ^1.2.0
+  faker: ^2.0.0
+  mockito: ^5.0.12
   flutter_test:
     sdk: flutter
 
@@ -66,7 +68,6 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/audio/
     - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see

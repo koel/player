@@ -1,10 +1,8 @@
-import 'dart:ui';
-
-import 'package:app/constants/dimensions.dart';
-import 'package:app/models/song.dart';
-import 'package:app/utils/preferences.dart' as preferences;
+import 'package:app/constants/constants.dart';
+import 'package:app/models/models.dart';
+import 'package:app/ui/widgets/widgets.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 
 class AppBar extends StatelessWidget {
@@ -31,7 +29,7 @@ class AppBar extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: [
             Colors.transparent,
-            Colors.black,
+            AppColors.screenHeaderBackground,
           ],
         ),
       ),
@@ -40,32 +38,38 @@ class AppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final backgroundImage = this.backgroundImage;
+
     return SliverAppBar(
       pinned: true,
       expandedHeight: 290,
       actions: actions,
-      flexibleSpace: FlexibleSpaceBar(
-        title: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.horizontalPadding,
-          ),
-          child: Text(
-            headingText,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        background: Stack(
-          children: <Widget>[
-            if (backgroundImage != null) backgroundImage!,
-            _gradientEffect,
-            Center(
-              child: SizedBox(
-                width: 192,
-                height: 192,
-                child: coverImage,
-              ),
+      backgroundColor: AppColors.screenHeaderBackground,
+      shadowColor: Colors.transparent,
+      flexibleSpace: FrostedGlassBackground(
+        child: FlexibleSpaceBar(
+          title: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.hPadding,
             ),
-          ],
+            child: Text(
+              headingText,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          background: Stack(
+            children: <Widget>[
+              if (backgroundImage != null) backgroundImage,
+              _gradientEffect,
+              Center(
+                child: SizedBox(
+                  width: 192,
+                  height: 192,
+                  child: coverImage,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -77,6 +81,8 @@ class CoverImageStack extends StatelessWidget {
 
   const CoverImageStack({Key? key, required this.songs}) : super(key: key);
 
+  bool get isEmpty => songs.isEmpty;
+
   @override
   Widget build(BuildContext context) {
     const imageCount = 4;
@@ -85,7 +91,7 @@ class CoverImageStack extends StatelessWidget {
     if (songs.isNotEmpty) {
       images = songs
           .where((song) => song.hasCustomImage)
-          .map((song) => song.imageUrl)
+          .map((song) => song.albumCoverUrl)
           .toList();
 
       images.shuffle();
@@ -94,7 +100,7 @@ class CoverImageStack extends StatelessWidget {
 
     // fill up to 4 images
     for (int i = images.length; i < imageCount; ++i) {
-      images.insert(0, preferences.defaultImageUrl);
+      images.insert(0, null);
     }
 
     return Stack(
@@ -133,30 +139,37 @@ class CoverImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imageUrl = this.imageUrl;
+
     return SizedBox(
       width: 160,
       height: 160,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(overlayOpacity),
-              BlendMode.srcOver,
+      child: ClipSmoothRect(
+        radius: SmoothBorderRadius(
+          cornerRadius: 16,
+          cornerSmoothing: .8,
+        ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              colorFilter: ColorFilter.mode(
+                AppColors.screenHeaderBackground.withOpacity(overlayOpacity),
+                BlendMode.srcOver,
+              ),
+              image: imageUrl == null
+                  ? AppImages.defaultImage.image
+                  : CachedNetworkImageProvider(imageUrl),
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
             ),
-            image: CachedNetworkImageProvider(
-              imageUrl ?? preferences.defaultImageUrl,
-            ),
-            fit: BoxFit.cover,
-            alignment: Alignment.topCenter,
+            boxShadow: const <BoxShadow>[
+              const BoxShadow(
+                color: AppColors.screenHeaderBackground,
+                blurRadius: 10.0,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
-          borderRadius: BorderRadius.all(Radius.circular(8)),
-          boxShadow: const <BoxShadow>[
-            const BoxShadow(
-              color: Colors.black38,
-              blurRadius: 10.0,
-              offset: const Offset(0, 6),
-            ),
-          ],
         ),
       ),
     );

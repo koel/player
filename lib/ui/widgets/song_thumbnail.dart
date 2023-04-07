@@ -1,10 +1,9 @@
-import 'package:app/constants/images.dart';
-import 'package:app/models/song.dart';
-import 'package:app/utils/preferences.dart' as preferences;
+import 'package:app/constants/constants.dart';
+import 'package:app/enums.dart';
+import 'package:app/models/models.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
-
-enum ThumbnailSize { sm, md, lg, xl }
 
 class SongThumbnail extends StatelessWidget {
   final Song song;
@@ -20,24 +19,36 @@ class SongThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return this.playing
-        ? PlayingSongThumbnail(
+    final albumCover = song.albumCoverUrl == null
+        ? Image.asset(
+            AppImages.defaultImageAssetName,
+            fit: BoxFit.cover,
             width: width,
             height: height,
-            song: song,
-            borderRadius: borderRadius,
           )
-        : ClipRRect(
-            borderRadius: BorderRadius.circular(borderRadius),
-            child: CachedNetworkImage(
-              fit: BoxFit.cover,
+        : CachedNetworkImage(
+            fit: BoxFit.cover,
+            width: width,
+            height: height,
+            placeholder: (_, __) => AppImages.defaultImage,
+            errorWidget: (_, __, ___) => AppImages.defaultImage,
+            imageUrl: song.albumCoverUrl ?? '',
+          );
+
+    return ClipSmoothRect(
+      radius: SmoothBorderRadius(
+        cornerRadius: borderRadius,
+        cornerSmoothing: .8,
+      ),
+      child: this.playing
+          ? PlayingSongThumbnail(
               width: width,
               height: height,
-              placeholder: (_, __) => defaultImage,
-              errorWidget: (_, __, ___) => defaultImage,
-              imageUrl: song.imageUrl ?? preferences.defaultImageUrl,
-            ),
-          );
+              song: song,
+              borderRadius: borderRadius,
+            )
+          : albumCover,
+    );
   }
 
   double get width {
@@ -56,11 +67,11 @@ class SongThumbnail extends StatelessWidget {
   double get borderRadius {
     switch (size) {
       case ThumbnailSize.md:
-        return 12;
-      case ThumbnailSize.lg:
         return 16;
+      case ThumbnailSize.lg:
+        return 24;
       case ThumbnailSize.xl:
-        return 20;
+        return 32;
       default:
         return 8;
     }
@@ -95,10 +106,8 @@ class PlayingSongThumbnail extends StatelessWidget {
             width: double.infinity,
             height: double.infinity,
             child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
-                color: Colors.black54,
-              ),
+              decoration:
+                  BoxDecoration(color: Color(0xFF410928).withOpacity(.7)),
             ),
           ),
           Align(

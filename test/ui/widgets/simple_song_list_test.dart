@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_provider.dart';
-import 'package:app/providers/cache_provider.dart';
+import 'package:app/providers/download_provider.dart';
 import 'package:app/ui/widgets/simple_song_list.dart';
 import 'package:app/ui/widgets/song_row.dart';
 import 'package:app/ui/widgets/typography.dart';
@@ -47,7 +47,8 @@ void main() {
       MultiProvider(
         providers: [
           ChangeNotifierProvider<AudioProvider>(create: (_) => audioMock),
-          ChangeNotifierProvider<CacheProvider>(create: (_) => CacheProvider()),
+          ChangeNotifierProvider<DownloadProvider>(
+              create: (_) => DownloadProvider()),
         ],
         child: SimpleSongList(
           songs: songs ?? Song.fakeMany(4),

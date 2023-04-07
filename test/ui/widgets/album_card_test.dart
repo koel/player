@@ -1,8 +1,8 @@
 import 'package:app/models/album.dart';
 import 'package:app/models/artist.dart';
 import 'package:app/router.dart';
+import 'package:app/ui/widgets/album_artist_thumbnail.dart';
 import 'package:app/ui/widgets/album_card.dart';
-import 'package:app/ui/widgets/album_thumbnail.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -24,7 +24,7 @@ void main() {
   testWidgets('renders', (WidgetTester tester) async {
     await tester.pumpAppWidget(AlbumCard(album: album));
 
-    expect(find.byType(AlbumThumbnail), findsOneWidget);
+    expect(find.byType(AlbumArtistThumbnail), findsOneWidget);
     expect(find.text('Banana'), findsOneWidget);
     expect(find.text('A Whole New Bunch'), findsOneWidget);
 

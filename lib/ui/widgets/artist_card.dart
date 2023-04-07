@@ -1,6 +1,7 @@
-import 'package:app/models/artist.dart';
+import 'package:app/enums.dart';
+import 'package:app/models/models.dart';
 import 'package:app/router.dart';
-import 'package:app/ui/widgets/artist_thumbnail.dart';
+import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -19,8 +20,8 @@ class ArtistCard extends StatefulWidget {
 }
 
 class _ArtistCardState extends State<ArtistCard> {
-  double _opacity = 1.0;
-  double _cardWidth = 144.0;
+  var _opacity = 1.0;
+  final _cardWidth = 144.0;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +31,7 @@ class _ArtistCardState extends State<ArtistCard> {
       onTapCancel: () => setState(() => _opacity = 1.0),
       onTap: () => widget.router.gotoArtistDetailsScreen(
         context,
-        artist: widget.artist,
+        artistId: widget.artist.id,
       ),
       behavior: HitTestBehavior.opaque,
       child: AnimatedOpacity(
@@ -38,12 +39,12 @@ class _ArtistCardState extends State<ArtistCard> {
         opacity: _opacity,
         child: Column(
           children: <Widget>[
-            ArtistThumbnail(
-              artist: widget.artist,
+            AlbumArtistThumbnail(
+              entity: widget.artist,
               size: ThumbnailSize.md,
               asHero: true,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             SizedBox(
               width: _cardWidth,
               child: Column(

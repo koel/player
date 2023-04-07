@@ -1,9 +1,8 @@
-import 'package:app/extensions/duration.dart';
+import 'package:app/extensions/extensions.dart';
+import 'package:app/main.dart';
 import 'package:app/mixins/stream_subscriber.dart';
-import 'package:app/models/song.dart';
-import 'package:app/providers/audio_provider.dart';
+import 'package:app/models/models.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class ProgressBar extends StatefulWidget {
   final Song song;
@@ -14,11 +13,11 @@ class ProgressBar extends StatefulWidget {
 }
 
 class _ProgressBarState extends State<ProgressBar> with StreamSubscriber {
-  late final AudioProvider audio;
-  late Duration _duration, _position;
-  bool _shouldAutoUpdatePosition = true;
+  late Duration _duration;
+  var _position = Duration.zero;
+  var _shouldAutoUpdatePosition = true;
 
-  TextStyle timeStampStyle = const TextStyle(
+  final timeStampStyle = const TextStyle(
     fontSize: 12,
     color: Colors.white54,
   );
@@ -26,14 +25,11 @@ class _ProgressBarState extends State<ProgressBar> with StreamSubscriber {
   @override
   void initState() {
     super.initState();
-    audio = context.read();
 
     setState(() => _duration = Duration(seconds: widget.song.length.toInt()));
 
-    subscribe(audio.player.currentPosition.listen((position) {
-      if (_shouldAutoUpdatePosition) {
-        setState(() => _position = position);
-      }
+    subscribe(audioHandler.player.positionStream.listen((position) {
+      if (_shouldAutoUpdatePosition) setState(() => _position = position);
     }));
   }
 
@@ -68,7 +64,7 @@ class _ProgressBarState extends State<ProgressBar> with StreamSubscriber {
           onChangeStart: (_) => _shouldAutoUpdatePosition = false,
           onChangeEnd: (double value) {
             _shouldAutoUpdatePosition = true;
-            audio.player.seek(Duration(seconds: value.toInt()));
+            audioHandler.player.seek(Duration(seconds: value.toInt()));
           },
         ),
         Container(

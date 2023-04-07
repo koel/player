@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:app/exceptions/http_response_exception.dart';
+import 'package:app/exceptions/exceptions.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:http/http.dart' as Http;
 
@@ -19,6 +19,7 @@ Future<dynamic> request(
   Map<String, String> headers = {
     HttpHeaders.contentTypeHeader: ContentType.json.mimeType,
     HttpHeaders.acceptHeader: ContentType.json.mimeType,
+    'X-Api-Version': preferences.apiVersion,
     if (preferences.apiToken != null)
       HttpHeaders.authorizationHeader: 'Bearer ${preferences.apiToken}',
   };
@@ -59,6 +60,7 @@ Future<dynamic> request(
   switch (response.statusCode) {
     case 200:
       return json.decode(response.body);
+    case 201:
     case 204:
       return;
     default:
