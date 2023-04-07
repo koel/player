@@ -1,171 +1,106 @@
-import 'package:app/app_state.dart';
-import 'package:app/constants/constants.dart';
-import 'package:app/enums.dart';
-import 'package:app/extensions/extensions.dart';
-import 'package:app/providers/providers.dart';
-import 'package:app/ui/placeholders/placeholders.dart';
-import 'package:app/ui/widgets/widgets.dart';
-import 'package:app/values/values.dart';
+import 'package:app/constants/dimensions.dart';
+import 'package:app/providers/interaction_provider.dart';
+import 'package:app/ui/widgets/app_bar.dart';
+import 'package:app/ui/widgets/bottom_space.dart';
+import 'package:app/ui/widgets/song_list_buttons.dart';
+import 'package:app/ui/widgets/song_row.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
-class FavoritesScreen extends StatefulWidget {
+class FavoritesScreen extends StatelessWidget {
   static const routeName = '/favorites';
 
   const FavoritesScreen({Key? key}) : super(key: key);
 
   @override
-  _FavoritesScreenState createState() => _FavoritesScreenState();
-}
-
-class _FavoritesScreenState extends State<FavoritesScreen> {
-  var _errored = false;
-  var _loading = false;
-  var _searchQuery = '';
-  var cover = CoverImageStack(songs: []);
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => makeRequest());
-  }
-
-  Future<void> makeRequest({bool forceRefresh = false}) async {
-    if (_loading) return;
-
-    setState(() {
-      _errored = false;
-      _loading = true;
-    });
-
-    try {
-      await context.read<FavoriteProvider>().fetch(forceRefresh: forceRefresh);
-    } catch (_) {
-      setState(() => _errored = true);
-    } finally {
-      setState(() => _loading = false);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    var sortConfig = AppState.get(
-      'favorites.sort',
-      SongSortConfig(field: 'title', order: SortOrder.asc),
-    )!;
-
-    final emptyWidget = SliverFillRemaining(
-      hasScrollBody: false,
-      fillOverscroll: true,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppDimensions.hPadding,
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const Icon(
-                CupertinoIcons.heart,
-                size: 56.0,
-                color: Colors.grey,
+    return Scaffold(
+      body: Consumer<InteractionProvider>(
+        builder: (_, provider, __) {
+          if (provider.favorites.isEmpty) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.horizontalPadding,
               ),
-              const SizedBox(height: 16.0),
-              Text(
-                'No favorites',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 16.0),
-              RichText(
-                textAlign: TextAlign.center,
-                text: const TextSpan(
-                  style: TextStyle(color: Colors.white54),
-                  children: <InlineSpan>[
-                    TextSpan(text: 'Tap the'),
-                    WidgetSpan(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 5.0),
-                        child: Icon(
-                          CupertinoIcons.heart_solid,
-                          size: 16.0,
-                        ),
-                      ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    const Icon(
+                      CupertinoIcons.heart,
+                      size: 56.0,
+                      color: Colors.grey,
                     ),
-                    TextSpan(
-                      text: 'icon in a song’s menu to mark it as '
-                          'favorite.',
+                    const SizedBox(height: 16.0),
+                    Text(
+                      'No favorites',
+                      style: Theme.of(context).textTheme.headline5,
+                    ),
+                    const SizedBox(height: 16.0),
+                    RichText(
+                      textAlign: TextAlign.center,
+                      text: const TextSpan(
+                        style: TextStyle(color: Colors.white54),
+                        children: <InlineSpan>[
+                          TextSpan(text: 'Tap the'),
+                          WidgetSpan(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 5.0),
+                              child: Icon(
+                                CupertinoIcons.heart_solid,
+                                size: 16.0,
+                              ),
+                            ),
+                          ),
+                          TextSpan(
+                            text: 'icon in a song’s menu to mark it as '
+                                'favorite.',
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    return Scaffold(
-      body: GradientDecoratedContainer(
-        child: Consumer<FavoriteProvider>(
-          builder: (_, provider, __) {
-            if (provider.songs.isEmpty) {
-              if (_loading) return const SongListScreenPlaceholder();
-              if (_errored) return OopsBox(onRetry: makeRequest);
-            }
-
-            if (cover.isEmpty) {
-              cover = CoverImageStack(songs: provider.songs);
-            }
-
-            final songs =
-                provider.songs.$sort(sortConfig).$filter(_searchQuery);
-
-            return PullToRefresh(
-              onRefresh: () {
-                return _loading
-                    ? Future(() => null)
-                    : makeRequest(forceRefresh: true);
-              },
-              child: CustomScrollView(
-                slivers: provider.songs.isEmpty
-                    ? <Widget>[emptyWidget]
-                    : <Widget>[
-                        AppBar(
-                          headingText: 'Favorites',
-                          coverImage: cover,
-                          actions: [
-                            SortButton(
-                              fields: ['title', 'artist_name', 'created_at'],
-                              currentField: sortConfig.field,
-                              currentOrder: sortConfig.order,
-                              onMenuItemSelected: (_sortConfig) {
-                                setState(() => sortConfig = _sortConfig);
-                                AppState.set('favorites.sort', sortConfig);
-                              },
-                            ),
-                          ],
-                        ),
-                        SliverToBoxAdapter(
-                          child: SongListHeader(
-                            songs: songs,
-                            onSearchQueryChanged: (String query) {
-                              setState(() => _searchQuery = query);
-                            },
-                          ),
-                        ),
-                        SliverSongList(
-                          songs: songs,
-                          listContext: SongListContext.favorites,
-                          onDismissed: provider.unlike,
-                          dismissIcon: const Icon(CupertinoIcons.heart_slash),
-                        ),
-                        const BottomSpace(),
-                      ],
-              ),
             );
-          },
-        ),
+          }
+
+          return CustomScrollView(
+            slivers: <Widget>[
+              AppBar(
+                headingText: 'Favorites',
+                coverImage: CoverImageStack(songs: provider.favorites),
+              ),
+              SliverToBoxAdapter(
+                child: SongListButtons(songs: provider.favorites),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (_, int index) {
+                    return Dismissible(
+                      direction: DismissDirection.endToStart,
+                      onDismissed: (DismissDirection direction) =>
+                          provider.unlike(song: provider.favorites[index]),
+                      background: Container(
+                        alignment: AlignmentDirectional.centerEnd,
+                        color: Colors.red,
+                        child: const Padding(
+                          padding: EdgeInsets.only(right: 28),
+                          child: Icon(CupertinoIcons.heart_slash),
+                        ),
+                      ),
+                      key: ValueKey(provider.favorites[index]),
+                      child: SongRow(song: provider.favorites[index]),
+                    );
+                  },
+                  childCount: provider.favorites.length,
+                ),
+              ),
+              const BottomSpace(),
+            ],
+          );
+        },
       ),
     );
   }

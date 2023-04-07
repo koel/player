@@ -1,6 +1,6 @@
-import 'package:app/constants/constants.dart';
-import 'package:app/models/models.dart';
-import 'package:app/ui/widgets/widgets.dart';
+import 'package:app/models/song.dart';
+import 'package:app/ui/widgets/song_row.dart';
+import 'package:app/ui/widgets/typography.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -23,25 +23,20 @@ class SimpleSongList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final headingText = this.headingText;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         if (headingText != null)
           GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onHeaderTap,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.hPadding,
-                ),
-                child: Heading5(text: headingText),
-              )),
+            behavior: HitTestBehavior.opaque,
+            onTap: onHeaderTap,
+            child: Heading5(text: headingText!),
+          ),
         ...songs.map(
           (song) => SongRow(
             song: song,
             bordered: bordered,
+            padding: const EdgeInsets.symmetric(horizontal: 0),
           ),
         )
       ],

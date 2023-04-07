@@ -1,8 +1,11 @@
+import 'package:app/extensions/assets_audio_player.dart';
 import 'package:app/models/artist.dart';
 import 'package:app/models/song.dart';
+import 'package:app/providers/audio_provider.dart';
 import 'package:app/providers/song_provider.dart';
 import 'package:app/router.dart';
-import 'package:app/ui/widgets/mini_player.dart';
+import 'package:app/ui/widgets/footer_player_sheet.dart';
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -52,22 +55,22 @@ void main() {
           ChangeNotifierProvider<AudioProvider>(create: (_) => audioMock),
           Provider<SongProvider>(create: (_) => songProviderMock),
         ],
-        child: MiniPlayer(router: routerMock),
+        child: FooterPlayerSheet(router: routerMock),
       ),
     );
 
     await tester.pump();
 
     var title = find.text('A Banana Work Is Never Done');
-    var pauseButton = find.byKey(MiniPlayer.pauseButtonKey);
-    var nextButton = find.byKey(MiniPlayer.nextButtonKey);
+    var pauseButton = find.byKey(FooterPlayerSheet.pauseButtonKey);
+    var nextButton = find.byKey(FooterPlayerSheet.nextButtonKey);
 
     expect(title, findsOneWidget);
     expect(pauseButton, findsOneWidget);
     expect(nextButton, findsOneWidget);
 
     await expectLater(
-      find.byType(MiniPlayer),
+      find.byType(FooterPlayerSheet),
       matchesGoldenFile('goldens/footer_player_sheet.png'),
     );
 

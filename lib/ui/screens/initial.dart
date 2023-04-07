@@ -1,8 +1,7 @@
-import 'package:app/mixins/stream_subscriber.dart';
-import 'package:app/providers/providers.dart';
-import 'package:app/ui/screens/screens.dart';
-import 'package:app/ui/widgets/widgets.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:app/providers/auth_provider.dart';
+import 'package:app/ui/screens/data_loading.dart';
+import 'package:app/ui/screens/login.dart';
+import 'package:app/ui/widgets/spinner.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,37 +15,29 @@ class InitialScreen extends StatefulWidget {
   _InitialScreenState createState() => _InitialScreenState();
 }
 
-class _InitialScreenState extends State<InitialScreen> with StreamSubscriber {
+class _InitialScreenState extends State<InitialScreen> {
   @override
   void initState() {
     super.initState();
-
-    Connectivity().checkConnectivity().then((value) {
-      if (value == ConnectivityResult.none) {
-        Navigator.of(context).pushReplacementNamed(
-          NoConnectionScreen.routeName,
-        );
-      } else {
-        _resolveAuthenticatedUser();
-      }
-    });
+    _resolveAuthenticatedUser();
   }
 
   Future<void> _resolveAuthenticatedUser() async {
-    try {
-      final user = await context.read<AuthProvider>().tryGetAuthUser();
+    context.read<AuthProvider>().tryGetAuthUser().then((user) {
       Navigator.of(context).pushReplacement(PageRouteBuilder(
         pageBuilder: (_, __, ___) =>
             user == null ? const LoginScreen() : const DataLoadingScreen(),
         transitionDuration: Duration.zero,
       ));
-    } catch (e) {
+    }, onError: (_) async {
       await Navigator.of(context, rootNavigator: true).pushReplacementNamed(
         LoginScreen.routeName,
       );
-    }
+    });
   }
 
   @override
-  Widget build(BuildContext context) => const ContainerWithSpinner();
+  Widget build(BuildContext context) {
+    return const ContainerWithSpinner();
+  }
 }

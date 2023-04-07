@@ -1,7 +1,8 @@
-import 'package:app/main.dart';
+import 'package:app/providers/audio_provider.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class VolumeSlider extends StatefulWidget {
   const VolumeSlider({Key? key}) : super(key: key);
@@ -11,11 +12,14 @@ class VolumeSlider extends StatefulWidget {
 }
 
 class _VolumeSliderState extends State<VolumeSlider> {
-  var _volume = 0.7;
+  double _volume = .7;
+  late AudioProvider audio;
 
   @override
   void initState() {
     super.initState();
+    audio = context.read();
+
     setState(() => _volume = preferences.volume);
   }
 
@@ -23,7 +27,7 @@ class _VolumeSliderState extends State<VolumeSlider> {
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
-        const Icon(
+        Icon(
           CupertinoIcons.volume_mute,
           size: 16,
           color: Colors.white54,
@@ -44,7 +48,7 @@ class _VolumeSliderState extends State<VolumeSlider> {
                 value: _volume,
                 onChanged: (value) {
                   setState(() => _volume = value);
-                  audioHandler.setVolume(value);
+                  audio.player.setVolume(value);
                   preferences.volume = value;
                 },
               ),

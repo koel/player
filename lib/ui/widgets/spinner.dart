@@ -1,4 +1,3 @@
-import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
@@ -24,7 +23,7 @@ class ContainerWithSpinner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GradientDecoratedContainer(
+    return Container(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[

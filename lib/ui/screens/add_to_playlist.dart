@@ -1,9 +1,12 @@
-import 'package:app/constants/constants.dart';
-import 'package:app/models/models.dart';
-import 'package:app/providers/providers.dart';
+import 'package:app/models/playlist.dart';
+import 'package:app/models/song.dart';
+import 'package:app/providers/playlist_provider.dart';
 import 'package:app/router.dart';
-import 'package:app/ui/screens/screens.dart';
-import 'package:app/ui/widgets/widgets.dart';
+import 'package:app/ui/screens/playlists.dart';
+import 'package:app/ui/widgets/bottom_space.dart';
+import 'package:app/ui/widgets/message_overlay.dart';
+import 'package:app/ui/widgets/playlist_row.dart';
+import 'package:app/ui/widgets/typography.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,11 +24,11 @@ class AddToPlaylistScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final song = ModalRoute.of(context)!.settings.arguments as Song;
+    Song song = ModalRoute.of(context)!.settings.arguments as Song;
 
     return Scaffold(
       body: CupertinoTheme(
-        data: const CupertinoThemeData(primaryColor: Colors.white),
+        data: CupertinoThemeData(primaryColor: Colors.white),
         child: Consumer<PlaylistProvider>(
           builder: (context, provider, navigationBar) {
             if (provider.standardPlaylists.isEmpty) {
@@ -45,7 +48,10 @@ class AddToPlaylistScreen extends StatelessWidget {
                       return PlaylistRow(
                         playlist: playlist,
                         onTap: () {
-                          provider.addSongToPlaylist(song, playlist: playlist);
+                          provider.addSongToPlaylist(
+                            song: song,
+                            playlist: playlist,
+                          );
                           HapticFeedback.mediumImpact();
                           Navigator.pop(context);
                           showOverlay(
@@ -65,7 +71,7 @@ class AddToPlaylistScreen extends StatelessWidget {
             );
           },
           child: CupertinoSliverNavigationBar(
-            backgroundColor: AppColors.screenHeaderBackground,
+            backgroundColor: Colors.black,
             largeTitle: const LargeTitle(text: 'Add to a Playlist'),
             trailing: IconButton(
               onPressed: () => router.showCreatePlaylistSheet(context),

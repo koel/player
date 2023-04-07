@@ -1,10 +1,10 @@
-import 'package:app/enums.dart';
-import 'package:app/main.dart';
-import 'package:app/models/models.dart';
+import 'package:app/models/song.dart';
+import 'package:app/providers/audio_provider.dart';
 import 'package:app/router.dart';
-import 'package:app/ui/widgets/widgets.dart';
+import 'package:app/ui/widgets/song_thumbnail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 class SongCard extends StatefulWidget {
   final Song song;
@@ -21,17 +21,19 @@ class SongCard extends StatefulWidget {
 }
 
 class _SongCardState extends State<SongCard> {
-  var _opacity = 1.0;
-  final _cardWidth = 144.0;
+  double _opacity = 1.0;
+  double _cardWidth = 144.0;
 
   @override
   Widget build(BuildContext context) {
+    AudioProvider audio = context.watch();
+
     return GestureDetector(
       onTapDown: (_) => setState(() => _opacity = 0.7),
       onTapCancel: () => setState(() => _opacity = 1.0),
       onTap: () async {
         setState(() => _opacity = 1.0);
-        await audioHandler.queueAndPlay(widget.song);
+        await audio.play(song: widget.song);
       },
       onLongPress: () {
         HapticFeedback.mediumImpact();
@@ -55,9 +57,9 @@ class _SongCardState extends State<SongCard> {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   Text(
-                    widget.song.artistName,
+                    widget.song.artist.name,
                     style: const TextStyle(color: Colors.white54),
                     overflow: TextOverflow.ellipsis,
                   )
