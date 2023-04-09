@@ -71,6 +71,13 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                           ],
                         ),
                       ),
+                      if (Navigator.canPop(context)) ...[
+                        const SizedBox(height: 16.0),
+                        ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text('Go back'),
+                        ),
+                      ],
                     ],
                   ),
                 ),
