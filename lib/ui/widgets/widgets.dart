@@ -18,6 +18,7 @@ export 'oops_box.dart';
 export 'playlist_row.dart';
 export 'profile_avatar.dart';
 export 'pull_to_refresh.dart';
+export 'scrolls_to_top.dart';
 export 'simple_song_list.dart';
 export 'sliver_song_list.dart';
 export 'song_cache_icon.dart';

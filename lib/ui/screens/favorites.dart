@@ -59,9 +59,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       hasScrollBody: false,
       fillOverscroll: true,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppDimensions.hPadding,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: AppDimensions.hPadding),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -127,41 +125,43 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     ? Future(() => null)
                     : makeRequest(forceRefresh: true);
               },
-              child: CustomScrollView(
-                slivers: provider.songs.isEmpty
-                    ? <Widget>[emptyWidget]
-                    : <Widget>[
-                        AppBar(
-                          headingText: 'Favorites',
-                          coverImage: cover,
-                          actions: [
-                            SortButton(
-                              fields: ['title', 'artist_name', 'created_at'],
-                              currentField: sortConfig.field,
-                              currentOrder: sortConfig.order,
-                              onMenuItemSelected: (_sortConfig) {
-                                setState(() => sortConfig = _sortConfig);
-                                AppState.set('favorites.sort', sortConfig);
+              child: ScrollsToTop(
+                child: CustomScrollView(
+                  slivers: provider.songs.isEmpty
+                      ? <Widget>[emptyWidget]
+                      : <Widget>[
+                          AppBar(
+                            headingText: 'Favorites',
+                            coverImage: cover,
+                            actions: [
+                              SortButton(
+                                fields: ['title', 'artist_name', 'created_at'],
+                                currentField: sortConfig.field,
+                                currentOrder: sortConfig.order,
+                                onMenuItemSelected: (_sortConfig) {
+                                  setState(() => sortConfig = _sortConfig);
+                                  AppState.set('favorites.sort', sortConfig);
+                                },
+                              ),
+                            ],
+                          ),
+                          SliverToBoxAdapter(
+                            child: SongListHeader(
+                              songs: songs,
+                              onSearchQueryChanged: (String query) {
+                                setState(() => _searchQuery = query);
                               },
                             ),
-                          ],
-                        ),
-                        SliverToBoxAdapter(
-                          child: SongListHeader(
-                            songs: songs,
-                            onSearchQueryChanged: (String query) {
-                              setState(() => _searchQuery = query);
-                            },
                           ),
-                        ),
-                        SliverSongList(
-                          songs: songs,
-                          listContext: SongListContext.favorites,
-                          onDismissed: provider.unlike,
-                          dismissIcon: const Icon(CupertinoIcons.heart_slash),
-                        ),
-                        const BottomSpace(),
-                      ],
+                          SliverSongList(
+                            songs: songs,
+                            listContext: SongListContext.favorites,
+                            onDismissed: provider.unlike,
+                            dismissIcon: const Icon(CupertinoIcons.heart_slash),
+                          ),
+                          const BottomSpace(),
+                        ],
+                ),
               ),
             );
           },

@@ -64,29 +64,43 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
 
             return PullToRefresh(
               onRefresh: () => buildRequest(albumId, forceRefresh: true),
-              child: CustomScrollView(
-                slivers: <Widget>[
-                  AppBar(
-                    headingText: album.name,
-                    actions: [
-                      SortButton(
-                        fields: ['track', 'title', 'created_at'],
-                        currentField: sortConfig.field,
-                        currentOrder: sortConfig.order,
-                        onMenuItemSelected: (_sortConfig) {
-                          setState(() => sortConfig = _sortConfig);
-                          AppState.set('album.sort', sortConfig);
-                        },
-                      ),
-                    ],
-                    backgroundImage: SizedBox(
-                      width: double.infinity,
-                      height: double.infinity,
-                      child: ImageFiltered(
-                        imageFilter: ImageFilter.blur(
-                          sigmaX: 20.0,
-                          sigmaY: 20.0,
+              child: ScrollsToTop(
+                child: CustomScrollView(
+                  slivers: <Widget>[
+                    AppBar(
+                      headingText: album.name,
+                      actions: [
+                        SortButton(
+                          fields: ['track', 'title', 'created_at'],
+                          currentField: sortConfig.field,
+                          currentOrder: sortConfig.order,
+                          onMenuItemSelected: (_sortConfig) {
+                            setState(() => sortConfig = _sortConfig);
+                            AppState.set('album.sort', sortConfig);
+                          },
                         ),
+                      ],
+                      backgroundImage: SizedBox(
+                        width: double.infinity,
+                        height: double.infinity,
+                        child: ImageFiltered(
+                          imageFilter: ImageFilter.blur(
+                            sigmaX: 20.0,
+                            sigmaY: 20.0,
+                          ),
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: album.image,
+                                fit: BoxFit.cover,
+                                alignment: Alignment.topCenter,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      coverImage: Hero(
+                        tag: "album-hero-${album.id}",
                         child: DecoratedBox(
                           decoration: BoxDecoration(
                             image: DecorationImage(
@@ -94,48 +108,36 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                               fit: BoxFit.cover,
                               alignment: Alignment.topCenter,
                             ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    coverImage: Hero(
-                      tag: "album-hero-${album.id}",
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: album.image,
-                            fit: BoxFit.cover,
-                            alignment: Alignment.topCenter,
-                          ),
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(16),
-                          ),
-                          boxShadow: const <BoxShadow>[
-                            const BoxShadow(
-                              color: Colors.black38,
-                              blurRadius: 10.0,
-                              offset: const Offset(0, 6),
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(16),
                             ),
-                          ],
+                            boxShadow: const <BoxShadow>[
+                              const BoxShadow(
+                                color: Colors.black38,
+                                blurRadius: 10.0,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  if (songs.isNotEmpty)
-                    SliverToBoxAdapter(
-                      child: SongListHeader(
-                        songs: displayedSongs,
-                        onSearchQueryChanged: (String query) {
-                          setState(() => _searchQuery = query);
-                        },
+                    if (songs.isNotEmpty)
+                      SliverToBoxAdapter(
+                        child: SongListHeader(
+                          songs: displayedSongs,
+                          onSearchQueryChanged: (String query) {
+                            setState(() => _searchQuery = query);
+                          },
+                        ),
                       ),
+                    SliverSongList(
+                      songs: displayedSongs,
+                      listContext: SongListContext.album,
                     ),
-                  SliverSongList(
-                    songs: displayedSongs,
-                    listContext: SongListContext.album,
-                  ),
-                  const BottomSpace(),
-                ],
+                    const BottomSpace(),
+                  ],
+                ),
               ),
             );
           },

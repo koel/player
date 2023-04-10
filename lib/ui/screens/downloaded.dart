@@ -91,38 +91,40 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
             final displayedSongs =
                 provider.songs.$sort(sortConfig).$filter(_searchQuery);
 
-            return CustomScrollView(
-              slivers: <Widget>[
-                AppBar(
-                  headingText: 'Downloaded',
-                  coverImage: _cover,
-                  actions: [
-                    SortButton(
-                      fields: ['title', 'artist_name', 'created_at'],
-                      currentField: sortConfig.field,
-                      currentOrder: sortConfig.order,
-                      onMenuItemSelected: (_sortConfig) {
-                        setState(() => sortConfig = _sortConfig);
-                        AppState.set('downloaded.sort', _sortConfig);
+            return ScrollsToTop(
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  AppBar(
+                    headingText: 'Downloaded',
+                    coverImage: _cover,
+                    actions: [
+                      SortButton(
+                        fields: ['title', 'artist_name', 'created_at'],
+                        currentField: sortConfig.field,
+                        currentOrder: sortConfig.order,
+                        onMenuItemSelected: (_sortConfig) {
+                          setState(() => sortConfig = _sortConfig);
+                          AppState.set('downloaded.sort', _sortConfig);
+                        },
+                      ),
+                    ],
+                  ),
+                  SliverToBoxAdapter(
+                    child: SongListHeader(
+                      songs: displayedSongs,
+                      onSearchQueryChanged: (String query) {
+                        setState(() => _searchQuery = query);
                       },
                     ),
-                  ],
-                ),
-                SliverToBoxAdapter(
-                  child: SongListHeader(
-                    songs: displayedSongs,
-                    onSearchQueryChanged: (String query) {
-                      setState(() => _searchQuery = query);
-                    },
                   ),
-                ),
-                SliverSongList(
-                  songs: displayedSongs,
-                  listContext: SongListContext.downloads,
-                  onDismissed: provider.removeForSong,
-                ),
-                const BottomSpace(),
-              ],
+                  SliverSongList(
+                    songs: displayedSongs,
+                    listContext: SongListContext.downloads,
+                    onDismissed: provider.removeForSong,
+                  ),
+                  const BottomSpace(),
+                ],
+              ),
             );
           },
         ),

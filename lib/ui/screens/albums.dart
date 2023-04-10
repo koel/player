@@ -1,5 +1,6 @@
 import 'package:app/app_state.dart';
 import 'package:app/constants/constants.dart';
+import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
@@ -95,62 +96,73 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
               data: const CupertinoThemeData(primaryColor: Colors.white),
               child: PullToRefresh(
                 onRefresh: _albumProvider.refresh,
-                child: CustomScrollView(
-                  controller: _scrollController,
-                  slivers: <Widget>[
-                    const CupertinoSliverNavigationBar(
-                      backgroundColor: AppColors.screenHeaderBackground,
-                      largeTitle: LargeTitle(text: 'Albums'),
-                    ),
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
-                          final album = provider.albums[index];
-
-                          return Card(
-                            child: InkWell(
-                              onTap: () => widget.router.gotoAlbumDetailsScreen(
-                                context,
-                                albumId: album.id,
-                              ),
-                              child: ListTile(
-                                shape: Border(
-                                  bottom: Divider.createBorderSide(context),
-                                ),
-                                leading: AlbumArtistThumbnail(
-                                  entity: album,
-                                  asHero: true,
-                                ),
-                                title: Text(
-                                  album.name,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                subtitle: Text(
-                                  album.artistName,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(color: Colors.white60),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                        childCount: provider.albums.length,
+                child: ScrollsToTop(
+                  scrollController: _scrollController,
+                  child: CustomScrollView(
+                    controller: _scrollController,
+                    slivers: <Widget>[
+                      const CupertinoSliverNavigationBar(
+                        backgroundColor: AppColors.screenHeaderBackground,
+                        largeTitle: LargeTitle(text: 'Albums'),
                       ),
-                    ),
-                    _loading
-                        ? SliverToBoxAdapter(
-                            child: Container(
-                              height: 72,
-                              child: Center(child: const Spinner(size: 16)),
-                            ),
-                          )
-                        : const SliverToBoxAdapter(),
-                    const BottomSpace(),
-                  ],
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (BuildContext context, int index) {
+                            if (index >= provider.albums.length) return null;
+
+                            return AlbumRow(
+                              album: provider.albums[index],
+                              router: widget.router,
+                            );
+                          },
+                          childCount: provider.albums.length,
+                        ),
+                      ),
+                      _loading
+                          ? SliverToBoxAdapter(
+                              child: Container(
+                                height: 72,
+                                child: Center(child: const Spinner(size: 16)),
+                              ),
+                            )
+                          : const SliverToBoxAdapter(),
+                      const BottomSpace(),
+                    ],
+                  ),
                 ),
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class AlbumRow extends StatelessWidget {
+  final Album album;
+  final AppRouter router;
+
+  const AlbumRow({Key? key, required this.album, required this.router})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: InkWell(
+        onTap: () => router.gotoAlbumDetailsScreen(
+          context,
+          albumId: album.id,
+        ),
+        child: ListTile(
+          shape: Border(bottom: Divider.createBorderSide(context)),
+          leading: AlbumArtistThumbnail(entity: album, asHero: true),
+          title: Text(album.name, overflow: TextOverflow.ellipsis),
+          subtitle: Text(
+            album.artistName,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: Colors.white60),
+          ),
         ),
       ),
     );
