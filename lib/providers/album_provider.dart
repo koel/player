@@ -48,16 +48,19 @@ class AlbumProvider with ChangeNotifier, StreamSubscriber {
       _albums = [_albums];
     }
 
-    List<Album> synced = (_albums as List<Album>).map<Album>((remote) {
-      final local = byId(remote.id);
+    List<Album> synced = (_albums as List<Album>)
+        .map<Album>((remote) {
+          final local = byId(remote.id);
 
-      if (local == null) {
-        _vault[remote.id] = remote;
-        return remote;
-      } else {
-        return local.merge(remote);
-      }
-    }).toList();
+          if (local == null) {
+            _vault[remote.id] = remote;
+            return remote;
+          } else {
+            return local.merge(remote);
+          }
+        })
+        .toSet()
+        .toList();
 
     notifyListeners();
 

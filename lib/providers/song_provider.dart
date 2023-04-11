@@ -26,16 +26,19 @@ class SongProvider with ChangeNotifier, StreamSubscriber {
       _songs = [_songs];
     }
 
-    List<Song> synced = (_songs as List<Song>).map<Song>((remote) {
-      final local = byId(remote.id);
+    List<Song> synced = (_songs as List<Song>)
+        .map<Song>((remote) {
+          final local = byId(remote.id);
 
-      if (local == null) {
-        _vault[remote.id] = remote;
-        return remote;
-      } else {
-        return local.merge(remote);
-      }
-    }).toList();
+          if (local == null) {
+            _vault[remote.id] = remote;
+            return remote;
+          } else {
+            return local.merge(remote);
+          }
+        })
+        .toSet()
+        .toList();
 
     return synced;
   }

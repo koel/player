@@ -48,16 +48,19 @@ class ArtistProvider with ChangeNotifier, StreamSubscriber {
       _artists = [_artists];
     }
 
-    List<Artist> synced = (_artists as List<Artist>).map<Artist>((remote) {
-      final local = byId(remote.id);
+    List<Artist> synced = (_artists as List<Artist>)
+        .map<Artist>((remote) {
+          final local = byId(remote.id);
 
-      if (local == null) {
-        _vault[remote.id] = remote;
-        return remote;
-      } else {
-        return local.merge(remote);
-      }
-    }).toList();
+          if (local == null) {
+            _vault[remote.id] = remote;
+            return remote;
+          } else {
+            return local.merge(remote);
+          }
+        })
+        .toSet()
+        .toList();
 
     notifyListeners();
 
