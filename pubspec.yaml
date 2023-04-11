@@ -47,7 +47,6 @@ dependencies:
   connectivity_plus: ^2.1.0
   path_provider: ^2.0.14
   scrolls_to_top: ^2.1.0
-  fading_edge_scrollview: ^3.0.0
 
 dev_dependencies:
   golden_toolkit: ^0.12.0
