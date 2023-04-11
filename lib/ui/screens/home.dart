@@ -55,11 +55,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
         final blocks = <Widget>[
           if (overviewProvider.mostPlayedSongs.isNotEmpty)
-            SimpleSongList(
-              headingText: 'Most played',
-              songs: overviewProvider.mostPlayedSongs,
-            ),
-          if (overviewProvider.mostPlayedSongs.isNotEmpty)
             HorizontalCardScroller(
               headingText: 'Most played songs',
               cards: <Widget>[
