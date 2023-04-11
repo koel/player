@@ -29,13 +29,13 @@ class AlbumArtistThumbnail extends StatelessWidget {
         ? Image.asset(
             AppImages.defaultImageAssetName,
             fit: BoxFit.cover,
-            width: width,
-            height: height,
+            width: dimension,
+            height: dimension,
           )
         : CachedNetworkImage(
             fit: BoxFit.cover,
-            width: width,
-            height: height,
+            width: dimension,
+            height: dimension,
             placeholder: (_, __) => AppImages.defaultImage,
             errorWidget: (_, __, ___) => AppImages.defaultImage,
             imageUrl: imageUrl,
@@ -50,7 +50,7 @@ class AlbumArtistThumbnail extends StatelessWidget {
     );
   }
 
-  double get width {
+  double get dimension {
     switch (size) {
       case ThumbnailSize.lg:
         return 192;
@@ -75,6 +75,4 @@ class AlbumArtistThumbnail extends StatelessWidget {
         return 20; // rounded for sm size
     }
   }
-
-  double get height => width;
 }

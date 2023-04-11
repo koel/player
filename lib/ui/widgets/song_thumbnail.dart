@@ -23,13 +23,13 @@ class SongThumbnail extends StatelessWidget {
         ? Image.asset(
             AppImages.defaultImageAssetName,
             fit: BoxFit.cover,
-            width: width,
-            height: height,
+            width: dimension,
+            height: dimension,
           )
         : CachedNetworkImage(
             fit: BoxFit.cover,
-            width: width,
-            height: height,
+            width: dimension,
+            height: dimension,
             placeholder: (_, __) => AppImages.defaultImage,
             errorWidget: (_, __, ___) => AppImages.defaultImage,
             imageUrl: song.albumCoverUrl ?? '',
@@ -42,8 +42,7 @@ class SongThumbnail extends StatelessWidget {
       ),
       child: this.playing
           ? PlayingSongThumbnail(
-              width: width,
-              height: height,
+              dimension: dimension,
               song: song,
               borderRadius: borderRadius,
             )
@@ -51,7 +50,7 @@ class SongThumbnail extends StatelessWidget {
     );
   }
 
-  double get width {
+  double get dimension {
     switch (size) {
       case ThumbnailSize.lg:
         return 192;
@@ -76,35 +75,29 @@ class SongThumbnail extends StatelessWidget {
         return 8;
     }
   }
-
-  double get height => width;
 }
 
 class PlayingSongThumbnail extends StatelessWidget {
-  final double width;
-  final double height;
+  final double dimension;
   final Song song;
   final double borderRadius;
 
   const PlayingSongThumbnail({
     Key? key,
-    required this.width,
-    required this.height,
+    required this.dimension,
     required this.song,
     required this.borderRadius,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: width,
-      height: height,
+    return SizedBox.square(
+      dimension: dimension,
       child: Stack(
         children: <Widget>[
           SongThumbnail(song: song),
-          SizedBox(
-            width: double.infinity,
-            height: double.infinity,
+          SizedBox.square(
+            dimension: double.infinity,
             child: DecoratedBox(
               decoration:
                   BoxDecoration(color: Color(0xFF410928).withOpacity(.7)),
@@ -112,10 +105,9 @@ class PlayingSongThumbnail extends StatelessWidget {
           ),
           Align(
             alignment: Alignment.center,
-            child: SizedBox(
+            child: SizedBox.square(
+              dimension: 16,
               child: Image.asset('assets/images/loading-animation.gif'),
-              width: 16,
-              height: 16,
             ),
           ),
         ],

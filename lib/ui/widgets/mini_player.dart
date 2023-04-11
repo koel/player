@@ -74,98 +74,162 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
 
     return FrostedGlassBackground(
       sigma: 10.0,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: AppColors.white.withOpacity(0.1),
-              width: .5,
-            ),
-            bottom: BorderSide(
-              color: AppColors.white.withOpacity(0.1),
-              width: .5,
-            ),
-          ),
-        ),
-        child: InkWell(
-          onTap: () => widget.router.openNowPlayingScreen(context),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Stack(
-                children: [
-                  Hero(
-                    tag: 'hero-now-playing-thumbnail',
-                    child: SongThumbnail(song: song),
-                  ),
-                  if (isLoading)
-                    SizedBox(
-                      width: 48,
-                      height: 48,
-                      child: DecoratedBox(
-                        decoration: const BoxDecoration(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(8),
-                          ),
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ),
-                  if (isLoading)
-                    SizedBox(
-                      width: 48,
-                      height: 48,
-                      child: statusIndicator,
-                    ),
-                ],
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        song.title,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        song.artistName,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: Colors.white60),
-                      )
-                    ],
-                  ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: AppColors.white.withOpacity(0.1),
+                  width: .5,
+                ),
+                bottom: BorderSide(
+                  color: AppColors.white.withOpacity(0.1),
+                  width: .5,
                 ),
               ),
-              Row(
-                children: <Widget>[
-                  IconButton(
-                    key: MiniPlayer.pauseButtonKey,
-                    onPressed: audioHandler.playOrPause,
-                    icon: Icon(
-                      state.playing
-                          ? CupertinoIcons.pause_fill
-                          : CupertinoIcons.play_fill,
-                      size: 24,
-                    ),
-                  ),
-                  IconButton(
-                    key: MiniPlayer.nextButtonKey,
-                    onPressed: audioHandler.skipToNext,
-                    icon: const Icon(
-                      CupertinoIcons.forward_fill,
-                      size: 24,
-                    ),
+            ),
+            child: InkWell(
+              onTap: () => widget.router.openNowPlayingScreen(context),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Stack(
+                        children: [
+                          Hero(
+                            tag: 'hero-now-playing-thumbnail',
+                            child: SongThumbnail(song: song),
+                          ),
+                          if (isLoading)
+                            SizedBox(
+                              width: 48,
+                              height: 48,
+                              child: DecoratedBox(
+                                decoration: const BoxDecoration(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(8),
+                                  ),
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ),
+                          if (isLoading)
+                            SizedBox.square(
+                              dimension: 48,
+                              child: statusIndicator,
+                            ),
+                        ],
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                song.title,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                song.artistName,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(color: Colors.white60),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                      Row(
+                        children: <Widget>[
+                          IconButton(
+                            key: MiniPlayer.pauseButtonKey,
+                            onPressed: audioHandler.playOrPause,
+                            icon: Icon(
+                              state.playing
+                                  ? CupertinoIcons.pause_fill
+                                  : CupertinoIcons.play_fill,
+                              size: 24,
+                            ),
+                          ),
+                          IconButton(
+                            key: MiniPlayer.nextButtonKey,
+                            onPressed: audioHandler.skipToNext,
+                            icon: const Icon(
+                              CupertinoIcons.forward_fill,
+                              size: 24,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
+          const MiniPlayerProgressBar(),
+        ],
+      ),
+    );
+  }
+}
+
+class MiniPlayerProgressBar extends StatefulWidget {
+  const MiniPlayerProgressBar({Key? key}) : super(key: key);
+
+  @override
+  _MiniPlayerProgressBarState createState() => _MiniPlayerProgressBarState();
+}
+
+class _MiniPlayerProgressBarState extends State<MiniPlayerProgressBar>
+    with StreamSubscriber {
+  late Duration? _duration;
+  var _position = Duration.zero;
+
+  final timeStampStyle = const TextStyle(
+    fontSize: 12,
+    color: Colors.white54,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+
+    subscribe(audioHandler.player.positionStream.listen((position) {
+      setState(() => _position = position);
+    }));
+
+    subscribe(audioHandler.mediaItem.listen((mediaItem) {
+      if (mediaItem != null && mediaItem.duration != null) {
+        setState(() => _duration = mediaItem.duration);
+      }
+    }));
+  }
+
+  @override
+  void dispose() {
+    unsubscribeAll();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final duration = _duration;
+    if (duration == null) return SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      alignment: Alignment.centerLeft,
+      height: 1.0,
+      color: Colors.white12,
+      child: FractionallySizedBox(
+        widthFactor: _position.inSeconds / duration.inSeconds,
+        child: Container(color: Colors.white),
       ),
     );
   }

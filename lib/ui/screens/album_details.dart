@@ -80,9 +80,8 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                           },
                         ),
                       ],
-                      backgroundImage: SizedBox(
-                        width: double.infinity,
-                        height: double.infinity,
+                      backgroundImage: SizedBox.square(
+                        dimension: double.infinity,
                         child: ImageFiltered(
                           imageFilter: ImageFilter.blur(
                             sigmaX: 20.0,

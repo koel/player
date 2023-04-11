@@ -62,9 +62,8 @@ class AppBar extends StatelessWidget {
               if (backgroundImage != null) backgroundImage,
               _gradientEffect,
               Center(
-                child: SizedBox(
-                  width: 192,
-                  height: 192,
+                child: SizedBox.square(
+                  dimension: 192,
                   child: coverImage,
                 ),
               ),

@@ -24,6 +24,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  static const tabBarHeight = 60.0;
   int _selectedIndex = 0;
   var _isOffline = AppState.get('mode', AppMode.online) == AppMode.offline;
 
@@ -42,6 +43,22 @@ class _MainScreenState extends State<MainScreen> {
     audioHandler.init(
       songProvider: context.read<SongProvider>(),
       downloadProvider: context.read<DownloadProvider>(),
+    );
+  }
+
+  BottomNavigationBarItem tabBarItem({
+    required String title,
+    required IconData icon,
+  }) {
+    return BottomNavigationBarItem(
+      icon: Column(
+        children: [
+          const SizedBox(height: 14.0),
+          Icon(icon),
+          const SizedBox(height: 4.0),
+          Text(title),
+        ],
+      ),
     );
   }
 
@@ -79,20 +96,21 @@ class _MainScreenState extends State<MainScreen> {
                       backgroundColor: Colors.black12,
                       iconSize: 24,
                       activeColor: Colors.white,
-                      inactiveColor: Colors.white.withOpacity(0.5),
+                      height: tabBarHeight,
+                      inactiveColor: Colors.white54,
                       border: Border(top: Divider.createBorderSide(context)),
-                      items: const <BottomNavigationBarItem>[
-                        const BottomNavigationBarItem(
-                          icon: Icon(CupertinoIcons.house_fill),
-                          label: 'Home',
+                      items: <BottomNavigationBarItem>[
+                        tabBarItem(
+                          title: 'Home',
+                          icon: CupertinoIcons.house_fill,
                         ),
-                        const BottomNavigationBarItem(
-                          icon: Icon(CupertinoIcons.search),
-                          label: 'Search',
+                        tabBarItem(
+                          title: 'Search',
+                          icon: CupertinoIcons.search,
                         ),
-                        const BottomNavigationBarItem(
-                          icon: Icon(CupertinoIcons.music_albums_fill),
-                          label: 'Library',
+                        tabBarItem(
+                          title: 'Library',
+                          icon: CupertinoIcons.music_albums_fill,
                         ),
                       ],
                       currentIndex: _selectedIndex,
@@ -100,8 +118,8 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                   ),
                   Positioned(
-                    // 50 is the standard iOS (10) tab bar height.
-                    bottom: 50 + MediaQuery.of(context).padding.bottom,
+                    bottom:
+                        tabBarHeight + MediaQuery.of(context).padding.bottom,
                     width: MediaQuery.of(context).size.width,
                     child: const MiniPlayer(),
                   ),

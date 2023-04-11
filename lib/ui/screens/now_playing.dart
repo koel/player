@@ -136,10 +136,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                       children: <Widget>[
                         const RepeatModeButton(),
                         IconButton(
-                          onPressed: () => showInfoSheet(
-                            context,
-                            song: song,
-                          ),
+                          onPressed: () => showInfoSheet(context, song: song),
                           icon: Icon(
                             CupertinoIcons.text_quote,
                             color: bottomIconColor,
