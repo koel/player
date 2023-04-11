@@ -84,7 +84,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: Hero(
         tag: 'hero-now-playing-thumbnail',
-        child: SongThumbnail(song: song, size: ThumbnailSize.xl),
+        child: SongThumbnail.xl(song: song),
       ),
     );
 

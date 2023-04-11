@@ -101,7 +101,7 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
                         children: [
                           Hero(
                             tag: 'hero-now-playing-thumbnail',
-                            child: SongThumbnail(song: song),
+                            child: SongThumbnail.sm(song: song),
                           ),
                           if (isLoading)
                             SizedBox(
@@ -188,7 +188,7 @@ class MiniPlayerProgressBar extends StatefulWidget {
 
 class _MiniPlayerProgressBarState extends State<MiniPlayerProgressBar>
     with StreamSubscriber {
-  late Duration? _duration;
+  Duration _duration = Duration.zero;
   var _position = Duration.zero;
 
   final timeStampStyle = const TextStyle(
@@ -206,7 +206,7 @@ class _MiniPlayerProgressBarState extends State<MiniPlayerProgressBar>
 
     subscribe(audioHandler.mediaItem.listen((mediaItem) {
       if (mediaItem != null && mediaItem.duration != null) {
-        setState(() => _duration = mediaItem.duration);
+        setState(() => _duration = mediaItem.duration ?? Duration.zero);
       }
     }));
   }
@@ -219,8 +219,7 @@ class _MiniPlayerProgressBarState extends State<MiniPlayerProgressBar>
 
   @override
   Widget build(BuildContext context) {
-    final duration = _duration;
-    if (duration == null) return SizedBox.shrink();
+    if (_duration == Duration.zero) return SizedBox.shrink();
 
     return Container(
       width: double.infinity,
@@ -228,7 +227,7 @@ class _MiniPlayerProgressBarState extends State<MiniPlayerProgressBar>
       height: 1.0,
       color: Colors.white12,
       child: FractionallySizedBox(
-        widthFactor: _position.inSeconds / duration.inSeconds,
+        widthFactor: _position.inSeconds / _duration.inSeconds,
         child: Container(color: Colors.white),
       ),
     );

@@ -49,7 +49,7 @@ class _SongActionSheetState extends State<SongActionSheet> {
             const SizedBox.shrink(), // to properly align the thumbnail area
             Column(
               children: [
-                SongThumbnail(song: song, size: ThumbnailSize.lg),
+                SongThumbnail.lg(song: song),
                 const SizedBox(height: 16),
                 Text(
                   song.title,

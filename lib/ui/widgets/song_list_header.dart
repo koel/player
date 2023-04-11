@@ -79,20 +79,12 @@ class _SongListHeaderState extends State<SongListHeader> {
         const Spacer(),
         IconButton(
           onPressed: onPlayPressed,
-          icon: SizedBox(
-            height: 24,
-            width: 24,
-            child: playIcon,
-          ),
+          icon: SizedBox.square(dimension: 24, child: playIcon),
         ),
         const SizedBox(width: 6),
         ElevatedButton(
           onPressed: onShufflePressed,
-          child: SizedBox(
-            height: 24,
-            width: 24,
-            child: shuffleIcon,
-          ),
+          child: SizedBox.square(dimension: 24, child: shuffleIcon),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.all(16),
             elevation: 0,

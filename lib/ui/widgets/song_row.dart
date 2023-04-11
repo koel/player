@@ -138,7 +138,7 @@ class _SongRowThumbnailState extends State<SongRowThumbnail>
   Widget build(BuildContext context) {
     final state = _state;
 
-    return SongThumbnail(
+    return SongThumbnail.sm(
       song: widget.song,
       playing: state != null &&
           state.playing &&
@@ -184,10 +184,7 @@ class SongRowTrailingActions extends StatelessWidget {
             icon: const Icon(CupertinoIcons.ellipsis, size: 20),
             padding: const EdgeInsets.fromLTRB(8, 8, 0, 8),
             constraints: BoxConstraints(),
-            onPressed: () => router.showActionSheet(
-              context,
-              song: song,
-            ),
+            onPressed: () => router.showActionSheet(context, song: song),
           ),
       ],
     );

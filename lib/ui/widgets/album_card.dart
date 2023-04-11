@@ -38,11 +38,7 @@ class _AlbumCardState extends State<AlbumCard> {
         opacity: _opacity,
         child: Column(
           children: <Widget>[
-            AlbumArtistThumbnail(
-              entity: widget.album,
-              size: ThumbnailSize.md,
-              asHero: true,
-            ),
+            AlbumArtistThumbnail.md(entity: widget.album, asHero: true),
             const SizedBox(height: 12),
             SizedBox(
               width: _cardWidth,

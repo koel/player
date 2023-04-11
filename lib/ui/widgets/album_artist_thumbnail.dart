@@ -10,21 +10,27 @@ class AlbumArtistThumbnail extends StatelessWidget {
   final ThumbnailSize size;
   final bool asHero;
 
-  const AlbumArtistThumbnail({
+  const AlbumArtistThumbnail.sm({
     Key? key,
     required this.entity,
-    this.size = ThumbnailSize.sm,
     this.asHero = false,
-  })  : assert(entity is Artist || entity is Album),
+  })  : size = ThumbnailSize.sm,
+        assert(entity is Artist || entity is Album),
         super(key: key);
 
-  get imageUrl => entity is Artist ? entity.imageUrl : entity.cover;
-
-  get heroTag =>
-      entity is Artist ? 'artist-hero-${entity.id}' : 'album-hero-${entity.id}';
+  const AlbumArtistThumbnail.md({
+    Key? key,
+    required this.entity,
+    this.asHero = false,
+  })  : size = ThumbnailSize.md,
+        assert(entity is Artist || entity is Album),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final dimension = dimensionForSize(size);
+    final imageUrl = entity is Artist ? entity.imageUrl : entity.cover;
+
     Widget image = imageUrl == null
         ? Image.asset(
             AppImages.defaultImageAssetName,
@@ -43,14 +49,20 @@ class AlbumArtistThumbnail extends StatelessWidget {
 
     return ClipSmoothRect(
       radius: SmoothBorderRadius(
-        cornerRadius: borderRadius,
+        cornerRadius: borderRadiusForSize(size),
         cornerSmoothing: .8,
       ),
-      child: asHero ? Hero(tag: heroTag, child: image) : image,
+      child: asHero
+          ? Hero(
+              tag: entity is Artist
+                  ? 'artist-hero-${entity.id}'
+                  : 'album-hero-${entity.id}',
+              child: image)
+          : image,
     );
   }
 
-  double get dimension {
+  static double dimensionForSize(ThumbnailSize size) {
     switch (size) {
       case ThumbnailSize.lg:
         return 192;
@@ -63,14 +75,14 @@ class AlbumArtistThumbnail extends StatelessWidget {
     }
   }
 
-  double get borderRadius {
+  static double borderRadiusForSize(ThumbnailSize size) {
     switch (size) {
       case ThumbnailSize.md:
-        return 24;
+        return 16;
       case ThumbnailSize.lg:
-        return 32;
+        return 24;
       case ThumbnailSize.xl:
-        return 48;
+        return 32;
       default:
         return 20; // rounded for sm size
     }

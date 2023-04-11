@@ -9,10 +9,7 @@ class Spinner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SpinKitFadingCube(
-      color: Colors.white,
-      size: size,
-    );
+    return SpinKitFadingCube(color: Colors.white, size: size);
   }
 }
 
@@ -27,9 +24,7 @@ class ContainerWithSpinner extends StatelessWidget {
     return GradientDecoratedContainer(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Center(child: Spinner(size: spinnerSize)),
-        ],
+        children: <Widget>[Center(child: Spinner(size: spinnerSize))],
       ),
     );
   }

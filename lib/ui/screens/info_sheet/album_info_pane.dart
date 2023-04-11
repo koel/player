@@ -51,7 +51,7 @@ class AlbumInfoPane extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  AlbumArtistThumbnail(entity: album),
+                  AlbumArtistThumbnail.sm(entity: album),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(

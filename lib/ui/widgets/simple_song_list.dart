@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 /// A simple song list to display a small amount of song rows.
 /// Not meant to be used for a great number for rows, in such a case
-/// use SliverList or something similar instead.
+/// use SliverSongList instead.
 class SimpleSongList extends StatelessWidget {
   final Iterable<Song> songs;
   final String? headingText;
@@ -38,12 +38,7 @@ class SimpleSongList extends StatelessWidget {
                 ),
                 child: Heading5(text: headingText),
               )),
-        ...songs.map(
-          (song) => SongRow(
-            song: song,
-            bordered: bordered,
-          ),
-        )
+        ...songs.map((song) => SongRow(song: song, bordered: bordered))
       ],
     );
   }

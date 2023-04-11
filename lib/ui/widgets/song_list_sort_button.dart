@@ -70,10 +70,7 @@ class SortButton extends StatelessWidget {
         currentField = item;
 
         onMenuItemSelected?.call(
-          SongSortConfig(
-            field: item,
-            order: currentOrder,
-          ),
+          SongSortConfig(field: item, order: currentOrder),
         );
       },
       itemBuilder: (_) {

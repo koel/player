@@ -156,7 +156,7 @@ class AlbumRow extends StatelessWidget {
         ),
         child: ListTile(
           shape: Border(bottom: Divider.createBorderSide(context)),
-          leading: AlbumArtistThumbnail(entity: album, asHero: true),
+          leading: AlbumArtistThumbnail.sm(entity: album, asHero: true),
           title: Text(album.name, overflow: TextOverflow.ellipsis),
           subtitle: Text(
             album.artistName,

@@ -1,4 +1,5 @@
 import 'package:app/constants/constants.dart';
+import 'package:app/enums.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
@@ -62,24 +63,19 @@ class PlaceholderCard extends StatelessWidget {
     return Card(
       shape: SmoothRectangleBorder(
         borderRadius: SmoothBorderRadius(
-          cornerRadius: 18,
-          cornerSmoothing: .5,
+          cornerRadius: AlbumArtistThumbnail.borderRadiusForSize(
+            ThumbnailSize.md,
+          ),
+          cornerSmoothing: .8,
         ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: SizedBox(
-        height: 144,
-        width: 144,
+      child: SizedBox.square(
+        dimension: AlbumArtistThumbnail.dimensionForSize(ThumbnailSize.md),
         child: ElevatedButton(
           onPressed: onPressed,
           child: Icon(icon, size: 32),
           style: ElevatedButton.styleFrom(
-            shape: SmoothRectangleBorder(
-              borderRadius: SmoothBorderRadius(
-                cornerRadius: 24,
-                cornerSmoothing: .8,
-              ),
-            ),
             backgroundColor: AppColors.highlight,
           ),
         ),

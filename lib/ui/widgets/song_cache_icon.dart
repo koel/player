@@ -75,10 +75,7 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
     if (_downloading)
       return const Padding(
         padding: EdgeInsets.only(right: 4.0),
-        child: CupertinoActivityIndicator(
-          radius: 9,
-          color: AppColors.white,
-        ),
+        child: CupertinoActivityIndicator(radius: 9, color: AppColors.white),
       );
 
     final downloaded = this._downloaded;
@@ -100,10 +97,7 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
       onPressed: _download,
       constraints: const BoxConstraints(),
       padding: const EdgeInsets.symmetric(horizontal: 0.0),
-      icon: const Icon(
-        CupertinoIcons.cloud_download_fill,
-        size: 16,
-      ),
+      icon: const Icon(CupertinoIcons.cloud_download_fill, size: 16),
     );
   }
 }
