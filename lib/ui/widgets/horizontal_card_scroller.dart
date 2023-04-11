@@ -29,18 +29,13 @@ class HorizontalCardScroller extends StatelessWidget {
             child: Heading5(text: headingText),
           ),
         SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.hPadding,
+          ),
           scrollDirection: Axis.horizontal,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              ...cards.expand(
-                (card) => <Widget>[
-                  const SizedBox(width: AppDimensions.hPadding),
-                  card,
-                ],
-              ),
-              const SizedBox(width: AppDimensions.hPadding),
-            ],
+          child: Wrap(
+            spacing: AppDimensions.hPadding,
+            children: cards.toList(),
           ),
         ),
       ],

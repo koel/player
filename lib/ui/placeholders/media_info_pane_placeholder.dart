@@ -14,11 +14,11 @@ class MediaInfoPanePlaceholder extends StatelessWidget {
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 18),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 12,
               children: <Widget>[
                 const CirclePlaceholder(size: 48),
-                const SizedBox(width: 12),
                 Container(width: 124, height: 48, color: Colors.white),
               ],
             ),

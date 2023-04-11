@@ -52,23 +52,30 @@ class _NoConnectionScreenState extends State<NoConnectionScreen>
 
     return Scaffold(
       body: GradientDecoratedContainer(
+        padding: const EdgeInsets.all(24.0),
         child: Center(
           child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Wrap(
+              direction: Axis.vertical,
+              alignment: WrapAlignment.center,
+              spacing: 24.0,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Icon(
                   CupertinoIcons.wifi_slash,
                   size: 128,
                   color: AppColors.white.withOpacity(.4),
                 ),
-                const SizedBox(height: 12),
-                const Text('You are offline.'),
-                const SizedBox(height: 12),
-                const Text(
-                  'Please connect to the internet and try again.',
+                Wrap(
+                  direction: Axis.vertical,
+                  alignment: WrapAlignment.center,
+                  spacing: 4.0,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text('You are offline.'),
+                    Text('Please connect to the internet and try again.')
+                  ],
                 ),
-                const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () {
                     AppState.set('mode', AppMode.offline);

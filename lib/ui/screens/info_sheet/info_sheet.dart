@@ -9,6 +9,7 @@ import 'package:app/ui/widgets/widgets.dart' hide AppBar;
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 
 class InfoSheet extends StatefulWidget {
   final Song song;
@@ -24,14 +25,18 @@ class InfoSheet extends StatefulWidget {
 class _InfoSheetState extends State<InfoSheet> {
   Widget build(BuildContext context) {
     Widget wrapTabPane(Widget pane) {
-      return SingleChildScrollView(
-        controller: widget.scroller,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.hPadding,
-            vertical: 8.0,
+      return FadingEdgeScrollView.fromSingleChildScrollView(
+        gradientFractionOnStart: .3,
+        gradientFractionOnEnd: .3,
+        child: SingleChildScrollView(
+          controller: widget.scroller,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.hPadding,
+              vertical: 8.0,
+            ),
+            child: pane,
           ),
-          child: pane,
         ),
       );
     }

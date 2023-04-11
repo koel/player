@@ -22,18 +22,14 @@ class HorizontalCardScrollerPlaceholder extends StatelessWidget {
           ),
         ),
         SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.hPadding,
+          ),
           physics: NeverScrollableScrollPhysics(),
           scrollDirection: Axis.horizontal,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: List<Widget>.generate(5, (_) => const CardPlaceholder())
-                .expand<Widget>(
-                  (card) => [
-                    const SizedBox(width: AppDimensions.hPadding),
-                    card,
-                  ],
-                )
-                .toList(),
+          child: Wrap(
+            spacing: AppDimensions.hPadding,
+            children: List<Widget>.generate(5, (_) => const CardPlaceholder()),
           ),
         ),
       ],

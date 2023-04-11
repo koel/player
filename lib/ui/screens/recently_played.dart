@@ -68,15 +68,16 @@ class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
                   horizontal: AppDimensions.hPadding,
                 ),
                 child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  child: Wrap(
+                    spacing: 16.0,
+                    direction: Axis.vertical,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: <Widget>[
                       const Icon(
                         CupertinoIcons.time,
                         size: 96.0,
                         color: Colors.white30,
                       ),
-                      const SizedBox(height: 16.0),
                       const Text('You have not played any songs yet.'),
                     ],
                   ),

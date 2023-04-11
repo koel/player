@@ -135,16 +135,16 @@ class NoPlaylistsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Wrap(
+        spacing: 16.0,
+        direction: Axis.vertical,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: <Widget>[
           const Icon(
             CupertinoIcons.exclamationmark_square,
             size: 56.0,
           ),
-          const SizedBox(height: 16.0),
           const Text('You have no playlists in your library.'),
-          const SizedBox(height: 16.0),
           ElevatedButton(onPressed: onTap, child: Text('Create Playlist')),
         ],
       ),

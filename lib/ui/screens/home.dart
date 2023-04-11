@@ -114,35 +114,38 @@ class _HomeScreenState extends State<HomeScreen> {
             child: PullToRefresh(
               onRefresh: () => context.read<OverviewProvider>().refresh(),
               child: CustomScrollView(
-                slivers: <Widget>[
-                  CupertinoSliverNavigationBar(
-                    largeTitle: const LargeTitle(text: 'Home'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            Navigator.of(
-                              context,
-                              rootNavigator: true,
-                            ).pushNamed(RecentlyPlayedScreen.routeName);
-                          },
-                          icon: const Icon(CupertinoIcons.time, size: 23),
+                slivers: overviewProvider.isEmpty
+                    ? [SliverToBoxAdapter(child: const EmptyHomeScreen())]
+                    : <Widget>[
+                        CupertinoSliverNavigationBar(
+                          largeTitle: const LargeTitle(text: 'Home'),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  Navigator.of(
+                                    context,
+                                    rootNavigator: true,
+                                  ).pushNamed(RecentlyPlayedScreen.routeName);
+                                },
+                                icon: const Icon(CupertinoIcons.time, size: 23),
+                              ),
+                              const ProfileAvatar(),
+                            ],
+                          ),
                         ),
-                        const ProfileAvatar(),
+                        SliverList(
+                          delegate: SliverChildListDelegate.fixed([
+                            HomeRecentlyPlayedSection(
+                              initialSongs:
+                                  overviewProvider.recentlyPlayedSongs,
+                            ),
+                            ...blocks,
+                          ]),
+                        ),
+                        const BottomSpace(height: 192),
                       ],
-                    ),
-                  ),
-                  SliverList(
-                    delegate: SliverChildListDelegate.fixed([
-                      HomeRecentlyPlayedSection(
-                        initialSongs: overviewProvider.recentlyPlayedSongs,
-                      ),
-                      ...blocks,
-                    ]),
-                  ),
-                  const BottomSpace(height: 192),
-                ],
               ),
             ),
           ),
@@ -175,6 +178,39 @@ class _HomeRecentlyPlayedSectionState extends State<HomeRecentlyPlayedSection> {
 
         return songs.isEmpty ? SizedBox.shrink() : SimpleSongList(songs: songs);
       },
+    );
+  }
+}
+
+class EmptyHomeScreen extends StatelessWidget {
+  const EmptyHomeScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              CupertinoIcons.music_note,
+              size: 100,
+              color: AppColors.white,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'No activities… yet',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Pull down to refresh this screen.',
+              style: TextStyle(fontSize: 14),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

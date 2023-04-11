@@ -34,6 +34,13 @@ class OverviewProvider with ChangeNotifier, StreamSubscriber {
     }));
   }
 
+  bool get isEmpty =>
+      mostPlayedSongs.isEmpty &&
+      recentlyAddedSongs.isEmpty &&
+      recentlyPlayedSongs.isEmpty &&
+      mostPlayedAlbums.isEmpty &&
+      mostPlayedArtists.isEmpty;
+
   Future<void> refresh() async {
     final Map<String, dynamic> response = await get('overview');
 

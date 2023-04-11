@@ -1,4 +1,5 @@
 import 'package:app/constants/constants.dart';
+import 'package:app/enums.dart';
 import 'package:app/main.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
@@ -104,13 +105,18 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
                             child: SongThumbnail.sm(song: song),
                           ),
                           if (isLoading)
-                            SizedBox(
-                              width: 48,
-                              height: 48,
+                            SizedBox.square(
+                              dimension: SongThumbnail.dimensionForSize(
+                                ThumbnailSize.sm,
+                              ),
                               child: DecoratedBox(
-                                decoration: const BoxDecoration(
+                                decoration: BoxDecoration(
                                   borderRadius: BorderRadius.all(
-                                    Radius.circular(8),
+                                    Radius.circular(
+                                      SongThumbnail.borderRadiusForSize(
+                                        ThumbnailSize.sm,
+                                      ),
+                                    ),
                                   ),
                                   color: Colors.black54,
                                 ),
@@ -118,7 +124,9 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
                             ),
                           if (isLoading)
                             SizedBox.square(
-                              dimension: 48,
+                              dimension: SongThumbnail.dimensionForSize(
+                                ThumbnailSize.sm,
+                              ),
                               child: statusIndicator,
                             ),
                         ],

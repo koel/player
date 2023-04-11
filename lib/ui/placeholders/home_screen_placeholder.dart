@@ -21,8 +21,6 @@ class HomeScreenPlaceholder extends StatelessWidget {
               const SizedBox(height: 32.0),
               const SongListWithHeadingPlaceholder(),
               const SizedBox(height: 16.0),
-              const SongListWithHeadingPlaceholder(),
-              const SizedBox(height: 16.0),
               const HorizontalCardScrollerPlaceholder(),
               const SizedBox(height: 32.0),
               const HorizontalCardScrollerPlaceholder(),

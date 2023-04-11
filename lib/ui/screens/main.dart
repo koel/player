@@ -171,22 +171,19 @@ class _ConnectivityInfoBoxState extends State<ConnectivityInfoBox>
         child: _offline
             ? Container(
                 padding: padding,
-                child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                child: Wrap(
+                    spacing: 8.0,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    alignment: WrapAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         CupertinoIcons.wifi_slash,
-                        color: AppColors.white.withOpacity(.5),
+                        color: Colors.white54,
                         size: 20,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
+                      const Text(
                         'No internet connection',
-                        style: TextStyle(
-                          color: AppColors.white.withOpacity(.5),
-                        ),
+                        style: TextStyle(color: Colors.white54),
                       ),
                     ]),
               )

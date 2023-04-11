@@ -5,8 +5,9 @@ class CardPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Wrap(
+      spacing: 12.0,
+      direction: Axis.vertical,
       children: <Widget>[
         Container(
           width: 128,
@@ -16,13 +17,11 @@ class CardPlaceholder extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
         ),
-        const SizedBox(height: 8),
         Container(
           width: 96,
           height: 14,
           color: Colors.white,
         ),
-        const SizedBox(height: 8),
         Container(
           width: 64,
           height: 12,

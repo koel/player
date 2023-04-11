@@ -48,11 +48,11 @@ class ArtistInfoPane extends StatelessWidget {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+              child: Wrap(
+                spacing: 12,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: <Widget>[
                   AlbumArtistThumbnail.sm(entity: artist),
-                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       song.artistName,

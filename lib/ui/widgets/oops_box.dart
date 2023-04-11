@@ -43,37 +43,35 @@ class OopsBox extends StatelessWidget {
                 ),
               ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                if (onRetry != null)
-                  ElevatedButton(
-                    key: retryButtonKey,
-                    onPressed: onRetry,
-                    child: const Text('Retry'),
-                  ),
-                if (showLogOutButton) ...[
-                  const SizedBox(width: 8),
-                  TextButton(
-                    key: logOutButtonKey,
-                    onPressed: () async {
-                      await auth.logout();
-                      await Navigator.of(
-                        context,
-                        rootNavigator: true,
-                      ).pushNamedAndRemoveUntil(
-                        LoginScreen.routeName,
-                        (_) => false,
-                      );
-                    },
-                    child: const Text(
-                      'Log Out',
-                      style: TextStyle(color: Colors.white60),
+            Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 8,
+                children: <Widget>[
+                  if (onRetry != null)
+                    ElevatedButton(
+                      key: retryButtonKey,
+                      onPressed: onRetry,
+                      child: const Text('Retry'),
                     ),
-                  ),
-                ]
-              ],
-            )
+                  if (showLogOutButton)
+                    TextButton(
+                      key: logOutButtonKey,
+                      onPressed: () async {
+                        await auth.logout();
+                        await Navigator.of(
+                          context,
+                          rootNavigator: true,
+                        ).pushNamedAndRemoveUntil(
+                          LoginScreen.routeName,
+                          (_) => false,
+                        );
+                      },
+                      child: const Text(
+                        'Log Out',
+                        style: TextStyle(color: Colors.white60),
+                      ),
+                    ),
+                ])
           ],
         ),
       ),
