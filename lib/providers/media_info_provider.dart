@@ -1,5 +1,4 @@
 import 'package:app/app_state.dart';
-import 'package:app/models/models.dart';
 import 'package:app/utils/api_request.dart';
 
 class Track {
@@ -65,16 +64,6 @@ class MediaInfo {
 }
 
 class MediaInfoProvider {
-  Map<String, MediaInfo> _cache = {};
-
-  Future<MediaInfo> fetch({required Song song}) async {
-    if (!_cache.containsKey(song.id)) {
-      _cache[song.id] = MediaInfo.fromJson(await get('song/${song.id}/info'));
-    }
-
-    return _cache[song.id]!;
-  }
-
   Future<AlbumInfo> fetchForAlbum(int albumId) async {
     if (AppState.has(['album.info', albumId])) {
       return AppState.get<AlbumInfo>(['album.info', albumId])!;
