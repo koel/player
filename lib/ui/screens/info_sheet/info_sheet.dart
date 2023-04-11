@@ -105,6 +105,7 @@ Future<void> showInfoSheet(BuildContext context, {required Song song}) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
+    enableDrag: true,
     backgroundColor: Colors.transparent,
     builder: (_) {
       return DraggableScrollableSheet(
