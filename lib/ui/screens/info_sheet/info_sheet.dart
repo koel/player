@@ -85,7 +85,7 @@ class InfoHtml extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Html(
+    return SelectableHtml(
       data: '<div>$content</div>',
       style: {
         'body': Style().copyWith(
