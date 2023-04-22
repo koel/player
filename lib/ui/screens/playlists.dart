@@ -21,6 +21,21 @@ class PlaylistsScreen extends StatefulWidget {
 }
 
 class _PlaylistsScreenState extends State<PlaylistsScreen> {
+  var _loading = false;
+
+  Future<void> makeRequest() async {
+    if (_loading) return;
+
+    setState(() => _loading = true);
+
+    try {
+      await context.read<PlaylistProvider>().fetchAll();
+    } catch (_) {
+    } finally {
+      setState(() => _loading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,17 +44,23 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
         child: GradientDecoratedContainer(
           child: Consumer<PlaylistProvider>(
             builder: (context, provider, navigationBar) {
-              if (provider.playlists.isEmpty) {
-                return NoPlaylistsScreen(
-                  onTap: () => widget.router.showCreatePlaylistSheet(context),
-                );
-              }
-
               final playlists = provider.playlists
                 ..sort((a, b) => a.name.compareTo(b.name));
 
-              return CustomScrollView(
-                slivers: <Widget>[
+              late var widgets = <Widget>[];
+
+              if (playlists.isEmpty) {
+                widgets = [
+                  SliverToBoxAdapter(
+                    child: NoPlaylistsScreen(
+                      onTap: () {
+                        widget.router.showCreatePlaylistSheet(context);
+                      },
+                    ),
+                  )
+                ];
+              } else {
+                widgets = [
                   navigationBar!,
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
@@ -71,7 +92,12 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
                     ),
                   ),
                   const BottomSpace(),
-                ],
+                ];
+              }
+
+              return PullToRefresh(
+                onRefresh: () => _loading ? Future(() => null) : makeRequest(),
+                child: CustomScrollView(slivers: widgets),
               );
             },
             child: CupertinoSliverNavigationBar(
@@ -134,7 +160,9 @@ class NoPlaylistsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return Container(
+      height: MediaQuery.of(context).size.height,
+      alignment: Alignment.center,
       child: Wrap(
         spacing: 16.0,
         direction: Axis.vertical,

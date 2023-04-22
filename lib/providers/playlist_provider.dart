@@ -3,15 +3,7 @@ import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/auth_provider.dart';
 import 'package:app/utils/api_request.dart';
-import 'package:app/values/values.dart';
 import 'package:flutter/foundation.dart';
-
-ParseResult parsePlaylists(List<dynamic> data) {
-  ParseResult result = ParseResult();
-  data.forEach((json) => result.add(Playlist.fromJson(json), json['id']));
-
-  return result;
-}
 
 class PlaylistProvider with ChangeNotifier, StreamSubscriber {
   var _playlists = <Playlist>[];
@@ -24,8 +16,7 @@ class PlaylistProvider with ChangeNotifier, StreamSubscriber {
   }
 
   Future<void> init(List<dynamic> playlistData) async {
-    ParseResult result = await compute(parsePlaylists, playlistData);
-    _playlists = result.collection.cast();
+    _playlists = _parsePlaylistsFromJson(playlistData);
     notifyListeners();
   }
 
@@ -90,5 +81,14 @@ class PlaylistProvider with ChangeNotifier, StreamSubscriber {
     _playlists.remove(playlist);
 
     notifyListeners();
+  }
+
+  Future<void> fetchAll() async {
+    _playlists = _parsePlaylistsFromJson(await get('playlists'));
+    notifyListeners();
+  }
+
+  List<Playlist> _parsePlaylistsFromJson(List<dynamic> json) {
+    return json.map<Playlist>((j) => Playlist.fromJson(j)).toList();
   }
 }
