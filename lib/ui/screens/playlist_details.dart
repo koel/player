@@ -76,6 +76,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                     headingText: playlist.name,
                     coverImage: _cover,
                     actions: [
+                      SongListCacheIcon(songs: songs),
                       SortButton(
                         fields: ['title', 'artist_name', 'created_at'],
                         currentField: sortConfig.field,

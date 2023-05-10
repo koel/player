@@ -24,12 +24,15 @@ class DownloadProvider with StreamSubscriber {
   final _downloadsCleared = StreamController<bool>.broadcast();
   final _downloadRemoved = StreamController<Song>.broadcast();
   final _songDownloaded = StreamController<Download>.broadcast();
+  final _songDownloadStarted = StreamController<Song>.broadcast();
 
   Stream<bool> get downloadsClearedStream => _downloadsCleared.stream;
 
   Stream<Song> get downloadRemovedStream => _downloadRemoved.stream;
 
   Stream<Download> get songDownloadedStream => _songDownloaded.stream;
+
+  Stream<Song> get downloadStartedStream => _songDownloadStarted.stream;
 
   static const serializedSongContainer = 'Downloads';
   static const downloadCacheKey = 'koel.downloaded.songs';
@@ -79,6 +82,8 @@ class DownloadProvider with StreamSubscriber {
   get serializedSongKey => '${preferences.host}.${preferences.userEmail}.songs';
 
   Future<void> download({required Song song}) async {
+    _songDownloadStarted.add(song);
+
     final file = await _downloadManager.downloadFile(
       song.sourceUrl,
       key: song.cacheKey,

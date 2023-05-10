@@ -6,19 +6,22 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class SongCacheIcon extends StatefulWidget {
-  final Song song;
+class SongListCacheIcon extends StatefulWidget {
+  final List<Song> songs;
 
-  const SongCacheIcon({Key? key, required this.song}) : super(key: key);
+  const SongListCacheIcon({Key? key, required this.songs}) : super(key: key);
 
   @override
-  _SongCacheIconState createState() => _SongCacheIconState();
+  _SongListCacheIconState createState() => _SongListCacheIconState();
 }
 
-class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
+class _SongListCacheIconState extends State<SongListCacheIcon>
+    with StreamSubscriber {
   late DownloadProvider downloadProvider;
   var _downloading = false;
-  bool? _downloaded;
+  bool? _downloaded = false;
+
+  static const downloadBatchSize = 3;
 
   @override
   void initState() {
@@ -30,22 +33,14 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
     }));
 
     subscribe(downloadProvider.downloadRemovedStream.listen((song) {
-      if (song == widget.song) setState(() => _downloaded = false);
+      if (widget.songs.contains(song)) setState(() => _downloaded = false);
     }));
 
     subscribe(downloadProvider.songDownloadedStream.listen((event) {
-      if (event.song == widget.song)
-        setState(() {
-          _downloaded = true;
-          _downloading = false;
-        });
+      if (widget.songs.contains(event.song)) _resolveDownloadStatus();
     }));
 
-    subscribe(downloadProvider.downloadStartedStream.listen((song) {
-      if (song == widget.song) setState(() => _downloading = true);
-    }));
-
-    setState(() => _downloaded = downloadProvider.has(song: widget.song));
+    _resolveDownloadStatus();
   }
 
   /// Since this widget is rendered inside NowPlayingScreen, change to current
@@ -54,13 +49,14 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
   /// For that, we hook into didUpdateWidget().
   /// See https://stackoverflow.com/questions/54759920/flutter-why-is-child-widgets-initstate-is-not-called-on-every-rebuild-of-pa.
   @override
-  void didUpdateWidget(covariant SongCacheIcon oldWidget) {
+  void didUpdateWidget(covariant SongListCacheIcon oldWidget) {
     super.didUpdateWidget(oldWidget);
     _resolveDownloadStatus();
   }
 
   void _resolveDownloadStatus() {
-    setState(() => _downloaded = downloadProvider.has(song: widget.song));
+    setState(() => _downloaded =
+        !widget.songs.any((song) => !downloadProvider.has(song: song)));
   }
 
   @override
@@ -71,7 +67,28 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
 
   Future<void> _download() async {
     setState(() => _downloading = true);
-    await downloadProvider.download(song: widget.song);
+
+    int indexLastStarted = 0;
+
+    /// Download songs in parallel.
+    /// Recursively iterates over the song list, downloading songs that haven't
+    /// been downloaded yet.
+    Future<void> downloadNextSong() async {
+      if (indexLastStarted >= widget.songs.length) return;
+
+      Song song;
+      do {
+        song = widget.songs[indexLastStarted++];
+      } while (downloadProvider.has(song: song) &&
+          indexLastStarted < widget.songs.length);
+
+      await downloadProvider.download(song: song);
+      await downloadNextSong();
+    }
+
+    await Future.wait(
+        List.generate(downloadBatchSize, (_) => downloadNextSong()));
+
     setState(() {
       _downloading = false;
       _downloaded = true;
