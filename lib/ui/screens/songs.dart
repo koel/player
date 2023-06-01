@@ -228,10 +228,7 @@ class _SongListHeaderState extends State<SongListHeader> {
 
   Future<void> fetchSongsToShuffleAll() async {
     setState(() => _fetchingSongsToShuffle = true);
-    final songs = await _songProvider.fetchInOrder(
-      sortField: widget.sortField,
-      order: widget.sortOrder,
-    );
+    final songs = await _songProvider.fetchRandom();
     setState(() => _fetchingSongsToShuffle = false);
     audioHandler.replaceQueue(songs, shuffle: true);
   }
