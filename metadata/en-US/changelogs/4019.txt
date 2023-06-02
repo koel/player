@@ -1,0 +1,11 @@
+* Added Scroll to top functionality
+
+* Remove duplicate "Most Play" section from home screen
+
+* Added a progress bar for the Mini Player
+
+* Added a special empty home screen
+
+* The Infosheet text is now selectable
+
+* Playlist screens can now be pulled down to refresh 
