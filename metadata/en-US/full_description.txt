@@ -1,0 +1,8 @@
+The official mobile player for Koel (https://koel.dev), the open-source self-hosted music streaming service. With Koel Player you can connect to and stream your music from your own Koel server. Koel Player supports most of the features found in the web-based version:
+
+- Queue and play music
+- Like/unlike songs
+- Manipulate playlists
+- View lyrics and media information (especially if the server Koel instance is integrated with Last.fm)
+
+In addition, Koel Player allows caching music for local playback. More features are planned.
