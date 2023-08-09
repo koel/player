@@ -84,3 +84,19 @@ flutter {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
+
+// Change version codes of split APKs to be together
+// By default they are increments of 1000, e.g. when the versionCode is 19, then 1019 is is ARMv7a, 2019 is ARM64 v8a, 3019 is x86 and 4019 is x64
+// We change it to 190 for a non split apk, 191 for ARMv7a, 192 for AARM64 v8a, 193 for x86 and 194 for x64
+ext.abiCodes = ["armeabi-v7a": 1, "arm64-v8a": 2, "x86": 3, "x86_64": 4]
+import com.android.build.OutputFile
+android.applicationVariants.all { variant ->
+    variant.outputs.each { output ->
+        def abiVersionCode = project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
+        if (abiVersionCode == null) {
+            // Probably a non-split APK
+            abiVersionCode = 0
+        }
+        output.versionCodeOverride = variant.versionCode * 10 + abiVersionCode
+    }
+}
