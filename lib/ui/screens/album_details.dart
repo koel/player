@@ -70,6 +70,7 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                     AppBar(
                       headingText: album.name,
                       actions: [
+                        SongListCacheIcon(songs: songs),
                         SortButton(
                           fields: ['track', 'title', 'created_at'],
                           currentField: sortConfig.field,
