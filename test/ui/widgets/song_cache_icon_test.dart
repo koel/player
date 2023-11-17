@@ -98,7 +98,7 @@ void main() {
     await _mount(tester);
     _assertCacheStatus(hasCache: false);
 
-    songCached.add(Download(song: song, file: MockFileInfo()));
+    songCached.add(Download(song: song, path: MockFileInfo()));
     await tester.pumpAndSettle();
     _assertCacheStatus(hasCache: true);
   });

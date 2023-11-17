@@ -1,18 +1,20 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:app/utils/crypto.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:collection/collection.dart';
 import 'package:app/utils/preferences.dart' as preferences;
+import 'package:path_provider/path_provider.dart';
 
 class Download {
   final Song song;
-  final FileInfo file;
+  final String path;
 
-  Download({required this.song, required this.file});
+  Download({required this.song, required this.path});
 }
 
 class DownloadProvider with StreamSubscriber {
@@ -32,15 +34,7 @@ class DownloadProvider with StreamSubscriber {
   Stream<Download> get songDownloadedStream => _songDownloaded.stream;
 
   static const serializedSongContainer = 'Downloads';
-  static const downloadCacheKey = 'koel.downloaded.songs';
   static final _songStorage = GetStorage(serializedSongContainer);
-
-  static final _downloadManager = CacheManager(
-    Config(
-      downloadCacheKey,
-      stalePeriod: Duration(days: 365 * 10),
-    ),
-  );
 
   DownloadProvider({required SongProvider songProvider})
       : _songProvider = songProvider {
@@ -57,55 +51,90 @@ class DownloadProvider with StreamSubscriber {
     _collectDownloads();
   }
 
+  Future<String> get downloadsDir async {
+    final documentsDir = await getApplicationDocumentsDirectory();
+    final hash =
+        sha256('${preferences.host}${preferences.userEmail}'.toLowerCase());
+    return '${documentsDir.path}/${hash}';
+  }
+
   Future<void> _collectDownloads() async {
     _downloads.clear();
     final serializedSongs =
         _songStorage.read<List<dynamic>>(serializedSongKey) ?? [];
 
-    await Future.forEach<dynamic>(serializedSongs, (json) async {
-      var song = Song.fromJson(json);
-      final file = await _downloadManager.getFileFromCache(song.cacheKey);
+    var downloadsDir = await this.downloadsDir;
 
-      // a download is only valid if the file is still found in the cache
-      // (i.e. it hasn't been deleted by the OS)
-      if (file != null) {
-        _downloads.add(Download(song: song, file: file));
+    serializedSongs.forEach((json) {
+      var song = Song.fromJson(json);
+      final file = _localFile(downloadsDir, song);
+
+      if (file.existsSync() && !_downloads.any((d) => d.song == song)) {
+        _downloads.add(Download(song: song, path: file.path));
       }
     });
 
     _songProvider.syncWithVault(this.songs);
   }
 
+  File _localFile(String downloadsDir, Song song) {
+    // just_audio requires a valid extension on iOS
+    // see https://github.com/ryanheise/just_audio/issues/289
+    return File('${downloadsDir}/${song.cacheKey}.mp3');
+  }
+
   get serializedSongKey => '${preferences.host}.${preferences.userEmail}.songs';
 
   Future<void> download({required Song song}) async {
-    final file = await _downloadManager.downloadFile(
-      song.sourceUrl,
-      key: song.cacheKey,
-      force: true,
-    );
+    var client = HttpClient();
+    var targetDir = Directory(await downloadsDir);
 
-    final download = Download(song: song, file: file);
-    _songStorage.write(
-      serializedSongKey,
-      songs
-        ..add(song)
-        ..toSet()
-        ..toList(),
-    );
+    if (!targetDir.existsSync()) {
+      targetDir.createSync();
+    }
 
-    _songDownloaded.add(download);
-    _downloads.add(download);
+    var file = _localFile(targetDir.path, song);
+
+    if (file.existsSync()) {
+      try {
+        file.deleteSync();
+      } catch (e) {
+        print(e);
+      }
+    }
+
+    var request = await client.getUrl(Uri.parse(song.sourceUrl));
+    var response = await request.close();
+    List<int> downloadData = [];
+
+    response.listen((data) async {
+      downloadData.addAll(data);
+    }, onDone: () {
+      file.writeAsBytesSync(downloadData);
+      final download = Download(song: song, path: file.path);
+      _songStorage.write(
+        serializedSongKey,
+        songs
+          ..add(song)
+          ..toSet()
+          ..toList(),
+      );
+
+      _songDownloaded.add(download);
+      _downloads.add(download);
+    }, onError: (error) {
+      print(error);
+    });
   }
 
-  FileInfo? getForSong(Song song) {
-    return _downloads.firstWhereOrNull((d) => d.song == song)?.file;
+  Download? getForSong(Song song) {
+    return _downloads.firstWhereOrNull((d) => d.song == song);
   }
 
   bool has({required Song song}) => getForSong(song) != null;
 
   Future<void> removeForSong(Song song) async {
-    await _downloadManager.removeFile(song.cacheKey);
+    _removeSong(song);
     _downloadRemoved.add(song);
 
     _downloads.removeWhere((element) => element.song.id == song.id);
@@ -114,11 +143,23 @@ class DownloadProvider with StreamSubscriber {
 
   Future<void> clear() async {
     await Future.forEach<Song>(songs, (song) async {
-      await _downloadManager.removeFile(song.cacheKey);
+      await _removeSong(song);
     });
 
     _downloadsCleared.add(true);
     _downloads.clear();
     _songStorage.remove(serializedSongKey);
+  }
+
+  Future<void> _removeSong(Song song) async {
+    var download = getForSong(song);
+
+    if (download == null) return;
+
+    try {
+      await File(download.path).delete();
+    } catch (e) {
+      print(e);
+    }
   }
 }

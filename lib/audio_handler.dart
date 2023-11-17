@@ -105,7 +105,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     if (download == null) {
       await _player.setUrl(mediaItem.extras?['sourceUrl'] as String);
     } else {
-      await _player.setFilePath(download.file.path);
+      await _player.setFilePath(download.path);
     }
   }
 
