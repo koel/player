@@ -7,6 +7,7 @@ import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:audio_service/audio_service.dart';
+import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -73,115 +74,116 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
       isLoading = false;
     }
 
-    return FrostedGlassBackground(
-      sigma: 10.0,
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(
-                  color: AppColors.white.withOpacity(0.1),
-                  width: .5,
-                ),
-                bottom: BorderSide(
-                  color: AppColors.white.withOpacity(0.1),
-                  width: .5,
-                ),
-              ),
-            ),
-            child: InkWell(
-              onTap: () => widget.router.openNowPlayingScreen(context),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Stack(
-                        children: [
-                          Hero(
-                            tag: 'hero-now-playing-thumbnail',
-                            child: SongThumbnail.sm(song: song),
-                          ),
-                          if (isLoading)
-                            SizedBox.square(
-                              dimension: SongThumbnail.dimensionForSize(
-                                ThumbnailSize.sm,
-                              ),
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(
-                                      SongThumbnail.borderRadiusForSize(
-                                        ThumbnailSize.sm,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6.0),
+      child: ClipSmoothRect(
+        radius: SmoothBorderRadius(
+          cornerRadius: 14.0,
+          cornerSmoothing: .8,
+        ),
+        child: FrostedGlassBackground(
+          sigma: 20.0,
+          child: Container(
+            color: Color.fromRGBO(25, 0, 64, .5),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: AppColors.white.withOpacity(0.1),
+                      width: .5,
+                    ),
+                  ),
+                  child: InkWell(
+                    onTap: () => widget.router.openNowPlayingScreen(context),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Stack(
+                              children: [
+                                Hero(
+                                  tag: 'hero-now-playing-thumbnail',
+                                  child: SongThumbnail.xs(song: song),
+                                ),
+                                if (isLoading)
+                                  SizedBox.square(
+                                    dimension: SongThumbnail.dimensionForSize(
+                                      ThumbnailSize.xs,
+                                    ),
+                                    child: DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(
+                                            SongThumbnail.borderRadiusForSize(
+                                              ThumbnailSize.xs,
+                                            ),
+                                          ),
+                                        ),
+                                        color: Colors.black54,
                                       ),
                                     ),
                                   ),
-                                  color: Colors.black54,
+                                if (isLoading)
+                                  SizedBox.square(
+                                    dimension: SongThumbnail.dimensionForSize(
+                                      ThumbnailSize.xs,
+                                    ),
+                                    child: statusIndicator,
+                                  ),
+                              ],
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 16),
+                                child: Text(
+                                  song.title,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ),
-                          if (isLoading)
-                            SizedBox.square(
-                              dimension: SongThumbnail.dimensionForSize(
-                                ThumbnailSize.sm,
-                              ),
-                              child: statusIndicator,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: <Widget>[
+                                IconButton(
+                                  key: MiniPlayer.pauseButtonKey,
+                                  onPressed: audioHandler.playOrPause,
+                                  icon: Icon(
+                                    state.playing
+                                        ? CupertinoIcons.pause_fill
+                                        : CupertinoIcons.play_fill,
+                                    size: 24,
+                                  ),
+                                ),
+                                IconButton(
+                                  key: MiniPlayer.nextButtonKey,
+                                  onPressed: audioHandler.skipToNext,
+                                  icon: const Icon(
+                                    CupertinoIcons.forward_fill,
+                                    size: 24,
+                                  ),
+                                ),
+                              ],
                             ),
-                        ],
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                song.title,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                song.artistName,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(color: Colors.white60),
-                              )
-                            ],
-                          ),
+                          ],
                         ),
-                      ),
-                      Row(
-                        children: <Widget>[
-                          IconButton(
-                            key: MiniPlayer.pauseButtonKey,
-                            onPressed: audioHandler.playOrPause,
-                            icon: Icon(
-                              state.playing
-                                  ? CupertinoIcons.pause_fill
-                                  : CupertinoIcons.play_fill,
-                              size: 24,
-                            ),
-                          ),
-                          IconButton(
-                            key: MiniPlayer.nextButtonKey,
-                            onPressed: audioHandler.skipToNext,
-                            icon: const Icon(
-                              CupertinoIcons.forward_fill,
-                              size: 24,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: const MiniPlayerProgressBar(),
+                ),
+              ],
             ),
           ),
-          const MiniPlayerProgressBar(),
-        ],
+        ),
       ),
     );
   }

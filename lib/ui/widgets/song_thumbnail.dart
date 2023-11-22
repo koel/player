@@ -10,6 +10,10 @@ class SongThumbnail extends StatelessWidget {
   final ThumbnailSize size;
   final bool playing;
 
+  const SongThumbnail.xs({Key? key, required this.song, this.playing = false})
+      : size = ThumbnailSize.xs,
+        super(key: key);
+
   const SongThumbnail.sm({Key? key, required this.song, this.playing = false})
       : size = ThumbnailSize.sm,
         super(key: key);
@@ -58,10 +62,12 @@ class SongThumbnail extends StatelessWidget {
 
   static double dimensionForSize(ThumbnailSize size) {
     switch (size) {
-      case ThumbnailSize.lg:
-        return 192;
+      case ThumbnailSize.xs:
+        return 32;
       case ThumbnailSize.md:
         return 144;
+      case ThumbnailSize.lg:
+        return 192;
       case ThumbnailSize.xl:
         return 256;
       default:
@@ -71,6 +77,8 @@ class SongThumbnail extends StatelessWidget {
 
   static double borderRadiusForSize(ThumbnailSize size) {
     switch (size) {
+      case ThumbnailSize.xs:
+        return 8;
       case ThumbnailSize.md:
         return 16;
       case ThumbnailSize.lg:
