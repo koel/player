@@ -89,8 +89,10 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
               mainAxisSize: MainAxisSize.max,
               children: [
                 Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 11.0,
+                    vertical: 3.0,
+                  ),
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: AppColors.white.withOpacity(0.1),

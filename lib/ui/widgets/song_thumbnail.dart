@@ -63,7 +63,7 @@ class SongThumbnail extends StatelessWidget {
   static double dimensionForSize(ThumbnailSize size) {
     switch (size) {
       case ThumbnailSize.xs:
-        return 32;
+        return 36;
       case ThumbnailSize.md:
         return 144;
       case ThumbnailSize.lg:
