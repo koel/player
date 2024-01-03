@@ -1,10 +1,16 @@
 import 'dart:io';
 
+import 'package:app/app_state.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
+import 'package:app/utils/api_request.dart';
+import 'package:app/values/queue_state.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:app/utils/preferences.dart' as preferences;
+import 'package:collection/collection.dart';
+import 'package:version/version.dart';
+import 'package:app/extensions/extensions.dart';
 
 class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   static const MAX_ERROR_COUNT = 10;
@@ -13,9 +19,11 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   late final SongProvider songProvider;
   late AudioServiceRepeatMode repeatMode;
 
+  var _supportsQueueStateSync = false;
   var _errorCount = 0;
   var _initialized = false;
   var _currentMediaItem = MediaItem(id: '', title: '');
+
   final _player = AudioPlayer();
 
   AudioPlayer get player => _player;
@@ -40,6 +48,17 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       ..repeatMode = preferences.repeatMode;
 
     await this.setVolume(preferences.volume);
+
+    try {
+      _supportsQueueStateSync = AppState.get<Version>(['app', 'apiVersion'])! >
+          Version.parse('6.11.5');
+    } catch (e) {
+      print(e);
+    }
+
+    if (_supportsQueueStateSync) {
+      _trySetUpQueue();
+    }
 
     _initialized = true;
   }
@@ -97,8 +116,55 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     });
   }
 
+  void _trySetUpQueue() async {
+    final state = AppState.get<QueueState>(['app', 'queueState'])!;
+
+    if (state.songs.isEmpty) return;
+
+    try {
+      final songs = songProvider.syncWithVault(state.songs);
+      await replaceQueue(songs, shuffle: false, autoPlay: false);
+
+      if (state.currentSong != null) {
+        var currentSong = songProvider.syncWithVault(state.currentSong).first;
+
+        var queuedMediaItem = queue.value.firstWhereOrNull(
+          (item) => item.id == currentSong.id,
+        );
+
+        if (queuedMediaItem != null) {
+          _setPlayerSource(queuedMediaItem);
+          player.seek(Duration(seconds: state.playbackPosition));
+        }
+      }
+
+      queue.stream.listen((mediaItems) {
+        var songIds = mediaItems.map((item) => item.id).toList();
+        if (songIds.isEmpty) return;
+
+        put('queue/state', data: {
+          'songs': songIds,
+          'song': _currentMediaItem.id,
+        });
+      });
+
+      _player.positionStream.throttle(Duration(seconds: 1)).listen((position) {
+        if (mediaItem.value == null || position.inSeconds % 5 != 0) return;
+
+        put('queue/playback-status', data: {
+          'song': _currentMediaItem.id,
+          'position': position.inSeconds,
+        });
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
   _setPlayerSource(MediaItem mediaItem) async {
     _currentMediaItem = mediaItem;
+    this.mediaItem.add(_currentMediaItem);
+
     final song = songProvider.byId(mediaItem.id)!;
     final download = downloadProvider.getForSong(song);
 
@@ -173,11 +239,15 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     if (queue.value.length <= index) return;
 
     final mediaItem = queue.value[index];
-    this.mediaItem.add(mediaItem);
 
     try {
       await _setPlayerSource(mediaItem);
       await play();
+
+      put('queue/playback-status', data: {
+        'song': mediaItem.id,
+        'position': _player.position.inSeconds,
+      });
 
       // Reset the error count if the song is successfully loaded.
       _errorCount = 0;
@@ -236,13 +306,19 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   Future<void> setVolume(double value) async => await _player.setVolume(value);
 
-  Future<void> replaceQueue(List<Song> songs, {bool shuffle = false}) async {
+  Future<void> replaceQueue(
+    List<Song> songs, {
+    bool shuffle = false,
+    bool autoPlay = true,
+  }) async {
     final items = await Future.wait(songs.map((song) => song.asMediaItem()));
     if (shuffle) items.shuffle();
 
     await updateQueue(items);
 
-    await _playAtIndex(0);
+    if (autoPlay) {
+      await _playAtIndex(0);
+    }
   }
 
   Future<AudioServiceRepeatMode> rotateRepeatMode() async {
