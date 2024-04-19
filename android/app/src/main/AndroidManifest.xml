@@ -49,6 +49,11 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- Support for QR scanner. See https://github.com/roman-yerin/native_qr -->
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode_ui" />
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

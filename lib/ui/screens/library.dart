@@ -142,7 +142,7 @@ class LibraryMenuItem extends StatelessWidget {
           contentPadding: EdgeInsets.symmetric(
             horizontal: AppDimensions.hPadding,
           ),
-          horizontalTitleGap: 0,
+          horizontalTitleGap: 12,
           leading: icon is IconData ? Icon(icon, color: Colors.white54) : icon,
           title: Text(label, style: const TextStyle(fontSize: 20)),
           trailing: const Icon(

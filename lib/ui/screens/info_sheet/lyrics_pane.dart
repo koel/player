@@ -21,7 +21,8 @@ class LyricsPane extends StatelessWidget {
         : Padding(
             padding: EdgeInsets.only(top: 4.0),
             child: InfoHtml(
-              content: song.lyrics.replaceAll('\n', '<br>'),
+              content:
+                  song.lyrics.replaceAll('\n', '<br>').replaceAll('\r', '<br>'),
               style: Style(fontSize: FontSize.larger),
             ),
           );

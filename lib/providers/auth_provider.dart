@@ -41,6 +41,21 @@ class AuthProvider with StreamSubscriber {
     preferences.audioToken = response['audio-token'];
   }
 
+  Future<void> loginWithOneTimeToken({
+    required String host,
+    required String token,
+  }) async {
+    preferences.host = host;
+
+    final loginData = <String, String>{
+      'token': token,
+    };
+
+    final response = await post('me/otp', data: loginData);
+    preferences.apiToken = response['token'];
+    preferences.audioToken = response['audio-token'];
+  }
+
   void setAuthUser(User user) => _authUser = user;
 
   Future<User?> tryGetAuthUser() async {

@@ -52,7 +52,6 @@ class _InfoSheetState extends State<InfoSheet> {
               backgroundColor: Colors.transparent,
               elevation: 0,
               bottom: const TabBar(
-                indicatorColor: AppColors.highlight,
                 tabs: [
                   Tab(text: 'Lyrics'),
                   Tab(text: 'Artist'),
@@ -85,18 +84,20 @@ class InfoHtml extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SelectableHtml(
-      data: '<div>$content</div>',
-      style: {
-        'body': Style().copyWith(
-          padding: EdgeInsets.zero,
-          margin: EdgeInsets.zero,
-        ),
-        'div': (style ?? Style()).copyWith(
-          fontSize: FontSize.large,
-          lineHeight: LineHeight.number(1.4),
-        ),
-      },
+    return SelectionArea(
+      child: Html(
+        data: '<div>$content</div>',
+        style: {
+          'body': Style().copyWith(
+            padding: HtmlPaddings.zero,
+            margin: Margins.zero,
+          ),
+          'div': (style ?? Style()).copyWith(
+            fontSize: FontSize.large,
+            lineHeight: LineHeight.number(1.4),
+          ),
+        },
+      ),
     );
   }
 }
