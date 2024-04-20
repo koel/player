@@ -1,4 +1,3 @@
-import 'package:app/enums.dart';
 import 'package:app/main.dart';
 import 'package:app/models/models.dart';
 import 'package:app/router.dart';

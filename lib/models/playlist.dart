@@ -2,7 +2,7 @@ import 'package:app/models/models.dart';
 import 'package:faker/faker.dart';
 
 class Playlist {
-  dynamic id; // This might be a UUID string in the near future
+  var id; // This might be a UUID string in the near future
   String name;
   bool isSmart;
   List<Song> songs = [];
@@ -21,11 +21,11 @@ class Playlist {
     );
   }
 
-  factory Playlist.fake({dynamic id, String? name, bool? isSmart}) {
+  factory Playlist.fake({var id, String? name, bool? isSmart}) {
     Faker faker = Faker();
 
     return Playlist(
-      id: id ?? faker.randomGenerator.integer(100, min: 1),
+      id: id ?? faker.guid.guid(),
       name: name ?? faker.food.cuisine(),
       isSmart: isSmart ?? false,
     );
