@@ -7,7 +7,6 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_html/style.dart';
 
 class SongRow extends StatefulWidget {
   final Song song;
@@ -95,7 +94,7 @@ class SongRowTrackNumber extends StatelessWidget {
       child: Text(
         song.track == 0 ? '' : song.track.toString(),
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(fontSize: FontSize.large.size, color: Colors.white54),
+        style: TextStyle(fontSize: 15, color: Colors.white54),
       ),
     );
   }

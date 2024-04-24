@@ -3,6 +3,7 @@ import 'package:app/exceptions/exceptions.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/screens.dart';
+import 'package:app/ui/widgets/qr_login_button.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:flutter/cupertino.dart';
@@ -76,6 +77,13 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
     return host;
   }
 
+  void redirectToDataLoadingScreen() {
+    Navigator.of(
+      context,
+      rootNavigator: true,
+    ).pushReplacementNamed(DataLoadingScreen.routeName);
+  }
+
   Future<void> attemptLogin() async {
     final form = formKey.currentState!;
     var successful = false;
@@ -106,11 +114,37 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
     if (successful) {
       preferences.host = _host;
       preferences.userEmail = _email;
+      redirectToDataLoadingScreen();
+    }
+  }
 
-      Navigator.of(
+  Future<void> attemptLoginWithOtp({
+    required String host,
+    required String token,
+  }) async {
+    var successful = false;
+    setState(() => _authenticating = true);
+
+    try {
+      host = standardizeHost(host);
+      await _auth.loginWithOneTimeToken(host: host, token: token);
+      await _auth.tryGetAuthUser();
+      successful = true;
+    } on HttpResponseException catch (error) {
+      await showErrorDialog(
         context,
-        rootNavigator: true,
-      ).pushReplacementNamed(DataLoadingScreen.routeName);
+        message:
+            error.response.statusCode == 401 ? 'Invalid login token.' : null,
+      );
+    } catch (error) {
+      await showErrorDialog(context);
+    } finally {
+      setState(() => _authenticating = false);
+    }
+
+    if (successful) {
+      preferences.host = host;
+      redirectToDataLoadingScreen();
     }
   }
 
@@ -189,6 +223,16 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
                         onPressed: _authenticating ? null : attemptLogin,
                       ),
                     ),
+                    _authenticating
+                        ? SizedBox()
+                        : QrLoginButton(
+                            onResult: ({
+                              required String host,
+                              required String token,
+                            }) {
+                              attemptLoginWithOtp(host: host, token: token);
+                            },
+                          ),
                   ].expand((widget) => [widget, const SizedBox(height: 12)]),
                 ],
               ),

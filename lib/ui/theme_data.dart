@@ -8,7 +8,17 @@ import 'package:flutter/material.dart';
 ThemeData themeData(BuildContext context) {
   return ThemeData(
     splashColor: AppColors.highlightAccent,
-    dividerColor: Colors.white30,
+    dividerTheme: const DividerThemeData(
+      color: Colors.white12,
+      space: 0,
+      thickness: .5,
+    ),
+    tabBarTheme: TabBarTheme(
+      labelColor: Colors.white,
+      unselectedLabelColor: Colors.white54,
+      indicatorColor: AppColors.highlight,
+      dividerColor: Colors.white12,
+    ),
     scaffoldBackgroundColor: Colors.transparent,
     colorScheme: ColorScheme.dark(
       background: AppColors.background,

@@ -30,7 +30,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
   }
 
   Future<List<Song>> buildRequest(
-    int playlistId, {
+    var playlistId, {
     bool forceRefresh = false,
   }) {
     return context

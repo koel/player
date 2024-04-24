@@ -91,7 +91,7 @@ class SongProvider with ChangeNotifier, StreamSubscriber {
   }
 
   Future<List<Song>> fetchForPlaylist(
-    int playlistId, {
+    var playlistId, {
     bool forceRefresh = false,
   }) async {
     if (forceRefresh) AppState.delete(['playlist.songs', playlistId]);

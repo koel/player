@@ -96,7 +96,7 @@ class _SongCacheIconState extends State<SongCacheIcon> with StreamSubscriber {
     return IconButton(
       onPressed: _download,
       constraints: const BoxConstraints(),
-      padding: const EdgeInsets.symmetric(horizontal: 0.0),
+      padding: const EdgeInsets.only(right: 4.0),
       icon: const Icon(CupertinoIcons.cloud_download_fill, size: 16),
     );
   }
