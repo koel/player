@@ -72,7 +72,7 @@ class LibraryScreen extends StatelessWidget {
           child: CustomScrollView(
             slivers: <Widget>[
               const CupertinoSliverNavigationBar(
-                backgroundColor: AppColors.screenHeaderBackground,
+                backgroundColor: AppColors.staticScreenHeaderBackground,
                 largeTitle: const LargeTitle(text: 'Library'),
               ),
               SliverPadding(

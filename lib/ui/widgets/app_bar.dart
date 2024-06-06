@@ -29,7 +29,7 @@ class AppBar extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: [
             Colors.transparent,
-            AppColors.screenHeaderBackground,
+            AppColors.flexibleScreenHeaderBackground,
           ],
         ),
       ),
@@ -44,10 +44,14 @@ class AppBar extends StatelessWidget {
       pinned: true,
       expandedHeight: 290,
       actions: actions,
-      backgroundColor: AppColors.screenHeaderBackground,
-      shadowColor: Colors.transparent,
+      backgroundColor: AppColors.flexibleScreenHeaderBackground,
       flexibleSpace: FrostedGlassBackground(
         child: FlexibleSpaceBar(
+          expandedTitleScale: 1.3,
+          titlePadding: EdgeInsets.symmetric(
+            horizontal: 48,
+            vertical: 12,
+          ),
           title: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: AppDimensions.hPadding,
@@ -55,6 +59,7 @@ class AppBar extends StatelessWidget {
             child: Text(
               headingText,
               overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
           ),
           background: Stack(
@@ -152,7 +157,8 @@ class CoverImage extends StatelessWidget {
           decoration: BoxDecoration(
             image: DecorationImage(
               colorFilter: ColorFilter.mode(
-                AppColors.screenHeaderBackground.withOpacity(overlayOpacity),
+                AppColors.flexibleScreenHeaderBackground
+                    .withOpacity(overlayOpacity),
                 BlendMode.srcOver,
               ),
               image: imageUrl == null
@@ -163,7 +169,7 @@ class CoverImage extends StatelessWidget {
             ),
             boxShadow: const <BoxShadow>[
               const BoxShadow(
-                color: AppColors.screenHeaderBackground,
+                color: AppColors.flexibleScreenHeaderBackground,
                 blurRadius: 10.0,
                 offset: const Offset(0, 6),
               ),

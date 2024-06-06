@@ -101,7 +101,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
               );
             },
             child: CupertinoSliverNavigationBar(
-              backgroundColor: AppColors.screenHeaderBackground,
+              backgroundColor: AppColors.staticScreenHeaderBackground,
               largeTitle: const LargeTitle(text: 'Playlists'),
               trailing: IconButton(
                 onPressed: () => widget.router.showCreatePlaylistSheet(context),

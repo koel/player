@@ -11,7 +11,7 @@ class QrLoginButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      child: Icon(Icons.qr_code_scanner_rounded, size: 32),
+      child: Icon(Icons.qr_code, size: 32),
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.transparent,
         shape: CircleBorder(),

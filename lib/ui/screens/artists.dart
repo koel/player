@@ -102,7 +102,7 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
                     controller: _scrollController,
                     slivers: [
                       const CupertinoSliverNavigationBar(
-                        backgroundColor: AppColors.screenHeaderBackground,
+                        backgroundColor: AppColors.staticScreenHeaderBackground,
                         largeTitle: LargeTitle(text: 'Artists'),
                       ),
                       SliverList(

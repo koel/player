@@ -58,7 +58,7 @@ class SortButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
       offset: const Offset(-12, 48),
-      icon: const Icon(CupertinoIcons.sort_down, size: 24),
+      icon: const Icon(CupertinoIcons.sort_down),
       onSelected: (item) {
         if (item == currentField) {
           currentOrder =
