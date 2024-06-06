@@ -1,4 +1,5 @@
 import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 
 class QueueState {
   List<Song> songs;
@@ -11,14 +12,17 @@ class QueueState {
     this.playbackPosition = 0,
   });
 
-  static parse(Map<String, dynamic> json) {
+  static parse(Map<String, dynamic> json, SongProvider songProvider) {
+    final songs = songProvider.parseFromJson(json['songs']);
+
+    var currentSong =
+        json['current_song'] != null && json['current_song']['type'] == 'songs'
+            ? Song.fromJson(json['current_song'])
+            : null;
+
     return QueueState(
-      songs: (json['songs'] as List<dynamic>)
-          .map<Song>((song) => Song.fromJson(song))
-          .toList(),
-      currentSong: json['current_song'] != null
-          ? Song.fromJson(json['current_song'])
-          : null,
+      songs: songs,
+      currentSong: currentSong,
       playbackPosition: json['playback_position'],
     );
   }

@@ -104,12 +104,7 @@ class SongProvider with ChangeNotifier, StreamSubscriber {
 
   Future<List<Song>> _stateAwareFetch(String url, Object cacheKey) async {
     if (AppState.has(cacheKey)) return AppState.get(cacheKey);
-
-    final res = await get(url);
-    final items = res.map<Song>((json) => Song.fromJson(json)).toList();
-    AppState.set(cacheKey, items);
-
-    return syncWithVault(items);
+    return AppState.set(cacheKey, parseFromJson(await get(url)));
   }
 
   Future<List<Song>> fetchRandom({int limit = 500}) async {
@@ -128,6 +123,18 @@ class SongProvider with ChangeNotifier, StreamSubscriber {
     );
     final items = res.map<Song>((json) => Song.fromJson(json)).toList();
     return syncWithVault(items);
+  }
+
+  List<Song> parseFromJson(dynamic json) {
+    final songs = <Song>[];
+
+    json.forEach((j) {
+      if (j['type'] == 'songs') {
+        songs.add(Song.fromJson(j));
+      }
+    });
+
+    return syncWithVault(songs).toList();
   }
 }
 

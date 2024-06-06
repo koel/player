@@ -46,15 +46,15 @@ class OverviewProvider with ChangeNotifier, StreamSubscriber {
 
     mostPlayedSongs
       ..clear()
-      ..addAll(_parseSongsFromJson(response['most_played_songs']));
+      ..addAll(_songProvider.parseFromJson(response['most_played_songs']));
 
     recentlyAddedSongs
       ..clear()
-      ..addAll(_parseSongsFromJson(response['recently_added_songs']));
+      ..addAll(_songProvider.parseFromJson(response['recently_added_songs']));
 
     recentlyPlayedSongs
       ..clear()
-      ..addAll(_parseSongsFromJson(response['recently_played_songs']));
+      ..addAll(_songProvider.parseFromJson(response['recently_played_songs']));
 
     final _mostPlayedAlbums = response['most_played_albums']
         .map<Album>((j) => Album.fromJson(j))
@@ -73,10 +73,5 @@ class OverviewProvider with ChangeNotifier, StreamSubscriber {
       ..addAll(_artistProvider.syncWithVault(_mostPlayedArtist));
 
     notifyListeners();
-  }
-
-  List<Song> _parseSongsFromJson(dynamic json) {
-    return _songProvider
-        .syncWithVault(json.map<Song>((j) => Song.fromJson(j)).toList());
   }
 }

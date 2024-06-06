@@ -57,6 +57,7 @@ List<SingleChildWidget> _providers = [
   ChangeNotifierProvider(
     create: (context) => DataProvider(
       playlistProvider: context.read<PlaylistProvider>(),
+      songProvider: context.read<SongProvider>(),
     ),
   ),
   ChangeNotifierProvider(

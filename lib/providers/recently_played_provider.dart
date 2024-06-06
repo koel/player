@@ -21,7 +21,14 @@ class RecentlyPlayedProvider with ChangeNotifier, StreamSubscriber {
 
   Future<List<Song>> fetch() async {
     final res = await get('songs/recently-played');
-    final items = res.map<Song>((j) => Song.fromJson(j)).toList();
+    final items = <Song>[];
+
+    res.forEach((json) {
+      if (json['type'] == 'songs') {
+        items.add(Song.fromJson(json));
+      }
+    });
+
     songs = _songProvider.syncWithVault(items);
     _loaded = true;
     notifyListeners();
