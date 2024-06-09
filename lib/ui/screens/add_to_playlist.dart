@@ -21,7 +21,7 @@ class AddToPlaylistScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final song = ModalRoute.of(context)!.settings.arguments as Song;
+    final playable = ModalRoute.of(context)!.settings.arguments as Playable;
 
     return Scaffold(
       body: CupertinoTheme(
@@ -45,14 +45,14 @@ class AddToPlaylistScreen extends StatelessWidget {
                       return PlaylistRow(
                         playlist: playlist,
                         onTap: () {
-                          provider.addSongToPlaylist(song, playlist: playlist);
+                          provider.addToPlaylist(playable, playlist: playlist);
                           HapticFeedback.mediumImpact();
                           Navigator.pop(context);
                           showOverlay(
                             context,
                             icon: CupertinoIcons.text_badge_plus,
                             caption: 'Added',
-                            message: 'Song added to playlist.',
+                            message: 'Item added to playlist.',
                           );
                         },
                       );
@@ -78,9 +78,12 @@ class AddToPlaylistScreen extends StatelessWidget {
   }
 }
 
-void gotoAddToPlaylistScreen(BuildContext context, {required Song song}) {
+void gotoAddToPlaylistScreen(
+  BuildContext context, {
+  required Playable playable,
+}) {
   Navigator.of(context, rootNavigator: true).pushNamed(
     AddToPlaylistScreen.routeName,
-    arguments: song,
+    arguments: playable,
   );
 }

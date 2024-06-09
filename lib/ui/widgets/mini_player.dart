@@ -3,6 +3,7 @@ import 'package:app/enums.dart';
 import 'package:app/main.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
+import 'package:app/models/playable.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/widgets.dart';
@@ -29,21 +30,23 @@ class MiniPlayer extends StatefulWidget {
 }
 
 class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
-  late SongProvider _songProvider;
+  late PlayableProvider _playableProvider;
   PlaybackState? _state;
-  Song? _song;
+  Playable? _playable;
 
   @override
   void initState() {
     super.initState();
-    _songProvider = context.read();
+    _playableProvider = context.read();
 
     subscribe(audioHandler.playbackState.listen((PlaybackState value) {
       setState(() => _state = value);
     }));
 
     subscribe(audioHandler.mediaItem.listen((MediaItem? value) {
-      if (value != null) setState(() => _song = _songProvider.byId(value.id));
+      if (value != null) {
+        setState(() => _playable = _playableProvider.byId(value.id));
+      }
     }));
   }
 
@@ -55,10 +58,10 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
 
   @override
   Widget build(BuildContext context) {
-    final song = _song;
+    final playable = _playable;
     final state = _state;
 
-    if (song == null || state == null) return SizedBox.shrink();
+    if (playable == null || state == null) return SizedBox.shrink();
 
     late final Widget statusIndicator;
     late final bool isLoading;
@@ -110,18 +113,22 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
                               children: [
                                 Hero(
                                   tag: 'hero-now-playing-thumbnail',
-                                  child: SongThumbnail.xs(song: song),
+                                  child: PlayableThumbnail.xs(
+                                    playable: playable,
+                                  ),
                                 ),
                                 if (isLoading)
                                   SizedBox.square(
-                                    dimension: SongThumbnail.dimensionForSize(
+                                    dimension:
+                                        PlayableThumbnail.dimensionForSize(
                                       ThumbnailSize.xs,
                                     ),
                                     child: DecoratedBox(
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.all(
                                           Radius.circular(
-                                            SongThumbnail.borderRadiusForSize(
+                                            PlayableThumbnail
+                                                .borderRadiusForSize(
                                               ThumbnailSize.xs,
                                             ),
                                           ),
@@ -132,7 +139,8 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
                                   ),
                                 if (isLoading)
                                   SizedBox.square(
-                                    dimension: SongThumbnail.dimensionForSize(
+                                    dimension:
+                                        PlayableThumbnail.dimensionForSize(
                                       ThumbnailSize.xs,
                                     ),
                                     child: statusIndicator,
@@ -144,7 +152,7 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 16),
                                 child: Text(
-                                  song.title,
+                                  playable.title,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),

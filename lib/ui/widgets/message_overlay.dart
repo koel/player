@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/cupertino.dart';

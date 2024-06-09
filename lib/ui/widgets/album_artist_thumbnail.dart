@@ -15,7 +15,7 @@ class AlbumArtistThumbnail extends StatelessWidget {
     required this.entity,
     this.asHero = false,
   })  : size = ThumbnailSize.sm,
-        assert(entity is Artist || entity is Album),
+        assert(entity is Artist || entity is Album || entity is Podcast),
         super(key: key);
 
   const AlbumArtistThumbnail.md({
@@ -23,13 +23,13 @@ class AlbumArtistThumbnail extends StatelessWidget {
     required this.entity,
     this.asHero = false,
   })  : size = ThumbnailSize.md,
-        assert(entity is Artist || entity is Album),
+        assert(entity is Artist || entity is Album || entity is Podcast),
         super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final dimension = dimensionForSize(size);
-    final imageUrl = entity is Artist ? entity.imageUrl : entity.cover;
+    final imageUrl = imageUrlForEntity(entity);
 
     Widget image = imageUrl == null
         ? Image.asset(
@@ -52,13 +52,7 @@ class AlbumArtistThumbnail extends StatelessWidget {
         cornerRadius: borderRadiusForSize(size),
         cornerSmoothing: .8,
       ),
-      child: asHero
-          ? Hero(
-              tag: entity is Artist
-                  ? 'artist-hero-${entity.id}'
-                  : 'album-hero-${entity.id}',
-              child: image)
-          : image,
+      child: asHero ? Hero(tag: tagForEntity(entity), child: image) : image,
     );
   }
 
@@ -86,5 +80,29 @@ class AlbumArtistThumbnail extends StatelessWidget {
       default:
         return 20; // rounded for sm size
     }
+  }
+
+  static String? imageUrlForEntity(dynamic entity) {
+    if (entity is Artist) {
+      return entity.imageUrl;
+    } else if (entity is Album) {
+      return entity.cover;
+    } else if (entity is Podcast) {
+      return entity.imageUrl;
+    }
+
+    throw ArgumentError('Entity must be Artist, Album or Podcast');
+  }
+
+  static String tagForEntity(dynamic entity) {
+    if (entity is Artist) {
+      return 'artist-hero-${entity.id}';
+    } else if (entity is Album) {
+      return 'album-hero-${entity.id}';
+    } else if (entity is Podcast) {
+      return 'podcast-hero-${entity.id}';
+    }
+
+    throw ArgumentError('Entity must be Artist, Album or Podcast');
   }
 }

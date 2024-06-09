@@ -5,27 +5,29 @@ import 'package:app/utils/api_request.dart';
 import 'package:flutter/foundation.dart';
 
 class SearchResult {
-  var songs = <Song>[];
+  var playables = <Playable>[];
   var artists = <Artist>[];
   var albums = <Album>[];
+  var podcasts = <Podcast>[];
 
   SearchResult({
-    this.songs = const [],
+    this.playables = const [],
     this.artists = const [],
     this.albums = const [],
+    this.podcasts = const [],
   });
 }
 
 class SearchProvider with ChangeNotifier {
-  final SongProvider _songProvider;
+  final PlayableProvider _playableProvider;
   final AlbumProvider _albumProvider;
   final ArtistProvider _artistProvider;
 
   SearchProvider({
-    required songProvider,
+    required playableProvider,
     required artistProvider,
     required albumProvider,
-  })  : _songProvider = songProvider,
+  })  : _playableProvider = playableProvider,
         _artistProvider = artistProvider,
         _albumProvider = albumProvider;
 
@@ -35,31 +37,39 @@ class SearchProvider with ChangeNotifier {
 
     final res = await get('search?q=$keywords');
 
-    final songs = _songProvider.syncWithVault(
-        res['songs'].map<Song>((j) => Song.fromJson(j)).toList());
+    final playables = _playableProvider.syncWithVault(res['songs']
+        .map<Playable>((j) => Playable.fromJson(j) as Playable)
+        .toList());
     final artists = _artistProvider.syncWithVault(
         res['artists'].map<Artist>((j) => Artist.fromJson(j)).toList());
     final albums = _albumProvider.syncWithVault(
         res['albums'].map<Album>((j) => Album.fromJson(j)).toList());
 
+    // Since podcast feature is added later, we want to ensure backward compatibility
+    final List<Podcast> podcasts = res['podcasts'] == null
+        ? []
+        : res['podcasts'].map<Podcast>((j) => Podcast.fromJson(j)).toList();
+
     return AppState.set(
       cacheKey,
       SearchResult(
-        songs: songs,
+        playables: playables,
         artists: artists,
         albums: albums,
+        podcasts: podcasts,
       ),
     );
   }
 
-  Future<List<Song>> searchSongs(String keywords) async {
-    final cacheKey = ['search.songs', keywords];
+  Future<List<Playable>> searchPlayables(String keywords) async {
+    final cacheKey = ['search.playables', keywords];
 
     if (AppState.has(cacheKey)) return AppState.get(cacheKey);
 
     final res = await get('search/songs?q=$keywords');
-    final songs = _songProvider
-        .syncWithVault(res.map<Song>((j) => Song.fromJson(j)).toList());
+    final songs = _playableProvider.syncWithVault(
+      res.map<Playable>((j) => Playable.fromJson(j)).toList(),
+    );
 
     return AppState.set(cacheKey, songs);
   }

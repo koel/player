@@ -4,7 +4,7 @@ import 'package:app/models/models.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-enum SongListContext {
+enum PlayableListContext {
   queue,
   allSongs,
   album,
@@ -14,10 +14,11 @@ enum SongListContext {
   other,
   downloads,
   recentlyPlayed,
+  podcast
 }
 
-class SongListHeader extends StatefulWidget {
-  final List<Song> songs;
+class PlayableListHeader extends StatefulWidget {
+  final List<Playable> playables;
   final Function(String keywords)? onSearchQueryChanged;
   final Function()? onPlayPressed;
   final Function()? onShufflePressed;
@@ -26,9 +27,9 @@ class SongListHeader extends StatefulWidget {
   final Widget? playIcon;
   final Widget? shuffleIcon;
 
-  const SongListHeader({
+  const PlayableListHeader({
     Key? key,
-    required this.songs,
+    required this.playables,
     this.onSearchQueryChanged,
     this.onSearchExpanded,
     this.onSearchCollapsed,
@@ -39,10 +40,10 @@ class SongListHeader extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _SongListHeaderState();
+  State<StatefulWidget> createState() => _PlayableListHeaderState();
 }
 
-class _SongListHeaderState extends State<SongListHeader> {
+class _PlayableListHeaderState extends State<PlayableListHeader> {
   var _displayingSearch = false;
   final _searchController = TextEditingController();
 
@@ -61,11 +62,11 @@ class _SongListHeaderState extends State<SongListHeader> {
     final shuffleIcon =
         widget.shuffleIcon ?? const Icon(CupertinoIcons.shuffle);
 
-    final onPlayPressed =
-        widget.onPlayPressed ?? () => audioHandler.replaceQueue(widget.songs);
+    final onPlayPressed = widget.onPlayPressed ??
+        () => audioHandler.replaceQueue(widget.playables);
 
     final onShufflePressed = widget.onShufflePressed ??
-        () => audioHandler.replaceQueue(widget.songs, shuffle: true);
+        () => audioHandler.replaceQueue(widget.playables, shuffle: true);
 
     final Widget buttonsHeader = Row(
       children: <Widget>[

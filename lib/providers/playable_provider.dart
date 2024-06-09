@@ -7,27 +7,27 @@ import 'package:app/utils/api_request.dart';
 import 'package:app/values/values.dart';
 import 'package:flutter/foundation.dart';
 
-class SongProvider with ChangeNotifier, StreamSubscriber {
-  var songs = <Song>[];
-  final _vault = <String, Song>{};
+class PlayableProvider with ChangeNotifier, StreamSubscriber {
+  var playables = <Playable>[];
+  final _vault = <String, Playable>{};
 
-  SongProvider() {
+  PlayableProvider() {
     subscribe(AuthProvider.userLoggedOutStream.listen((_) {
-      songs.clear();
+      playables.clear();
       _vault.clear();
       notifyListeners();
     }));
   }
 
-  List<Song> syncWithVault(dynamic _songs) {
-    assert(_songs is List<Song> || _songs is Song);
+  List<Playable> syncWithVault(dynamic _playables) {
+    assert(_playables is List<Playable> || _playables is Playable);
 
-    if (_songs is Song) {
-      _songs = [_songs];
+    if (_playables is Playable) {
+      _playables = [_playables];
     }
 
-    List<Song> synced = (_songs as List<Song>)
-        .map<Song>((remote) {
+    return (_playables as List<Playable>)
+        .map<Playable>((remote) {
           final local = byId(remote.id);
 
           if (local == null) {
@@ -39,13 +39,13 @@ class SongProvider with ChangeNotifier, StreamSubscriber {
         })
         .toSet()
         .toList();
-
-    return synced;
   }
 
-  Song? byId(String id) => _vault[id];
+  Playable? byId(String id) => _vault[id];
 
-  Future<PaginationResult<Song>> paginate(SongPaginationConfig config) async {
+  Future<PaginationResult<Playable>> paginate(
+    PlayablePaginationConfig config,
+  ) async {
     final res = await get(
       'songs'
       '?page=${config.page}'
@@ -53,10 +53,11 @@ class SongProvider with ChangeNotifier, StreamSubscriber {
       '&order=${config.sortOrder.value}',
     );
 
-    final items = res['data'].map<Song>((j) => Song.fromJson(j)).toList();
+    final items =
+        res['data'].map<Playable>((j) => Playable.fromJson(j)).toList();
     final synced = syncWithVault(items);
 
-    songs = [...songs, ...synced].toSet().toList();
+    playables = [...playables, ...synced].toSet().toList();
     notifyListeners();
 
     return new PaginationResult(
@@ -66,7 +67,7 @@ class SongProvider with ChangeNotifier, StreamSubscriber {
     );
   }
 
-  Future<List<Song>> fetchForArtist(
+  Future<List<Playable>> fetchForArtist(
     int artistId, {
     bool forceRefresh = false,
   }) async {
@@ -78,7 +79,7 @@ class SongProvider with ChangeNotifier, StreamSubscriber {
     );
   }
 
-  Future<List<Song>> fetchForAlbum(
+  Future<List<Playable>> fetchForAlbum(
     int albumId, {
     bool forceRefresh = false,
   }) async {
@@ -90,30 +91,43 @@ class SongProvider with ChangeNotifier, StreamSubscriber {
     );
   }
 
-  Future<List<Song>> fetchForPlaylist(
+  Future<List<Playable>> fetchForPlaylist(
     var playlistId, {
     bool forceRefresh = false,
   }) async {
-    if (forceRefresh) AppState.delete(['playlist.songs', playlistId]);
+    if (forceRefresh) AppState.delete(['playlist.playables', playlistId]);
 
     return _stateAwareFetch(
       'playlists/$playlistId/songs',
-      ['playlist.songs', playlistId],
+      ['playlist.playables', playlistId],
     );
   }
 
-  Future<List<Song>> _stateAwareFetch(String url, Object cacheKey) async {
+  Future<List<Playable>> fetchForPodcast(
+    String podcastId, {
+    bool forceRefresh = false,
+    bool getUpdates = false,
+  }) async {
+    if (forceRefresh) AppState.delete(['podcast.episodes', podcastId]);
+
+    return _stateAwareFetch(
+      'podcasts/$podcastId/episodes${getUpdates ? '?refresh=1' : ''}',
+      ['podcast.episodes', podcastId],
+    );
+  }
+
+  Future<List<Playable>> _stateAwareFetch(String url, Object cacheKey) async {
     if (AppState.has(cacheKey)) return AppState.get(cacheKey);
     return AppState.set(cacheKey, parseFromJson(await get(url)));
   }
 
-  Future<List<Song>> fetchRandom({int limit = 500}) async {
+  Future<List<Playable>> fetchRandom({int limit = 500}) async {
     final res = await get('queue/fetch?order=rand&limit=$limit');
-    final items = res.map<Song>((json) => Song.fromJson(json)).toList();
+    final items = res.map<Playable>((json) => Playable.fromJson(json)).toList();
     return syncWithVault(items);
   }
 
-  Future<List<Song>> fetchInOrder({
+  Future<List<Playable>> fetchInOrder({
     String sortField = 'title',
     SortOrder order = SortOrder.asc,
     int limit = 500,
@@ -121,29 +135,27 @@ class SongProvider with ChangeNotifier, StreamSubscriber {
     final res = await get(
       'queue/fetch?order=${order.value}&sort=$sortField&limit=$limit',
     );
-    final items = res.map<Song>((json) => Song.fromJson(json)).toList();
+    final items = res.map<Playable>((json) => Playable.fromJson(json)).toList();
     return syncWithVault(items);
   }
 
-  List<Song> parseFromJson(dynamic json) {
-    final songs = <Song>[];
+  List<Playable> parseFromJson(dynamic json) {
+    final playables = <Playable>[];
 
     json.forEach((j) {
-      if (j['type'] == 'songs') {
-        songs.add(Song.fromJson(j));
-      }
+      playables.add(Playable.fromJson(j));
     });
 
-    return syncWithVault(songs).toList();
+    return syncWithVault(playables).toList();
   }
 }
 
-class SongPaginationConfig {
+class PlayablePaginationConfig {
   String _sortField;
   SortOrder _sortOrder;
   int? page;
 
-  SongPaginationConfig({
+  PlayablePaginationConfig({
     String sortField = 'title',
     SortOrder sortOrder = SortOrder.asc,
     this.page = 1,
@@ -154,7 +166,7 @@ class SongPaginationConfig {
 
   SortOrder get sortOrder => _sortOrder;
 
-  SongSortConfig get sortConfig => SongSortConfig(
+  PlayableSortConfig get sortConfig => PlayableSortConfig(
         field: _sortField,
         order: _sortOrder,
       );

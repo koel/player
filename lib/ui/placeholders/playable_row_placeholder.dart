@@ -2,8 +2,8 @@ import 'package:app/constants/constants.dart';
 import 'package:app/ui/placeholders/circle_placeholder.dart';
 import 'package:flutter/material.dart';
 
-class SongRowPlaceholder extends StatelessWidget {
-  const SongRowPlaceholder({Key? key}) : super(key: key);
+class PlayableRowPlaceholder extends StatelessWidget {
+  const PlayableRowPlaceholder({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

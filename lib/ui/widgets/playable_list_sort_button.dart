@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 // ignore: must_be_immutable
 class SortButton extends StatelessWidget {
   final List<String> fields;
-  final void Function(SongSortConfig sortConfig)? onMenuItemSelected;
+  final void Function(PlayableSortConfig sortConfig)? onMenuItemSelected;
   String currentField;
   SortOrder currentOrder;
 
@@ -15,8 +15,8 @@ class SortButton extends StatelessWidget {
     'track': 'Track number',
     'disc': 'Disc number',
     'title': 'Title',
-    'album_name': 'Album',
-    'artist_name': 'Artist',
+    'album_name': 'Album or podcast',
+    'artist_name': 'Artist or author',
     'created_at': 'Recently added',
     'length': 'Length',
   };
@@ -70,7 +70,7 @@ class SortButton extends StatelessWidget {
         currentField = item;
 
         onMenuItemSelected?.call(
-          SongSortConfig(field: item, order: currentOrder),
+          PlayableSortConfig(field: item, order: currentOrder),
         );
       },
       itemBuilder: (_) {

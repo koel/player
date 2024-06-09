@@ -2,13 +2,14 @@ import 'package:app/app_state.dart';
 import 'package:app/constants/constants.dart';
 import 'package:app/models/models.dart';
 import 'package:app/utils/preferences.dart' as preferences;
+import 'package:app/values/values.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
-class Song {
+class Song extends Playable<Song> {
   late Album album;
   late Artist artist;
   String id;
@@ -30,10 +31,9 @@ class Song {
   int playCount = 0;
   DateTime createdAt;
 
-  String? _sourceUrl;
-  ImageProvider? _image;
+  ImageProvider? _cachedImage;
 
-  bool playCountRegistered = false;
+  var _cachedSourceUrl;
 
   Song({
     required this.id,
@@ -55,8 +55,9 @@ class Song {
     required this.createdAt,
   });
 
+  @override
   ImageProvider get image {
-    var image = _image;
+    var image = _cachedImage;
     final albumCoverUrl = this.albumCoverUrl;
 
     if (image == null) {
@@ -68,23 +69,7 @@ class Song {
     return image;
   }
 
-  String get sourceUrl {
-    var src = _sourceUrl;
-
-    if (src == null) {
-      var host = AppState.get(['app', 'cdnUrl'], preferences.host)!
-          .replaceAll(RegExp(r'/$'), '');
-
-      String rawUrl = AppState.get(['app', 'transcoding'], false)!
-          ? '/play/$id/1/128?t=${preferences.audioToken}'
-          : '$host/play/$id?t=${preferences.audioToken}';
-
-      _sourceUrl = src = Uri.encodeFull(rawUrl);
-    }
-
-    return src;
-  }
-
+  @override
   Future<MediaItem> asMediaItem() async {
     final albumCoverUrl = this.albumCoverUrl;
 
@@ -102,44 +87,45 @@ class Song {
     );
   }
 
-  bool get hasCustomImage {
-    return image is CachedNetworkImageProvider &&
-        !(image as CachedNetworkImageProvider)
-            .url
-            .endsWith('/default-image.webp');
+  @override
+  String get sourceUrl {
+    var src = _cachedSourceUrl;
+
+    if (src == null) {
+      String rawUrl = AppState.get(['app', 'transcoding'], false)!
+          ? '$host/play/$id/1/128?t=${preferences.audioToken}'
+          : '$host/play/$id?t=${preferences.audioToken}';
+
+      _cachedSourceUrl = src = Uri.encodeFull(rawUrl);
+    }
+
+    return src;
   }
 
-  Song merge(Song target) {
+  @override
+  Song merge(Song other) {
     this
-      ..liked = target.liked
-      ..title = target.title
-      ..lyrics = target.lyrics
-      ..length = target.length
-      ..albumCoverUrl = target.albumCoverUrl
-      ..playCount = target.playCount
-      ..artistName = target.artistName
-      ..albumName = target.albumName
-      ..artistId = target.artistId
-      ..albumId = target.albumId
-      ..albumArtistId = target.albumArtistId
-      ..albumArtistName = target.albumArtistName
-      ..disc = target.disc
-      ..track = target.track
-      ..genre = target.genre
-      ..year = target.year;
+      ..liked = other.liked
+      ..title = other.title
+      ..lyrics = other.lyrics
+      ..length = other.length
+      ..albumCoverUrl = other.albumCoverUrl
+      ..playCount = other.playCount
+      ..artistName = other.artistName
+      ..albumName = other.albumName
+      ..artistId = other.artistId
+      ..albumId = other.albumId
+      ..albumArtistId = other.albumArtistId
+      ..albumArtistName = other.albumArtistName
+      ..disc = other.disc
+      ..track = other.track
+      ..genre = other.genre
+      ..year = other.year;
 
-    _image = null;
+    _cachedImage = null;
 
     return this;
   }
-
-  String get cacheKey => 'CACHE_$id';
-
-  @override
-  bool operator ==(Object other) => other is Song && other.id == id;
-
-  @override
-  int get hashCode => id.hashCode;
 
   factory Song.fromJson(Map<String, dynamic> json) {
     return Song(
@@ -163,8 +149,10 @@ class Song {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
+      'type': 'songs',
       'id': id,
       'title': title,
       'lyrics': lyrics,
@@ -267,5 +255,30 @@ class Song {
     }
 
     return songs;
+  }
+
+  @override
+  bool matchKeywords(String keywords) {
+    return title.toLowerCase().contains(keywords) ||
+        artistName.toLowerCase().contains(keywords) ||
+        albumName.toLowerCase().contains(keywords);
+  }
+
+  @override
+  Comparable valueToCompare(PlayableSortConfig config) {
+    switch (config.field) {
+      case 'title':
+        return title;
+      case 'album_name':
+        return '${albumName}${albumId}${track}';
+      case 'artist_name':
+        return '${artistName}${albumName}${track}';
+      case 'created_at':
+        return createdAt;
+      case 'track':
+        return track;
+      default:
+        return '';
+    }
   }
 }

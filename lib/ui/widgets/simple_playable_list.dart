@@ -4,18 +4,18 @@ import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-/// A simple song list to display a small amount of song rows.
+/// A simple list to display a small amount of song rows.
 /// Not meant to be used for a great number for rows, in such a case
-/// use SliverSongList instead.
-class SimpleSongList extends StatelessWidget {
-  final Iterable<Song> songs;
+/// use SliverPlayableList instead.
+class SimplePlayableList extends StatelessWidget {
+  final Iterable<Playable> playables;
   final String? headingText;
   final bool bordered;
   final void Function()? onHeaderTap;
 
-  const SimpleSongList({
+  const SimplePlayableList({
     Key? key,
-    required this.songs,
+    required this.playables,
     this.headingText,
     this.bordered = false,
     this.onHeaderTap,
@@ -38,7 +38,9 @@ class SimpleSongList extends StatelessWidget {
                 ),
                 child: Heading5(text: headingText),
               )),
-        ...songs.map((song) => SongRow(song: song, bordered: bordered))
+        ...playables.map(
+          (playable) => PlayableRow(playable: playable, bordered: bordered),
+        )
       ],
     );
   }

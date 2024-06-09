@@ -2,44 +2,41 @@ import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:flutter/material.dart';
+
 import 'providers.dart';
 
 class RecentlyPlayedProvider with ChangeNotifier, StreamSubscriber {
-  final SongProvider _songProvider;
+  final PlayableProvider _playableProvider;
   var _loaded = false;
-  var songs = <Song>[];
+  var playables = <Playable>[];
 
-  RecentlyPlayedProvider({required songProvider})
-      : _songProvider = songProvider {
+  RecentlyPlayedProvider({required playableProvider})
+      : _playableProvider = playableProvider {
     subscribe(AuthProvider.userLoggedOutStream.listen((_) {
-      songs.clear();
+      playables.clear();
       _loaded = false;
 
       notifyListeners();
     }));
   }
 
-  Future<List<Song>> fetch() async {
+  Future<List<Playable>> fetch() async {
     final res = await get('songs/recently-played');
-    final items = <Song>[];
+    final items = <Playable>[];
 
-    res.forEach((json) {
-      if (json['type'] == 'songs') {
-        items.add(Song.fromJson(json));
-      }
-    });
+    res.forEach((json) => items.add(Playable.fromJson(json)));
 
-    songs = _songProvider.syncWithVault(items);
+    playables = _playableProvider.syncWithVault(items);
     _loaded = true;
     notifyListeners();
-    return songs;
+    return playables;
   }
 
-  void add(Song song) {
+  void add(Playable playable) {
     if (!_loaded) return;
 
-    songs.remove(song);
-    songs.insert(0, song);
+    playables.remove(playable);
+    playables.insert(0, playable);
     notifyListeners();
   }
 }

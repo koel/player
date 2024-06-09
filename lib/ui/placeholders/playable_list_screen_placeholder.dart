@@ -2,8 +2,8 @@ import 'package:app/constants/constants.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:flutter/material.dart';
 
-class SongListScreenPlaceholder extends StatelessWidget {
-  const SongListScreenPlaceholder({Key? key}) : super(key: key);
+class PlayableListScreenPlaceholder extends StatelessWidget {
+  const PlayableListScreenPlaceholder({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class SongListScreenPlaceholder extends StatelessWidget {
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
-              (_, __) => const SongRowPlaceholder(),
+              (_, __) => const PlayableRowPlaceholder(),
               childCount: 10,
             ),
           ),

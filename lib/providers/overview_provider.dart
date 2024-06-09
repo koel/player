@@ -5,22 +5,22 @@ import 'package:app/utils/api_request.dart';
 import 'package:flutter/foundation.dart';
 
 class OverviewProvider with ChangeNotifier, StreamSubscriber {
-  final SongProvider _songProvider;
+  final PlayableProvider _playableProvider;
   final AlbumProvider _albumProvider;
   final ArtistProvider _artistProvider;
 
-  final mostPlayedSongs = <Song>[];
-  final recentlyAddedSongs = <Song>[];
-  final recentlyPlayedSongs = <Song>[];
+  final mostPlayedSongs = <Playable>[];
+  final recentlyAddedSongs = <Playable>[];
+  final recentlyPlayedSongs = <Playable>[];
   final recentlyAddedAlbums = <Album>[];
   final mostPlayedAlbums = <Album>[];
   final mostPlayedArtists = <Artist>[];
 
   OverviewProvider({
-    required songProvider,
+    required playableProvider,
     required albumProvider,
     required artistProvider,
-  })  : _songProvider = songProvider,
+  })  : _playableProvider = playableProvider,
         _albumProvider = albumProvider,
         _artistProvider = artistProvider {
     subscribe(AuthProvider.userLoggedOutStream.listen((_) {
@@ -46,15 +46,17 @@ class OverviewProvider with ChangeNotifier, StreamSubscriber {
 
     mostPlayedSongs
       ..clear()
-      ..addAll(_songProvider.parseFromJson(response['most_played_songs']));
+      ..addAll(_playableProvider.parseFromJson(response['most_played_songs']));
 
     recentlyAddedSongs
       ..clear()
-      ..addAll(_songProvider.parseFromJson(response['recently_added_songs']));
+      ..addAll(
+          _playableProvider.parseFromJson(response['recently_added_songs']));
 
     recentlyPlayedSongs
       ..clear()
-      ..addAll(_songProvider.parseFromJson(response['recently_played_songs']));
+      ..addAll(
+          _playableProvider.parseFromJson(response['recently_played_songs']));
 
     final _mostPlayedAlbums = response['most_played_albums']
         .map<Album>((j) => Album.fromJson(j))

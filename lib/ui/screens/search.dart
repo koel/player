@@ -19,9 +19,10 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   var _hasFocus = false;
   var _initial = true;
-  var _songs = <Song>[];
+  var _playables = <Playable>[];
   var _artists = <Artist>[];
   var _albums = <Album>[];
+  var _podcasts = <Podcast>[];
 
   late final SearchProvider searchProvider;
   final _controller = TextEditingController(text: '');
@@ -37,25 +38,24 @@ class _SearchScreenState extends State<SearchScreen> {
     });
   }
 
-  _search(String keywords) => EasyDebounce.debounce(
-        'search',
-        const Duration(microseconds: 500), // typing on a phone isn't that fast
-        () async {
-          if (keywords.length == 0) return _resetSearch();
-          if (keywords.length < 2) return;
+  _search(String keywords) =>
+      EasyDebounce.debounce('search', const Duration(microseconds: 500),
+          () async {
+        if (keywords.length == 0) return _resetSearch();
+        if (keywords.length < 2) return;
 
-          SearchResult result = await searchProvider.searchExcerpts(
-            keywords: keywords,
-          );
+        SearchResult result = await searchProvider.searchExcerpts(
+          keywords: keywords,
+        );
 
-          setState(() {
-            _initial = false;
-            _songs = result.songs;
-            _albums = result.albums;
-            _artists = result.artists;
-          });
-        },
-      );
+        setState(() {
+          _initial = false;
+          _playables = result.playables;
+          _albums = result.albums;
+          _artists = result.artists;
+          _podcasts = result.podcasts;
+        });
+      });
 
   Widget get noResults {
     return const Padding(
@@ -127,7 +127,8 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        SimpleSongList(songs: _songs, bordered: true),
+                        SimplePlayableList(
+                            playables: _playables, bordered: true),
                         const SizedBox(height: 32),
                         Padding(
                           padding: const EdgeInsets.only(
@@ -156,6 +157,21 @@ class _SearchScreenState extends State<SearchScreen> {
                           HorizontalCardScroller(
                             cards: _artists.map(
                               (artist) => ArtistCard(artist: artist),
+                            ),
+                          ),
+                        const SizedBox(height: 32),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: AppDimensions.hPadding,
+                          ),
+                          child: const Heading5(text: 'Podcasts'),
+                        ),
+                        if (_podcasts.isEmpty)
+                          noResults
+                        else
+                          HorizontalCardScroller(
+                            cards: _podcasts.map(
+                              (podcast) => PodcastCard(podcast: podcast),
                             ),
                           ),
                         const BottomSpace(asSliver: false),

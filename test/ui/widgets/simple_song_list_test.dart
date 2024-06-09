@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_provider.dart';
 import 'package:app/providers/download_provider.dart';
-import 'package:app/ui/widgets/simple_song_list.dart';
-import 'package:app/ui/widgets/song_row.dart';
+import 'package:app/ui/widgets/simple_playable_list.dart';
+import 'package:app/ui/widgets/playable_row.dart';
 import 'package:app/ui/widgets/typography.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/services.dart';
@@ -50,8 +50,8 @@ void main() {
           ChangeNotifierProvider<DownloadProvider>(
               create: (_) => DownloadProvider()),
         ],
-        child: SimpleSongList(
-          songs: songs ?? Song.fakeMany(4),
+        child: SimplePlayableList(
+          playables: songs ?? Song.fakeMany(4),
           headingText: heading,
           onHeaderTap: onTap,
         ),
@@ -61,7 +61,7 @@ void main() {
 
   testWidgets('renders the song rows', (WidgetTester tester) async {
     await _mount(tester);
-    expect(find.byType(SongRow), findsNWidgets(4));
+    expect(find.byType(PlayableRow), findsNWidgets(4));
   });
 
   testWidgets('does not render the heading', (WidgetTester tester) async {

@@ -28,7 +28,7 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
           .read<AlbumProvider>()
           .resolve(albumId, forceRefresh: forceRefresh),
       context
-          .read<SongProvider>()
+          .read<PlayableProvider>()
           .fetchForAlbum(albumId, forceRefresh: forceRefresh),
     ]);
   }
@@ -39,7 +39,7 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
 
     var sortConfig = AppState.get(
       'album.sort',
-      SongSortConfig(field: 'track', order: SortOrder.asc),
+      PlayableSortConfig(field: 'track', order: SortOrder.asc),
     )!;
 
     return Scaffold(
@@ -49,17 +49,17 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
           builder: (_, AsyncSnapshot<List<Object>> snapshot) {
             if (!snapshot.hasData ||
                 snapshot.connectionState == ConnectionState.active)
-              return const SongListScreenPlaceholder();
+              return const PlayableListScreenPlaceholder();
 
             if (snapshot.hasError)
               return OopsBox(onRetry: () => setState(() {}));
 
             final songs = snapshot.data == null
                 ? <Song>[]
-                : snapshot.requireData[1] as List<Song>;
+                : snapshot.requireData[1] as List<Playable>;
 
             final album = snapshot.requireData[0] as Album;
-            final displayedSongs =
+            final displayedPlayables =
                 songs.$sort(sortConfig).$filter(_searchQuery);
 
             return PullToRefresh(
@@ -123,16 +123,16 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                     ),
                     if (songs.isNotEmpty)
                       SliverToBoxAdapter(
-                        child: SongListHeader(
-                          songs: displayedSongs,
+                        child: PlayableListHeader(
+                          playables: displayedPlayables,
                           onSearchQueryChanged: (String query) {
                             setState(() => _searchQuery = query);
                           },
                         ),
                       ),
-                    SliverSongList(
-                      songs: displayedSongs,
-                      listContext: SongListContext.album,
+                    SliverPlayableList(
+                      playables: displayedPlayables,
+                      listContext: PlayableListContext.album,
                     ),
                     const BottomSpace(),
                   ],

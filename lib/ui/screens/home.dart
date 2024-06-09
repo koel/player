@@ -59,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
               headingText: 'Most played songs',
               cards: <Widget>[
                 ...overviewProvider.mostPlayedSongs
-                    .map((song) => SongCard(song: song)),
+                    .map((song) => SongCard(song: song as Song)),
                 PlaceholderCard(
                   icon: CupertinoIcons.music_note,
                   onPressed: () => Navigator.of(context).push(
@@ -140,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         SliverList(
                           delegate: SliverChildListDelegate.fixed([
                             HomeRecentlyPlayedSection(
-                              initialSongs:
+                              initialPlayables:
                                   overviewProvider.recentlyPlayedSongs,
                             ),
                             ...blocks,
@@ -158,9 +158,9 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class HomeRecentlyPlayedSection extends StatefulWidget {
-  final List<Song> initialSongs;
+  final List<Playable> initialPlayables;
 
-  const HomeRecentlyPlayedSection({Key? key, required this.initialSongs})
+  const HomeRecentlyPlayedSection({Key? key, required this.initialPlayables})
       : super(key: key);
 
   @override
@@ -172,13 +172,15 @@ class _HomeRecentlyPlayedSectionState extends State<HomeRecentlyPlayedSection> {
   Widget build(BuildContext context) {
     return Consumer<RecentlyPlayedProvider>(
       builder: (_, overviewProvider, __) {
-        final songs = overviewProvider.songs.isNotEmpty
-            ? overviewProvider.songs
-                .getRange(0, min(4, overviewProvider.songs.length))
-            : widget.initialSongs
-                .getRange(0, min(4, widget.initialSongs.length));
+        final playables = overviewProvider.playables.isNotEmpty
+            ? overviewProvider.playables
+                .getRange(0, min(4, overviewProvider.playables.length))
+            : widget.initialPlayables
+                .getRange(0, min(4, widget.initialPlayables.length));
 
-        return songs.isEmpty ? SizedBox.shrink() : SimpleSongList(songs: songs);
+        return playables.isEmpty
+            ? SizedBox.shrink()
+            : SimplePlayableList(playables: playables);
       },
     );
   }

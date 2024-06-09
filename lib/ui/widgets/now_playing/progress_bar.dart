@@ -5,9 +5,9 @@ import 'package:app/models/models.dart';
 import 'package:flutter/material.dart';
 
 class ProgressBar extends StatefulWidget {
-  final Song song;
+  final Playable playable;
 
-  const ProgressBar({Key? key, required this.song}) : super(key: key);
+  const ProgressBar({Key? key, required this.playable}) : super(key: key);
 
   _ProgressBarState createState() => _ProgressBarState();
 }
@@ -26,7 +26,8 @@ class _ProgressBarState extends State<ProgressBar> with StreamSubscriber {
   void initState() {
     super.initState();
 
-    setState(() => _duration = Duration(seconds: widget.song.length.toInt()));
+    setState(
+        () => _duration = Duration(seconds: widget.playable.length.toInt()));
 
     subscribe(audioHandler.player.positionStream.listen((position) {
       if (_shouldAutoUpdatePosition) setState(() => _position = position);
@@ -41,7 +42,8 @@ class _ProgressBarState extends State<ProgressBar> with StreamSubscriber {
   @override
   void didUpdateWidget(covariant ProgressBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    setState(() => _duration = Duration(seconds: widget.song.length.toInt()));
+    setState(
+        () => _duration = Duration(seconds: widget.playable.length.toInt()));
   }
 
   @override

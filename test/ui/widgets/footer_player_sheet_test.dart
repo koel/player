@@ -1,6 +1,6 @@
 import 'package:app/models/artist.dart';
 import 'package:app/models/song.dart';
-import 'package:app/providers/song_provider.dart';
+import 'package:app/providers/playable_provider.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/mini_player.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,10 +12,10 @@ import 'package:rxdart/rxdart.dart';
 import '../../extensions/widget_tester_extension.dart';
 import 'footer_player_sheet_test.mocks.dart';
 
-@GenerateMocks([AudioProvider, SongProvider, AppRouter])
+@GenerateMocks([AudioProvider, PlayableProvider, AppRouter])
 void main() {
   late MockAudioProvider audioMock;
-  late MockSongProvider songProviderMock;
+  late MockplayableProvider playableProviderMock;
   late MockAppRouter routerMock;
   late AssetsAudioPlayer player;
   late Song song;
@@ -32,8 +32,8 @@ void main() {
     audioMock = MockAudioProvider();
     when(audioMock.player).thenReturn(player);
 
-    songProviderMock = MockSongProvider();
-    when(songProviderMock.byId(song.id)).thenReturn(song);
+    playableProviderMock = MockplayableProvider();
+    when(playableProviderMock.byId(song.id)).thenReturn(song);
 
     routerMock = MockAppRouter();
   });
@@ -50,7 +50,7 @@ void main() {
       MultiProvider(
         providers: [
           ChangeNotifierProvider<AudioProvider>(create: (_) => audioMock),
-          Provider<SongProvider>(create: (_) => songProviderMock),
+          Provider<PlayableProvider>(create: (_) => playableProviderMock),
         ],
         child: MiniPlayer(router: routerMock),
       ),

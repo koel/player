@@ -2,35 +2,34 @@ import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 
 class QueueState {
-  List<Song> songs;
-  Song? currentSong;
+  List<Playable> playables;
+  Playable? currentPlayable;
   int playbackPosition;
 
   QueueState({
-    required this.songs,
-    this.currentSong,
+    required this.playables,
+    this.currentPlayable,
     this.playbackPosition = 0,
   });
 
-  static parse(Map<String, dynamic> json, SongProvider songProvider) {
-    final songs = songProvider.parseFromJson(json['songs']);
+  static parse(Map<String, dynamic> json, PlayableProvider playableProvider) {
+    final playables = playableProvider.parseFromJson(json['songs']);
 
-    var currentSong =
-        json['current_song'] != null && json['current_song']['type'] == 'songs'
-            ? Song.fromJson(json['current_song'])
-            : null;
+    var currentPlayable = json['current_song'] != null
+        ? Playable.tryFromJson(json['current_song'])
+        : null;
 
     return QueueState(
-      songs: songs,
-      currentSong: currentSong,
+      playables: playables,
+      currentPlayable: currentPlayable,
       playbackPosition: json['playback_position'],
     );
   }
 
   static empty() {
     return QueueState(
-      songs: [],
-      currentSong: null,
+      playables: [],
+      currentPlayable: null,
       playbackPosition: 0,
     );
   }

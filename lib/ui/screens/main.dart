@@ -41,7 +41,7 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
 
     audioHandler.init(
-      songProvider: context.read<SongProvider>(),
+      playableProvider: context.read<PlayableProvider>(),
       downloadProvider: context.read<DownloadProvider>(),
     );
   }

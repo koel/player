@@ -12,7 +12,7 @@ import 'package:app/providers/album_provider.dart' as _i5;
 import 'package:app/providers/artist_provider.dart' as _i4;
 import 'package:app/providers/audio_provider.dart' as _i10;
 import 'package:app/providers/download_provider.dart' as _i6;
-import 'package:app/providers/song_provider.dart' as _i13;
+import 'package:app/providers/playable_provider.dart' as _i13;
 import 'package:app/router.dart' as _i16;
 import 'package:app/ui/widgets/app_bar.dart' as _i7;
 import 'package:assets_audio_player/assets_audio_player.dart' as _i2;
@@ -188,11 +188,11 @@ class MockAudioProvider extends _i1.Mock implements _i10.AudioProvider {
           returnValueForMissingStub: null);
 }
 
-/// A class which mocks [SongProvider].
+/// A class which mocks [playableProvider].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockSongProvider extends _i1.Mock implements _i13.SongProvider {
-  MockSongProvider() {
+class MockplayableProvider extends _i1.Mock implements _i13.PlayableProvider {
+  MockplayableProvider() {
     _i1.throwOnMissingStub(this);
   }
 
@@ -237,7 +237,7 @@ class MockSongProvider extends _i1.Mock implements _i13.SongProvider {
           returnValueForMissingStub: null);
 
   @override
-  List<_i9.Song> get songs =>
+  List<_i9.Song> get playables =>
       (super.noSuchMethod(Invocation.getter(#songs), returnValue: <_i9.Song>[])
           as List<_i9.Song>);
 
@@ -340,10 +340,10 @@ class MockAppRouter extends _i1.Mock implements _i16.AppRouter {
       as _i11.Future<void>);
 
   @override
-  _i11.Future<void> showActionSheet(_i8.BuildContext? context,
-          {_i9.Song? song}) =>
+  _i11.Future<void> showPlayableActionSheet(_i8.BuildContext? context,
+          {_i9.Song? playable}) =>
       (super.noSuchMethod(
-              Invocation.method(#showActionSheet, [context], {#song: song}),
+              Invocation.method(#showActionSheet, [context], {#song: playable}),
               returnValue: Future<void>.value(),
               returnValueForMissingStub: Future<void>.value())
           as _i11.Future<void>);

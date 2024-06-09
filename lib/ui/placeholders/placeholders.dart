@@ -6,5 +6,6 @@ export 'gradient_placeholder.dart';
 export 'home_screen_placeholder.dart';
 export 'horizontal_card_scroller_placeholder.dart';
 export 'media_info_pane_placeholder.dart';
-export 'song_list_screen_placeholder.dart';
-export 'song_row_placeholder.dart';
+export 'playable_list_screen_placeholder.dart';
+export 'playable_row_placeholder.dart';
+export 'podcasts_screen_placeholder.dart';

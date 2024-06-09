@@ -1,18 +1,28 @@
 import 'package:app/models/models.dart';
 import 'package:flutter/material.dart';
 
-class SongInfo extends StatelessWidget {
-  final Song song;
+class PlayableInfo extends StatelessWidget {
+  final Playable playable;
 
-  const SongInfo({Key? key, required this.song}) : super(key: key);
+  const PlayableInfo({Key? key, required this.playable}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    late final String subtitle;
+
+    if (playable is Song) {
+      subtitle = (playable as Song).artistName;
+    } else if (playable is Episode) {
+      subtitle = (playable as Episode).podcastTitle;
+    } else {
+      subtitle = '';
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          song.title,
+          playable.title,
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
@@ -21,7 +31,7 @@ class SongInfo extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          song.artistName,
+          subtitle,
           style: const TextStyle(
             color: Colors.white70,
             fontSize: 18,

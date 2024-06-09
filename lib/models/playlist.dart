@@ -5,11 +5,11 @@ class Playlist {
   var id; // This might be a UUID string in the near future
   String name;
   bool isSmart;
-  List<Song> songs = [];
+  List<Playable> playables = [];
 
   Playlist({required this.id, required this.name, required this.isSmart});
 
-  bool get isEmpty => songs.length == 0;
+  bool get isEmpty => playables.length == 0;
 
   bool get isStandard => !isSmart;
 

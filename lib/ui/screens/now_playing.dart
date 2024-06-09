@@ -27,14 +27,14 @@ class NowPlayingScreen extends StatefulWidget {
 class _NowPlayingScreenState extends State<NowPlayingScreen>
     with StreamSubscriber {
   PlaybackState? _state;
-  Song? _song;
-  late SongProvider _songProvider;
+  Playable? _playable;
+  late PlayableProvider _playableProvider;
 
   @override
   void initState() {
     super.initState();
 
-    _songProvider = context.read();
+    _playableProvider = context.read();
 
     subscribe(audioHandler.playbackState.listen((PlaybackState value) {
       setState(() => _state = value);
@@ -42,7 +42,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
 
     subscribe(audioHandler.mediaItem.listen((MediaItem? value) {
       if (value == null) return;
-      setState(() => _song = _songProvider.byId(value.id));
+      setState(() => _playable = _playableProvider.byId(value.id));
     }));
   }
 
@@ -54,9 +54,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
 
   @override
   Widget build(BuildContext context) {
-    final song = _song;
+    final playable = _playable;
 
-    if (song == null || _state == null) return const SizedBox.shrink();
+    if (playable == null || _state == null) return const SizedBox.shrink();
 
     final bottomIconColor = Colors.white54;
 
@@ -69,7 +69,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           child: DecoratedBox(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: song.image,
+                image: playable.image,
                 fit: BoxFit.cover,
                 alignment: Alignment.topCenter,
               ),
@@ -83,7 +83,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: Hero(
         tag: 'hero-now-playing-thumbnail',
-        child: SongThumbnail.xl(song: song),
+        child: PlayableThumbnail.xl(playable: playable),
       ),
     );
 
@@ -93,18 +93,20 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Expanded(child: SongInfo(song: song)),
+            Expanded(child: PlayableInfo(playable: playable)),
             const SizedBox(width: 8),
-            SongCacheIcon(song: song),
-            IconButton(
-              onPressed: () =>
-                  widget.router.showActionSheet(context, song: song),
-              icon: const Icon(CupertinoIcons.ellipsis),
+            PlayableCacheIcon(playable: playable),
+            GestureDetector(
+              onTap: () => widget.router.showPlayableActionSheet(
+                context,
+                playable: playable,
+              ),
+              child: const Icon(CupertinoIcons.ellipsis),
             ),
           ],
         ),
         const SizedBox(height: 8),
-        ProgressBar(song: song),
+        ProgressBar(playable: playable),
       ],
     );
 
@@ -135,7 +137,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                       children: <Widget>[
                         const RepeatModeButton(),
                         IconButton(
-                          onPressed: () => showInfoSheet(context, song: song),
+                          onPressed: () => showInfoSheet(
+                            context,
+                            playable: playable,
+                          ),
                           icon: Icon(
                             CupertinoIcons.text_quote,
                             color: bottomIconColor,

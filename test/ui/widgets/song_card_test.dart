@@ -58,7 +58,7 @@ void main() {
     (WidgetTester tester) async {
       await _mount(tester);
       await tester.longPress(find.byType(SongCard));
-      verify(router.showActionSheet(any, song: song)).called(1);
+      verify(router.showPlayableActionSheet(any, playable: song)).called(1);
     },
   );
 }

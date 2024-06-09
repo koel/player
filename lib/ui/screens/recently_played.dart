@@ -21,7 +21,7 @@ class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
   var _loading = false;
   var _errored = false;
   var _searchQuery = '';
-  var _cover = CoverImageStack(songs: []);
+  var _cover = CoverImageStack(playables: []);
 
   @override
   void initState() {
@@ -30,7 +30,7 @@ class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
     _recentlyPlayedProvider = context.read();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (_recentlyPlayedProvider.songs.isEmpty) {
+      if (_recentlyPlayedProvider.playables.isEmpty) {
         await fetchData();
       }
     });
@@ -59,8 +59,8 @@ class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
       body: GradientDecoratedContainer(
         child: Consumer<RecentlyPlayedProvider>(
           builder: (_, provider, __) {
-            if (provider.songs.isEmpty) {
-              if (_loading) return const SongListScreenPlaceholder();
+            if (provider.playables.isEmpty) {
+              if (_loading) return const PlayableListScreenPlaceholder();
               if (_errored) return OopsBox(onRetry: fetchData);
 
               return Padding(
@@ -85,9 +85,9 @@ class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
               );
             }
 
-            _cover = CoverImageStack(songs: provider.songs);
+            _cover = CoverImageStack(playables: provider.playables);
 
-            final songs = provider.songs.$filter(_searchQuery);
+            final playables = provider.playables.$filter(_searchQuery);
 
             return CustomScrollView(
               slivers: <Widget>[
@@ -96,16 +96,16 @@ class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
                   coverImage: _cover,
                 ),
                 SliverToBoxAdapter(
-                  child: SongListHeader(
-                    songs: songs,
+                  child: PlayableListHeader(
+                    playables: playables,
                     onSearchQueryChanged: (String query) {
                       setState(() => _searchQuery = query);
                     },
                   ),
                 ),
-                SliverSongList(
-                  songs: songs,
-                  listContext: SongListContext.recentlyPlayed,
+                SliverPlayableList(
+                  playables: playables,
+                  listContext: PlayableListContext.recentlyPlayed,
                 ),
                 const BottomSpace(),
               ],

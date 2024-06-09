@@ -1,5 +1,6 @@
 import 'package:app/app_state.dart';
 import 'package:app/enums.dart';
+import 'package:app/extensions/extensions.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
@@ -7,7 +8,6 @@ import 'package:app/ui/widgets/widgets.dart';
 import 'package:app/values/values.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
-import 'package:app/extensions/extensions.dart';
 
 class PlaylistDetailsScreen extends StatefulWidget {
   static const routeName = '/playlist';
@@ -21,7 +21,7 @@ class PlaylistDetailsScreen extends StatefulWidget {
 class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
   late PlaylistProvider _playlistProvider;
   String _searchQuery = '';
-  CoverImageStack _cover = CoverImageStack(songs: []);
+  CoverImageStack _cover = CoverImageStack(playables: []);
 
   @override
   void initState() {
@@ -29,12 +29,12 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
     _playlistProvider = context.read();
   }
 
-  Future<List<Song>> buildRequest(
+  Future<List<Playable>> buildRequest(
     var playlistId, {
     bool forceRefresh = false,
   }) {
     return context
-        .read<SongProvider>()
+        .read<PlayableProvider>()
         .fetchForPlaylist(playlistId, forceRefresh: forceRefresh);
   }
 
@@ -43,30 +43,30 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
     final playlist = ModalRoute.of(context)!.settings.arguments as Playlist;
     var sortConfig = AppState.get(
       'playlist.sort',
-      SongSortConfig(field: 'title', order: SortOrder.asc),
+      PlayableSortConfig(field: 'title', order: SortOrder.asc),
     )!;
 
     return Scaffold(
       body: GradientDecoratedContainer(
         child: FutureBuilder(
           future: buildRequest(playlist.id),
-          builder: (BuildContext context, AsyncSnapshot<List<Song>> snapshot) {
+          builder: (BuildContext _, AsyncSnapshot<List<Playable>> snapshot) {
             if (!snapshot.hasData ||
                 snapshot.connectionState == ConnectionState.active)
-              return const SongListScreenPlaceholder();
+              return const PlayableListScreenPlaceholder();
 
             if (snapshot.hasError)
               return OopsBox(onRetry: () => setState(() {}));
 
-            final songs =
-                snapshot.data == null ? <Song>[] : snapshot.requireData;
+            final playables =
+                snapshot.data == null ? <Playable>[] : snapshot.requireData;
 
-            if (_cover.isEmpty && songs.isNotEmpty) {
-              _cover = CoverImageStack(songs: songs);
+            if (_cover.isEmpty && playables.isNotEmpty) {
+              _cover = CoverImageStack(playables: playables);
             }
 
-            final displayedSongs =
-                songs.$sort(sortConfig).$filter(_searchQuery);
+            final displayedPlayables =
+                playables.$sort(sortConfig).$filter(_searchQuery);
 
             return PullToRefresh(
               onRefresh: () => buildRequest(playlist.id, forceRefresh: true),
@@ -88,16 +88,16 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                     ],
                   ),
                   SliverToBoxAdapter(
-                    child: songs.isEmpty
+                    child: playables.isEmpty
                         ? const SizedBox.shrink()
-                        : SongListHeader(
-                            songs: displayedSongs,
+                        : PlayableListHeader(
+                            playables: displayedPlayables,
                             onSearchQueryChanged: (query) {
                               setState(() => _searchQuery = query);
                             },
                           ),
                   ),
-                  if (songs.isEmpty)
+                  if (playables.isEmpty)
                     SliverToBoxAdapter(
                       child: const Padding(
                         padding: EdgeInsets.only(top: 32),
@@ -110,11 +110,13 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                       ),
                     )
                   else
-                    SliverSongList(
-                      songs: displayedSongs,
+                    SliverPlayableList(
+                      playables: displayedPlayables,
                       onDismissed: playlist.isStandard
-                          ? (song) => _playlistProvider
-                              .removeSongFromPlaylist(song, playlist: playlist)
+                          ? (playable) => _playlistProvider.removeFromPlaylist(
+                                playable,
+                                playlist: playlist,
+                              )
                           : null,
                     ),
                   const BottomSpace(),

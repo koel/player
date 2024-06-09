@@ -7,13 +7,13 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/foundation.dart';
 
 class InteractionProvider with ChangeNotifier, StreamSubscriber {
-  late final SongProvider _songProvider;
+  late final PlayableProvider _playableProvider;
   late final RecentlyPlayedProvider _recentlyPlayedProvider;
 
   InteractionProvider({
-    required SongProvider songProvider,
+    required PlayableProvider playableProvider,
     required RecentlyPlayedProvider recentlyPlayedProvider,
-  })  : _songProvider = songProvider,
+  })  : _playableProvider = playableProvider,
         _recentlyPlayedProvider = recentlyPlayedProvider {
     _subscribeToAudioEvents();
   }
@@ -24,23 +24,26 @@ class InteractionProvider with ChangeNotifier, StreamSubscriber {
       // every time the song completes, reset the play count registered flag
       // so that next time the song is played, the count will be registered again.
       if (state.processingState == AudioProcessingState.completed) {
-        final song = _songProvider.byId(audioHandler.mediaItem.value!.id);
-        if (song == null) return; // should never happen
+        final playable = _playableProvider.byId(
+          audioHandler.mediaItem.value!.id,
+        );
 
-        _recentlyPlayedProvider.add(song);
-        song.playCountRegistered = false;
+        if (playable == null) return; // should never happen
+
+        _recentlyPlayedProvider.add(playable);
+        playable.playCountRegistered = false;
       }
     }));
 
     subscribe(audioHandler.player.positionStream.listen((duration) {
       if (audioHandler.mediaItem.value == null) return;
-      final song = _songProvider.byId(audioHandler.mediaItem.value!.id);
+      final song = _playableProvider.byId(audioHandler.mediaItem.value!.id);
 
       if (song != null &&
           !song.playCountRegistered &&
           duration.inSeconds / song.length > .25) {
         song.playCountRegistered = true;
-        _registerPlayCount(song: song);
+        _registerPlayCount(playable: song);
       }
     }));
   }
@@ -61,13 +64,13 @@ class InteractionProvider with ChangeNotifier, StreamSubscriber {
     return song.liked ? _unlike(song: song) : _like(song: song);
   }
 
-  Future<void> _registerPlayCount({required Song song}) async {
-    song.playCountRegistered = true;
-    final json = await post('interaction/play', data: {'song': song.id});
+  Future<void> _registerPlayCount({required Playable playable}) async {
+    playable.playCountRegistered = true;
+    final json = await post('interaction/play', data: {'song': playable.id});
 
     // Use the data from the server to make sure we don't miss a play from another device.
     final interaction = Interaction.fromJson(json);
-    song
+    playable
       ..playCount = interaction.playCount
       ..liked = interaction.liked;
   }

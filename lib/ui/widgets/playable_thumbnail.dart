@@ -5,37 +5,64 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 
-class SongThumbnail extends StatelessWidget {
-  final Song song;
+class PlayableThumbnail extends StatelessWidget {
+  final Playable playable;
   final ThumbnailSize size;
   final bool playing;
 
-  const SongThumbnail.xs({Key? key, required this.song, this.playing = false})
-      : size = ThumbnailSize.xs,
+  const PlayableThumbnail.xs({
+    Key? key,
+    required this.playable,
+    this.playing = false,
+  })  : size = ThumbnailSize.xs,
         super(key: key);
 
-  const SongThumbnail.sm({Key? key, required this.song, this.playing = false})
-      : size = ThumbnailSize.sm,
+  const PlayableThumbnail.sm({
+    Key? key,
+    required this.playable,
+    this.playing = false,
+  })  : size = ThumbnailSize.sm,
         super(key: key);
 
-  const SongThumbnail.md({Key? key, required this.song, this.playing = false})
-      : size = ThumbnailSize.md,
+  const PlayableThumbnail.md({
+    Key? key,
+    required this.playable,
+    this.playing = false,
+  })  : size = ThumbnailSize.md,
         super(key: key);
 
-  const SongThumbnail.lg({Key? key, required this.song, this.playing = false})
-      : size = ThumbnailSize.lg,
+  const PlayableThumbnail.lg({
+    Key? key,
+    required this.playable,
+    this.playing = false,
+  })  : size = ThumbnailSize.lg,
         super(key: key);
 
-  const SongThumbnail.xl({Key? key, required this.song, this.playing = false})
-      : size = ThumbnailSize.xl,
+  const PlayableThumbnail.xl({
+    Key? key,
+    required this.playable,
+    this.playing = false,
+  })  : size = ThumbnailSize.xl,
         super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final dimension = dimensionForSize(size);
     final borderRadius = borderRadiusForSize(size);
+    late final String? imageUrl;
 
-    final albumCover = song.albumCoverUrl == null
+    switch (playable.runtimeType) {
+      case Song:
+        imageUrl = (playable as Song).albumCoverUrl;
+        break;
+      case Episode:
+        imageUrl = (playable as Episode).imageUrl;
+        break;
+      default:
+        throw Exception('Unknown Playable type');
+    }
+
+    final albumCover = imageUrl == null
         ? Image.asset(
             AppImages.defaultImageAssetName,
             fit: BoxFit.cover,
@@ -48,7 +75,7 @@ class SongThumbnail extends StatelessWidget {
             height: dimension,
             placeholder: (_, __) => AppImages.defaultImage,
             errorWidget: (_, __, ___) => AppImages.defaultImage,
-            imageUrl: song.albumCoverUrl ?? '',
+            imageUrl: imageUrl,
           );
 
     return ClipSmoothRect(
@@ -56,7 +83,9 @@ class SongThumbnail extends StatelessWidget {
         cornerRadius: borderRadius,
         cornerSmoothing: .8,
       ),
-      child: this.playing ? PlayingSongThumbnail(song: song) : albumCover,
+      child: this.playing
+          ? PlayingPlayableThumbnail(playable: playable)
+          : albumCover,
     );
   }
 
@@ -91,18 +120,19 @@ class SongThumbnail extends StatelessWidget {
   }
 }
 
-class PlayingSongThumbnail extends StatelessWidget {
-  final Song song;
+class PlayingPlayableThumbnail extends StatelessWidget {
+  final Playable playable;
 
-  const PlayingSongThumbnail({Key? key, required this.song}) : super(key: key);
+  const PlayingPlayableThumbnail({Key? key, required this.playable})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return SizedBox.square(
-      dimension: SongThumbnail.dimensionForSize(ThumbnailSize.sm),
+      dimension: PlayableThumbnail.dimensionForSize(ThumbnailSize.sm),
       child: Stack(
         children: <Widget>[
-          SongThumbnail.sm(song: song),
+          PlayableThumbnail.sm(playable: playable),
           SizedBox.square(
             dimension: double.infinity,
             child: DecoratedBox(

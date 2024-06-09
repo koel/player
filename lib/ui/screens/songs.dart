@@ -5,8 +5,8 @@ import 'package:app/extensions/extensions.dart';
 import 'package:app/main.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
+import 'package:app/ui/widgets/playable_list_header.dart' as BaseSongListHeader;
 import 'package:app/ui/widgets/widgets.dart';
-import 'package:app/ui/widgets/song_list_header.dart' as BaseSongListHeader;
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
@@ -21,16 +21,16 @@ class SongsScreen extends StatefulWidget {
 }
 
 class _SongsScreenState extends State<SongsScreen> {
-  late final SongListScreenProvider _provider;
+  late final PlayableListScreenProvider _provider;
 
   final _paginationConfig =
-      AppState.get('songs.paginationConfig', SongPaginationConfig())!;
+      AppState.get('songs.paginationConfig', PlayablePaginationConfig())!;
 
   late final ScrollController _scrollController;
   var _currentScrollOffset = AppState.get('songs.scrollOffSet', 0.0)!;
   final _scrollThreshold = 64.0;
   var _searchQuery = '';
-  var _cover = CoverImageStack(songs: []);
+  var _cover = CoverImageStack(playables: []);
   var _loading = false;
   var _errored = false;
   var _inSearchMode = false;
@@ -100,18 +100,18 @@ class _SongsScreenState extends State<SongsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: GradientDecoratedContainer(
-        child: Consumer<SongListScreenProvider>(
+        child: Consumer<PlayableListScreenProvider>(
           builder: (_, provider, __) {
-            if (provider.songs.isEmpty) {
-              if (_loading) return const SongListScreenPlaceholder();
+            if (provider.playables.isEmpty) {
+              if (_loading) return const PlayableListScreenPlaceholder();
               if (_errored) return OopsBox(onRetry: makeRequest);
             }
 
             if (_cover.isEmpty) {
-              _cover = CoverImageStack(songs: provider.songs);
+              _cover = CoverImageStack(playables: provider.playables);
             }
 
-            var displayedSongs = provider.songs;
+            var displayedSongs = provider.playables;
 
             if (_inSearchMode) {
               // In search mode, sorting is done from the client side.
@@ -140,7 +140,7 @@ class _SongsScreenState extends State<SongsScreen> {
                         // If we're not searching but displaying the full list,
                         // every time we sort, we fetch a new list of songs,
                         // since the sorting is done from the server.
-                        provider.songs.clear();
+                        provider.playables.clear();
                         makeRequest();
                       },
                     ),
@@ -162,9 +162,9 @@ class _SongsScreenState extends State<SongsScreen> {
                     },
                   ),
                 ),
-                SliverSongList(
-                  songs: displayedSongs,
-                  listContext: BaseSongListHeader.SongListContext.allSongs,
+                SliverPlayableList(
+                  playables: displayedSongs,
+                  listContext: BaseSongListHeader.PlayableListContext.allSongs,
                 ),
                 _loading
                     ? SliverToBoxAdapter(
@@ -208,17 +208,17 @@ class _SongListHeaderState extends State<SongListHeader> {
   bool _fetchingSongsToPlayAll = false;
   bool _fetchingSongsToShuffle = false;
 
-  late final SongProvider _songProvider;
+  late final PlayableProvider _playableProvider;
 
   @override
   initState() {
     super.initState();
-    _songProvider = context.read();
+    _playableProvider = context.read();
   }
 
   Future<void> fetchSongsToPlayAll() async {
     setState(() => _fetchingSongsToPlayAll = true);
-    final songs = await _songProvider.fetchInOrder(
+    final songs = await _playableProvider.fetchInOrder(
       sortField: widget.sortField,
       order: widget.sortOrder,
     );
@@ -228,15 +228,15 @@ class _SongListHeaderState extends State<SongListHeader> {
 
   Future<void> fetchSongsToShuffleAll() async {
     setState(() => _fetchingSongsToShuffle = true);
-    final songs = await _songProvider.fetchRandom();
+    final songs = await _playableProvider.fetchRandom();
     setState(() => _fetchingSongsToShuffle = false);
     audioHandler.replaceQueue(songs, shuffle: true);
   }
 
   @override
   Widget build(BuildContext context) {
-    return BaseSongListHeader.SongListHeader(
-      songs: [],
+    return BaseSongListHeader.PlayableListHeader(
+      playables: [],
       playIcon: _fetchingSongsToPlayAll
           ? SpinKitThreeBounce(color: AppColors.white.withOpacity(.5), size: 16)
           : null,

@@ -4,35 +4,35 @@ import 'package:app/providers/providers.dart';
 import 'package:app/values/pagination_result.dart';
 import 'package:flutter/foundation.dart';
 
-class SongListScreenProvider with ChangeNotifier, StreamSubscriber {
-  final SongProvider _songProvider;
+class PlayableListScreenProvider with ChangeNotifier, StreamSubscriber {
+  final PlayableProvider _playableProvider;
   final SearchProvider _searchProvider;
 
-  List<Song> songs = [];
+  List<Playable> playables = [];
 
-  SongListScreenProvider({
-    required songProvider,
+  PlayableListScreenProvider({
+    required playableProvider,
     required searchProvider,
-  })  : _songProvider = songProvider,
+  })  : _playableProvider = playableProvider,
         _searchProvider = searchProvider {
     subscribe(AuthProvider.userLoggedOutStream.listen((_) {
-      songs.clear();
+      playables.clear();
       notifyListeners();
     }));
   }
 
   Future<PaginationResult?> fetch({
-    SongPaginationConfig? paginationConfig,
+    PlayablePaginationConfig? paginationConfig,
     String searchQuery = '',
   }) async {
     assert(paginationConfig != null || searchQuery.isNotEmpty);
     PaginationResult? result;
 
     if (searchQuery.isNotEmpty) {
-      songs = await _searchProvider.searchSongs(searchQuery);
+      playables = await _searchProvider.searchPlayables(searchQuery);
     } else {
-      result = await _songProvider.paginate(paginationConfig!);
-      songs = _songProvider.songs;
+      result = await _playableProvider.paginate(paginationConfig!);
+      playables = _playableProvider.playables;
     }
 
     notifyListeners();

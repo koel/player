@@ -6,55 +6,56 @@ import 'package:app/utils/api_request.dart';
 import 'package:flutter/foundation.dart';
 
 class FavoriteProvider with ChangeNotifier, StreamSubscriber {
-  var songs = <Song>[];
-  late final SongProvider _songProvider;
+  var playables = <Playable>[];
+  late final PlayableProvider _playableProvider;
 
-  FavoriteProvider({required SongProvider songProvider})
-      : _songProvider = songProvider {
+  FavoriteProvider({required PlayableProvider playableProvider})
+      : _playableProvider = playableProvider {
     subscribe(AuthProvider.userLoggedOutStream.listen((_) {
-      songs.clear();
+      playables.clear();
       notifyListeners();
     }));
   }
 
-  Future<List<Song>> fetch({bool forceRefresh = false}) async {
+  Future<List<Playable>> fetch({bool forceRefresh = false}) async {
     if (forceRefresh) AppState.delete(['favorites']);
 
     if (AppState.has(['favorites'])) {
-      songs = AppState.get<List<Song>>(['favorites'])!;
+      playables = AppState.get<List<Playable>>(['favorites'])!;
     } else {
       final response = await get('songs/favorite');
-      final _songs = response.map<Song>((j) => Song.fromJson(j)).toList();
-      songs = _songProvider.syncWithVault(_songs);
-      AppState.set(['favorites'], songs);
+      final _playables =
+          response.map<Playable>((j) => Playable.fromJson(j)).toList();
+      playables = _playableProvider.syncWithVault(_playables);
+      AppState.set(['favorites'], playables);
     }
 
     notifyListeners();
 
-    return songs;
+    return playables;
   }
 
-  Future<void> unlike(Song song) async {
-    song.liked = false;
-    songs.remove(song);
+  Future<void> unlike(Playable playable) async {
+    playable.liked = false;
+    playables.remove(playable);
     notifyListeners();
 
     await post('interaction/batch/unlike', data: {
-      'songs': [song.id],
+      'songs': [playable.id],
     });
   }
 
-  Future<void> toggleOne({required Song song}) async {
-    song.liked = !song.liked;
+  Future<void> toggleOne({required Playable playable}) async {
+    playable.liked = !playable.liked;
 
-    if (song.liked) {
-      songs.add(song);
+    if (playable.liked) {
+      playables.add(playable);
     } else {
-      songs.remove(song);
+      playables.remove(playable);
     }
 
     notifyListeners();
 
-    await post('interaction/like', data: {'song': song.id});
+    await post('interaction/like', data: {'song': playable.id});
   }
 }

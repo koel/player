@@ -23,7 +23,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   var _errored = false;
   var _loading = false;
   var _searchQuery = '';
-  var cover = CoverImageStack(songs: []);
+  var cover = CoverImageStack(playables: []);
 
   @override
   void initState() {
@@ -52,7 +52,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   Widget build(BuildContext context) {
     var sortConfig = AppState.get(
       'favorites.sort',
-      SongSortConfig(field: 'title', order: SortOrder.asc),
+      PlayableSortConfig(field: 'title', order: SortOrder.asc),
     )!;
 
     final emptyWidget = SliverFillRemaining(
@@ -107,17 +107,17 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       body: GradientDecoratedContainer(
         child: Consumer<FavoriteProvider>(
           builder: (_, provider, __) {
-            if (provider.songs.isEmpty) {
-              if (_loading) return const SongListScreenPlaceholder();
+            if (provider.playables.isEmpty) {
+              if (_loading) return const PlayableListScreenPlaceholder();
               if (_errored) return OopsBox(onRetry: makeRequest);
             }
 
             if (cover.isEmpty) {
-              cover = CoverImageStack(songs: provider.songs);
+              cover = CoverImageStack(playables: provider.playables);
             }
 
             final songs =
-                provider.songs.$sort(sortConfig).$filter(_searchQuery);
+                provider.playables.$sort(sortConfig).$filter(_searchQuery);
 
             return PullToRefresh(
               onRefresh: () {
@@ -127,7 +127,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               },
               child: ScrollsToTop(
                 child: CustomScrollView(
-                  slivers: provider.songs.isEmpty
+                  slivers: provider.playables.isEmpty
                       ? <Widget>[emptyWidget]
                       : <Widget>[
                           AppBar(
@@ -146,16 +146,16 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                             ],
                           ),
                           SliverToBoxAdapter(
-                            child: SongListHeader(
-                              songs: songs,
+                            child: PlayableListHeader(
+                              playables: songs,
                               onSearchQueryChanged: (String query) {
                                 setState(() => _searchQuery = query);
                               },
                             ),
                           ),
-                          SliverSongList(
-                            songs: songs,
-                            listContext: SongListContext.favorites,
+                          SliverPlayableList(
+                            playables: songs,
+                            listContext: PlayableListContext.favorites,
                             onDismissed: provider.unlike,
                             dismissIcon: const Icon(CupertinoIcons.heart_slash),
                           ),

@@ -22,20 +22,20 @@ class DownloadedScreen extends StatefulWidget {
 
 class _DownloadedScreenState extends State<DownloadedScreen> {
   var _searchQuery = '';
-  var _cover = CoverImageStack(songs: []);
+  var _cover = CoverImageStack(playables: []);
 
   @override
   Widget build(BuildContext context) {
     var sortConfig = AppState.get(
       'downloaded.sort',
-      SongSortConfig(field: 'title', order: SortOrder.asc),
+      PlayableSortConfig(field: 'title', order: SortOrder.asc),
     )!;
 
     return Scaffold(
       body: GradientDecoratedContainer(
         child: Consumer<DownloadProvider>(
           builder: (_, provider, __) {
-            if (provider.songs.isEmpty) {
+            if (provider.playables.isEmpty) {
               return Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppDimensions.hPadding,
@@ -85,11 +85,11 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
             }
 
             if (_cover.isEmpty) {
-              _cover = CoverImageStack(songs: provider.songs);
+              _cover = CoverImageStack(playables: provider.playables);
             }
 
-            final displayedSongs =
-                provider.songs.$sort(sortConfig).$filter(_searchQuery);
+            final displayedPlayables =
+                provider.playables.$sort(sortConfig).$filter(_searchQuery);
 
             return ScrollsToTop(
               child: CustomScrollView(
@@ -110,17 +110,17 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                     ],
                   ),
                   SliverToBoxAdapter(
-                    child: SongListHeader(
-                      songs: displayedSongs,
+                    child: PlayableListHeader(
+                      playables: displayedPlayables,
                       onSearchQueryChanged: (String query) {
                         setState(() => _searchQuery = query);
                       },
                     ),
                   ),
-                  SliverSongList(
-                    songs: displayedSongs,
-                    listContext: SongListContext.downloads,
-                    onDismissed: provider.removeForSong,
+                  SliverPlayableList(
+                    playables: displayedPlayables,
+                    listContext: PlayableListContext.downloads,
+                    onDismissed: provider.removeForPlayable,
                   ),
                   const BottomSpace(),
                 ],

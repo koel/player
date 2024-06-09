@@ -11,43 +11,46 @@ import 'package:app/values/values.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
-class ArtistDetailsScreen extends StatefulWidget {
-  static const routeName = '/artist';
+class PodcastDetailsScreen extends StatefulWidget {
+  static const routeName = '/podcast';
 
-  const ArtistDetailsScreen({Key? key}) : super(key: key);
+  const PodcastDetailsScreen({Key? key}) : super(key: key);
 
   @override
-  _ArtistDetailsScreenState createState() => _ArtistDetailsScreenState();
+  _PodcastDetailsScreen createState() => _PodcastDetailsScreen();
 }
 
-class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
-  var _searchQuery = '';
-  var cover = CoverImageStack(playables: []);
+class _PodcastDetailsScreen extends State<PodcastDetailsScreen> {
+  String _searchQuery = '';
 
-  Future<List<Object>> buildRequest(int artistId, {bool forceRefresh = false}) {
+  Future<List<Object>> buildRequest(
+    String podcastId, {
+    bool forceRefresh = false,
+  }) {
     return Future.wait([
       context
-          .read<ArtistProvider>()
-          .resolve(artistId, forceRefresh: forceRefresh),
+          .read<PodcastProvider>()
+          .resolve(podcastId, forceRefresh: forceRefresh),
       context
           .read<PlayableProvider>()
-          .fetchForArtist(artistId, forceRefresh: forceRefresh),
+          .fetchForPodcast(podcastId, forceRefresh: forceRefresh),
     ]);
   }
 
   @override
   Widget build(BuildContext context) {
-    final artistId = ModalRoute.of(context)!.settings.arguments as int;
+    final podcastId = ModalRoute.of(context)!.settings.arguments as String;
+
     var sortConfig = AppState.get(
-      'artist.sort',
-      PlayableSortConfig(field: 'title', order: SortOrder.asc),
+      'podcast.sort',
+      PlayableSortConfig(field: 'created_at', order: SortOrder.desc),
     )!;
 
     return Scaffold(
       body: GradientDecoratedContainer(
         child: FutureBuilder(
-          future: buildRequest(artistId),
-          builder: (_, AsyncSnapshot<List<dynamic>> snapshot) {
+          future: buildRequest(podcastId),
+          builder: (_, AsyncSnapshot<List<Object>> snapshot) {
             if (!snapshot.hasData ||
                 snapshot.connectionState == ConnectionState.active)
               return const PlayableListScreenPlaceholder();
@@ -55,31 +58,29 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
             if (snapshot.hasError)
               return OopsBox(onRetry: () => setState(() {}));
 
-            final songs = snapshot.requireData[1] as List<Playable>;
+            final songs = snapshot.data == null
+                ? <Song>[]
+                : snapshot.requireData[1] as List<Playable>;
 
-            if (cover.isEmpty) {
-              cover = CoverImageStack(playables: songs);
-            }
-
-            final artist = snapshot.requireData[0] as Artist;
-            final displayedSongs =
+            final podcast = snapshot.requireData[0] as Podcast;
+            final displayedPlayables =
                 songs.$sort(sortConfig).$filter(_searchQuery);
 
             return PullToRefresh(
-              onRefresh: () => buildRequest(artistId, forceRefresh: true),
+              onRefresh: () => buildRequest(podcastId, forceRefresh: true),
               child: ScrollsToTop(
                 child: CustomScrollView(
                   slivers: <Widget>[
                     AppBar(
-                      headingText: artist.name,
+                      headingText: podcast.title,
                       actions: [
                         SortButton(
-                          fields: ['title', 'album_name', 'created_at'],
+                          fields: ['title', 'created_at'],
                           currentField: sortConfig.field,
                           currentOrder: sortConfig.order,
                           onMenuItemSelected: (_sortConfig) {
                             setState(() => sortConfig = _sortConfig);
-                            AppState.set('artist.sort', sortConfig);
+                            AppState.set('podcast.sort', sortConfig);
                           },
                         ),
                       ],
@@ -93,7 +94,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                           child: DecoratedBox(
                             decoration: BoxDecoration(
                               image: DecorationImage(
-                                image: artist.image,
+                                image: podcast.image,
                                 fit: BoxFit.cover,
                                 alignment: Alignment.topCenter,
                               ),
@@ -102,11 +103,11 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                         ),
                       ),
                       coverImage: Hero(
-                        tag: "artist-hero-${artist.id}",
+                        tag: "podcast-hero-${podcast.id}",
                         child: DecoratedBox(
                           decoration: BoxDecoration(
                             image: DecorationImage(
-                              image: artist.image,
+                              image: podcast.image,
                               fit: BoxFit.cover,
                               alignment: Alignment.topCenter,
                             ),
@@ -117,7 +118,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                               const BoxShadow(
                                 color: Colors.black38,
                                 blurRadius: 10.0,
-                                offset: Offset(0, 6),
+                                offset: const Offset(0, 6),
                               ),
                             ],
                           ),
@@ -127,15 +128,15 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                     if (songs.isNotEmpty)
                       SliverToBoxAdapter(
                         child: PlayableListHeader(
-                          playables: displayedSongs,
+                          playables: displayedPlayables,
                           onSearchQueryChanged: (String query) {
                             setState(() => _searchQuery = query);
                           },
                         ),
                       ),
                     SliverPlayableList(
-                      playables: displayedSongs,
-                      listContext: PlayableListContext.artist,
+                      playables: displayedPlayables,
+                      listContext: PlayableListContext.podcast,
                     ),
                     const BottomSpace(),
                   ],

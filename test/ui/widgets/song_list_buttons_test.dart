@@ -1,6 +1,6 @@
 import 'package:app/models/song.dart';
 import 'package:app/providers/audio_provider.dart';
-import 'package:app/ui/widgets/song_list_header.dart';
+import 'package:app/ui/widgets/playable_list_header.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -23,20 +23,20 @@ void main() {
     await tester.pumpAppWidget(
       ChangeNotifierProvider<AudioProvider>.value(
         value: audioMock,
-        child: SongListHeader(songs: songs),
+        child: PlayableListHeader(playables: songs),
       ),
     );
   }
 
   testWidgets('plays all', (WidgetTester tester) async {
     await _mount(tester);
-    await tester.tap(find.byKey(SongListHeader.firstButtonKey));
+    await tester.tap(find.byKey(PlayableListHeader.firstButtonKey));
     verify(audioMock.replaceQueue(songs)).called(1);
   });
 
   testWidgets('shuffles all', (WidgetTester tester) async {
     await _mount(tester);
-    await tester.tap(find.byKey(SongListHeader.secondButtonKey));
+    await tester.tap(find.byKey(PlayableListHeader.secondButtonKey));
     verify(audioMock.replaceQueue(songs, shuffle: true)).called(1);
   });
 }

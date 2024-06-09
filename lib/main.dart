@@ -14,29 +14,29 @@ late KoelAudioHandler audioHandler;
 List<SingleChildWidget> _providers = [
   Provider(create: (_) => AuthProvider()),
   ChangeNotifierProvider(create: (_) => ArtistProvider()),
-  ChangeNotifierProvider(create: (context) => SongProvider()),
+  ChangeNotifierProvider(create: (context) => PlayableProvider()),
   Provider(create: (_) => MediaInfoProvider()),
   // Download files should always be available to adapt to login/logout and
   // offline mode.
   Provider(
       create: (context) => DownloadProvider(
-            songProvider: context.read<SongProvider>(),
+            playableProvider: context.read<PlayableProvider>(),
           ),
       lazy: false),
   ChangeNotifierProvider(create: (context) => AlbumProvider()),
   ChangeNotifierProvider(
     create: (context) => FavoriteProvider(
-      songProvider: context.read<SongProvider>(),
+      playableProvider: context.read<PlayableProvider>(),
     ),
   ),
   ChangeNotifierProvider(
     create: (context) => RecentlyPlayedProvider(
-      songProvider: context.read<SongProvider>(),
+      playableProvider: context.read<PlayableProvider>(),
     ),
   ),
   ChangeNotifierProvider(
     create: (context) => InteractionProvider(
-      songProvider: context.read<SongProvider>(),
+      playableProvider: context.read<PlayableProvider>(),
       recentlyPlayedProvider: context.read<RecentlyPlayedProvider>(),
     ),
     // By setting lazy to false, we ensure that the provider is initialized
@@ -49,7 +49,7 @@ List<SingleChildWidget> _providers = [
   ),
   ChangeNotifierProvider(
     create: (context) => SearchProvider(
-      songProvider: context.read<SongProvider>(),
+      playableProvider: context.read<PlayableProvider>(),
       artistProvider: context.read<ArtistProvider>(),
       albumProvider: context.read<AlbumProvider>(),
     ),
@@ -57,19 +57,20 @@ List<SingleChildWidget> _providers = [
   ChangeNotifierProvider(
     create: (context) => DataProvider(
       playlistProvider: context.read<PlaylistProvider>(),
-      songProvider: context.read<SongProvider>(),
+      playableProvider: context.read<PlayableProvider>(),
     ),
   ),
   ChangeNotifierProvider(
     create: (context) => OverviewProvider(
-      songProvider: context.read<SongProvider>(),
+      playableProvider: context.read<PlayableProvider>(),
       albumProvider: context.read<AlbumProvider>(),
       artistProvider: context.read<ArtistProvider>(),
     ),
   ),
+  ChangeNotifierProvider(create: (context) => PodcastProvider()),
   ChangeNotifierProvider(
-    create: (context) => SongListScreenProvider(
-      songProvider: context.read<SongProvider>(),
+    create: (context) => PlayableListScreenProvider(
+      playableProvider: context.read<PlayableProvider>(),
       searchProvider: context.read<SearchProvider>(),
     ),
   ),
@@ -86,7 +87,7 @@ Future<void> main() async {
   );
 
   await GetStorage.init('Preferences');
-  await GetStorage.init(DownloadProvider.serializedSongContainer);
+  await GetStorage.init(DownloadProvider.serializedPlayableContainer);
 
   runApp(
     MultiProvider(

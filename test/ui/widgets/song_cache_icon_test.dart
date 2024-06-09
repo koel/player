@@ -1,6 +1,6 @@
 import 'package:app/models/song.dart';
 import 'package:app/providers/download_provider.dart';
-import 'package:app/ui/widgets/song_cache_icon.dart';
+import 'package:app/ui/widgets/playable_cache_icon.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,7 +29,8 @@ void main() {
         .thenAnswer((_) => cacheCleared.stream);
 
     songCached = BehaviorSubject();
-    when(cacheMock.songDownloadedStream).thenAnswer((_) => songCached.stream);
+    when(cacheMock.playableDownloadedStream)
+        .thenAnswer((_) => songCached.stream);
 
     singleCacheRemoved = BehaviorSubject();
     when(cacheMock.downloadRemovedStream)
@@ -40,7 +41,7 @@ void main() {
     await tester.pumpAppWidget(
       ChangeNotifierProvider<DownloadProvider>.value(
         value: cacheMock,
-        child: SongCacheIcon(song: song),
+        child: PlayableCacheIcon(playable: song),
       ),
     );
   }
@@ -64,7 +65,7 @@ void main() {
   testWidgets(
     'renders a download button if song is not cached',
     (WidgetTester tester) async {
-      when(cacheMock.has(song: song)).thenAnswer((_) async => false);
+      when(cacheMock.has(playable: song)).thenAnswer((_) async => false);
 
       await _mount(tester);
       _assertCacheStatus(hasCache: false);
@@ -74,7 +75,7 @@ void main() {
   testWidgets(
     'renders a "downloaded" indicator if song is cached',
     (WidgetTester tester) async {
-      when(cacheMock.has(song: song)).thenAnswer((_) async => true);
+      when(cacheMock.has(playable: song)).thenAnswer((_) async => true);
 
       await _mount(tester);
       _assertCacheStatus(hasCache: true);
@@ -82,7 +83,7 @@ void main() {
   );
 
   testWidgets('re-renders when cache is cleared', (WidgetTester tester) async {
-    when(cacheMock.has(song: song)).thenAnswer((_) async => true);
+    when(cacheMock.has(playable: song)).thenAnswer((_) async => true);
 
     await _mount(tester);
     _assertCacheStatus(hasCache: true);
@@ -93,12 +94,12 @@ void main() {
   });
 
   testWidgets('re-renders when song is cached', (WidgetTester tester) async {
-    when(cacheMock.has(song: song)).thenAnswer((_) async => false);
+    when(cacheMock.has(playable: song)).thenAnswer((_) async => false);
 
     await _mount(tester);
     _assertCacheStatus(hasCache: false);
 
-    songCached.add(Download(song: song, path: MockFileInfo()));
+    songCached.add(Download(playable: song, path: MockFileInfo()));
     await tester.pumpAndSettle();
     _assertCacheStatus(hasCache: true);
   });
@@ -106,7 +107,7 @@ void main() {
   testWidgets(
     're-renders when song cache is removed',
     (WidgetTester tester) async {
-      when(cacheMock.has(song: song)).thenAnswer((_) async => true);
+      when(cacheMock.has(playable: song)).thenAnswer((_) async => true);
 
       await _mount(tester);
       _assertCacheStatus(hasCache: true);

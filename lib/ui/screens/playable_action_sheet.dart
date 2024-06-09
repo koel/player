@@ -8,36 +8,48 @@ import 'package:app/ui/screens/add_to_playlist.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
-class SongActionSheet extends StatefulWidget {
-  final Song song;
+class PlayableActionSheet extends StatefulWidget {
+  final Playable playable;
 
-  const SongActionSheet({Key? key, required this.song}) : super(key: key);
+  const PlayableActionSheet({Key? key, required this.playable})
+      : super(key: key);
 
   @override
-  _SongActionSheetState createState() => _SongActionSheetState();
+  _PlayableActionSheetState createState() => _PlayableActionSheetState();
 }
 
-class _SongActionSheetState extends State<SongActionSheet> {
+class _PlayableActionSheetState extends State<PlayableActionSheet> {
   var _queued = false;
 
   initState() {
     super.initState();
 
-    audioHandler.queued(widget.song).then((queued) {
+    audioHandler.queued(widget.playable).then((queued) {
       setState(() => _queued = queued);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final song = widget.song;
+    final playable = widget.playable;
     final favoriteProvider = context.read<FavoriteProvider>();
     final isCurrent = audioHandler.mediaItem.value != null &&
-        audioHandler.mediaItem.value!.id == song.id;
+        audioHandler.mediaItem.value!.id == playable.id;
     final inOfflineMode =
         AppState.get('mode', AppMode.online) == AppMode.offline;
+
+    late final String subtitle;
+
+    if (playable is Song) {
+      subtitle = '${playable.artistName} • ${playable.albumName}';
+    } else if (playable is Episode) {
+      subtitle = playable.podcastTitle;
+    } else {
+      subtitle = '';
+    }
 
     return FrostedGlassBackground(
       sigma: 40.0,
@@ -49,22 +61,27 @@ class _SongActionSheetState extends State<SongActionSheet> {
             const SizedBox.shrink(), // to properly align the thumbnail area
             Column(
               children: [
-                SongThumbnail.lg(song: song),
+                PlayableThumbnail.lg(playable: playable),
                 const SizedBox(height: 16),
-                Text(
-                  song.title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text(
+                    playable.title,
+                    textAlign: TextAlign.center,
+                    softWrap: true,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Text(
-                    '${song.artistName} • ${song.albumName}',
-                    overflow: TextOverflow.ellipsis,
+                    subtitle,
+                    textAlign: TextAlign.center,
+                    softWrap: true,
                     style: const TextStyle(color: Colors.white54),
                   ),
                 ),
@@ -75,61 +92,63 @@ class _SongActionSheetState extends State<SongActionSheet> {
               shrinkWrap: true,
               children: <Widget>[
                 if (!isCurrent)
-                  SongActionButton(
+                  PlayableActionButton(
                     text: 'Play Next',
                     icon: const Icon(
                       CupertinoIcons.arrow_right_circle_fill,
                       color: Colors.white30,
                     ),
                     onTap: () async {
-                      await audioHandler.queueAfterCurrent(song);
+                      await audioHandler.queueAfterCurrent(playable);
                       showOverlay(
                         context,
                         icon: CupertinoIcons.arrow_right_circle_fill,
                         caption: 'Queued',
-                        message: 'Song to be played next.',
+                        message: 'To be played next.',
                       );
                     },
                   ),
                 if (!isCurrent)
-                  SongActionButton(
+                  PlayableActionButton(
                     text: 'Play Last',
                     icon: const Icon(
                       CupertinoIcons.arrow_down_right_circle_fill,
                       color: Colors.white30,
                     ),
                     onTap: () async {
-                      await audioHandler.queueToBottom(song);
+                      await audioHandler.queueToBottom(playable);
                       showOverlay(
                         context,
                         icon: CupertinoIcons.arrow_down_right_circle_fill,
                         caption: 'Queued',
-                        message: 'Song queued to bottom.',
+                        message: 'Queued to bottom.',
                       );
                     },
                   ),
                 if (_queued)
-                  SongActionButton(
+                  PlayableActionButton(
                     text: 'Remove from Queue',
                     icon: const Icon(
                       CupertinoIcons.text_badge_minus,
                       color: Colors.white30,
                     ),
                     onTap: () async {
-                      await audioHandler.removeFromQueue(song);
+                      await audioHandler.removeFromQueue(playable);
                       showOverlay(
                         context,
                         icon: CupertinoIcons.text_badge_minus,
                         caption: 'Removed',
-                        message: 'Song removed from queue.',
+                        message: 'Removed from queue.',
                       );
                     },
                   ),
-                SongActionButton(
+                PlayableActionButton(
                   enabled: !inOfflineMode,
-                  text: song.liked ? 'Remove as Favorite' : 'Mark as Favorite',
+                  text: playable.liked
+                      ? 'Remove as Favorite'
+                      : 'Mark as Favorite',
                   icon: Icon(
-                    song.liked
+                    playable.liked
                         ? CupertinoIcons.heart_fill
                         : CupertinoIcons.heart,
                     color: Colors.white30,
@@ -137,52 +156,71 @@ class _SongActionSheetState extends State<SongActionSheet> {
                   onTap: () {
                     showOverlay(
                       context,
-                      caption: song.liked ? 'Unliked' : 'Liked',
-                      message: song.liked
-                          ? 'Song removed from Favorites.'
-                          : 'Song added to Favorites.',
-                      icon: song.liked
+                      caption: playable.liked ? 'Unliked' : 'Liked',
+                      message: playable.liked
+                          ? 'Removed from Favorites.'
+                          : 'Added to Favorites.',
+                      icon: playable.liked
                           ? CupertinoIcons.heart_slash
                           : CupertinoIcons.heart_fill,
                     );
-                    favoriteProvider.toggleOne(song: song);
+                    favoriteProvider.toggleOne(playable: playable);
                   },
                 ),
                 const Divider(indent: 16, endIndent: 16),
-                SongActionButton(
-                  enabled: !inOfflineMode,
-                  text: 'Go to Album',
-                  icon: const Icon(
-                    CupertinoIcons.music_albums_fill,
-                    color: Colors.white30,
+                if (playable is Song)
+                  PlayableActionButton(
+                    enabled: !inOfflineMode,
+                    text: 'Go to Album',
+                    icon: const Icon(
+                      CupertinoIcons.music_albums_fill,
+                      color: Colors.white30,
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      AppRouter().gotoAlbumDetailsScreen(
+                        context,
+                        albumId: playable.albumId,
+                      );
+                    },
+                    hideSheetOnTap: false,
                   ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    AppRouter().gotoAlbumDetailsScreen(
-                      context,
-                      albumId: song.albumId,
-                    );
-                  },
-                  hideSheetOnTap: false,
-                ),
-                SongActionButton(
-                  enabled: !inOfflineMode,
-                  text: 'Go to Artist',
-                  icon: const Icon(
-                    CupertinoIcons.music_mic,
-                    color: Colors.white30,
+                if (playable is Episode)
+                  PlayableActionButton(
+                    enabled: !inOfflineMode,
+                    text: 'Go to Podcast',
+                    icon: const Icon(
+                      LucideIcons.podcast,
+                      color: Colors.white30,
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      AppRouter().gotoPodcastDetailsScreen(
+                        context,
+                        podcastId: playable.podcastId,
+                      );
+                    },
+                    hideSheetOnTap: false,
                   ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    AppRouter().gotoArtistDetailsScreen(
-                      context,
-                      artistId: song.artistId,
-                    );
-                  },
-                  hideSheetOnTap: false,
-                ),
+                if (playable is Song)
+                  PlayableActionButton(
+                    enabled: !inOfflineMode,
+                    text: 'Go to Artist',
+                    icon: const Icon(
+                      CupertinoIcons.music_mic,
+                      color: Colors.white30,
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      AppRouter().gotoArtistDetailsScreen(
+                        context,
+                        artistId: playable.artistId,
+                      );
+                    },
+                    hideSheetOnTap: false,
+                  ),
                 const Divider(indent: 16, endIndent: 16),
-                SongActionButton(
+                PlayableActionButton(
                   enabled: !inOfflineMode,
                   text: 'Add to a Playlist…',
                   icon: const Icon(
@@ -191,7 +229,7 @@ class _SongActionSheetState extends State<SongActionSheet> {
                   ),
                   onTap: () {
                     Navigator.pop(context);
-                    gotoAddToPlaylistScreen(context, song: song);
+                    gotoAddToPlaylistScreen(context, playable: playable);
                   },
                   hideSheetOnTap: false,
                 ),
@@ -204,14 +242,14 @@ class _SongActionSheetState extends State<SongActionSheet> {
   }
 }
 
-class SongActionButton extends StatelessWidget {
+class PlayableActionButton extends StatelessWidget {
   final String text;
   final Icon icon;
   final Function onTap;
   final bool hideSheetOnTap;
   final bool enabled;
 
-  const SongActionButton({
+  const PlayableActionButton({
     Key? key,
     required this.text,
     required this.icon,

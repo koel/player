@@ -1,10 +1,10 @@
 import 'package:app/enums.dart';
 
-class SongSortConfig {
+class PlayableSortConfig {
   String field;
   SortOrder order;
 
-  SongSortConfig({
+  PlayableSortConfig({
     required this.field,
     required this.order,
   });

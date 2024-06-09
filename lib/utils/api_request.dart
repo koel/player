@@ -50,22 +50,25 @@ Future<dynamic> request(
       );
       break;
     case HttpMethod.delete:
-      response =
-          await Http.delete(uri, headers: headers, body: json.encode(data));
+      response = await Http.delete(
+        uri,
+        headers: headers,
+        body: json.encode(data),
+      );
       break;
     default:
       throw ArgumentError.value(method);
   }
 
-  switch (response.statusCode) {
-    case 200:
+  if (response.statusCode >= 200 && response.statusCode < 300) {
+    try {
       return json.decode(response.body);
-    case 201:
-    case 204:
-      return;
-    default:
-      throw HttpResponseException.fromResponse(response);
+    } catch (e) {
+      return null;
+    }
   }
+
+  throw HttpResponseException.fromResponse(response);
 }
 
 Future<dynamic> get(String path) async => request(HttpMethod.get, path);

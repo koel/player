@@ -53,7 +53,7 @@ class SongListWithHeadingPlaceholder extends StatelessWidget {
             color: Colors.white,
             margin: const EdgeInsets.only(left: 8.0),
           ),
-          ...List<Widget>.generate(4, (_) => const SongRowPlaceholder()),
+          ...List<Widget>.generate(4, (_) => const PlayableRowPlaceholder()),
         ],
       ),
     );

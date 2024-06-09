@@ -49,6 +49,16 @@ class AppRouter {
     ));
   }
 
+  gotoPodcastDetailsScreen(
+    BuildContext context, {
+    required String podcastId,
+  }) async {
+    await Navigator.of(context).push(CupertinoPageRoute(
+      builder: (_) => const PodcastDetailsScreen(),
+      settings: RouteSettings(arguments: podcastId),
+    ));
+  }
+
   Future<void> openNowPlayingScreen(BuildContext context) async {
     await showModalBottomSheet(
       context: context,
@@ -79,15 +89,30 @@ class AppRouter {
     );
   }
 
-  Future<void> showActionSheet(
+  Future<void> showPlayableActionSheet(
     BuildContext context, {
-    required Song song,
+    required Playable playable,
   }) async {
     showModalBottomSheet<void>(
       useRootNavigator: true, // covering everything else
       context: context,
       isScrollControlled: true,
-      builder: (_) => SongActionSheet(song: song),
+      builder: (_) => PlayableActionSheet(playable: playable),
+    );
+  }
+
+  Future<void> showAddPodcastSheet(BuildContext context) async {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height,
+          child: const AddPodcastSheet(),
+        );
+      },
     );
   }
 }

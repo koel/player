@@ -4,6 +4,7 @@ import 'package:app/ui/screens/screens.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class LibraryScreen extends StatelessWidget {
@@ -56,6 +57,13 @@ class LibraryScreen extends StatelessWidget {
           ),
         ),
         LibraryMenuItem(
+          icon: LucideIcons.podcast,
+          label: 'Podcasts',
+          onTap: () => Navigator.of(context).push(
+            CupertinoPageRoute(builder: (_) => const PodcastsScreen()),
+          ),
+        ),
+        LibraryMenuItem(
           icon: CupertinoIcons.cloud_download_fill,
           label: 'Downloaded',
           onTap: () => Navigator.of(context).push(
@@ -94,7 +102,7 @@ class LibraryScreen extends StatelessWidget {
               ),
               recentlyAddedSongs.isEmpty
                   ? const SliverToBoxAdapter(child: SizedBox.shrink())
-                  : SliverSongList(songs: recentlyAddedSongs),
+                  : SliverPlayableList(playables: recentlyAddedSongs),
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(
                   AppDimensions.hPadding,
@@ -108,7 +116,7 @@ class LibraryScreen extends StatelessWidget {
               ),
               mostPlayedSongs.isEmpty
                   ? const SliverToBoxAdapter(child: SizedBox.shrink())
-                  : SliverSongList(songs: mostPlayedSongs),
+                  : SliverPlayableList(playables: mostPlayedSongs),
               const BottomSpace(),
             ],
           ),

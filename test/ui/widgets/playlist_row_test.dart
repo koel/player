@@ -53,7 +53,7 @@ void main() {
         isSmart: playlist.isSmart,
       );
 
-      populatedPlaylist.songs = Song.fakeMany(4);
+      populatedPlaylist.playables = Song.fakeMany(4);
 
       await mount(tester);
       await tester.pumpAndSettle();

@@ -81,22 +81,27 @@ class AppBar extends StatelessWidget {
 }
 
 class CoverImageStack extends StatelessWidget {
-  final List<Song> songs;
+  final List<Playable> playables;
 
-  const CoverImageStack({Key? key, required this.songs}) : super(key: key);
+  const CoverImageStack({Key? key, required this.playables}) : super(key: key);
 
-  bool get isEmpty => songs.isEmpty;
+  bool get isEmpty => playables.isEmpty;
 
   @override
   Widget build(BuildContext context) {
     const imageCount = 4;
     List<String?> images = [];
 
-    if (songs.isNotEmpty) {
-      images = songs
-          .where((song) => song.hasCustomImage)
-          .map((song) => song.albumCoverUrl)
-          .toList();
+    if (playables.isNotEmpty) {
+      images = playables.where((playable) => playable.hasCustomImage).map(
+        (playable) {
+          if (playable is Song) {
+            return playable.albumCoverUrl;
+          } else if (playable is Episode) {
+            return playable.imageUrl;
+          }
+        },
+      ).toList();
 
       images.shuffle();
       images = images.take(imageCount).toList();

@@ -36,70 +36,83 @@ class MockPlaylistProvider extends _i1.Mock implements _i4.PlaylistProvider {
       (super.noSuchMethod(Invocation.getter(#playlistPopulatedStream),
               returnValue: _FakeValueStream<_i3.Playlist>())
           as _i2.ValueStream<_i3.Playlist>);
+
   @override
   List<_i3.Playlist> get playlists =>
       (super.noSuchMethod(Invocation.getter(#playlists),
           returnValue: <_i3.Playlist>[]) as List<_i3.Playlist>);
+
   @override
   List<_i3.Playlist> get standardPlaylists =>
       (super.noSuchMethod(Invocation.getter(#standardPlaylists),
           returnValue: <_i3.Playlist>[]) as List<_i3.Playlist>);
+
   @override
   bool get hasListeners =>
       (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
           as bool);
+
   @override
   _i5.Future<void> init(List<dynamic>? playlistData) =>
       (super.noSuchMethod(Invocation.method(#init, [playlistData]),
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i5.Future<void>);
+
   @override
   _i5.Future<_i3.Playlist> populatePlaylist({_i3.Playlist? playlist}) =>
       (super.noSuchMethod(
               Invocation.method(#populatePlaylist, [], {#playlist: playlist}),
               returnValue: Future<_i3.Playlist>.value(_FakePlaylist()))
           as _i5.Future<_i3.Playlist>);
+
   @override
   void populateAllPlaylists() =>
       super.noSuchMethod(Invocation.method(#populateAllPlaylists, []),
           returnValueForMissingStub: null);
+
   @override
-  _i5.Future<void> addSongToPlaylist(
-          {_i6.Song? song, _i3.Playlist? playlist}) =>
+  _i5.Future<void> addToPlaylist({_i6.Song? song, _i3.Playlist? playlist}) =>
       (super.noSuchMethod(
           Invocation.method(
               #addSongToPlaylist, [], {#song: song, #playlist: playlist}),
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i5.Future<void>);
+
   @override
-  _i5.Future<void> removeSongFromPlaylist(
+  _i5.Future<void> removeFromPlaylist(
           {_i6.Song? song, _i3.Playlist? playlist}) =>
       (super.noSuchMethod(
           Invocation.method(
               #removeSongFromPlaylist, [], {#song: song, #playlist: playlist}),
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i5.Future<void>);
+
   @override
   _i5.Future<_i3.Playlist> create({String? name}) =>
       (super.noSuchMethod(Invocation.method(#create, [], {#name: name}),
               returnValue: Future<_i3.Playlist>.value(_FakePlaylist()))
           as _i5.Future<_i3.Playlist>);
+
   @override
   _i5.Future<void> remove({_i3.Playlist? playlist}) =>
       (super.noSuchMethod(Invocation.method(#remove, [], {#playlist: playlist}),
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i5.Future<void>);
+
   @override
   void addListener(_i7.VoidCallback? listener) =>
       super.noSuchMethod(Invocation.method(#addListener, [listener]),
           returnValueForMissingStub: null);
+
   @override
   void removeListener(_i7.VoidCallback? listener) =>
       super.noSuchMethod(Invocation.method(#removeListener, [listener]),
           returnValueForMissingStub: null);
+
   @override
   void dispose() => super.noSuchMethod(Invocation.method(#dispose, []),
       returnValueForMissingStub: null);
+
   @override
   void notifyListeners() =>
       super.noSuchMethod(Invocation.method(#notifyListeners, []),

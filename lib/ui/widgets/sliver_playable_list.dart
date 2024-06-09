@@ -3,16 +3,16 @@ import 'package:app/models/models.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 
-class SliverSongList extends StatelessWidget {
-  final List<Song> songs;
-  final SongListContext listContext;
+class SliverPlayableList extends StatelessWidget {
+  final List<Playable> playables;
+  final PlayableListContext listContext;
   final Widget dismissIcon;
-  final Function(Song song)? onDismissed;
+  final Function(Playable playable)? onDismissed;
 
-  SliverSongList({
+  SliverPlayableList({
     Key? key,
-    required this.songs,
-    this.listContext = SongListContext.other,
+    required this.playables,
+    this.listContext = PlayableListContext.other,
     this.onDismissed,
     this.dismissIcon = const Icon(CupertinoIcons.delete),
   }) : super(key: key);
@@ -23,10 +23,13 @@ class SliverSongList extends StatelessWidget {
       delegate: SliverChildBuilderDelegate(
         (_, int index) {
           return onDismissed == null
-              ? SongRow(song: songs[index], listContext: listContext)
+              ? PlayableRow(
+                  playable: playables[index],
+                  listContext: listContext,
+                )
               : Dismissible(
                   direction: DismissDirection.endToStart,
-                  onDismissed: (_) => onDismissed?.call(songs[index]),
+                  onDismissed: (_) => onDismissed?.call(playables[index]),
                   background: Container(
                     alignment: AlignmentDirectional.centerEnd,
                     color: AppColors.highlightAccent,
@@ -35,11 +38,14 @@ class SliverSongList extends StatelessWidget {
                       child: dismissIcon,
                     ),
                   ),
-                  key: ValueKey(songs[index]),
-                  child: SongRow(song: songs[index], listContext: listContext),
+                  key: ValueKey(playables[index]),
+                  child: PlayableRow(
+                    playable: playables[index],
+                    listContext: listContext,
+                  ),
                 );
         },
-        childCount: songs.length,
+        childCount: playables.length,
       ),
     );
   }

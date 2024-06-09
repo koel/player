@@ -18,18 +18,19 @@ class QueueScreen extends StatefulWidget {
 }
 
 class _QueueScreenState extends State<QueueScreen> with StreamSubscriber {
-  late SongProvider _songProvider;
-  var _songs = <Song>[];
+  late PlayableProvider _playableProvider;
+  var _playables = <Playable>[];
 
   @override
   void initState() {
     super.initState();
-    _songProvider = context.read();
+    _playableProvider = context.read();
 
     subscribe(
       audioHandler.queue.listen((List<MediaItem> value) {
         setState(() {
-          _songs = value.map((item) => _songProvider.byId(item.id)!).toList();
+          _playables =
+              value.map((item) => _playableProvider.byId(item.id)!).toList();
         });
       }),
     );
@@ -49,9 +50,9 @@ class _QueueScreenState extends State<QueueScreen> with StreamSubscriber {
           slivers: <Widget>[
             AppBar(
               headingText: 'Current Queue',
-              coverImage: CoverImageStack(songs: _songs),
+              coverImage: CoverImageStack(playables: _playables),
               actions: <Widget>[
-                if (_songs.isNotEmpty)
+                if (_playables.isNotEmpty)
                   TextButton(
                     onPressed: () async => await audioHandler.clearQueue(),
                     child: const Text(
@@ -61,14 +62,14 @@ class _QueueScreenState extends State<QueueScreen> with StreamSubscriber {
                   ),
               ],
             ),
-            if (_songs.isEmpty)
+            if (_playables.isEmpty)
               SliverToBoxAdapter(
                 child: Column(
                   children: <Widget>[
                     const SizedBox(height: 128),
                     Center(
                       child: const Text(
-                        'No songs queued.',
+                        'No items queued.',
                         style: TextStyle(color: Colors.white54),
                       ),
                     ),
@@ -77,7 +78,7 @@ class _QueueScreenState extends State<QueueScreen> with StreamSubscriber {
               )
             else
               SliverReorderableList(
-                itemCount: _songs.length,
+                itemCount: _playables.length,
                 itemBuilder: (BuildContext context, int index) {
                   return Dismissible(
                     direction: DismissDirection.endToStart,
@@ -92,12 +93,12 @@ class _QueueScreenState extends State<QueueScreen> with StreamSubscriber {
                         child: Icon(CupertinoIcons.delete),
                       ),
                     ),
-                    key: ValueKey(_songs[index]),
-                    child: SongRow(
+                    key: ValueKey(_playables[index]),
+                    child: PlayableRow(
                       index: index,
-                      key: ValueKey(_songs[index]),
-                      song: _songs[index],
-                      listContext: SongListContext.queue,
+                      key: ValueKey(_playables[index]),
+                      playable: _playables[index],
+                      listContext: PlayableListContext.queue,
                     ),
                   );
                 },

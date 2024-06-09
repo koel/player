@@ -1,48 +1,43 @@
-import 'package:app/main.dart';
 import 'package:app/models/models.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-class SongCard extends StatefulWidget {
-  final Song song;
+class PodcastCard extends StatefulWidget {
+  final Podcast podcast;
   final AppRouter router;
 
-  const SongCard({
+  PodcastCard({
     Key? key,
-    required this.song,
+    required this.podcast,
     this.router = const AppRouter(),
   }) : super(key: key);
 
   @override
-  _SongCardState createState() => _SongCardState();
+  _PodcastCardState createState() => _PodcastCardState();
 }
 
-class _SongCardState extends State<SongCard> {
+class _PodcastCardState extends State<PodcastCard> {
   var _opacity = 1.0;
   final _cardWidth = 144.0;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => setState(() => _opacity = 0.7),
+      onTapDown: (_) => setState(() => _opacity = 0.4),
+      onTapUp: (_) => setState(() => _opacity = 1.0),
       onTapCancel: () => setState(() => _opacity = 1.0),
-      onTap: () async {
-        setState(() => _opacity = 1.0);
-        await audioHandler.queueAndPlay(widget.song);
-      },
-      onLongPress: () {
-        HapticFeedback.mediumImpact();
-        widget.router.showPlayableActionSheet(context, playable: widget.song);
-      },
+      onTap: () => widget.router.gotoPodcastDetailsScreen(
+        context,
+        podcastId: widget.podcast.id,
+      ),
       behavior: HitTestBehavior.opaque,
       child: AnimatedOpacity(
-        duration: const Duration(microseconds: 100),
+        duration: const Duration(milliseconds: 100),
         opacity: _opacity,
         child: Column(
           children: <Widget>[
-            PlayableThumbnail.md(playable: widget.song),
+            AlbumArtistThumbnail.md(entity: widget.podcast, asHero: true),
             const SizedBox(height: 12),
             SizedBox(
               width: _cardWidth,
@@ -50,16 +45,16 @@ class _SongCardState extends State<SongCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    widget.song.title,
+                    widget.podcast.title,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    widget.song.artistName,
+                    widget.podcast.author,
                     style: const TextStyle(color: Colors.white54),
                     overflow: TextOverflow.ellipsis,
-                  )
+                  ),
                 ],
               ),
             ),
