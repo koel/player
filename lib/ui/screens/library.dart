@@ -2,6 +2,7 @@ import 'package:app/constants/constants.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/screens.dart';
 import 'package:app/ui/widgets/widgets.dart';
+import 'package:app/utils/features.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -56,13 +57,14 @@ class LibraryScreen extends StatelessWidget {
             CupertinoPageRoute(builder: (_) => const AlbumsScreen()),
           ),
         ),
-        LibraryMenuItem(
-          icon: LucideIcons.podcast,
-          label: 'Podcasts',
-          onTap: () => Navigator.of(context).push(
-            CupertinoPageRoute(builder: (_) => const PodcastsScreen()),
+        if (Feature.podcasts.isSupported())
+          LibraryMenuItem(
+            icon: LucideIcons.podcast,
+            label: 'Podcasts',
+            onTap: () => Navigator.of(context).push(
+              CupertinoPageRoute(builder: (_) => const PodcastsScreen()),
+            ),
           ),
-        ),
         LibraryMenuItem(
           icon: CupertinoIcons.cloud_download_fill,
           label: 'Downloaded',

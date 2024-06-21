@@ -5,12 +5,12 @@ import 'package:app/extensions/extensions.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/utils/api_request.dart';
+import 'package:app/utils/features.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:app/values/queue_state.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:collection/collection.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:version/version.dart';
 
 class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   static const MAX_ERROR_COUNT = 10;
@@ -19,7 +19,6 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   late final PlayableProvider playableProvider;
   late AudioServiceRepeatMode repeatMode;
 
-  var _supportsQueueStateSync = false;
   var _errorCount = 0;
   var _initialized = false;
   var _currentMediaItem = MediaItem(id: '', title: '');
@@ -49,14 +48,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
     await this.setVolume(preferences.volume);
 
-    try {
-      _supportsQueueStateSync = AppState.get<Version>(['app', 'apiVersion'])! >
-          Version.parse('6.11.5');
-    } catch (e) {
-      print(e);
-    }
-
-    if (_supportsQueueStateSync) {
+    if (Feature.queueStateSync.isSupported()) {
       _trySetUpQueue();
     }
 
@@ -193,7 +185,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     await _playAtIndex(queue.value.indexOf(await playable.asMediaItem()));
   }
 
-  Future<void> maybeQueueAndPlay(Playable playable) async {
+  Future<void> maybeQueueAndPlay(Playable playable, {position = 0}) async {
     if (await queued(playable)) {
       await _playAtIndex(queue.value.indexOf(await playable.asMediaItem()));
     } else {

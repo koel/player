@@ -2,6 +2,7 @@ import 'package:app/constants/constants.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/widgets.dart';
+import 'package:app/utils/features.dart';
 import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -159,21 +160,23 @@ class _SearchScreenState extends State<SearchScreen> {
                               (artist) => ArtistCard(artist: artist),
                             ),
                           ),
-                        const SizedBox(height: 32),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: AppDimensions.hPadding,
-                          ),
-                          child: const Heading5(text: 'Podcasts'),
-                        ),
-                        if (_podcasts.isEmpty)
-                          noResults
-                        else
-                          HorizontalCardScroller(
-                            cards: _podcasts.map(
-                              (podcast) => PodcastCard(podcast: podcast),
+                        if (Feature.podcasts.isSupported()) ...[
+                          const SizedBox(height: 32),
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: AppDimensions.hPadding,
                             ),
+                            child: const Heading5(text: 'Podcasts'),
                           ),
+                          if (_podcasts.isEmpty)
+                            noResults
+                          else
+                            HorizontalCardScroller(
+                              cards: _podcasts.map(
+                                (podcast) => PodcastCard(podcast: podcast),
+                              ),
+                            ),
+                        ],
                         const BottomSpace(asSliver: false),
                       ],
                     ),

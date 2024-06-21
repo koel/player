@@ -1,3 +1,5 @@
+import 'package:app/app_state.dart';
+import 'package:app/enums.dart';
 import 'package:app/main.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
@@ -35,6 +37,18 @@ class PlayableRow extends StatefulWidget {
 }
 
 class _PlayableRowState extends State<PlayableRow> {
+  Future<num> getPlaybackStartPosition(Playable playable) async {
+    if (AppState.get('mode', AppMode.online) == AppMode.offline) {
+      return 0;
+    }
+
+    if (playable is Episode) {
+      return 0;
+    }
+
+    return 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     late String subtitle;
@@ -63,8 +77,10 @@ class _PlayableRowState extends State<PlayableRow> {
 
     return Card(
       child: InkWell(
-        onTap: () async =>
-            await audioHandler.maybeQueueAndPlay(widget.playable),
+        onTap: () async => await audioHandler.maybeQueueAndPlay(
+          widget.playable,
+          position: await getPlaybackStartPosition(widget.playable),
+        ),
         onLongPress: () {
           HapticFeedback.mediumImpact();
           widget.router.showPlayableActionSheet(
