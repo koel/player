@@ -1,3 +1,4 @@
+import 'package:app/main.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
@@ -63,5 +64,14 @@ class PodcastProvider with ChangeNotifier, StreamSubscriber {
     }
 
     return _vault[id]!;
+  }
+
+  Future<num> getEpisodeProgress(Episode episode) async {
+    try {
+      final podcast = await resolve(episode.podcastId);
+      return podcast.state.progresses[episode.id] ?? 0;
+    } catch (e) {
+      return 0;
+    }
   }
 }

@@ -83,7 +83,10 @@ class Song extends Playable<Song> {
           ? await AppImages.getDefaultArtUri()
           : Uri.parse(albumCoverUrl),
       genre: genre,
-      extras: {'sourceUrl': sourceUrl},
+      extras: {
+        'sourceUrl': sourceUrl,
+        'type': 'song',
+      },
     );
   }
 

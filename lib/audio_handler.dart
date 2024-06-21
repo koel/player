@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:app/app_state.dart';
@@ -148,10 +149,24 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
           'song': _currentMediaItem.id,
           'position': position.inSeconds,
         });
+
+        // if the playable is an episode, we want to keep track of the progress
+        // in the app as well.
+        if (_currentMediaItem.extras?['type'] == 'episode') {
+          setPlaybackPositionToState(_currentMediaItem.id, position.inSeconds);
+        }
       });
     } catch (e) {
       print(e);
     }
+  }
+
+  num? getPlaybackPositionFromState(String playableId) {
+    return AppState.get<num>(['playbackPosition', playableId]);
+  }
+
+  void setPlaybackPositionToState(String playableId, num position) {
+    AppState.set(['playbackPosition', playableId], position);
   }
 
   _setPlayerSource(MediaItem mediaItem) async {
@@ -232,9 +247,11 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     if (queue.value.length <= index) return;
 
     final mediaItem = queue.value[index];
+    final position = getPlaybackPositionFromState(mediaItem.id) ?? 0;
 
     try {
       await _setPlayerSource(mediaItem);
+      _player.seek(Duration(seconds: position.toInt()));
       await play();
 
       put('queue/playback-status', data: {

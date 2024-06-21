@@ -3,13 +3,16 @@ import 'package:app/enums.dart';
 import 'package:app/main.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/widgets.dart';
+import 'package:app/utils/features.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:provider/provider.dart';
 
 import 'package:intl/intl.dart';
 
@@ -38,12 +41,26 @@ class PlayableRow extends StatefulWidget {
 
 class _PlayableRowState extends State<PlayableRow> {
   Future<num> getPlaybackStartPosition(Playable playable) async {
+    if (!Feature.podcasts.isSupported()) {
+      return 0;
+    }
+
     if (AppState.get('mode', AppMode.online) == AppMode.offline) {
       return 0;
     }
 
     if (playable is Episode) {
-      return 0;
+      var position = audioHandler.getPlaybackPositionFromState(playable.id);
+
+      if (position != null) {
+        return position;
+      }
+
+      position =
+          await context.read<PodcastProvider>().getEpisodeProgress(playable);
+      audioHandler.setPlaybackPositionToState(playable.id, position);
+
+      return position;
     }
 
     return 0;

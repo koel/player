@@ -43,7 +43,10 @@ class Episode extends Playable<Episode> {
       duration: Duration(seconds: length.toInt()),
       artUri: Uri.parse(imageUrl),
       genre: 'Podcast',
-      extras: {'sourceUrl': sourceUrl},
+      extras: {
+        'sourceUrl': sourceUrl,
+        'type': 'episode',
+      },
     );
   }
 

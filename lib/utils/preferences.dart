@@ -15,7 +15,7 @@ String? get host => _get<String>('hostUrl');
 
 String? get apiBaseUrl => host == null ? null : '$host/api';
 
-String get apiVersion => 'v6';
+String get apiVersion => 'v7';
 
 set apiToken(String? token) =>
     token == null ? _delete('apiToken') : _set('apiToken', token);
