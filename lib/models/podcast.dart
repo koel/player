@@ -1,3 +1,4 @@
+import 'package:app/enums.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/widgets.dart';
 
@@ -10,6 +11,7 @@ class Podcast {
   final String author;
   final String imageUrl;
   final String subscribedAt;
+  final String lastPlayedAt;
   final PodcastState state;
 
   ImageProvider? _image;
@@ -23,6 +25,7 @@ class Podcast {
     required this.author,
     required this.imageUrl,
     required this.subscribedAt,
+    required this.lastPlayedAt,
     required this.state,
   });
 
@@ -41,8 +44,22 @@ class Podcast {
       author: json['author'],
       imageUrl: json['image'],
       subscribedAt: json['subscribed_at'],
+      lastPlayedAt: json['last_played_at'],
       state: PodcastState.fromJson(json['state']),
     );
+  }
+
+  compare(Podcast other, PodcastSortField field) {
+    switch (field) {
+      case PodcastSortField.lastPlayedAt:
+        return this.lastPlayedAt.compareTo(other.lastPlayedAt);
+      case PodcastSortField.subscribedAt:
+        return this.subscribedAt.compareTo(other.subscribedAt);
+      case PodcastSortField.title:
+        return this.title.compareTo(other.title);
+      case PodcastSortField.author:
+        return this.author.compareTo(other.author);
+    }
   }
 }
 

@@ -1,4 +1,7 @@
+import 'package:app/app_state.dart';
 import 'package:app/constants/constants.dart';
+import 'package:app/enums.dart';
+import 'package:app/extensions/extensions.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
@@ -24,6 +27,7 @@ class PodcastsScreen extends StatefulWidget {
 class _PodcastScreenState extends State<PodcastsScreen> {
   var _loading = false;
   var _errored = false;
+  late PodcastSortConfig _sortConfig;
 
   Future<void> fetchData() async {
     if (_loading) return;
@@ -46,6 +50,14 @@ class _PodcastScreenState extends State<PodcastsScreen> {
   void initState() {
     super.initState();
 
+    _sortConfig = AppState.get(
+      'podcast.sort',
+      PodcastSortConfig(
+        field: PodcastSortField.lastPlayedAt,
+        order: SortOrder.desc,
+      ),
+    )!;
+
     fetchData();
   }
 
@@ -62,8 +74,7 @@ class _PodcastScreenState extends State<PodcastsScreen> {
                 if (_errored) return OopsBox(onRetry: fetchData);
               }
 
-              final podcasts = provider.podcasts
-                ..sort((b, a) => a.subscribedAt.compareTo(b.subscribedAt));
+              final podcasts = provider.podcasts.$sort(_sortConfig);
 
               late var widgets = <Widget>[];
 
@@ -123,9 +134,26 @@ class _PodcastScreenState extends State<PodcastsScreen> {
             child: CupertinoSliverNavigationBar(
               backgroundColor: AppColors.staticScreenHeaderBackground,
               largeTitle: const LargeTitle(text: 'Podcasts'),
-              trailing: IconButton(
-                onPressed: () => widget.router.showAddPodcastSheet(context),
-                icon: const Icon(CupertinoIcons.add_circled),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => widget.router.showAddPodcastSheet(context),
+                    icon: const Icon(
+                      CupertinoIcons.add_circled,
+                      size: 23,
+                    ),
+                  ),
+                  PodcastSortButton(
+                    currentField: _sortConfig.field,
+                    currentOrder: _sortConfig.order,
+                    onMenuItemSelected: (config) {
+                      setState(() => _sortConfig = config);
+                      AppState.set('podcast.sort', _sortConfig);
+                    },
+                  ),
+                ],
               ),
             ),
           ),
@@ -214,6 +242,84 @@ class NoPodcastsScreen extends StatelessWidget {
           ElevatedButton(onPressed: onTap, child: Text('Add a Podcast')),
         ],
       ),
+    );
+  }
+}
+
+class PodcastSortConfig {
+  PodcastSortField field;
+  SortOrder order;
+
+  PodcastSortConfig({required this.field, required this.order});
+}
+
+class PodcastSortButton extends StatelessWidget {
+  final void Function(PodcastSortConfig sortConfig)? onMenuItemSelected;
+
+  PodcastSortField currentField;
+  SortOrder currentOrder;
+
+  static const fields = <PodcastSortField, String>{
+    PodcastSortField.lastPlayedAt: 'Last played',
+    PodcastSortField.subscribedAt: 'Subscribed',
+    PodcastSortField.title: 'Title',
+    PodcastSortField.author: 'Author',
+  };
+
+  PodcastSortButton({
+    Key? key,
+    required this.currentField,
+    required this.currentOrder,
+    this.onMenuItemSelected,
+  }) : super(key: key) {}
+
+  PopupMenuItem<PodcastSortField> buildMenuItem(
+    PodcastSortField field,
+    String label,
+  ) {
+    final active = field == currentField;
+    final style = active ? const TextStyle(color: AppColors.white) : null;
+
+    return PopupMenuItem<PodcastSortField>(
+      value: field,
+      child: Row(
+        children: <Widget>[
+          SizedBox(
+            width: 20,
+            child: Text(
+              active ? (currentOrder == SortOrder.asc ? '↓ ' : '↑ ') : '',
+              style: style,
+            ),
+          ),
+          Text(label, style: style),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<PodcastSortField>(
+      offset: const Offset(-12, 48),
+      icon: const Icon(
+        CupertinoIcons.sort_down,
+        size: 25,
+      ),
+      onSelected: (item) {
+        if (item == currentField) {
+          currentOrder =
+              currentOrder == SortOrder.asc ? SortOrder.desc : SortOrder.asc;
+        } else {
+          currentOrder = SortOrder.asc;
+        }
+
+        onMenuItemSelected?.call(PodcastSortConfig(
+          field: item,
+          order: currentOrder,
+        ));
+      },
+      itemBuilder: (_) =>
+          fields.keys.map((key) => buildMenuItem(key, fields[key]!)).toList(),
     );
   }
 }

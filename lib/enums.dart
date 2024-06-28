@@ -7,3 +7,10 @@ extension SortOrderExtension on SortOrder {
 }
 
 enum ThumbnailSize { xs, sm, md, lg, xl }
+
+enum PodcastSortField {
+  lastPlayedAt,
+  subscribedAt,
+  title,
+  author,
+}
