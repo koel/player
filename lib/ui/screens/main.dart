@@ -11,7 +11,6 @@ import 'package:app/ui/widgets/widgets.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class MainScreen extends StatefulWidget {
@@ -61,76 +60,68 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      child: Scaffold(
-        body: _isOffline
-            ? Stack(
+    return Scaffold(
+      body: _isOffline
+          ? Stack(
+        children: [
+          DownloadedScreen(inOfflineMode: true),
+          Positioned(
+            bottom: 0,
+            width: MediaQuery.of(context).size.width,
+            child: Container(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  DownloadedScreen(inOfflineMode: true),
-                  Positioned(
-                    bottom: 0,
-                    width: MediaQuery.of(context).size.width,
-                    child: Container(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          const MiniPlayer(),
-                          const ConnectivityInfoBox(),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              )
-            : Stack(
-                children: <Widget>[
-                  CupertinoTabScaffold(
-                    tabBuilder: (_, index) {
-                      return CupertinoTabView(
-                          builder: (_) => _widgetOptions[index]);
-                    },
-                    tabBar: CupertinoTabBar(
-                      backgroundColor: Colors.black12,
-                      iconSize: 24,
-                      activeColor: Colors.white,
-                      height: tabBarHeight,
-                      inactiveColor: Colors.white54,
-                      border: Border(top: Divider.createBorderSide(context)),
-                      items: <BottomNavigationBarItem>[
-                        tabBarItem(
-                          title: 'Home',
-                          icon: CupertinoIcons.house_fill,
-                        ),
-                        tabBarItem(
-                          title: 'Search',
-                          icon: CupertinoIcons.search,
-                        ),
-                        tabBarItem(
-                          title: 'Library',
-                          icon: CupertinoIcons.music_albums_fill,
-                        ),
-                      ],
-                      currentIndex: _selectedIndex,
-                      onTap: _onItemTapped,
-                    ),
-                  ),
-                  Positioned(
-                    bottom:
-                        tabBarHeight + MediaQuery.of(context).padding.bottom,
-                    width: MediaQuery.of(context).size.width,
-                    child: const MiniPlayer(),
-                  ),
+                  const MiniPlayer(),
+                  const ConnectivityInfoBox(),
                 ],
               ),
+            ),
+          ),
+        ],
+      )
+          : Stack(
+        children: <Widget>[
+          CupertinoTabScaffold(
+            tabBuilder: (_, index) {
+              return CupertinoTabView(
+                  builder: (_) => _widgetOptions[index]);
+            },
+            tabBar: CupertinoTabBar(
+              backgroundColor: Colors.black12,
+              iconSize: 24,
+              activeColor: Colors.white,
+              height: tabBarHeight,
+              inactiveColor: Colors.white54,
+              border: Border(top: Divider.createBorderSide(context)),
+              items: <BottomNavigationBarItem>[
+                tabBarItem(
+                  title: 'Home',
+                  icon: CupertinoIcons.house_fill,
+                ),
+                tabBarItem(
+                  title: 'Search',
+                  icon: CupertinoIcons.search,
+                ),
+                tabBarItem(
+                  title: 'Library',
+                  icon: CupertinoIcons.music_albums_fill,
+                ),
+              ],
+              currentIndex: _selectedIndex,
+              onTap: _onItemTapped,
+            ),
+          ),
+          Positioned(
+            bottom:
+            tabBarHeight + MediaQuery.of(context).padding.bottom,
+            width: MediaQuery.of(context).size.width,
+            child: const MiniPlayer(),
+          ),
+        ],
       ),
-      onWillPop: () async {
-        if (!Platform.isAndroid || Navigator.of(context).canPop()) return true;
-        MethodChannel('dev.koel.app').invokeMethod('minimize');
-        return false;
-      },
     );
   }
 }

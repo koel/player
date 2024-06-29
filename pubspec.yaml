@@ -29,29 +29,29 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   provider: ^6.0.3
-  http: ^0.13.3
+  http: ^1.2.1
   easy_debounce: ^2.0.0
   flutter_html: ^3.0.0-beta.2
   flutter_spinkit: ^5.0.0
   crypto: ^3.0.1
-  intl: ^0.17.0
+  intl: ^0.19.0
   get_storage: ^2.0.2
   cached_network_image: ^3.3.1
   build_runner: ^2.0.6
-  uuid: ^3.0.4
-  shimmer: ^2.0.0
+  uuid: ^4.4.0
+  shimmer: ^3.0.0
   just_audio: ^0.9.32
   audio_service: ^0.18.9
   figma_squircle: ^0.5.3
-  connectivity_plus: ^2.1.0
+  connectivity_plus: ^6.0.3
   path_provider: ^2.0.14
   scrolls_to_top: ^2.1.1
-  fading_edge_scrollview: ^3.0.0
+  fading_edge_scrollview: ^4.1.1
   version: ^3.0.2
   native_qr: ^0.0.3
 
 dev_dependencies:
-  golden_toolkit: ^0.12.0
+  golden_toolkit: ^0.15.0
   fake_async: ^1.2.0
   faker: ^2.0.0
   mockito: ^5.0.12
