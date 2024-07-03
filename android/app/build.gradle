@@ -32,7 +32,7 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -83,6 +83,7 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "com.google.android.gms:play-services-code-scanner:16.1.0"
 }
 
 // Change version codes of split APKs to be together
@@ -90,6 +91,7 @@ dependencies {
 // We change it to 190 for a non split apk, 191 for ARMv7a, 192 for AARM64 v8a, 193 for x86 and 194 for x64
 ext.abiCodes = ["armeabi-v7a": 1, "arm64-v8a": 2, "x86": 3, "x86_64": 4]
 import com.android.build.OutputFile
+
 android.applicationVariants.all { variant ->
     variant.outputs.each { output ->
         def abiVersionCode = project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
