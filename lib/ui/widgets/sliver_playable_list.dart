@@ -1,7 +1,10 @@
 import 'package:app/constants/constants.dart';
+import 'package:app/main.dart';
 import 'package:app/models/models.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class SliverPlayableList extends StatelessWidget {
   final List<Playable> playables;
@@ -28,11 +31,35 @@ class SliverPlayableList extends StatelessWidget {
                   listContext: listContext,
                 )
               : Dismissible(
-                  direction: DismissDirection.endToStart,
-                  onDismissed: (_) => onDismissed?.call(playables[index]),
+                  direction: DismissDirection.horizontal,
+                  confirmDismiss: (direction) async {
+                    if (direction == DismissDirection.endToStart) {
+                      onDismissed?.call(playables[index]);
+                      return true;
+                    }
+
+                    await audioHandler.queueAfterCurrent(playables[index]);
+
+                    showOverlay(
+                      context,
+                      icon: CupertinoIcons.arrow_right_circle_fill,
+                      caption: 'Queued',
+                      message: 'To be played next.',
+                    );
+
+                    return false;
+                  },
                   background: Container(
+                    alignment: AlignmentDirectional.centerStart,
+                    color: Colors.green,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 28),
+                      child: const Icon(LucideIcons.listPlus),
+                    ),
+                  ),
+                  secondaryBackground: Container(
                     alignment: AlignmentDirectional.centerEnd,
-                    color: AppColors.highlightAccent,
+                    color: AppColors.red,
                     child: Padding(
                       padding: const EdgeInsets.only(right: 28),
                       child: dismissIcon,
