@@ -38,7 +38,7 @@ class SearchProvider with ChangeNotifier {
     final res = await get('search?q=$keywords');
 
     final playables = _playableProvider.syncWithVault(res['songs']
-        .map<Playable>((j) => Playable.fromJson(j) as Playable)
+        .map<Playable>((j) => Playable.fromJson(j))
         .toList());
     final artists = _artistProvider.syncWithVault(
         res['artists'].map<Artist>((j) => Artist.fromJson(j)).toList());

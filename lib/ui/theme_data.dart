@@ -21,7 +21,7 @@ ThemeData themeData(BuildContext context) {
     ),
     scaffoldBackgroundColor: Colors.transparent,
     colorScheme: ColorScheme.dark(
-      background: AppColors.background,
+      surface: AppColors.background,
     ),
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: AppColors.black.withOpacity(.3),
@@ -123,23 +123,23 @@ ThemeData themeData(BuildContext context) {
     // The default theme for ElevatedButton widgets.
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
-        shape: MaterialStateProperty.all(
+        shape: WidgetStateProperty.all(
           RoundedRectangleBorder(
             side: BorderSide.none,
             borderRadius: AppDimensions.inputBorderRadius,
           ),
         ),
-        textStyle: MaterialStateProperty.all(
+        textStyle: WidgetStateProperty.all(
           const TextStyle(
             fontSize: 16.0,
             fontWeight: FontWeight.w500,
           ),
         ),
-        backgroundColor: MaterialStateProperty.all(AppColors.highlight),
-        foregroundColor: MaterialStateProperty.all(AppColors.white),
-        overlayColor: MaterialStateProperty.all(AppColors.highlightAccent),
-        elevation: MaterialStateProperty.all(0),
-        padding: MaterialStateProperty.all(AppDimensions.inputPadding),
+        backgroundColor: WidgetStateProperty.all(AppColors.highlight),
+        foregroundColor: WidgetStateProperty.all(AppColors.white),
+        overlayColor: WidgetStateProperty.all(AppColors.highlightAccent),
+        elevation: WidgetStateProperty.all(0),
+        padding: WidgetStateProperty.all(AppDimensions.inputPadding),
       ),
     ),
 
