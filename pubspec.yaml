@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 2.2.2+30
+version: 2.2.3+31
 
 environment:
   sdk: ">=2.17.0-0 <3.0.0"
@@ -48,7 +48,12 @@ dependencies:
   scrolls_to_top: ^2.1.1
   fading_edge_scrollview: ^4.0.0
   version: ^3.0.2
-  native_qr: ^0.0.3
+  # native_qr's current version is broken
+  # until https://github.com/roman-yerin/native_qr/pull/5 is released, use the commit directly
+  native_qr:
+    git:
+      url: https://github.com/roman-yerin/native_qr.git
+      ref: 8d84d3706f53594d40a47c15b49cf19f41d075be
   lucide_icons: ^0.257.0
   timeago: ^3.6.1
   url_launcher: ^6.3.0

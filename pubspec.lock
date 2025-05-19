@@ -595,10 +595,11 @@ packages:
   native_qr:
     dependency: "direct main"
     description:
-      name: native_qr
-      sha256: "0928754b92305eb101a3359014a60ac5e90126534406b4dd6fb7550433978420"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: "8d84d3706f53594d40a47c15b49cf19f41d075be"
+      resolved-ref: "8d84d3706f53594d40a47c15b49cf19f41d075be"
+      url: "https://github.com/roman-yerin/native_qr.git"
+    source: git
     version: "0.0.3"
   nested:
     dependency: transitive

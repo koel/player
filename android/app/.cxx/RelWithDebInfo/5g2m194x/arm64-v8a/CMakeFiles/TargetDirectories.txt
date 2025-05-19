@@ -1,2 +1,0 @@
-/Users/an/Personal/koel/player/android/app/.cxx/RelWithDebInfo/5g2m194x/arm64-v8a/CMakeFiles/edit_cache.dir
-/Users/an/Personal/koel/player/android/app/.cxx/RelWithDebInfo/5g2m194x/arm64-v8a/CMakeFiles/rebuild_cache.dir

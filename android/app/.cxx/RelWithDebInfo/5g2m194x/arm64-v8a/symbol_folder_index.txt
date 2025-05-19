@@ -1,1 +1,0 @@
-/Users/an/Personal/koel/player/build/app/intermediates/cxx/RelWithDebInfo/5g2m194x/obj/arm64-v8a
