@@ -24,7 +24,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
   var _searchQuery = '';
   var cover = CoverImageStack(playables: []);
 
-  Future<List<Object>> buildRequest(int artistId, {bool forceRefresh = false}) {
+  Future<List<Object>> buildRequest(dynamic artistId, {bool forceRefresh = false}) {
     return Future.wait([
       context
           .read<ArtistProvider>()
@@ -37,7 +37,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final artistId = ModalRoute.of(context)!.settings.arguments as int;
+    final artistId = ModalRoute.of(context)!.settings.arguments;
     var sortConfig = AppState.get(
       'artist.sort',
       PlayableSortConfig(field: 'title', order: SortOrder.asc),

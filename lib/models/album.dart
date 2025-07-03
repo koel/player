@@ -3,12 +3,13 @@ import 'package:app/models/models.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
+import 'package:ulid/ulid.dart';
 
 class Album {
-  int id;
+  dynamic id;
   String name;
   String? cover;
-  int artistId;
+  dynamic artistId;
   String artistName;
   int playCount = 0;
   ImageProvider? _image;
@@ -36,7 +37,7 @@ class Album {
 
   bool get isStandardAlbum => !isUnknownAlbum;
 
-  bool get isUnknownAlbum => id == 1;
+  bool get isUnknownAlbum => name == 'Unknown Album';
 
   factory Album.fromJson(Map<String, dynamic> json) {
     return Album(
@@ -49,7 +50,7 @@ class Album {
   }
 
   factory Album.fake({
-    int? id,
+    dynamic id,
     String? name,
     String? cover,
     int? playCount,
@@ -60,9 +61,9 @@ class Album {
     artist ??= Artist.fake();
 
     return Album(
-      id: id ?? faker.randomGenerator.integer(1000, min: 1),
+      id: id ?? Ulid().toString(),
       name: name ?? faker.lorem.words(3).join(' '),
-      cover: cover ?? faker.image.image(width: 192, height: 192),
+      cover: cover ?? faker.image.loremPicsum(width: 192, height: 192),
       artistId: artist.id,
       artistName: artist.name,
     )..playCount = playCount ?? faker.randomGenerator.integer(1000);

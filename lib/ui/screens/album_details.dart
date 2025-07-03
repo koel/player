@@ -22,7 +22,7 @@ class AlbumDetailsScreen extends StatefulWidget {
 class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
   var _searchQuery = '';
 
-  Future<List<Object>> buildRequest(int albumId, {bool forceRefresh = false}) {
+  Future<List<Object>> buildRequest(dynamic albumId, {bool forceRefresh = false}) {
     return Future.wait([
       context
           .read<AlbumProvider>()
@@ -35,7 +35,7 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final albumId = ModalRoute.of(context)!.settings.arguments as int;
+    final albumId = ModalRoute.of(context)!.settings.arguments;
 
     var sortConfig = AppState.get(
       'album.sort',

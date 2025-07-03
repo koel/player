@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 
 class ArtistProvider with ChangeNotifier, StreamSubscriber {
   var artists = <Artist>[];
-  final _vault = <int, Artist>{};
+  final _vault = <dynamic, Artist>{};
   var _page = 1;
 
   ArtistProvider() {
@@ -19,9 +19,9 @@ class ArtistProvider with ChangeNotifier, StreamSubscriber {
     }));
   }
 
-  Artist? byId(int id) => _vault[id];
+  Artist? byId(dynamic id) => _vault[id];
 
-  List<Artist> byIds(List<int> ids) {
+  List<Artist> byIds(List<dynamic> ids) {
     final artists = <Artist>[];
 
     ids.forEach((id) {
@@ -33,7 +33,7 @@ class ArtistProvider with ChangeNotifier, StreamSubscriber {
     return artists;
   }
 
-  Future<Artist> resolve(int id, {bool forceRefresh = false}) async {
+  Future<Artist> resolve(dynamic id, {bool forceRefresh = false}) async {
     if (!_vault.containsKey(id) || forceRefresh) {
       _vault[id] = Artist.fromJson(await get('artists/$id'));
     }

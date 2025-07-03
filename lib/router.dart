@@ -31,7 +31,7 @@ class AppRouter {
 
   Future<void> gotoAlbumDetailsScreen(
     BuildContext context, {
-    required int albumId,
+    required dynamic albumId,
   }) async {
     await Navigator.of(context).push(CupertinoPageRoute(
       builder: (_) => const AlbumDetailsScreen(),
@@ -41,7 +41,7 @@ class AppRouter {
 
   Future<void> gotoArtistDetailsScreen(
     BuildContext context, {
-    required int artistId,
+    required dynamic artistId,
   }) async {
     await Navigator.of(context).push(CupertinoPageRoute(
       builder: (_) => const ArtistDetailsScreen(),

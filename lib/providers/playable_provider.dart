@@ -68,7 +68,7 @@ class PlayableProvider with ChangeNotifier, StreamSubscriber {
   }
 
   Future<List<Playable>> fetchForArtist(
-    int artistId, {
+    dynamic artistId, {
     bool forceRefresh = false,
   }) async {
     if (forceRefresh) AppState.delete(['artist.songs', artistId]);
@@ -80,7 +80,7 @@ class PlayableProvider with ChangeNotifier, StreamSubscriber {
   }
 
   Future<List<Playable>> fetchForAlbum(
-    int albumId, {
+    dynamic albumId, {
     bool forceRefresh = false,
   }) async {
     if (forceRefresh) AppState.delete(['album.songs', albumId]);

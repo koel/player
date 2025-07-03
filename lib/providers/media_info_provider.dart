@@ -64,7 +64,7 @@ class MediaInfo {
 }
 
 class MediaInfoProvider {
-  Future<AlbumInfo> fetchForAlbum(int albumId) async {
+  Future<AlbumInfo> fetchForAlbum(dynamic albumId) async {
     if (AppState.has(['album.info', albumId])) {
       return AppState.get<AlbumInfo>(['album.info', albumId])!;
     }
@@ -74,7 +74,7 @@ class MediaInfoProvider {
     return info;
   }
 
-  Future<ArtistInfo> fetchForArtist(int artistId) async {
+  Future<ArtistInfo> fetchForArtist(dynamic artistId) async {
     if (AppState.has(['artist.info', artistId])) {
       return AppState.get<ArtistInfo>(['artist.info', artistId])!;
     }

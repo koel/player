@@ -16,11 +16,11 @@ class Song extends Playable<Song> {
   num length;
   String title;
   String lyrics;
-  int albumId;
+  dynamic albumId;
   String albumName;
-  int artistId;
+  dynamic artistId;
   String artistName;
-  int albumArtistId;
+  dynamic albumArtistId;
   String albumArtistName;
   String? albumCoverUrl;
   num track;

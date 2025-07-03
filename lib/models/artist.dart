@@ -2,9 +2,10 @@ import 'package:app/constants/constants.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
+import 'package:ulid/ulid.dart';
 
 class Artist {
-  int id;
+  dynamic id;
   String name;
   String? imageUrl;
   int playCount = 0;
@@ -25,11 +26,11 @@ class Artist {
     return image;
   }
 
-  bool get isStandardArtist => !isUnknownArtist && !isVariousArtist;
+  bool get isStandardArtist => !isUnknownArtist && !isVariousArtists;
 
-  bool get isUnknownArtist => id == 1;
+  bool get isUnknownArtist => name == 'Unknown Artist';
 
-  bool get isVariousArtist => id == 2;
+  bool get isVariousArtists => name == 'Various Artists';
 
   factory Artist.fromJson(Map<String, dynamic> json) {
     return Artist(
@@ -40,7 +41,7 @@ class Artist {
   }
 
   factory Artist.fake({
-    int? id,
+    dynamic id,
     String? name,
     String? imageUrl,
     int? playCount,
@@ -48,9 +49,9 @@ class Artist {
     Faker faker = Faker();
 
     return Artist(
-      id: id ?? faker.randomGenerator.integer(1000, min: 1),
+      id: id ?? Ulid().toString(),
       name: name ?? faker.person.name(),
-      imageUrl: imageUrl ?? faker.image.image(width: 192, height: 192),
+      imageUrl: imageUrl ?? faker.image.loremPicsum(width: 192, height: 192),
     )..playCount = playCount ?? faker.randomGenerator.integer(1000);
   }
 

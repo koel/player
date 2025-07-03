@@ -6,10 +6,10 @@ import 'package:flutter/foundation.dart';
 
 class AlbumProvider with ChangeNotifier, StreamSubscriber {
   var albums = <Album>[];
-  final _vault = <int, Album>{};
+  final _vault = <dynamic, Album>{};
   var _page = 1;
 
-  Album? byId(int id) => _vault[id];
+  Album? byId(dynamic id) => _vault[id];
 
   AlbumProvider() {
     subscribe(AuthProvider.userLoggedOutStream.listen((_) {
@@ -21,7 +21,7 @@ class AlbumProvider with ChangeNotifier, StreamSubscriber {
     }));
   }
 
-  List<Album> byIds(List<int> ids) {
+  List<Album> byIds(List<dynamic> ids) {
     final albums = <Album>[];
 
     ids.forEach((id) {
@@ -33,7 +33,7 @@ class AlbumProvider with ChangeNotifier, StreamSubscriber {
     return albums;
   }
 
-  Future<Album> resolve(int id, {bool forceRefresh = false}) async {
+  Future<Album> resolve(dynamic id, {bool forceRefresh = false}) async {
     if (!_vault.containsKey(id) || forceRefresh) {
       _vault[id] = Album.fromJson(await get('albums/$id'));
     }
