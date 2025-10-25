@@ -13,7 +13,7 @@ ThemeData themeData(BuildContext context) {
       space: 0,
       thickness: .5,
     ),
-    tabBarTheme: TabBarTheme(
+    tabBarTheme: TabBarThemeData(
       labelColor: Colors.white,
       unselectedLabelColor: Colors.white54,
       indicatorColor: AppColors.highlight,
@@ -195,7 +195,7 @@ ThemeData themeData(BuildContext context) {
       ),
     ),
 
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       elevation: 0,
