@@ -9,8 +9,13 @@ import 'package:flutter_html/flutter_html.dart';
 
 class LyricsPane extends StatefulWidget {
   final Song song;
+  final ScrollController? parentScrollController;
 
-  LyricsPane({Key? key, required this.song}) : super(key: key);
+  LyricsPane({
+    Key? key,
+    required this.song,
+    this.parentScrollController,
+  }) : super(key: key);
 
   @override
   State<LyricsPane> createState() => _LyricsPaneState();
@@ -21,6 +26,7 @@ class _LyricsPaneState extends State<LyricsPane> {
   int _currentLineIndex = -1;
   StreamSubscription<Duration>? _positionSubscription;
   bool _isSyncedLyrics = false;
+  final List<GlobalKey> _lineKeys = [];
 
   @override
   void initState() {
@@ -59,6 +65,12 @@ class _LyricsPaneState extends State<LyricsPane> {
       _lrcLines = LrcParser.parse(lyrics);
       if (_lrcLines.isEmpty) {
         _isSyncedLyrics = false;
+      } else {
+        // Initialize GlobalKeys for each line
+        _lineKeys.clear();
+        for (int i = 0; i < _lrcLines.length; i++) {
+          _lineKeys.add(GlobalKey());
+        }
       }
     }
   }
@@ -85,9 +97,38 @@ class _LyricsPaneState extends State<LyricsPane> {
   }
 
   void _scrollToCurrentLine() {
-    // Auto-scrolling is disabled since the ListView is nested in a SingleChildScrollView
-    // The parent scroll view controls scrolling, so we can't scroll to the current line automatically
-    // TODO: Pass parent ScrollController to enable auto-scrolling
+    if (_currentLineIndex < 0 ||
+        _currentLineIndex >= _lineKeys.length ||
+        widget.parentScrollController == null ||
+        !widget.parentScrollController!.hasClients) {
+      return;
+    }
+
+    final currentKey = _lineKeys[_currentLineIndex];
+    final context = currentKey.currentContext;
+
+    if (context != null) {
+      final RenderBox renderBox = context.findRenderObject() as RenderBox;
+      final position = renderBox.localToGlobal(Offset.zero);
+      final size = renderBox.size;
+
+      final scrollController = widget.parentScrollController!;
+      final viewportHeight = scrollController.position.viewportDimension;
+      final currentScrollOffset = scrollController.offset;
+
+      final targetOffset =
+          currentScrollOffset + position.dy - (viewportHeight / 2) + (size.height / 2);
+
+      final minScrollExtent = scrollController.position.minScrollExtent;
+      final maxScrollExtent = scrollController.position.maxScrollExtent;
+      final clampedOffset = targetOffset.clamp(minScrollExtent, maxScrollExtent);
+
+      scrollController.animateTo(
+        clampedOffset,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   @override
@@ -118,6 +159,7 @@ class _LyricsPaneState extends State<LyricsPane> {
       itemBuilder: (context, index) {
         final isActive = index == _currentLineIndex;
         return Padding(
+          key: _lineKeys[index],
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: AnimatedDefaultTextStyle(
             duration: const Duration(milliseconds: 300),

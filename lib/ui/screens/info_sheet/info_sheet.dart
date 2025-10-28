@@ -64,7 +64,10 @@ class _InfoSheetState extends State<InfoSheet> {
             body: TabBarView(
               children: [
                 if (widget.playable is Song)
-                  wrapTabPane(LyricsPane(song: widget.playable as Song)),
+                  wrapTabPane(LyricsPane(
+                    song: widget.playable as Song,
+                    parentScrollController: widget.scroller,
+                  )),
                 if (widget.playable is Song)
                   wrapTabPane(ArtistInfoPane(song: widget.playable as Song)),
                 if (widget.playable is Song)
