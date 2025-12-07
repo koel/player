@@ -59,17 +59,17 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
-  audio_service: cab6c1a0eaf01b5a35b567e11fa67d3cc1956910
-  audio_session: 19e9480dbdd4e5f6c4543826b2e8b0e4ab6145fe
-  connectivity_plus: bf0076dd84a130856aa636df1c71ccaff908fa1d
-  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  just_audio: a42c63806f16995daf5b219ae1d679deb76e6a79
-  native_qr: 2a3151f33e6c69d4320fc5c5f24848200c1aa4fa
-  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
+  audio_service: aa99a6ba2ae7565996015322b0bb024e1d25c6fd
+  audio_session: 9bb7f6c970f21241b19f5a3658097ae459681ba0
+  connectivity_plus: 481668c94744c30c53b8895afb39159d1e619bdf
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  just_audio: 4e391f57b79cad2b0674030a00453ca5ce817eed
+  native_qr: 6480ec3073288367c0697f8719791449d497ef72
+  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   ReachabilitySwift: 32793e867593cfc1177f5d16491e3a197d2fccda
-  sqflite_darwin: 5a7236e3b501866c1c9befc6771dfd73ffb8702d
-  url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
+  sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
+  url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
 
-PODFILE CHECKSUM: e3f29c7ff5542cfd5274ac2c7e8374a7eab80a0c
+PODFILE CHECKSUM: 433c4338a9bb67f1aca7498f08b8af1b7791a88e
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.16.2
