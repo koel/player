@@ -70,7 +70,7 @@ class PlaylistProvider with ChangeNotifier, StreamSubscriber {
   }
 
   Future<Playlist> create({required String name}) async {
-    final json = await post('playlist', data: {
+    final json = await post('playlists', data: {
       'name': name,
     });
 
