@@ -10,23 +10,33 @@ class LrcParser {
     if (lyrics.isEmpty) return [];
 
     final List<LrcLine> lines = [];
-    // Match [mm:ss.xx] or [mm:ss.xxx] format
-    final RegExp lrcRegex = RegExp(r'\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)');
+    // Match [m:ss.xx] or [mm:ss.xxx] format (1-2 digit minutes)
+    final RegExp tagRegex = RegExp(r'\[(\d{1,2}):(\d{2})\.(\d{2,3})\]');
 
     for (final line in lyrics.split('\n')) {
-      final match = lrcRegex.firstMatch(line);
-      if (match != null) {
+      final matches = tagRegex.allMatches(line);
+      if (matches.isEmpty) continue;
+
+      // The text is everything after the last tag
+      final lastMatch = matches.last;
+      final text = line.substring(lastMatch.end).trim();
+
+      if (text.isEmpty) continue;
+
+      for (final match in matches) {
         final minutes = int.parse(match.group(1)!);
         final seconds = int.parse(match.group(2)!);
-        final centiseconds = int.parse(
-          match.group(3)!.padRight(2, '0').substring(0, 2),
-        );
-        final time = minutes * 60.0 + seconds + centiseconds / 100.0;
-        final text = match.group(4)!.trim();
+        final fracStr = match.group(3)!;
+        final double frac;
 
-        if (text.isNotEmpty) {
-          lines.add(LrcLine(time: time, text: text));
+        if (fracStr.length == 3) {
+          frac = int.parse(fracStr) / 1000.0;
+        } else {
+          frac = int.parse(fracStr) / 100.0;
         }
+
+        final time = minutes * 60.0 + seconds + frac;
+        lines.add(LrcLine(time: time, text: text));
       }
     }
 
@@ -36,6 +46,6 @@ class LrcParser {
   }
 
   static bool hasSyncedLyrics(String lyrics) {
-    return RegExp(r'\[\d{2}:\d{2}\.\d{2,3}\]').hasMatch(lyrics);
+    return RegExp(r'\[\d{1,2}:\d{2}\.\d{2,3}\]').hasMatch(lyrics);
   }
 }

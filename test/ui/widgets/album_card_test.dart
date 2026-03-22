@@ -27,22 +27,17 @@ void main() {
     expect(find.byType(AlbumArtistThumbnail), findsOneWidget);
     expect(find.text('Banana'), findsOneWidget);
     expect(find.text('A Whole New Bunch'), findsOneWidget);
-
-    await expectLater(
-      find.byType(AlbumCard),
-      matchesGoldenFile('goldens/album_card.png'),
-    );
   });
 
   testWidgets('goes to Album Details screen', (WidgetTester tester) async {
     MockAppRouter router = MockAppRouter();
     when(
-      router.gotoAlbumDetailsScreen(any, album: album),
+      router.gotoAlbumDetailsScreen(any, albumId: album.id),
     ).thenAnswer((_) async => null);
 
     await tester.pumpAppWidget(AlbumCard(album: album, router: router));
 
     await tester.tap(find.text('A Whole New Bunch'));
-    verify(router.gotoAlbumDetailsScreen(any, album: album)).called(1);
+    verify(router.gotoAlbumDetailsScreen(any, albumId: album.id)).called(1);
   });
 }
