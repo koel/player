@@ -29,6 +29,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
   PlaybackState? _state;
   Playable? _playable;
   late PlayableProvider _playableProvider;
+  var _dragOffset = 0.0;
 
   @override
   void initState() {
@@ -50,6 +51,24 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
   void dispose() {
     unsubscribeAll();
     super.dispose();
+  }
+
+  void _onVerticalDragUpdate(DragUpdateDetails details) {
+    if (details.delta.dy < 0 && _dragOffset <= 0) return;
+    setState(() {
+      _dragOffset = (_dragOffset + details.delta.dy).clamp(0.0, double.infinity);
+    });
+  }
+
+  void _onVerticalDragEnd(DragEndDetails details) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final velocity = details.primaryVelocity ?? 0;
+
+    if (_dragOffset > screenHeight * 0.2 || velocity > 800) {
+      Navigator.of(context).pop();
+    } else {
+      setState(() => _dragOffset = 0);
+    }
   }
 
   @override
@@ -110,7 +129,22 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
       ],
     );
 
-    return Stack(
+    return GestureDetector(
+      onVerticalDragUpdate: _onVerticalDragUpdate,
+      onVerticalDragEnd: _onVerticalDragEnd,
+      child: AnimatedContainer(
+        duration: _dragOffset == 0
+            ? const Duration(milliseconds: 200)
+            : Duration.zero,
+        curve: Curves.easeOut,
+        transform: Matrix4.translationValues(0, _dragOffset, 0),
+        child: ClipRRect(
+          borderRadius: Theme.of(context).platform == TargetPlatform.iOS
+              ? const BorderRadius.vertical(top: Radius.circular(38.5))
+              : BorderRadius.zero,
+          child: Material(
+            type: MaterialType.transparency,
+            child: Stack(
       children: <Widget>[
         const GradientDecoratedContainer(),
         frostBackground,
@@ -125,6 +159,17 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
+                // Drag handle
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.white30,
+                      borderRadius: BorderRadius.circular(2.5),
+                    ),
+                  ),
+                ),
                 thumbnail,
                 infoPane,
                 const AudioControls(),
@@ -166,6 +211,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           ),
         ),
       ],
+    ),
+    ),
+    ),
+    ),
     );
   }
 }

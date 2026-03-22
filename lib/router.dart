@@ -1,5 +1,6 @@
 import 'package:app/models/models.dart';
 import 'package:app/ui/screens/screens.dart';
+import 'package:app/ui/widgets/now_playing_page_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -60,17 +61,8 @@ class AppRouter {
   }
 
   Future<void> openNowPlayingScreen(BuildContext context) async {
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return Container(
-          height: MediaQuery.of(context).size.height,
-          child: const NowPlayingScreen(),
-        );
-      },
+    await Navigator.of(context, rootNavigator: true).push(
+      NowPlayingPageRoute(builder: (_) => const NowPlayingScreen()),
     );
   }
 

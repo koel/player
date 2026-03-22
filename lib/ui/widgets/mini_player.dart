@@ -226,7 +226,7 @@ class _MiniPlayerProgressBarState extends State<MiniPlayerProgressBar>
 
     subscribe(audioHandler.mediaItem.listen((mediaItem) {
       if (mediaItem != null && mediaItem.duration != null) {
-        setState(() => _duration = mediaItem.duration ?? Duration.zero);
+        setState(() => _duration = mediaItem.duration!);
       }
     }));
   }
@@ -239,7 +239,10 @@ class _MiniPlayerProgressBarState extends State<MiniPlayerProgressBar>
 
   @override
   Widget build(BuildContext context) {
-    if (_duration == Duration.zero) return SizedBox.shrink();
+    if (_duration.inMilliseconds == 0) return SizedBox.shrink();
+
+    final progress = (_position.inMilliseconds / _duration.inMilliseconds)
+        .clamp(0.0, 1.0);
 
     return Container(
       width: double.infinity,
@@ -247,7 +250,7 @@ class _MiniPlayerProgressBarState extends State<MiniPlayerProgressBar>
       height: 1.0,
       color: Colors.white12,
       child: FractionallySizedBox(
-        widthFactor: _position.inSeconds / _duration.inSeconds,
+        widthFactor: progress,
         child: Container(color: Colors.white),
       ),
     );
