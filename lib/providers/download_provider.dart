@@ -111,24 +111,22 @@ class DownloadProvider with StreamSubscriber {
     var response = await request.close();
     List<int> downloadData = [];
 
-    response.listen((data) async {
+    await response.forEach((data) {
       downloadData.addAll(data);
-    }, onDone: () {
-      file.writeAsBytesSync(downloadData);
-      final download = Download(playable: playable, path: file.path);
-      _playableStorage.write(
-        serializedPlayableKey,
-        playables
-          ..add(playable)
-          ..toSet()
-          ..toList(),
-      );
-
-      _playableDownloaded.add(download);
-      _downloads.add(download);
-    }, onError: (error) {
-      print(error);
     });
+
+    file.writeAsBytesSync(downloadData);
+    final download = Download(playable: playable, path: file.path);
+    _playableStorage.write(
+      serializedPlayableKey,
+      playables
+        ..add(playable)
+        ..toSet()
+        ..toList(),
+    );
+
+    _playableDownloaded.add(download);
+    _downloads.add(download);
   }
 
   Download? getForPlayable(Playable playable) {

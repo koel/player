@@ -68,11 +68,14 @@ class _PlayableCacheIconState extends State<PlayableCacheIcon>
 
   Future<void> _download() async {
     setState(() => _downloading = true);
-    await downloadProvider.download(playable: widget.playable);
-    setState(() {
-      _downloading = false;
-      _downloaded = true;
-    });
+    try {
+      await downloadProvider.download(playable: widget.playable);
+      setState(() => _downloaded = true);
+    } catch (e) {
+      print(e);
+    } finally {
+      setState(() => _downloading = false);
+    }
   }
 
   @override
