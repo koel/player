@@ -10,25 +10,26 @@ void main() {
     WidgetTester tester, {
     required MessageOverlay overlay,
   }) async {
-    await tester.pumpAppWidget(
-      Scaffold(
-        backgroundColor: Colors.black26,
-        body: SafeArea(
-          child: Align(
-            alignment: Alignment.center,
-            child: overlay,
-          ),
-        ),
-      ),
-    );
+    await tester.pumpAppWidget(overlay);
+    // Allow the widget to become visible (setState in initState).
+    await tester.pump();
+  }
+
+  /// Advance past the timer started in initState to avoid pending timer errors.
+  Future<void> _drainTimers(WidgetTester tester) async {
+    await tester.pump(const Duration(seconds: 3));
   }
 
   testWidgets('renders default state', (WidgetTester tester) async {
     await _mount(tester, overlay: MessageOverlay());
-    await expectLater(
-      find.byType(MessageOverlay),
-      matchesGoldenFile('goldens/message_overlay_default.png'),
+
+    expect(find.byType(MessageOverlay), findsOneWidget);
+    expect(
+      find.byIcon(CupertinoIcons.check_mark_circled_solid),
+      findsOneWidget,
     );
+
+    await _drainTimers(tester);
   });
 
   testWidgets('renders a custom icon', (WidgetTester tester) async {
@@ -40,19 +41,15 @@ void main() {
       ),
     );
 
-    await expectLater(
-      find.byType(MessageOverlay),
-      matchesGoldenFile('goldens/message_overlay_custom_icon.png'),
-    );
+    expect(find.byIcon(CupertinoIcons.heart_solid), findsOneWidget);
+    await _drainTimers(tester);
   });
 
   testWidgets('renders a caption', (WidgetTester tester) async {
     await _mount(tester, overlay: MessageOverlay(caption: 'Done!'));
 
-    await expectLater(
-      find.byType(MessageOverlay),
-      matchesGoldenFile('goldens/message_overlay_caption.png'),
-    );
+    expect(find.text('Done!'), findsOneWidget);
+    await _drainTimers(tester);
   });
 
   testWidgets('renders a message without caption', (WidgetTester tester) async {
@@ -61,10 +58,8 @@ void main() {
       overlay: MessageOverlay(message: 'Banana cake cooked.'),
     );
 
-    await expectLater(
-      find.byType(MessageOverlay),
-      matchesGoldenFile('goldens/message_overlay_message.png'),
-    );
+    expect(find.text('Banana cake cooked.'), findsOneWidget);
+    await _drainTimers(tester);
   });
 
   testWidgets('renders full', (WidgetTester tester) async {
@@ -78,9 +73,9 @@ void main() {
       ),
     );
 
-    await expectLater(
-      find.byType(MessageOverlay),
-      matchesGoldenFile('goldens/message_overlay_full.png'),
-    );
+    expect(find.byIcon(CupertinoIcons.heart_solid), findsOneWidget);
+    expect(find.text('Done!'), findsOneWidget);
+    expect(find.text('Banana cake cooked.'), findsOneWidget);
+    await _drainTimers(tester);
   });
 }

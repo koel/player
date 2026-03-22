@@ -62,7 +62,6 @@ dependencies:
   faker: any
   ulid: ^2.0.1
 dev_dependencies:
-  golden_toolkit: ^0.12.0
   fake_async: ^1.2.0
   mockito: ^5.0.12
   flutter_test:

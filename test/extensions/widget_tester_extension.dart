@@ -1,7 +1,6 @@
 import 'package:app/ui/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 
 extension WidgetTesterExtension on WidgetTester {
   Future<void> pumpAppWidget(
@@ -10,23 +9,22 @@ extension WidgetTesterExtension on WidgetTester {
     NavigatorObserver? navigatorObserver,
     Map<String, Widget Function(BuildContext)>? routes,
   }) async {
-    await pumpWidgetBuilder(
-      widget,
-      wrapper: (Widget widget) {
-        return Builder(
-          builder: (BuildContext context) {
-            return MaterialApp(
-              theme: themeData(context).copyWith(platform: TargetPlatform.iOS),
-              navigatorObservers: [
-                if (navigatorObserver != null) navigatorObserver,
-              ],
-              home: Material(child: widget),
-              routes: routes ?? {},
-            );
-          },
-        );
-      },
-      surfaceSize: surfaceSize,
+    await binding.setSurfaceSize(surfaceSize);
+    addTearDown(() => binding.setSurfaceSize(null));
+
+    await pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          return MaterialApp(
+            theme: themeData(context).copyWith(platform: TargetPlatform.iOS),
+            navigatorObservers: [
+              if (navigatorObserver != null) navigatorObserver,
+            ],
+            home: Material(child: widget),
+            routes: routes ?? {},
+          );
+        },
+      ),
     );
   }
 }

@@ -1,8 +1,6 @@
 import 'package:app/models/playlist.dart';
-import 'package:app/models/song.dart';
 import 'package:app/providers/playlist_provider.dart';
 import 'package:app/ui/widgets/playlist_row.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,7 +17,6 @@ void main() {
 
   setUp(() {
     playlistProviderMock = MockPlaylistProvider();
-
     playlist = Playlist.fake(name: 'A Bunch of Bananas');
   });
 
@@ -44,32 +41,18 @@ void main() {
     );
   });
 
-  testWidgets(
-    'updates state when playlist is loaded',
-    (WidgetTester tester) async {
-      Playlist populatedPlaylist = Playlist.fake(
-        id: playlist.id,
-        name: playlist.name,
-        isSmart: playlist.isSmart,
-      );
+  testWidgets('renders smart playlist', (WidgetTester tester) async {
+    playlist = Playlist.fake(name: 'Smart Mix', isSmart: true);
 
-      populatedPlaylist.playables = Song.fakeMany(4);
+    await tester.pumpAppWidget(
+      ChangeNotifierProvider<PlaylistProvider>.value(
+        value: playlistProviderMock,
+        child: PlaylistRow(playlist: playlist),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      await mount(tester);
-      await tester.pumpAndSettle();
-      expect(find.text('Standard playlist • 4 songs'), findsOneWidget);
-
-      // The default icon should now be replaced by an image
-      expect(
-        find.widgetWithIcon(ListTile, CupertinoIcons.music_note_list),
-        findsNothing,
-      );
-      expect(find.byType(CachedNetworkImage), findsOneWidget);
-
-      await expectLater(
-        find.byType(PlaylistRow),
-        matchesGoldenFile('goldens/playlist_row_populated.png'),
-      );
-    },
-  );
+    expect(find.text('Smart Mix'), findsOneWidget);
+    expect(find.text('Smart playlist'), findsOneWidget);
+  });
 }

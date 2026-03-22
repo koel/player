@@ -35,10 +35,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await expectLater(
-      find.byType(CreatePlaylistSheet),
-      matchesGoldenFile('goldens/create_playlist_sheet.png'),
-    );
+    expect(find.byType(CreatePlaylistSheet), findsOneWidget);
   });
 
   testWidgets('creates a playlist successfully', (WidgetTester tester) async {

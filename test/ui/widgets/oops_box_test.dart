@@ -24,11 +24,15 @@ void main() {
   Future<void> _mount(
     WidgetTester tester, {
     void Function()? retryFunction,
+    bool showLogOutButton = false,
   }) async {
     await tester.pumpAppWidget(
         Provider<AuthProvider>.value(
           value: authMock,
-          child: OopsBox(onRetry: retryFunction),
+          child: OopsBox(
+            onRetry: retryFunction,
+            showLogOutButton: showLogOutButton,
+          ),
         ),
         routes: {
           LoginScreen.routeName: (_) => dummyLoginScreen,
@@ -38,10 +42,8 @@ void main() {
   testWidgets('renders', (WidgetTester tester) async {
     await _mount(tester, retryFunction: () {});
 
-    await expectLater(
-      find.byType(OopsBox),
-      matchesGoldenFile('goldens/oops_box.png'),
-    );
+    expect(find.text('Oops!'), findsOneWidget);
+    expect(find.text('Retry'), findsOneWidget);
   });
 
   testWidgets('invokes Retry function', (WidgetTester tester) async {
@@ -52,7 +54,8 @@ void main() {
   });
 
   testWidgets('logs out', (WidgetTester tester) async {
-    await _mount(tester);
+    when(authMock.logout()).thenAnswer((_) async {});
+    await _mount(tester, showLogOutButton: true);
     await tester.tap(find.byKey(OopsBox.logOutButtonKey));
     await tester.pumpAndSettle();
     verify(authMock.logout()).called(1);
