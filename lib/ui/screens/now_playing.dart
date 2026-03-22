@@ -147,9 +147,11 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                           ),
                         ),
                         IconButton(
-                          onPressed: () =>
-                              Navigator.of(context, rootNavigator: true)
-                                  .pushNamed(QueueScreen.routeName),
+                          onPressed: () {
+                            FocusManager.instance.primaryFocus?.unfocus();
+                            Navigator.of(context, rootNavigator: true)
+                                .pushNamed(QueueScreen.routeName);
+                          },
                           icon: Icon(
                             CupertinoIcons.list_number,
                             color: bottomIconColor,
