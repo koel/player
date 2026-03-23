@@ -6,6 +6,9 @@ import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:app/values/values.dart';
+import 'dart:ui';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
@@ -62,8 +65,33 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
             final playables =
                 snapshot.data == null ? <Playable>[] : snapshot.requireData;
 
-            if (_cover.isEmpty && playables.isNotEmpty) {
-              _cover = CoverImageStack(playables: playables);
+            Widget coverWidget;
+
+            if (playlist.hasCover) {
+              coverWidget = DecoratedBox(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: CachedNetworkImageProvider(playlist.cover!),
+                    fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
+                  ),
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(16),
+                  ),
+                  boxShadow: const <BoxShadow>[
+                    BoxShadow(
+                      color: Colors.black38,
+                      blurRadius: 10.0,
+                      offset: Offset(0, 6),
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              if (_cover.isEmpty && playables.isNotEmpty) {
+                _cover = CoverImageStack(playables: playables);
+              }
+              coverWidget = _cover;
             }
 
             final displayedPlayables =
@@ -78,7 +106,29 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                 slivers: <Widget>[
                   AppBar(
                     headingText: playlist.name,
-                    coverImage: _cover,
+                    coverImage: coverWidget,
+                    backgroundImage: playlist.hasCover
+                        ? SizedBox.square(
+                            dimension: double.infinity,
+                            child: ImageFiltered(
+                              imageFilter: ImageFilter.blur(
+                                sigmaX: 20.0,
+                                sigmaY: 20.0,
+                              ),
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                    image: CachedNetworkImageProvider(
+                                      playlist.cover!,
+                                    ),
+                                    fit: BoxFit.cover,
+                                    alignment: Alignment.topCenter,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : null,
                     actions: [
                       SortButton(
                         fields: ['title', 'artist_name', 'created_at'],

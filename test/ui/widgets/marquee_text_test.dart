@@ -49,26 +49,66 @@ void main() {
       expect(find.text('Short'), findsOneWidget);
     });
 
-    testWidgets('uses SingleChildScrollView internally', (tester) async {
+    testWidgets('short text has no fade effect', (tester) async {
       await tester.pumpWidget(const MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 400,
+            child: MarqueeText(text: 'Short'),
+          ),
+        ),
+      ));
+
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.byType(SingleChildScrollView), findsOneWidget);
+      expect(find.byType(ShaderMask), findsNothing);
+    });
+
+    testWidgets('overflowing text shows fade effect', (tester) async {
+      await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: SizedBox(
             width: 50,
             child: MarqueeText(
-              text: 'A very long text that should overflow the container',
-              pauseDuration: Duration.zero,
-              scrollDuration: Duration(milliseconds: 50),
+              text: 'This is a very long text that will definitely overflow '
+                  'the tiny 50px container and trigger the marquee',
+              pauseDuration: const Duration(seconds: 10),
+              scrollDuration: const Duration(seconds: 10),
             ),
           ),
         ),
       ));
 
+      // Pump twice: once for post-frame callback, once for setState rebuild
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.byType(ShaderMask), findsOneWidget);
       expect(find.byType(SingleChildScrollView), findsOneWidget);
 
-      // Drain animation timers
-      await tester.pump(const Duration(seconds: 1));
+      // Replace widget tree to dispose and cancel timers
       await tester.pumpWidget(const SizedBox());
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 20));
+    });
+
+    testWidgets('passes textAlign to Text widget', (tester) async {
+      await tester.pumpWidget(const MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 400,
+            child: MarqueeText(
+              text: 'Centered',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ));
+
+      await tester.pump();
+      final text = tester.widget<Text>(find.text('Centered'));
+      expect(text.textAlign, TextAlign.center);
     });
   });
 }

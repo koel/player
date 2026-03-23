@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class MarqueeText extends StatefulWidget {
   final String text;
   final TextStyle? style;
+  final TextAlign? textAlign;
   final Duration pauseDuration;
   final Duration scrollDuration;
 
@@ -10,6 +11,7 @@ class MarqueeText extends StatefulWidget {
     Key? key,
     required this.text,
     this.style,
+    this.textAlign,
     this.pauseDuration = const Duration(seconds: 2),
     this.scrollDuration = const Duration(seconds: 4),
   }) : super(key: key);
@@ -103,6 +105,7 @@ class _MarqueeTextState extends State<MarqueeText>
         widget.text,
         maxLines: 1,
         softWrap: false,
+        textAlign: widget.textAlign,
         style: widget.style,
       ),
     );

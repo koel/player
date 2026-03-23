@@ -52,12 +52,10 @@ class AppBar extends StatelessWidget {
             horizontal: 16,
             vertical: 12,
           ),
-          title: SizedBox(
-            width: double.infinity,
-            child: MarqueeText(
-              text: headingText,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
+          title: MarqueeText(
+            text: headingText,
+            style: Theme.of(context).textTheme.headlineSmall,
+            textAlign: TextAlign.center,
           ),
           background: Stack(
             children: <Widget>[
