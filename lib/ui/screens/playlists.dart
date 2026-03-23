@@ -423,7 +423,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
         },
         background: Container(
           alignment: AlignmentDirectional.centerStart,
-          color: AppColors.highlight,
+          color: Colors.green,
           child: const Padding(
             padding: EdgeInsets.only(left: 28),
             child: Icon(CupertinoIcons.text_badge_plus),

@@ -146,10 +146,17 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                           (BuildContext context, int index) {
                             if (index >= provider.albums.length) return null;
 
-                            return AlbumRow(
-                              album: provider.albums[index],
-                              router: widget.router,
-                              sortField: _albumProvider.sortField,
+                            final album = provider.albums[index];
+                            return SwipeToQueueDismissible(
+                              dismissibleKey: ValueKey(album.id),
+                              fetchSongs: () => context
+                                  .read<PlayableProvider>()
+                                  .fetchForAlbum(album.id),
+                              child: AlbumRow(
+                                album: album,
+                                router: widget.router,
+                                sortField: _albumProvider.sortField,
+                              ),
                             );
                           },
                           childCount: provider.albums.length,
