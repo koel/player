@@ -15,10 +15,12 @@ class SortButton extends StatelessWidget {
     'track': 'Track number',
     'disc': 'Disc number',
     'title': 'Title',
+    'name': 'Name',
     'album_name': 'Album or podcast',
-    'artist_name': 'Artist or author',
+    'artist_name': 'Artist',
     'created_at': 'Recently added',
     'length': 'Length',
+    'year': 'Year',
   };
 
   SortButton({

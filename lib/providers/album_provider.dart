@@ -1,3 +1,4 @@
+import 'package:app/enums.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/auth_provider.dart';
@@ -8,6 +9,22 @@ class AlbumProvider with ChangeNotifier, StreamSubscriber {
   var albums = <Album>[];
   final _vault = <dynamic, Album>{};
   var _page = 1;
+  var _sortField = 'name';
+  var _sortOrder = SortOrder.asc;
+
+  String get sortField => _sortField;
+  SortOrder get sortOrder => _sortOrder;
+
+  set sortField(String field) {
+    if (field != _sortField) {
+      _sortOrder = SortOrder.asc;
+    }
+    _sortField = field;
+  }
+
+  set sortOrder(SortOrder order) {
+    _sortOrder = order;
+  }
 
   Album? byId(dynamic id) => _vault[id];
 
@@ -68,7 +85,9 @@ class AlbumProvider with ChangeNotifier, StreamSubscriber {
   }
 
   Future<void> paginate() async {
-    final res = await get('albums?page=$_page');
+    final res = await get(
+      'albums?page=$_page&sort=$_sortField&order=${_sortOrder.value}',
+    );
 
     final List<Album> _albums = (res['data'] as List)
         .map<Album>((album) => Album.fromJson(album))
