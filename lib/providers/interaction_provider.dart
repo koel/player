@@ -30,7 +30,6 @@ class InteractionProvider with ChangeNotifier, StreamSubscriber {
 
         if (playable == null) return; // should never happen
 
-        _recentlyPlayedProvider.add(playable);
         playable.playCountRegistered = false;
       }
     }));
@@ -43,6 +42,7 @@ class InteractionProvider with ChangeNotifier, StreamSubscriber {
           !song.playCountRegistered &&
           duration.inSeconds / song.length > .25) {
         song.playCountRegistered = true;
+        _recentlyPlayedProvider.add(song);
         _registerPlayCount(playable: song);
       }
     }));

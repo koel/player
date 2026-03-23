@@ -8,6 +8,7 @@ class OverviewProvider with ChangeNotifier, StreamSubscriber {
   final PlayableProvider _playableProvider;
   final AlbumProvider _albumProvider;
   final ArtistProvider _artistProvider;
+  final RecentlyPlayedProvider _recentlyPlayedProvider;
 
   final mostPlayedSongs = <Playable>[];
   final recentlyAddedSongs = <Playable>[];
@@ -20,9 +21,11 @@ class OverviewProvider with ChangeNotifier, StreamSubscriber {
     required playableProvider,
     required albumProvider,
     required artistProvider,
+    required recentlyPlayedProvider,
   })  : _playableProvider = playableProvider,
         _albumProvider = albumProvider,
-        _artistProvider = artistProvider {
+        _artistProvider = artistProvider,
+        _recentlyPlayedProvider = recentlyPlayedProvider {
     subscribe(AuthProvider.userLoggedOutStream.listen((_) {
       mostPlayedSongs.clear();
       recentlyAddedSongs.clear();
@@ -57,6 +60,8 @@ class OverviewProvider with ChangeNotifier, StreamSubscriber {
       ..clear()
       ..addAll(
           _playableProvider.parseFromJson(response['recently_played_songs']));
+
+    _recentlyPlayedProvider.seed(recentlyPlayedSongs);
 
     final _mostPlayedAlbums = response['most_played_albums']
         .map<Album>((j) => Album.fromJson(j))
