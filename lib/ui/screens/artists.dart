@@ -5,6 +5,7 @@ import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/placeholders/artists_screen_placeholder.dart';
 import 'package:app/ui/widgets/widgets.dart';
+import 'package:app/values/values.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -101,9 +102,31 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
                   child: CustomScrollView(
                     controller: _scrollController,
                     slivers: [
-                      const CupertinoSliverNavigationBar(
+                      CupertinoSliverNavigationBar(
                         backgroundColor: AppColors.staticScreenHeaderBackground,
-                        largeTitle: LargeTitle(text: 'Artists'),
+                        largeTitle: const LargeTitle(text: 'Artists'),
+                        trailing: Transform.scale(
+                          scale: 0.8,
+                          alignment: Alignment.centerRight,
+                          child: SortButton(
+                            fields: const ['name', 'created_at'],
+                            currentField: _artistProvider.sortField,
+                            currentOrder: _artistProvider.sortOrder,
+                            onMenuItemSelected: (sortConfig) {
+                              setState(() {
+                                _artistProvider.sortField = sortConfig.field;
+                                _artistProvider.sortOrder = sortConfig.order;
+                              });
+
+                              _artistProvider.artists.clear();
+                              _artistProvider.refresh().then((_) {
+                                if (_scrollController.hasClients) {
+                                  _scrollController.jumpTo(0);
+                                }
+                              });
+                            },
+                          ),
+                        ),
                       ),
                       SliverList(
                         delegate: SliverChildBuilderDelegate((
