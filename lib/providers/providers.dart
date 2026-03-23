@@ -3,6 +3,7 @@ export 'artist_provider.dart';
 export 'auth_provider.dart';
 export 'data_provider.dart';
 export 'download_provider.dart';
+export 'download_sync_provider.dart';
 export 'favorite_provider.dart';
 export 'interaction_provider.dart';
 export 'media_info_provider.dart';
