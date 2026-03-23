@@ -93,13 +93,21 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
               if (_errored) return OopsBox(onRetry: fetchData);
             }
 
+            final showScrollbar = AlphabetScrollbar.shouldShow(
+              itemCount: provider.artists.length,
+              sortField: _artistProvider.sortField,
+              nameSortField: 'name',
+            );
+
             return CupertinoTheme(
               data: CupertinoThemeData(primaryColor: Colors.white),
               child: PullToRefresh(
                 onRefresh: _artistProvider.refresh,
                 child: ScrollsToTop(
                   scrollController: _scrollController,
-                  child: CustomScrollView(
+                  child: Stack(
+                    children: [
+                    CustomScrollView(
                     controller: _scrollController,
                     slivers: [
                       CupertinoSliverNavigationBar(
@@ -128,17 +136,22 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
                           ),
                         ),
                       ),
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate((
-                          BuildContext context,
-                          int index,
-                        ) {
-                          if (index >= provider.artists.length) return null;
-                          return ArtistRow(
-                            artist: provider.artists[index],
-                            router: widget.router,
-                          );
-                        }, childCount: provider.artists.length),
+                      SliverPadding(
+                        padding: EdgeInsets.only(
+                          right: showScrollbar ? alphabetScrollbarWidth : 0,
+                        ),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate((
+                            BuildContext context,
+                            int index,
+                          ) {
+                            if (index >= provider.artists.length) return null;
+                            return ArtistRow(
+                              artist: provider.artists[index],
+                              router: widget.router,
+                            );
+                          }, childCount: provider.artists.length),
+                        ),
                       ),
                       _loading
                           ? SliverToBoxAdapter(
@@ -150,6 +163,15 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
                           : const SliverToBoxAdapter(),
                       const BottomSpace(),
                     ],
+                  ),
+                  if (showScrollbar)
+                    AlphabetScrollbar(
+                      labels: provider.artists.map((a) => a.name).toList(),
+                      scrollController: _scrollController,
+                      itemCount: provider.artists.length,
+                      scrollOffset: 100,
+                    ),
+                  ],
                   ),
                 ),
               ),

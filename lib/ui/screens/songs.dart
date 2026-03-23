@@ -119,7 +119,9 @@ class _SongsScreenState extends State<SongsScreen> {
                   displayedSongs.$sort(_paginationConfig.sortConfig);
             }
 
-            return CustomScrollView(
+            return Stack(
+              children: [
+              CustomScrollView(
               controller: _scrollController,
               slivers: [
                 AppBar(
@@ -176,6 +178,15 @@ class _SongsScreenState extends State<SongsScreen> {
                     : const SliverToBoxAdapter(),
                 const BottomSpace(),
               ],
+            ),
+            if (AlphabetScrollbar.shouldShow(itemCount: displayedSongs.length, sortField: _paginationConfig.sortField, nameSortField: 'title'))
+              AlphabetScrollbar(
+                labels: displayedSongs.map((s) => s.title).toList(),
+                scrollController: _scrollController,
+                itemCount: displayedSongs.length,
+                scrollOffset: 250,
+              ),
+            ],
             );
           },
         ),

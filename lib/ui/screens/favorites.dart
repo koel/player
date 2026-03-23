@@ -24,6 +24,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   var _loading = false;
   var _searchQuery = '';
   var cover = CoverImageStack(playables: []);
+  final _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -126,7 +127,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     : makeRequest(forceRefresh: true);
               },
               child: ScrollsToTop(
-                child: CustomScrollView(
+                scrollController: _scrollController,
+                child: Stack(
+                  children: [
+                  CustomScrollView(
+                  controller: _scrollController,
                   slivers: provider.playables.isEmpty
                       ? <Widget>[emptyWidget]
                       : <Widget>[
@@ -161,6 +166,15 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                           ),
                           const BottomSpace(),
                         ],
+                ),
+                if (AlphabetScrollbar.shouldShow(itemCount: songs.length, sortField: sortConfig.field, nameSortField: 'title'))
+                  AlphabetScrollbar(
+                    labels: songs.map((s) => s.title).toList(),
+                    scrollController: _scrollController,
+                    itemCount: songs.length,
+                    scrollOffset: 250,
+                  ),
+                ],
                 ),
               ),
             );

@@ -94,13 +94,21 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
               if (_errored) return OopsBox(onRetry: fetchData);
             }
 
+            final showScrollbar = AlphabetScrollbar.shouldShow(
+              itemCount: provider.albums.length,
+              sortField: _albumProvider.sortField,
+              nameSortField: 'name',
+            );
+
             return CupertinoTheme(
               data: const CupertinoThemeData(primaryColor: Colors.white),
               child: PullToRefresh(
                 onRefresh: _albumProvider.refresh,
                 child: ScrollsToTop(
                   scrollController: _scrollController,
-                  child: CustomScrollView(
+                  child: Stack(
+                    children: [
+                    CustomScrollView(
                     controller: _scrollController,
                     slivers: <Widget>[
                       CupertinoSliverNavigationBar(
@@ -129,7 +137,11 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                         ),
                         ),
                       ),
-                      SliverList(
+                      SliverPadding(
+                        padding: EdgeInsets.only(
+                          right: showScrollbar ? alphabetScrollbarWidth : 0,
+                        ),
+                        sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (BuildContext context, int index) {
                             if (index >= provider.albums.length) return null;
@@ -142,7 +154,7 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                           },
                           childCount: provider.albums.length,
                         ),
-                      ),
+                      )),
                       _loading
                           ? SliverToBoxAdapter(
                               child: Container(
@@ -153,6 +165,15 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                           : const SliverToBoxAdapter(),
                       const BottomSpace(),
                     ],
+                  ),
+                  if (showScrollbar)
+                    AlphabetScrollbar(
+                      labels: provider.albums.map((a) => a.name).toList(),
+                      scrollController: _scrollController,
+                      itemCount: provider.albums.length,
+                      scrollOffset: 100,
+                    ),
+                  ],
                   ),
                 ),
               ),
