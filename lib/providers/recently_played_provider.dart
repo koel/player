@@ -32,9 +32,13 @@ class RecentlyPlayedProvider with ChangeNotifier, StreamSubscriber {
     return playables;
   }
 
-  void add(Playable playable) {
-    if (!_loaded) return;
+  void seed(List<Playable> items) {
+    if (playables.isEmpty) {
+      playables = List.from(items);
+    }
+  }
 
+  void add(Playable playable) {
     playables.remove(playable);
     playables.insert(0, playable);
     notifyListeners();

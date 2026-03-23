@@ -65,6 +65,7 @@ List<SingleChildWidget> _providers = [
       playableProvider: context.read<PlayableProvider>(),
       albumProvider: context.read<AlbumProvider>(),
       artistProvider: context.read<ArtistProvider>(),
+      recentlyPlayedProvider: context.read<RecentlyPlayedProvider>(),
     ),
   ),
   ChangeNotifierProvider(create: (context) => PodcastProvider()),
