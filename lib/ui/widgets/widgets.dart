@@ -8,6 +8,7 @@ export 'decorated_image_box.dart';
 export 'frosted_glass_background.dart';
 export 'gradient_decorated_container.dart';
 export 'horizontal_card_scroller.dart';
+export 'marquee_text.dart';
 export 'message_overlay.dart';
 export 'mini_player.dart';
 export 'now_playing/audio_controls.dart';
