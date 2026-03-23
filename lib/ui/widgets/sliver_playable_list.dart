@@ -4,7 +4,6 @@ import 'package:app/models/models.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 
 class SliverPlayableList extends StatelessWidget {
   final List<Playable> playables;
@@ -25,52 +24,53 @@ class SliverPlayableList extends StatelessWidget {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (_, int index) {
-          return onDismissed == null
-              ? PlayableRow(
-                  playable: playables[index],
-                  listContext: listContext,
-                )
-              : Dismissible(
-                  direction: DismissDirection.horizontal,
-                  confirmDismiss: (direction) async {
-                    if (direction == DismissDirection.endToStart) {
-                      onDismissed?.call(playables[index]);
-                      return true;
-                    }
+          final canDismiss = onDismissed != null;
 
-                    await audioHandler.queueAfterCurrent(playables[index]);
+          return Dismissible(
+            direction: canDismiss
+                ? DismissDirection.horizontal
+                : DismissDirection.startToEnd,
+            confirmDismiss: (direction) async {
+              if (direction == DismissDirection.endToStart) {
+                onDismissed?.call(playables[index]);
+                return true;
+              }
 
-                    showOverlay(
-                      context,
-                      icon: CupertinoIcons.arrow_right_circle_fill,
-                      caption: 'Queued',
-                      message: 'To be played next.',
-                    );
+              await audioHandler.queueAfterCurrent(playables[index]);
 
-                    return false;
-                  },
-                  background: Container(
-                    alignment: AlignmentDirectional.centerStart,
-                    color: Colors.green,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 28),
-                      child: const Icon(LucideIcons.listPlus),
-                    ),
-                  ),
-                  secondaryBackground: Container(
+              showOverlay(
+                context,
+                icon: CupertinoIcons.arrow_right_circle_fill,
+                caption: 'Queued',
+                message: 'To be played next.',
+              );
+
+              return false;
+            },
+            background: Container(
+              alignment: AlignmentDirectional.centerStart,
+              color: Colors.green,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 28),
+                child: const Icon(CupertinoIcons.text_badge_plus),
+              ),
+            ),
+            secondaryBackground: canDismiss
+                ? Container(
                     alignment: AlignmentDirectional.centerEnd,
                     color: AppColors.red,
                     child: Padding(
                       padding: const EdgeInsets.only(right: 28),
                       child: dismissIcon,
                     ),
-                  ),
-                  key: ValueKey(playables[index]),
-                  child: PlayableRow(
-                    playable: playables[index],
-                    listContext: listContext,
-                  ),
-                );
+                  )
+                : null,
+            key: ValueKey(playables[index]),
+            child: PlayableRow(
+              playable: playables[index],
+              listContext: listContext,
+            ),
+          );
         },
         childCount: playables.length,
       ),

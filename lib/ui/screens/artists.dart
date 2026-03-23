@@ -146,9 +146,16 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
                             int index,
                           ) {
                             if (index >= provider.artists.length) return null;
-                            return ArtistRow(
-                              artist: provider.artists[index],
-                              router: widget.router,
+                            final artist = provider.artists[index];
+                            return SwipeToQueueDismissible(
+                              dismissibleKey: ValueKey(artist.id),
+                              fetchSongs: () => context
+                                  .read<PlayableProvider>()
+                                  .fetchForArtist(artist.id),
+                              child: ArtistRow(
+                                artist: artist,
+                                router: widget.router,
+                              ),
                             );
                           }, childCount: provider.artists.length),
                         ),
