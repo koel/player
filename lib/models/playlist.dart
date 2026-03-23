@@ -7,6 +7,7 @@ class Playlist {
   bool isSmart;
   String? folderId;
   String? description;
+  String? cover;
   List<Playable> playables = [];
 
   Playlist({
@@ -15,6 +16,7 @@ class Playlist {
     required this.isSmart,
     this.folderId,
     this.description,
+    this.cover,
   });
 
   bool get isEmpty => playables.length == 0;
@@ -28,8 +30,11 @@ class Playlist {
       isSmart: json['is_smart'],
       folderId: json['folder_id'],
       description: json['description'],
+      cover: json['cover'],
     );
   }
+
+  bool get hasCover => cover != null && cover!.isNotEmpty;
 
   factory Playlist.fake({
     var id,
@@ -37,6 +42,7 @@ class Playlist {
     bool? isSmart,
     String? folderId,
     String? description,
+    String? cover,
   }) {
     Faker faker = Faker();
 
@@ -46,6 +52,7 @@ class Playlist {
       isSmart: isSmart ?? false,
       folderId: folderId,
       description: description,
+      cover: cover,
     );
   }
 }

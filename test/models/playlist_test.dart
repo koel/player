@@ -29,6 +29,24 @@ void main() {
       expect(playlist.isSmart, isTrue);
     });
 
+    test('parses cover', () {
+      final json = {
+        'id': 'playlist-c',
+        'name': 'With Cover',
+        'is_smart': false,
+        'cover': 'https://example.com/cover.jpg',
+      };
+
+      final playlist = Playlist.fromJson(json);
+      expect(playlist.cover, 'https://example.com/cover.jpg');
+      expect(playlist.hasCover, isTrue);
+    });
+
+    test('hasCover is false when cover is null', () {
+      final playlist = Playlist.fake();
+      expect(playlist.hasCover, isFalse);
+    });
+
     test('parses folder_id', () {
       final json = {
         'id': 'playlist-2',
