@@ -96,6 +96,17 @@ class MockAppRouter extends _i1.Mock implements _i2.AppRouter {
       ) as _i3.Future<void>);
 
   @override
+  _i3.Future<void> showCreatePlaylistFolderSheet(_i4.BuildContext? context) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #showCreatePlaylistFolderSheet,
+          [context],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
   _i3.Future<void> showPlayableActionSheet(
     _i4.BuildContext? context, {
     required _i5.Playable<dynamic>? playable,

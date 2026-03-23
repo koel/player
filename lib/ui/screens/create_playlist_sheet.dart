@@ -1,131 +1,171 @@
-import 'package:app/constants/constants.dart';
+import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class CreatePlaylistSheet extends StatefulWidget {
-  static final Key nameFieldKey = UniqueKey();
-  static final Key submitButtonKey = UniqueKey();
+Future<void> showCreatePlaylistDialog(BuildContext context) async {
+  final nameController = TextEditingController();
+  final descController = TextEditingController();
+  final playlistProvider = context.read<PlaylistProvider>();
+  final folderProvider = context.read<PlaylistFolderProvider>();
+  final folders = folderProvider.folders;
+  String? selectedFolderId;
 
-  const CreatePlaylistSheet({Key? key}) : super(key: key);
+  await showCupertinoDialog(
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          final selectedFolder = selectedFolderId == null
+              ? null
+              : folders.firstWhere((f) => f.id == selectedFolderId);
 
-  @override
-  _AddPlaylistScreenState createState() => _AddPlaylistScreenState();
-}
-
-class _AddPlaylistScreenState extends State<CreatePlaylistSheet> {
-  late final PlaylistProvider playlistProvider;
-  var _enabled = true;
-  var _working = false;
-  late String _name;
-  final focusNode = FocusNode();
-
-  @override
-  void initState() {
-    super.initState();
-
-    playlistProvider = context.read();
-  }
-
-  void _onFieldValueChanged(String value) {
-    _name = value;
-    setState(() => _enabled = value.trim().isNotEmpty);
-  }
-
-  final inputBorder = const UnderlineInputBorder(
-    borderSide: BorderSide(color: AppColors.highlight),
-  );
-
-  final spinner = const Center(
-    child: Padding(
-      padding: EdgeInsets.only(top: 18.0),
-      child: Spinner(size: 16.0),
-    ),
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    Future<void> submit() async {
-      if (_name == '') return;
-
-      focusNode.unfocus();
-      setState(() => _working = true);
-      var ok = true;
-
-      try {
-        await playlistProvider.create(name: _name);
-      } catch (err) {
-        ok = false;
-      } finally {
-        setState(() => _working = false);
-      }
-
-      if (ok) {
-        Navigator.of(context).pop();
-        showOverlay(context, caption: 'Playlist added');
-      } else {
-        showCupertinoDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return CupertinoAlertDialog(
-              title: const Text('Uh oh'),
-              content: const Text(
-                'Something wrong happened. Please try again.',
-              ),
-              actions: <Widget>[
-                CupertinoDialogAction(
-                  child: const Text('OK'),
-                  onPressed: () => Navigator.pop(context),
+          return CupertinoAlertDialog(
+            title: const Text('New Playlist'),
+            content: Column(
+              children: [
+                const SizedBox(height: 12),
+                CupertinoTextField(
+                  controller: nameController,
+                  placeholder: 'Playlist Name',
+                  autofocus: true,
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.tertiarySystemFill,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 ),
-              ],
-            );
-          },
-        );
-      }
-    }
-
-    return GradientDecoratedContainer(
-      padding: EdgeInsets.only(
-        left: AppDimensions.hPadding,
-        right: AppDimensions.hPadding,
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: Align(
-        child: Form(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              TextFormField(
-                key: CreatePlaylistSheet.nameFieldKey,
-                focusNode: focusNode,
-                onFieldSubmitted: (_) async => await submit(),
-                onChanged: _onFieldValueChanged,
-                style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.w700),
-                cursorColor: AppColors.highlight,
-                textAlign: TextAlign.center,
-                autofocus: true,
-                decoration: InputDecoration(
-                  border: inputBorder,
-                  enabledBorder: inputBorder,
-                  focusedBorder: inputBorder,
-                  fillColor: Colors.transparent,
-                  hintText: 'Playlist name',
+                const SizedBox(height: 8),
+                CupertinoTextField(
+                  controller: descController,
+                  placeholder: 'Description (optional)',
+                  maxLines: 2,
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.tertiarySystemFill,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 ),
-              ),
-              const SizedBox(height: 24.0),
-              _working
-                  ? spinner
-                  : ElevatedButton(
-                      key: CreatePlaylistSheet.submitButtonKey,
-                      onPressed: _enabled ? () async => await submit() : null,
-                      child: const Text('Save'),
+                if (folders.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () {
+                      showCupertinoModalPopup(
+                        context: context,
+                        builder: (_) => CupertinoActionSheet(
+                          title: const Text('Select Folder'),
+                          actions: [
+                            CupertinoActionSheetAction(
+                              onPressed: () {
+                                setState(() => selectedFolderId = null);
+                                Navigator.pop(context);
+                              },
+                              child: Text(
+                                'No folder',
+                                style: TextStyle(
+                                  color: selectedFolderId == null
+                                      ? CupertinoColors.activeBlue
+                                      : CupertinoColors.white,
+                                ),
+                              ),
+                            ),
+                            ...folders.map(
+                              (f) => CupertinoActionSheetAction(
+                                onPressed: () {
+                                  setState(() => selectedFolderId = f.id);
+                                  Navigator.pop(context);
+                                },
+                                child: Text(
+                                  f.name,
+                                  style: TextStyle(
+                                    color: selectedFolderId == f.id
+                                        ? CupertinoColors.activeBlue
+                                        : CupertinoColors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                          cancelButton: CupertinoActionSheetAction(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'),
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.tertiarySystemFill,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            CupertinoIcons.folder,
+                            size: 16,
+                            color: CupertinoColors.systemGrey,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              selectedFolder?.name ?? 'No folder',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: selectedFolder != null
+                                    ? CupertinoColors.white
+                                    : CupertinoColors.placeholderText,
+                              ),
+                            ),
+                          ),
+                          const Icon(
+                            CupertinoIcons.chevron_down,
+                            size: 12,
+                            color: CupertinoColors.systemGrey,
+                          ),
+                        ],
+                      ),
                     ),
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              CupertinoDialogAction(
+                child: const Text('Cancel'),
+                onPressed: () => Navigator.pop(context),
+              ),
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                child: const Text('Create'),
+                onPressed: () async {
+                  final name = nameController.text.trim();
+                  if (name.isEmpty) return;
+
+                  try {
+                    await playlistProvider.create(
+                      name: name,
+                      description: descController.text.trim(),
+                      folderId: selectedFolderId,
+                    );
+                    Navigator.pop(context);
+                    showOverlay(context, caption: 'Playlist added');
+                  } catch (_) {
+                    Navigator.pop(context);
+                  }
+                },
+              ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
+          );
+        },
+      );
+    },
+  );
 }

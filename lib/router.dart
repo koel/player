@@ -67,18 +67,11 @@ class AppRouter {
   }
 
   Future<void> showCreatePlaylistSheet(BuildContext context) async {
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return Container(
-          height: MediaQuery.of(context).size.height,
-          child: const CreatePlaylistSheet(),
-        );
-      },
-    );
+    await showCreatePlaylistDialog(context);
+  }
+
+  Future<void> showCreatePlaylistFolderSheet(BuildContext context) async {
+    await showCreatePlaylistFolderDialog(context);
   }
 
   Future<void> showPlayableActionSheet(

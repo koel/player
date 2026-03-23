@@ -4,6 +4,7 @@ export 'episode.dart';
 export 'interaction.dart';
 export 'playable.dart';
 export 'playlist.dart';
+export 'playlist_folder.dart';
 export 'podcast.dart';
 export 'song.dart';
 export 'user.dart';
