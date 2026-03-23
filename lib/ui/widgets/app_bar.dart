@@ -48,17 +48,14 @@ class AppBar extends StatelessWidget {
       flexibleSpace: FrostedGlassBackground(
         child: FlexibleSpaceBar(
           expandedTitleScale: 1.3,
-          titlePadding: EdgeInsets.symmetric(
-            horizontal: 48,
+          titlePadding: const EdgeInsets.symmetric(
+            horizontal: 16,
             vertical: 12,
           ),
-          title: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppDimensions.hPadding,
-            ),
-            child: Text(
-              headingText,
-              overflow: TextOverflow.ellipsis,
+          title: SizedBox(
+            width: double.infinity,
+            child: MarqueeText(
+              text: headingText,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
           ),
