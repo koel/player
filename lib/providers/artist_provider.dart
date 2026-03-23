@@ -1,3 +1,4 @@
+import 'package:app/enums.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
@@ -8,6 +9,22 @@ class ArtistProvider with ChangeNotifier, StreamSubscriber {
   var artists = <Artist>[];
   final _vault = <dynamic, Artist>{};
   var _page = 1;
+  var _sortField = 'name';
+  var _sortOrder = SortOrder.asc;
+
+  String get sortField => _sortField;
+  SortOrder get sortOrder => _sortOrder;
+
+  set sortField(String field) {
+    if (field != _sortField) {
+      _sortOrder = SortOrder.asc;
+    }
+    _sortField = field;
+  }
+
+  set sortOrder(SortOrder order) {
+    _sortOrder = order;
+  }
 
   ArtistProvider() {
     subscribe(AuthProvider.userLoggedOutStream.listen((_) {
@@ -68,7 +85,9 @@ class ArtistProvider with ChangeNotifier, StreamSubscriber {
   }
 
   Future<void> paginate() async {
-    final res = await get('artists?page=$_page');
+    final res = await get(
+      'artists?page=$_page&sort=$_sortField&order=${_sortOrder.value}',
+    );
 
     final _artists = (res['data'] as List)
         .map<Artist>((artist) => Artist.fromJson(artist))
