@@ -5,9 +5,17 @@ class Playlist {
   var id; // This might be a UUID string in the near future
   String name;
   bool isSmart;
+  String? folderId;
+  String? description;
   List<Playable> playables = [];
 
-  Playlist({required this.id, required this.name, required this.isSmart});
+  Playlist({
+    required this.id,
+    required this.name,
+    required this.isSmart,
+    this.folderId,
+    this.description,
+  });
 
   bool get isEmpty => playables.length == 0;
 
@@ -18,16 +26,26 @@ class Playlist {
       id: json['id'],
       name: json['name'],
       isSmart: json['is_smart'],
+      folderId: json['folder_id'],
+      description: json['description'],
     );
   }
 
-  factory Playlist.fake({var id, String? name, bool? isSmart}) {
+  factory Playlist.fake({
+    var id,
+    String? name,
+    bool? isSmart,
+    String? folderId,
+    String? description,
+  }) {
     Faker faker = Faker();
 
     return Playlist(
       id: id ?? faker.guid.guid(),
       name: name ?? faker.food.cuisine(),
       isSmart: isSmart ?? false,
+      folderId: folderId,
+      description: description,
     );
   }
 }

@@ -28,6 +28,30 @@ void main() {
       final playlist = Playlist.fromJson(json);
       expect(playlist.isSmart, isTrue);
     });
+
+    test('parses folder_id', () {
+      final json = {
+        'id': 'playlist-2',
+        'name': 'In Folder',
+        'is_smart': false,
+        'folder_id': 'folder-uuid-1',
+      };
+
+      final playlist = Playlist.fromJson(json);
+      expect(playlist.folderId, 'folder-uuid-1');
+    });
+
+    test('folder_id is null when not in a folder', () {
+      final json = {
+        'id': 'playlist-3',
+        'name': 'Root Level',
+        'is_smart': false,
+        'folder_id': null,
+      };
+
+      final playlist = Playlist.fromJson(json);
+      expect(playlist.folderId, isNull);
+    });
   });
 
   group('Playlist properties', () {

@@ -9,6 +9,7 @@ export 'media_info_provider.dart';
 export 'overview_provider.dart';
 export 'playable_list_screen_provider.dart';
 export 'playable_provider.dart';
+export 'playlist_folder_provider.dart';
 export 'playlist_provider.dart';
 export 'podcast_provider.dart';
 export 'recently_played_provider.dart';

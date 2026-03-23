@@ -7,10 +7,15 @@ import 'package:version/version.dart';
 
 class DataProvider with ChangeNotifier {
   final PlaylistProvider _playlistProvider;
+  final PlaylistFolderProvider _playlistFolderProvider;
   final PlayableProvider _playableProvider;
 
-  DataProvider({required playlistProvider, required playableProvider})
-      : _playlistProvider = playlistProvider,
+  DataProvider({
+    required playlistProvider,
+    required playlistFolderProvider,
+    required playableProvider,
+  })  : _playlistProvider = playlistProvider,
+        _playlistFolderProvider = playlistFolderProvider,
         _playableProvider = playableProvider;
 
   Future<void> init() async {
@@ -37,5 +42,9 @@ class DataProvider with ChangeNotifier {
     }
 
     await _playlistProvider.init(data['playlists']);
+
+    if (data.containsKey('playlist_folders')) {
+      _playlistFolderProvider.init(data['playlist_folders']);
+    }
   }
 }

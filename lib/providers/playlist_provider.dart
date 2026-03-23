@@ -69,9 +69,24 @@ class PlaylistProvider with ChangeNotifier, StreamSubscriber {
     }
   }
 
-  Future<Playlist> create({required String name}) async {
-    final json = await post('playlist', data: {
+  Future<void> addToFolder(Playlist playlist, {required String folderId}) async {
+    await post('playlist-folders/$folderId/playlists', data: {
+      'playlists': [playlist.id],
+    });
+    playlist.folderId = folderId;
+    notifyListeners();
+  }
+
+  Future<Playlist> create({
+    required String name,
+    String? description,
+    String? folderId,
+  }) async {
+    final json = await post('playlists', data: {
       'name': name,
+      if (description != null && description.isNotEmpty)
+        'description': description,
+      if (folderId != null) 'folder_id': folderId,
     });
 
     Playlist playlist = Playlist.fromJson(json);
@@ -79,6 +94,26 @@ class PlaylistProvider with ChangeNotifier, StreamSubscriber {
     notifyListeners();
 
     return playlist;
+  }
+
+  Future<void> update(
+    Playlist playlist, {
+    required String name,
+    String? description,
+    String? folderId,
+  }) async {
+    await put('playlists/${playlist.id}', data: {
+      'name': name,
+      'description': description ?? '',
+      'folder_id': folderId,
+    });
+
+    playlist
+      ..name = name
+      ..description = description
+      ..folderId = folderId;
+
+    notifyListeners();
   }
 
   Future<void> remove(Playlist playlist) async {
