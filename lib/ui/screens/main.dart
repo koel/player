@@ -44,6 +44,8 @@ class _MainScreenState extends State<MainScreen> {
       playableProvider: context.read<PlayableProvider>(),
       downloadProvider: context.read<DownloadProvider>(),
     );
+
+    context.read<DownloadSyncProvider>().scheduleSync();
   }
 
   BottomNavigationBarItem tabBarItem({

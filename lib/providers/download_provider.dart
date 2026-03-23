@@ -135,6 +135,10 @@ class DownloadProvider with StreamSubscriber {
 
   bool has({required Playable playable}) => getForPlayable(playable) != null;
 
+  void persistMetadata() {
+    _playableStorage.write(serializedPlayableKey, playables);
+  }
+
   Future<void> removeForPlayable(Playable playable) async {
     _removePlayable(playable);
     _downloadRemoved.add(playable);
