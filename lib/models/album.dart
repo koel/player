@@ -11,6 +11,7 @@ class Album {
   String? cover;
   dynamic artistId;
   String artistName;
+  int? year;
   int playCount = 0;
   ImageProvider? _image;
 
@@ -20,6 +21,7 @@ class Album {
     required this.cover,
     required this.artistId,
     required this.artistName,
+    this.year,
   });
 
   ImageProvider get image {
@@ -46,6 +48,7 @@ class Album {
       cover: json['cover'],
       artistId: json['artist_id'],
       artistName: json['artist_name'],
+      year: json['year'] == null ? null : int.parse(json['year'].toString()),
     );
   }
 
@@ -75,6 +78,7 @@ class Album {
       ..artistId = remote.artistId
       ..cover = remote.cover
       ..name = remote.name
+      ..year = remote.year
       ..playCount = remote.playCount ?? 0;
 
     _image = null;

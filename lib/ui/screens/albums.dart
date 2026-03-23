@@ -1,10 +1,12 @@
 import 'package:app/app_state.dart';
 import 'package:app/constants/constants.dart';
+import 'package:app/enums.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/widgets.dart';
+import 'package:app/values/values.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -101,9 +103,31 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                   child: CustomScrollView(
                     controller: _scrollController,
                     slivers: <Widget>[
-                      const CupertinoSliverNavigationBar(
+                      CupertinoSliverNavigationBar(
                         backgroundColor: AppColors.staticScreenHeaderBackground,
-                        largeTitle: LargeTitle(text: 'Albums'),
+                        largeTitle: const LargeTitle(text: 'Albums'),
+                        trailing: Transform.scale(
+                          scale: 0.8,
+                          alignment: Alignment.centerRight,
+                          child: SortButton(
+                          fields: const ['name', 'artist_name', 'year', 'created_at'],
+                          currentField: _albumProvider.sortField,
+                          currentOrder: _albumProvider.sortOrder,
+                          onMenuItemSelected: (sortConfig) {
+                            setState(() {
+                              _albumProvider.sortField = sortConfig.field;
+                              _albumProvider.sortOrder = sortConfig.order;
+                            });
+
+                            _albumProvider.albums.clear();
+                            _albumProvider.refresh().then((_) {
+                              if (_scrollController.hasClients) {
+                                _scrollController.jumpTo(0);
+                              }
+                            });
+                          },
+                        ),
+                        ),
                       ),
                       SliverList(
                         delegate: SliverChildBuilderDelegate(
@@ -113,6 +137,7 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                             return AlbumRow(
                               album: provider.albums[index],
                               router: widget.router,
+                              sortField: _albumProvider.sortField,
                             );
                           },
                           childCount: provider.albums.length,
@@ -142,9 +167,14 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
 class AlbumRow extends StatelessWidget {
   final Album album;
   final AppRouter router;
+  final String sortField;
 
-  const AlbumRow({Key? key, required this.album, required this.router})
-      : super(key: key);
+  const AlbumRow({
+    Key? key,
+    required this.album,
+    required this.router,
+    this.sortField = 'name',
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -163,6 +193,28 @@ class AlbumRow extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(color: Colors.white60),
           ),
+          trailing: sortField == 'year' && album.year != null
+              ? Transform.translate(
+                  offset: const Offset(8, -8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      '${album.year}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Colors.white54,
+                      ),
+                    ),
+                  ),
+                )
+              : null,
         ),
       ),
     );
