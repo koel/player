@@ -22,6 +22,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
   late PlaylistProvider _playlistProvider;
   String _searchQuery = '';
   CoverImageStack _cover = CoverImageStack(playables: []);
+  final _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -70,7 +71,10 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
 
             return PullToRefresh(
               onRefresh: () => buildRequest(playlist.id, forceRefresh: true),
-              child: CustomScrollView(
+              child: Stack(
+                children: [
+                CustomScrollView(
+                controller: _scrollController,
                 slivers: <Widget>[
                   AppBar(
                     headingText: playlist.name,
@@ -121,6 +125,15 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                     ),
                   const BottomSpace(),
                 ],
+              ),
+              if (AlphabetScrollbar.shouldShow(itemCount: displayedPlayables.length, sortField: sortConfig.field, nameSortField: 'title'))
+                AlphabetScrollbar(
+                  labels: displayedPlayables.map((s) => s.title).toList(),
+                  scrollController: _scrollController,
+                  itemCount: displayedPlayables.length,
+                  scrollOffset: 250,
+                ),
+              ],
               ),
             );
           },

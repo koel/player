@@ -23,6 +23,7 @@ class ArtistDetailsScreen extends StatefulWidget {
 class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
   var _searchQuery = '';
   var cover = CoverImageStack(playables: []);
+  final _scrollController = ScrollController();
 
   Future<List<Object>> buildRequest(dynamic artistId, {bool forceRefresh = false}) {
     return Future.wait([
@@ -68,7 +69,11 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
             return PullToRefresh(
               onRefresh: () => buildRequest(artistId, forceRefresh: true),
               child: ScrollsToTop(
-                child: CustomScrollView(
+                scrollController: _scrollController,
+                child: Stack(
+                  children: [
+                  CustomScrollView(
+                  controller: _scrollController,
                   slivers: <Widget>[
                     AppBar(
                       headingText: artist.name,
@@ -139,6 +144,15 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                     ),
                     const BottomSpace(),
                   ],
+                ),
+                if (AlphabetScrollbar.shouldShow(itemCount: displayedSongs.length, sortField: sortConfig.field, nameSortField: 'title'))
+                  AlphabetScrollbar(
+                    labels: displayedSongs.map((s) => s.title).toList(),
+                    scrollController: _scrollController,
+                    itemCount: displayedSongs.length,
+                    scrollOffset: 250,
+                  ),
+                ],
                 ),
               ),
             );
