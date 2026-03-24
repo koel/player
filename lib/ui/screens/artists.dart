@@ -103,8 +103,8 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
               data: CupertinoThemeData(primaryColor: Colors.white),
               child: PullToRefresh(
                 onRefresh: _artistProvider.refresh,
-                child: ScrollsToTop(
-                  scrollController: _scrollController,
+                child: PrimaryScrollController(
+                  controller: _scrollController,
                   child: Stack(
                     children: [
                     CustomScrollView(

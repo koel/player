@@ -26,7 +26,6 @@ export 'playlist_row.dart';
 export 'podcast_card.dart';
 export 'profile_avatar.dart';
 export 'pull_to_refresh.dart';
-export 'scrolls_to_top.dart';
 export 'simple_playable_list.dart';
 export 'sliver_playable_list.dart';
 export 'song_card.dart';

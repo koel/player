@@ -104,8 +104,8 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
               data: const CupertinoThemeData(primaryColor: Colors.white),
               child: PullToRefresh(
                 onRefresh: _albumProvider.refresh,
-                child: ScrollsToTop(
-                  scrollController: _scrollController,
+                child: PrimaryScrollController(
+                  controller: _scrollController,
                   child: Stack(
                     children: [
                     CustomScrollView(

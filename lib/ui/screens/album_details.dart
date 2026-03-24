@@ -64,8 +64,7 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
 
             return PullToRefresh(
               onRefresh: () => buildRequest(albumId, forceRefresh: true),
-              child: ScrollsToTop(
-                child: CustomScrollView(
+              child: CustomScrollView(
                   slivers: <Widget>[
                     AppBar(
                       headingText: album.name,
@@ -136,7 +135,6 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                     ),
                     const BottomSpace(),
                   ],
-                ),
               ),
             );
           },
