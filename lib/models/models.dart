@@ -6,5 +6,6 @@ export 'playable.dart';
 export 'playlist.dart';
 export 'playlist_folder.dart';
 export 'podcast.dart';
+export 'radio_station.dart';
 export 'song.dart';
 export 'user.dart';

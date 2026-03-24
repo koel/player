@@ -66,6 +66,13 @@ class LibraryScreen extends StatelessWidget {
             ),
           ),
         LibraryMenuItem(
+          icon: CupertinoIcons.antenna_radiowaves_left_right,
+          label: 'Radio',
+          onTap: () => Navigator.of(context).push(
+            CupertinoPageRoute(builder: (_) => const RadioStationsScreen()),
+          ),
+        ),
+        LibraryMenuItem(
           icon: CupertinoIcons.cloud_download_fill,
           label: 'Downloaded',
           onTap: () => Navigator.of(context).push(
