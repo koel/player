@@ -19,23 +19,6 @@ class AppBar extends StatelessWidget {
     this.actions = const [],
   }) : super(key: key);
 
-  final Widget _gradientEffect = const SizedBox(
-    width: double.infinity,
-    height: double.infinity,
-    child: const DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.transparent,
-            AppColors.flexibleScreenHeaderBackground,
-          ],
-        ),
-      ),
-    ),
-  );
-
   @override
   Widget build(BuildContext context) {
     final backgroundImage = this.backgroundImage;
@@ -44,32 +27,72 @@ class AppBar extends StatelessWidget {
       pinned: true,
       expandedHeight: 290,
       actions: actions,
-      backgroundColor: AppColors.flexibleScreenHeaderBackground,
-      flexibleSpace: FrostedGlassBackground(
-        child: FlexibleSpaceBar(
-          expandedTitleScale: 1.3,
-          titlePadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
-          title: MarqueeText(
-            text: headingText,
-            style: Theme.of(context).textTheme.headlineSmall,
-            textAlign: TextAlign.center,
-          ),
-          background: Stack(
-            children: <Widget>[
-              if (backgroundImage != null) backgroundImage,
-              _gradientEffect,
-              Center(
-                child: SizedBox.square(
-                  dimension: 192,
-                  child: coverImage,
+      backgroundColor: Colors.transparent,
+      flexibleSpace: LayoutBuilder(
+        builder: (context, constraints) {
+          final topPadding = MediaQuery.of(context).padding.top;
+          final collapsedHeight = topPadding + kToolbarHeight;
+          final t = ((290 + topPadding - constraints.maxHeight) /
+                  (290 + topPadding - collapsedHeight))
+              .clamp(0.0, 1.0);
+
+          return Stack(
+            children: [
+              // Collapsed bar background — only visible when pinned
+              Opacity(
+                key: const Key('appBarCollapsedBackground'),
+                opacity: t,
+                child: Container(
+                  height: collapsedHeight,
+                  color: const Color.fromRGBO(25, 0, 64, 0.95),
                 ),
               ),
-            ],
-          ),
+              FlexibleSpaceBar(
+        expandedTitleScale: 1.3,
+        titlePadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
         ),
+        title: MarqueeText(
+          text: headingText,
+          style: Theme.of(context).textTheme.headlineSmall,
+          textAlign: TextAlign.center,
+        ),
+        background: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            // Blurred background with fade-to-transparent at bottom
+            if (backgroundImage != null)
+              ShaderMask(
+                key: const Key('appBarBackgroundMask'),
+                shaderCallback: (bounds) {
+                  return const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: [0.0, 0.5, 1.0],
+                    colors: [
+                      Colors.white,
+                      Colors.white,
+                      Colors.transparent,
+                    ],
+                  ).createShader(bounds);
+                },
+                blendMode: BlendMode.dstIn,
+                child: backgroundImage,
+              ),
+            // Cover image centered
+            Center(
+              child: SizedBox.square(
+                dimension: 192,
+                child: coverImage,
+              ),
+            ),
+          ],
+        ),
+      ),
+            ],
+          );
+        },
       ),
     );
   }
