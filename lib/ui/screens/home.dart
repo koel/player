@@ -90,6 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     .map((artist) => ArtistCard(artist: artist)),
                 PlaceholderCard(
                   icon: CupertinoIcons.music_mic,
+                  circular: true,
                   onPressed: () => Navigator.of(context).push(
                     CupertinoPageRoute(builder: (_) => const ArtistsScreen()),
                   ),
