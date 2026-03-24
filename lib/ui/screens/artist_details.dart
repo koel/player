@@ -68,8 +68,8 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
 
             return PullToRefresh(
               onRefresh: () => buildRequest(artistId, forceRefresh: true),
-              child: ScrollsToTop(
-                scrollController: _scrollController,
+              child: PrimaryScrollController(
+                controller: _scrollController,
                 child: Stack(
                   children: [
                   CustomScrollView(

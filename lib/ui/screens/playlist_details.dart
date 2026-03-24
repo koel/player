@@ -99,7 +99,9 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
 
             return PullToRefresh(
               onRefresh: () => buildRequest(playlist.id, forceRefresh: true),
-              child: Stack(
+              child: PrimaryScrollController(
+                controller: _scrollController,
+                child: Stack(
                 children: [
                 CustomScrollView(
                 controller: _scrollController,
@@ -184,6 +186,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                   scrollOffset: 250,
                 ),
               ],
+              ),
               ),
             );
           },

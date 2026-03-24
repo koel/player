@@ -119,7 +119,9 @@ class _SongsScreenState extends State<SongsScreen> {
                   displayedSongs.$sort(_paginationConfig.sortConfig);
             }
 
-            return Stack(
+            return PrimaryScrollController(
+              controller: _scrollController,
+              child: Stack(
               children: [
               CustomScrollView(
               controller: _scrollController,
@@ -187,6 +189,7 @@ class _SongsScreenState extends State<SongsScreen> {
                 scrollOffset: 250,
               ),
             ],
+            ),
             );
           },
         ),

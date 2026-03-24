@@ -45,7 +45,6 @@ dependencies:
   figma_squircle: ^0.6.3
   connectivity_plus: ^5.0.0
   path_provider: ^2.0.14
-  scrolls_to_top: ^2.1.1
   fading_edge_scrollview: ^4.0.0
   version: ^3.0.2
   # native_qr's current version is broken

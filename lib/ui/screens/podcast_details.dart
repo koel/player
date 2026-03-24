@@ -68,8 +68,7 @@ class _PodcastDetailsScreen extends State<PodcastDetailsScreen> {
 
             return PullToRefresh(
               onRefresh: () => buildRequest(podcastId, forceRefresh: true),
-              child: ScrollsToTop(
-                child: CustomScrollView(
+              child: CustomScrollView(
                   slivers: <Widget>[
                     AppBar(
                       headingText: podcast.title,
@@ -140,7 +139,6 @@ class _PodcastDetailsScreen extends State<PodcastDetailsScreen> {
                     ),
                     const BottomSpace(),
                   ],
-                ),
               ),
             );
           },

@@ -126,8 +126,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     ? Future(() => null)
                     : makeRequest(forceRefresh: true);
               },
-              child: ScrollsToTop(
-                scrollController: _scrollController,
+              child: PrimaryScrollController(
+                controller: _scrollController,
                 child: Stack(
                   children: [
                   CustomScrollView(

@@ -91,8 +91,7 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
             final displayedPlayables =
                 provider.playables.$sort(sortConfig).$filter(_searchQuery);
 
-            return ScrollsToTop(
-              child: CustomScrollView(
+            return CustomScrollView(
                 slivers: <Widget>[
                   AppBar(
                     headingText: 'Downloaded',
@@ -124,7 +123,6 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                   ),
                   const BottomSpace(),
                 ],
-              ),
             );
           },
         ),
