@@ -46,27 +46,33 @@ class HorizontalCardScroller extends StatelessWidget {
 class PlaceholderCard extends StatelessWidget {
   final IconData icon;
   final void Function()? onPressed;
+  final bool circular;
 
   const PlaceholderCard({
     Key? key,
     required this.icon,
     this.onPressed,
+    this.circular = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final dimension = AlbumArtistThumbnail.dimensionForSize(ThumbnailSize.md);
+
     return Card(
-      shape: SmoothRectangleBorder(
-        borderRadius: SmoothBorderRadius(
-          cornerRadius: AlbumArtistThumbnail.borderRadiusForSize(
-            ThumbnailSize.md,
-          ),
-          cornerSmoothing: .8,
-        ),
-      ),
+      shape: circular
+          ? const CircleBorder()
+          : SmoothRectangleBorder(
+              borderRadius: SmoothBorderRadius(
+                cornerRadius: AlbumArtistThumbnail.borderRadiusForSize(
+                  ThumbnailSize.md,
+                ),
+                cornerSmoothing: .8,
+              ),
+            ),
       clipBehavior: Clip.antiAlias,
       child: SizedBox.square(
-        dimension: AlbumArtistThumbnail.dimensionForSize(ThumbnailSize.md),
+        dimension: dimension,
         child: ElevatedButton(
           onPressed: onPressed,
           child: Icon(icon, size: 32),
