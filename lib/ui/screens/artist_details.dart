@@ -67,7 +67,10 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                 songs.$sort(sortConfig).$filter(_searchQuery);
 
             return PullToRefresh(
-              onRefresh: () => buildRequest(artistId, forceRefresh: true),
+              onRefresh: () async {
+                await buildRequest(artistId, forceRefresh: true);
+                if (mounted) setState(() {});
+              },
               child: PrimaryScrollController(
                 controller: _scrollController,
                 child: Stack(

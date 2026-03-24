@@ -98,13 +98,17 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                 playables.$sort(sortConfig).$filter(_searchQuery);
 
             return PullToRefresh(
-              onRefresh: () => buildRequest(playlist.id, forceRefresh: true),
+              onRefresh: () async {
+                await buildRequest(playlist.id, forceRefresh: true);
+                if (mounted) setState(() {});
+              },
               child: PrimaryScrollController(
                 controller: _scrollController,
                 child: Stack(
                 children: [
                 CustomScrollView(
                 controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
                 slivers: <Widget>[
                   AppBar(
                     headingText: playlist.name,

@@ -67,7 +67,10 @@ class _PodcastDetailsScreen extends State<PodcastDetailsScreen> {
                 songs.$sort(sortConfig).$filter(_searchQuery);
 
             return PullToRefresh(
-              onRefresh: () => buildRequest(podcastId, forceRefresh: true),
+              onRefresh: () async {
+                await buildRequest(podcastId, forceRefresh: true);
+                if (mounted) setState(() {});
+              },
               child: CustomScrollView(
                   slivers: <Widget>[
                     AppBar(
