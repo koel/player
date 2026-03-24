@@ -118,9 +118,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                               fit: BoxFit.cover,
                               alignment: Alignment.topCenter,
                             ),
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(16),
-                            ),
+                            shape: BoxShape.circle,
                             boxShadow: const <BoxShadow>[
                               const BoxShadow(
                                 color: Colors.black38,

@@ -47,12 +47,20 @@ class AlbumArtistThumbnail extends StatelessWidget {
             imageUrl: imageUrl,
           );
 
+    final heroChild = asHero
+        ? Hero(tag: tagForEntity(entity), child: image)
+        : image;
+
+    if (entity is Artist) {
+      return ClipOval(child: heroChild);
+    }
+
     return ClipSmoothRect(
       radius: SmoothBorderRadius(
         cornerRadius: borderRadiusForSize(size),
         cornerSmoothing: .8,
       ),
-      child: asHero ? Hero(tag: tagForEntity(entity), child: image) : image,
+      child: heroChild,
     );
   }
 
@@ -71,6 +79,8 @@ class AlbumArtistThumbnail extends StatelessWidget {
 
   static double borderRadiusForSize(ThumbnailSize size) {
     switch (size) {
+      case ThumbnailSize.sm:
+        return 8;
       case ThumbnailSize.md:
         return 16;
       case ThumbnailSize.lg:
@@ -78,7 +88,7 @@ class AlbumArtistThumbnail extends StatelessWidget {
       case ThumbnailSize.xl:
         return 32;
       default:
-        return 20; // rounded for sm size
+        return 8;
     }
   }
 

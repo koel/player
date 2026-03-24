@@ -43,7 +43,7 @@ class _ArtistCardState extends State<ArtistCard> {
             SizedBox(
               width: _cardWidth,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Text(
                     widget.artist.name,
