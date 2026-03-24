@@ -63,7 +63,10 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                 songs.$sort(sortConfig).$filter(_searchQuery);
 
             return PullToRefresh(
-              onRefresh: () => buildRequest(albumId, forceRefresh: true),
+              onRefresh: () async {
+                await buildRequest(albumId, forceRefresh: true);
+                if (mounted) setState(() {});
+              },
               child: CustomScrollView(
                   slivers: <Widget>[
                     AppBar(
