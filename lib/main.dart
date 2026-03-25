@@ -79,6 +79,8 @@ List<SingleChildWidget> _providers = [
     ),
   ),
   ChangeNotifierProvider(create: (context) => PodcastProvider()),
+  ChangeNotifierProvider(create: (context) => RadioStationProvider()),
+  ChangeNotifierProvider(create: (context) => RadioPlayerProvider()),
   ChangeNotifierProvider(
     create: (context) => PlayableListScreenProvider(
       playableProvider: context.read<PlayableProvider>(),

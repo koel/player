@@ -13,5 +13,7 @@ export 'playable_provider.dart';
 export 'playlist_folder_provider.dart';
 export 'playlist_provider.dart';
 export 'podcast_provider.dart';
+export 'radio_player_provider.dart';
+export 'radio_station_provider.dart';
 export 'recently_played_provider.dart';
 export 'search_provider.dart';

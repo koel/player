@@ -8,6 +8,7 @@ import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:audio_service/audio_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -58,25 +59,18 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
 
   @override
   Widget build(BuildContext context) {
-    final playable = _playable;
-    final state = _state;
+    return Consumer<RadioPlayerProvider>(
+      builder: (context, radioPlayer, _) {
+        if (radioPlayer.active) {
+          return _buildRadioMiniPlayer(radioPlayer);
+        }
 
-    if (playable == null || state == null) return SizedBox.shrink();
+        return _buildQueueMiniPlayer();
+      },
+    );
+  }
 
-    late final Widget statusIndicator;
-    late final bool isLoading;
-
-    if ((state.processingState == AudioProcessingState.buffering ||
-            state.processingState == AudioProcessingState.loading) &&
-        state.playing) {
-      statusIndicator = SpinKitThreeBounce(color: AppColors.white, size: 16);
-      isLoading = true;
-    } else {
-      // statusIndicator = SizedBox.shrink();
-      statusIndicator = SpinKitThreeBounce(color: AppColors.white, size: 16);
-      isLoading = false;
-    }
-
+  Widget _buildShell({required Widget content, Widget? progressBar}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6.0),
       child: ClipSmoothRect(
@@ -102,99 +96,197 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
                       width: .5,
                     ),
                   ),
-                  child: InkWell(
-                    onTap: () => widget.router.openNowPlayingScreen(context),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Stack(
-                              children: [
-                                Hero(
-                                  tag: 'hero-now-playing-thumbnail',
-                                  child: PlayableThumbnail.xs(
-                                    playable: playable,
-                                  ),
-                                ),
-                                if (isLoading)
-                                  SizedBox.square(
-                                    dimension:
-                                        PlayableThumbnail.dimensionForSize(
-                                      ThumbnailSize.xs,
-                                    ),
-                                    child: DecoratedBox(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(
-                                            PlayableThumbnail
-                                                .borderRadiusForSize(
-                                              ThumbnailSize.xs,
-                                            ),
-                                          ),
-                                        ),
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                  ),
-                                if (isLoading)
-                                  SizedBox.square(
-                                    dimension:
-                                        PlayableThumbnail.dimensionForSize(
-                                      ThumbnailSize.xs,
-                                    ),
-                                    child: statusIndicator,
-                                  ),
-                              ],
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 16),
-                                child: Text(
-                                  playable.title,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: <Widget>[
-                                IconButton(
-                                  key: MiniPlayer.pauseButtonKey,
-                                  onPressed: audioHandler.playOrPause,
-                                  icon: Icon(
-                                    state.playing
-                                        ? CupertinoIcons.pause_fill
-                                        : CupertinoIcons.play_fill,
-                                    size: 24,
-                                  ),
-                                ),
-                                IconButton(
-                                  key: MiniPlayer.nextButtonKey,
-                                  onPressed: audioHandler.skipToNext,
-                                  icon: const Icon(
-                                    CupertinoIcons.forward_fill,
-                                    size: 24,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                  child: content,
+                ),
+                if (progressBar != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: progressBar,
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: const MiniPlayerProgressBar(),
-                ),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _radioDefaultIcon() {
+    return Container(
+      width: 36,
+      height: 36,
+      color: AppColors.highlight.withOpacity(0.3),
+      child: const Icon(
+        CupertinoIcons.antenna_radiowaves_left_right,
+        size: 18,
+        color: Colors.white,
+      ),
+    );
+  }
+
+  Widget _buildRadioMiniPlayer(RadioPlayerProvider radioPlayer) {
+    final station = radioPlayer.currentStation!;
+
+    return _buildShell(
+      content: Row(
+        children: <Widget>[
+          // Station logo
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: station.logo != null
+                ? CachedNetworkImage(
+                    imageUrl: station.logo!,
+                    width: 36,
+                    height: 36,
+                    fit: BoxFit.cover,
+                    errorWidget: (_, __, ___) => _radioDefaultIcon(),
+                  )
+                : _radioDefaultIcon(),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    station.name,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  if (radioPlayer.loading)
+                    const Text(
+                      'Connecting…',
+                      style: TextStyle(fontSize: 12, color: Colors.white54),
+                    ),
+                  if (radioPlayer.streamTitle != null &&
+                      !radioPlayer.loading)
+                    Text(
+                      radioPlayer.streamTitle!,
+                      overflow: TextOverflow.ellipsis,
+                      style:
+                          const TextStyle(fontSize: 12, color: Colors.white54),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          IconButton(
+            onPressed: radioPlayer.togglePlayPause,
+            icon: Icon(
+              radioPlayer.playing
+                  ? CupertinoIcons.pause_fill
+                  : CupertinoIcons.play_fill,
+              size: 24,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQueueMiniPlayer() {
+    final playable = _playable;
+    final state = _state;
+
+    if (playable == null || state == null) return SizedBox.shrink();
+
+    late final bool isLoading;
+
+    if ((state.processingState == AudioProcessingState.buffering ||
+            state.processingState == AudioProcessingState.loading) &&
+        state.playing) {
+      isLoading = true;
+    } else {
+      isLoading = false;
+    }
+
+    return _buildShell(
+      content: InkWell(
+        onTap: () => widget.router.openNowPlayingScreen(context),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Stack(
+                  children: [
+                    Hero(
+                      tag: 'hero-now-playing-thumbnail',
+                      child: PlayableThumbnail.xs(
+                        playable: playable,
+                      ),
+                    ),
+                    if (isLoading)
+                      SizedBox.square(
+                        dimension:
+                            PlayableThumbnail.dimensionForSize(
+                          ThumbnailSize.xs,
+                        ),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(
+                                PlayableThumbnail.borderRadiusForSize(
+                                  ThumbnailSize.xs,
+                                ),
+                              ),
+                            ),
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ),
+                    if (isLoading)
+                      SizedBox.square(
+                        dimension:
+                            PlayableThumbnail.dimensionForSize(
+                          ThumbnailSize.xs,
+                        ),
+                        child: SpinKitThreeBounce(
+                            color: AppColors.white, size: 16),
+                      ),
+                  ],
+                ),
+                Expanded(
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      playable.title,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    IconButton(
+                      key: MiniPlayer.pauseButtonKey,
+                      onPressed: audioHandler.playOrPause,
+                      icon: Icon(
+                        state.playing
+                            ? CupertinoIcons.pause_fill
+                            : CupertinoIcons.play_fill,
+                        size: 24,
+                      ),
+                    ),
+                    IconButton(
+                      key: MiniPlayer.nextButtonKey,
+                      onPressed: audioHandler.skipToNext,
+                      icon: const Icon(
+                        CupertinoIcons.forward_fill,
+                        size: 24,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      progressBar: const MiniPlayerProgressBar(),
     );
   }
 }
