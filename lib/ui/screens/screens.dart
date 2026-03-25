@@ -26,4 +26,5 @@ export 'queue.dart';
 export 'radio_stations.dart';
 export 'recently_played.dart';
 export 'search.dart';
+export 'settings.dart';
 export 'songs.dart';
