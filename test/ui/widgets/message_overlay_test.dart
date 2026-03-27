@@ -78,4 +78,27 @@ void main() {
     expect(find.text('Banana cake cooked.'), findsOneWidget);
     await _drainTimers(tester);
   });
+
+  testWidgets('uses horizontal layout with icon on the left',
+      (WidgetTester tester) async {
+    await _mount(
+      tester,
+      overlay: MessageOverlay(caption: 'Queued'),
+    );
+
+    final row = tester.widget<Row>(find.byType(Row).first);
+    expect(row.children.first, isA<Icon>());
+    await _drainTimers(tester);
+  });
+
+  testWidgets('is positioned near the bottom', (WidgetTester tester) async {
+    await _mount(
+      tester,
+      overlay: MessageOverlay(caption: 'Queued'),
+    );
+
+    final align = tester.widget<Align>(find.byType(Align));
+    expect(align.alignment, Alignment.bottomCenter);
+    await _drainTimers(tester);
+  });
 }

@@ -4,6 +4,7 @@ import 'package:app/ui/widgets/widgets.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class MessageOverlay extends StatefulWidget {
   final String? caption;
@@ -36,6 +37,7 @@ class _MessageOverlayState extends State<MessageOverlay> {
     super.initState();
 
     setState(() => _visible = true);
+    HapticFeedback.lightImpact();
     Future.delayed(widget.timeOut, hideOverlay);
   }
 
@@ -52,59 +54,73 @@ class _MessageOverlayState extends State<MessageOverlay> {
 
     return GestureDetector(
       onTap: hideOverlay,
-      child: Scaffold(
-        body: SafeArea(
-          child: Align(
-            alignment: Alignment.center,
+      behavior: HitTestBehavior.translucent,
+      child: SafeArea(
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 130, left: 32, right: 32),
             child: AnimatedOpacity(
               opacity: _visible ? 1 : 0,
               duration: _animationDuration,
               child: Container(
-                width: 256.0,
-                height: 256.0,
-                clipBehavior: Clip.antiAlias,
                 decoration: ShapeDecoration(
                   shape: SmoothRectangleBorder(
+                    side: BorderSide(color: Colors.white24),
                     borderRadius: SmoothBorderRadius(
-                      cornerRadius: 24,
+                      cornerRadius: 16,
                       cornerSmoothing: .5,
                     ),
                   ),
                 ),
-                child: FrostedGlassBackground(
-                  child: Container(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                child: ClipSmoothRect(
+                  radius: SmoothBorderRadius(
+                    cornerRadius: 16,
+                    cornerSmoothing: .5,
+                  ),
+                  child: FrostedGlassBackground(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           Icon(
                             widget.icon,
-                            size: 80.0,
+                            size: 24,
                             color: widget.iconColor,
                           ),
-                          if (caption != null) ...<Widget>[
-                            const SizedBox(height: 16.0),
-                            Text(
-                              caption,
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(color: Colors.white60),
+                          if (caption != null || message != null)
+                            const SizedBox(width: 12),
+                          Flexible(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                if (caption != null)
+                                  Text(
+                                    caption,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
+                                if (message != null)
+                                  Text(
+                                    message,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(color: Colors.white60),
+                                  ),
+                              ],
                             ),
-                          ],
-                          if (message != null) ...<Widget>[
-                            const SizedBox(height: 16.0),
-                            Text(
-                              message,
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge
-                                  ?.copyWith(color: Colors.white60),
-                            ),
-                          ]
+                          ),
                         ],
                       ),
                     ),
