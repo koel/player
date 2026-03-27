@@ -269,17 +269,19 @@ class Song extends Playable<Song> {
 
   @override
   Comparable valueToCompare(PlayableSortConfig config) {
+    final discTrack = '${disc.toString().padLeft(6, '0')}${track.toString().padLeft(6, '0')}';
+
     switch (config.field) {
       case 'title':
         return title;
       case 'album_name':
-        return '${albumName}${albumId}${track}';
+        return '${albumName}${albumId}${discTrack}';
       case 'artist_name':
-        return '${artistName}${albumName}${track}';
+        return '${artistName}${albumName}${discTrack}';
       case 'created_at':
         return createdAt;
       case 'track':
-        return track;
+        return discTrack;
       default:
         return '';
     }
