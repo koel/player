@@ -24,13 +24,27 @@ void main() {
       expect(provider.playables.length, 3);
     });
 
-    test('does not overwrite existing playables', () {
+    test('merges with existing playables keeping them at the top', () {
       final existing = Song.fake(title: 'Existing');
       provider.playables = [existing];
 
-      provider.seed(Song.fakeMany(5));
-      expect(provider.playables.length, 1);
+      final seeded = Song.fakeMany(5);
+      provider.seed(seeded);
+
+      // Existing song stays first, seeded songs are appended
       expect(provider.playables.first, existing);
+      expect(provider.playables.length, 6);
+    });
+
+    test('does not duplicate when seeding with overlapping songs', () {
+      final song = Song.fake(title: 'Overlap');
+      provider.playables = [song];
+
+      provider.seed([song, ...Song.fakeMany(3)]);
+
+      // The overlapping song should not be added again
+      expect(provider.playables.where((p) => p.id == song.id).length, 1);
+      expect(provider.playables.length, 4);
     });
   });
 

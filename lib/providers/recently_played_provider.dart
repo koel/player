@@ -33,9 +33,18 @@ class RecentlyPlayedProvider with ChangeNotifier, StreamSubscriber {
   }
 
   void seed(List<Playable> items) {
-    if (playables.isEmpty) {
-      playables = List.from(items);
+    // The API returns items sorted by most recently played.
+    // If a song was added during playback (before seed is called),
+    // re-insert it at the top since it's the most recent.
+    final current = List<Playable>.from(playables);
+    playables = List.from(items);
+
+    for (final playable in current) {
+      playables.remove(playable);
+      playables.insert(0, playable);
     }
+
+    notifyListeners();
   }
 
   void add(Playable playable) {
