@@ -6,14 +6,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class SongCard extends StatefulWidget {
-  final Song song;
+  final Playable playable;
   final AppRouter router;
 
   const SongCard({
     Key? key,
-    required this.song,
+    required this.playable,
     this.router = const AppRouter(),
   }) : super(key: key);
+
+  /// Convenience constructor for backward compatibility.
+  SongCard.fromSong({Key? key, required Song song, AppRouter router = const AppRouter()})
+      : this(key: key, playable: song, router: router);
 
   @override
   _SongCardState createState() => _SongCardState();
@@ -23,6 +27,13 @@ class _SongCardState extends State<SongCard> {
   var _opacity = 1.0;
   final _cardWidth = 144.0;
 
+  String get _subtitle {
+    final playable = widget.playable;
+    if (playable is Song) return playable.artistName;
+    if (playable is Episode) return playable.podcastTitle;
+    return '';
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -30,11 +41,12 @@ class _SongCardState extends State<SongCard> {
       onTapCancel: () => setState(() => _opacity = 1.0),
       onTap: () async {
         setState(() => _opacity = 1.0);
-        await audioHandler.queueAndPlay(widget.song);
+        await audioHandler.queueAndPlay(widget.playable);
       },
       onLongPress: () {
         HapticFeedback.mediumImpact();
-        widget.router.showPlayableActionSheet(context, playable: widget.song);
+        widget.router
+            .showPlayableActionSheet(context, playable: widget.playable);
       },
       behavior: HitTestBehavior.opaque,
       child: AnimatedOpacity(
@@ -42,7 +54,7 @@ class _SongCardState extends State<SongCard> {
         opacity: _opacity,
         child: Column(
           children: <Widget>[
-            PlayableThumbnail.md(playable: widget.song),
+            PlayableThumbnail.md(playable: widget.playable),
             const SizedBox(height: 12),
             SizedBox(
               width: _cardWidth,
@@ -50,13 +62,13 @@ class _SongCardState extends State<SongCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    widget.song.title,
+                    widget.playable.title,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    widget.song.artistName,
+                    _subtitle,
                     style: const TextStyle(color: Colors.white54),
                     overflow: TextOverflow.ellipsis,
                   )
