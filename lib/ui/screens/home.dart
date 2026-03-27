@@ -56,10 +56,10 @@ class _HomeScreenState extends State<HomeScreen> {
         final blocks = <Widget>[
           if (overviewProvider.mostPlayedSongs.isNotEmpty)
             HorizontalCardScroller(
-              headingText: 'Most played songs',
+              headingText: 'Most played',
               cards: <Widget>[
                 ...overviewProvider.mostPlayedSongs
-                    .map((song) => SongCard(song: song as Song)),
+                    .map((playable) => SongCard(playable: playable)),
                 PlaceholderCard(
                   icon: CupertinoIcons.music_note,
                   onPressed: () => Navigator.of(context).push(
