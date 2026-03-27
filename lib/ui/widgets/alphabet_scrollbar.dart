@@ -1,3 +1,4 @@
+import 'package:app/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -118,7 +119,11 @@ class _AlphabetScrollbarState extends State<AlphabetScrollbar> {
               },
               child: Container(
                 width: alphabetScrollbarWidth,
-                color: Colors.transparent,
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: letters.map((letter) {
@@ -134,7 +139,7 @@ class _AlphabetScrollbarState extends State<AlphabetScrollbar> {
                             height: 1,
                             fontWeight:
                                 isActive ? FontWeight.bold : FontWeight.normal,
-                            color: isActive ? Colors.white : Colors.white38,
+                            color: isActive ? AppColors.highlight : Colors.white,
                           ),
                         ),
                       ),
