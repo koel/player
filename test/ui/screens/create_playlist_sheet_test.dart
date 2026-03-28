@@ -2,7 +2,6 @@ import 'package:app/models/playlist.dart';
 import 'package:app/providers/playlist_folder_provider.dart';
 import 'package:app/providers/playlist_provider.dart';
 import 'package:app/ui/screens/create_playlist_sheet.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -32,11 +31,11 @@ void main() {
           value: folderProviderMock,
         ),
       ],
-      child: MaterialApp(home: child),
+      child: MaterialApp(home: Scaffold(body: child)),
     );
   }
 
-  testWidgets('shows create playlist dialog', (tester) async {
+  testWidgets('shows create playlist sheet', (tester) async {
     await tester.pumpWidget(buildTestApp(
       child: Builder(
         builder: (context) => ElevatedButton(
@@ -55,7 +54,7 @@ void main() {
     expect(find.text('Create'), findsOneWidget);
   });
 
-  testWidgets('creates a playlist via dialog', (tester) async {
+  testWidgets('creates a playlist via sheet', (tester) async {
     when(playlistProviderMock.create(
       name: 'Best Bananas',
       description: '',
@@ -75,9 +74,10 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(
-      find.byType(CupertinoTextField).first,
+      find.byType(TextField).first,
       'Best Bananas',
     );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Create'));
     await tester.pumpAndSettle(const Duration(seconds: 3));
 
@@ -88,7 +88,7 @@ void main() {
     )).called(1);
   });
 
-  testWidgets('cancel closes dialog without creating', (tester) async {
+  testWidgets('cancel closes sheet without creating', (tester) async {
     await tester.pumpWidget(buildTestApp(
       child: Builder(
         builder: (context) => ElevatedButton(

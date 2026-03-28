@@ -5,6 +5,7 @@ export 'app_bar.dart';
 export 'artist_card.dart';
 export 'bottom_space.dart';
 export 'decorated_image_box.dart';
+export 'form_sheet.dart';
 export 'frosted_glass_background.dart';
 export 'gradient_decorated_container.dart';
 export 'horizontal_card_scroller.dart';

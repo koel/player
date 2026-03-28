@@ -174,106 +174,79 @@ class _RadioStationsScreenState extends State<RadioStationsScreen> {
     final descController = TextEditingController();
     var isPublic = false;
 
-    await showCupertinoDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => CupertinoAlertDialog(
-        title: const Text('Add Radio Station'),
-        content: Column(
-          children: [
-            const SizedBox(height: 12),
-            CupertinoTextField(
-              controller: nameController,
-              placeholder: 'Station Name',
-              autofocus: true,
-              decoration: BoxDecoration(
-                color: CupertinoColors.tertiarySystemFill,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
-            const SizedBox(height: 8),
-            CupertinoTextField(
-              controller: urlController,
-              placeholder: 'Stream URL',
-              keyboardType: TextInputType.url,
-              decoration: BoxDecoration(
-                color: CupertinoColors.tertiarySystemFill,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
-            const SizedBox(height: 8),
-            CupertinoTextField(
-              controller: descController,
-              placeholder: 'Description (optional)',
-              maxLines: 2,
-              decoration: BoxDecoration(
-                color: CupertinoColors.tertiarySystemFill,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                CupertinoSwitch(
-                  value: isPublic,
-                  onChanged: (v) => setState(() => isPublic = v),
-                ),
-                const SizedBox(width: 8),
-                const Text('This station is public', style: TextStyle(fontSize: 14)),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          CupertinoDialogAction(
-            child: const Text('Cancel'),
-            onPressed: () => Navigator.pop(context),
-          ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            child: const Text('Add'),
-            onPressed: () async {
-              final name = nameController.text.trim();
-              final url = urlController.text.trim();
-              if (name.isEmpty || url.isEmpty) return;
+    await showFormSheet(
+      context,
+      title: 'Add Radio Station',
+      submitLabel: 'Add',
+      canSubmit: () =>
+          nameController.text.trim().isNotEmpty &&
+          urlController.text.trim().isNotEmpty,
+      onSubmit: () async {
+        final name = nameController.text.trim();
+        final url = urlController.text.trim();
+        if (name.isEmpty || url.isEmpty) return;
 
-              try {
-                await provider.create(
-                  name: name,
-                  url: url,
-                  description: descController.text.trim(),
-                  isPublic: isPublic,
-                );
-                Navigator.pop(context);
-                showOverlay(context, caption: 'Station added');
-              } catch (e) {
-                Navigator.pop(context);
-                var message = 'Something went wrong.';
-                if (e is HttpResponseException) {
-                  try {
-                    final body = jsonDecode(e.response.body);
-                    if (body['message'] != null) {
-                      message = body['message'];
-                    }
-                  } catch (_) {}
-                }
-                showOverlay(
-                  context,
-                  caption: 'Error',
-                  message: message,
-                  icon: CupertinoIcons.exclamationmark_triangle,
-                );
+        try {
+          await provider.create(
+            name: name,
+            url: url,
+            description: descController.text.trim(),
+            isPublic: isPublic,
+          );
+          Navigator.pop(context);
+          showOverlay(context, caption: 'Station added');
+        } catch (e) {
+          var message = 'Something went wrong.';
+          if (e is HttpResponseException) {
+            try {
+              final body = jsonDecode(e.response.body);
+              if (body['message'] != null) {
+                message = body['message'];
               }
-            },
+            } catch (_) {}
+          }
+          showOverlay(
+            context,
+            caption: 'Error',
+            message: message,
+            icon: CupertinoIcons.exclamationmark_triangle,
+          );
+        }
+      },
+      builder: (context, setState) => Column(
+        children: [
+          FormTextField(
+            controller: nameController,
+            placeholder: 'Station Name',
+            autofocus: true,
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 8),
+          FormTextField(
+            controller: urlController,
+            placeholder: 'Stream URL',
+            keyboardType: TextInputType.url,
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 8),
+          FormTextField(
+            controller: descController,
+            placeholder: 'Description (optional)',
+            maxLines: 2,
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              CupertinoSwitch(
+                value: isPublic,
+                onChanged: (v) => setState(() => isPublic = v),
+              ),
+              const SizedBox(width: 8),
+              const Text('This station is public',
+                  style: TextStyle(fontSize: 14)),
+            ],
           ),
         ],
-      ),
       ),
     );
   }
@@ -334,92 +307,77 @@ class _RadioStationsScreenState extends State<RadioStationsScreen> {
         TextEditingController(text: station.description ?? '');
     var isPublic = station.isPublic;
 
-    await showCupertinoDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => CupertinoAlertDialog(
-        title: const Text('Edit Radio Station'),
-        content: Column(
-          children: [
-            const SizedBox(height: 12),
-            CupertinoTextField(
-              controller: nameController,
-              placeholder: 'Station Name',
-              autofocus: true,
-              decoration: BoxDecoration(
-                color: CupertinoColors.tertiarySystemFill,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
-            const SizedBox(height: 8),
-            CupertinoTextField(
-              controller: urlController,
-              placeholder: 'Stream URL',
-              keyboardType: TextInputType.url,
-              decoration: BoxDecoration(
-                color: CupertinoColors.tertiarySystemFill,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
-            const SizedBox(height: 8),
-            CupertinoTextField(
-              controller: descController,
-              placeholder: 'Description (optional)',
-              maxLines: 2,
-              decoration: BoxDecoration(
-                color: CupertinoColors.tertiarySystemFill,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                CupertinoSwitch(
-                  value: isPublic,
-                  onChanged: (v) => setState(() => isPublic = v),
-                ),
-                const SizedBox(width: 8),
-                const Text('This station is public', style: TextStyle(fontSize: 14)),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          CupertinoDialogAction(
-            child: const Text('Cancel'),
-            onPressed: () => Navigator.pop(context),
-          ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            child: const Text('Save'),
-            onPressed: () async {
-              final name = nameController.text.trim();
-              final url = urlController.text.trim();
-              if (name.isEmpty || url.isEmpty) return;
+    await showFormSheet(
+      context,
+      title: 'Edit Radio Station',
+      submitLabel: 'Save',
+      canSubmit: () =>
+          nameController.text.trim().isNotEmpty &&
+          urlController.text.trim().isNotEmpty,
+      onSubmit: () async {
+        final name = nameController.text.trim();
+        final url = urlController.text.trim();
+        if (name.isEmpty || url.isEmpty) return;
 
-              try {
-                await provider.update(
-                  station,
-                  name: name,
-                  url: url,
-                  description: descController.text.trim(),
-                  isPublic: isPublic,
-                );
-                Navigator.pop(context);
-                showOverlay(context, caption: 'Station updated');
-              } catch (_) {
-                Navigator.pop(context);
-              }
-            },
+        try {
+          await provider.update(
+            station,
+            name: name,
+            url: url,
+            description: descController.text.trim(),
+            isPublic: isPublic,
+          );
+          Navigator.pop(context);
+          showOverlay(context, caption: 'Station updated');
+        } catch (e) {
+          var message = 'Something went wrong.';
+          if (e is HttpResponseException) {
+            try {
+              final body = jsonDecode(e.response.body);
+              if (body['message'] != null) message = body['message'];
+            } catch (_) {}
+          }
+          showOverlay(context,
+            caption: 'Error',
+            message: message,
+            icon: CupertinoIcons.exclamationmark_triangle,
+          );
+        }
+      },
+      builder: (context, setState) => Column(
+        children: [
+          FormTextField(
+            controller: nameController,
+            placeholder: 'Station Name',
+            autofocus: true,
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 8),
+          FormTextField(
+            controller: urlController,
+            placeholder: 'Stream URL',
+            keyboardType: TextInputType.url,
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 8),
+          FormTextField(
+            controller: descController,
+            placeholder: 'Description (optional)',
+            maxLines: 2,
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              CupertinoSwitch(
+                value: isPublic,
+                onChanged: (v) => setState(() => isPublic = v),
+              ),
+              const SizedBox(width: 8),
+              const Text('This station is public',
+                  style: TextStyle(fontSize: 14)),
+            ],
           ),
         ],
-      ),
       ),
     );
   }
