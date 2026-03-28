@@ -331,41 +331,32 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
   }) async {
     final controller = TextEditingController(text: folder.name);
 
-    await showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Rename Folder'),
-        content: Column(
-          children: [
-            const SizedBox(height: 12),
-            CupertinoTextField(
-              controller: controller,
-              autofocus: true,
-              decoration: BoxDecoration(
-                color: CupertinoColors.tertiarySystemFill,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
-          ],
-        ),
-        actions: [
-          CupertinoDialogAction(
-            child: const Text('Cancel'),
-            onPressed: () => Navigator.pop(context),
-          ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            child: const Text('Save'),
-            onPressed: () async {
-              final name = controller.text.trim();
-              if (name.isEmpty) return;
-              await provider.rename(folder, name: name);
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
+    await showFormSheet(
+      context,
+      title: 'Rename Folder',
+      submitLabel: 'Save',
+      canSubmit: () => controller.text.trim().isNotEmpty,
+      onSubmit: () async {
+        final name = controller.text.trim();
+        if (name.isEmpty) return;
+        try {
+          await provider.rename(folder, name: name);
+          Navigator.pop(context);
+        } catch (_) {
+          showOverlay(context,
+            caption: 'Error',
+            message: 'Could not rename folder.',
+            icon: Icons.error_outline,
+          );
+        }
+      },
+      builder: (context, setState) {
+        return FormTextField(
+          controller: controller,
+          autofocus: true,
+          onChanged: (_) => setState(() {}),
+        );
+      },
     );
   }
 
@@ -543,163 +534,68 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
     required PlaylistFolderProvider folderProvider,
   }) async {
     final nameController = TextEditingController(text: playlist.name);
-    final descController = TextEditingController(text: playlist.description ?? '');
+    final descController =
+        TextEditingController(text: playlist.description ?? '');
     final folders = folderProvider.folders;
     String? selectedFolderId = playlist.folderId;
 
-    await showCupertinoDialog(
-      context: context,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            final selectedFolder = selectedFolderId == null
-                ? null
-                : folders.firstWhere((f) => f.id == selectedFolderId);
+    await showFormSheet(
+      context,
+      title: 'Edit Playlist',
+      submitLabel: 'Save',
+      canSubmit: () => nameController.text.trim().isNotEmpty,
+      onSubmit: () async {
+        final name = nameController.text.trim();
+        if (name.isEmpty) return;
 
-            return CupertinoAlertDialog(
-              title: const Text('Edit Playlist'),
-              content: Column(
-                children: [
-                  const SizedBox(height: 12),
-                  CupertinoTextField(
-                    controller: nameController,
-                    placeholder: 'Playlist Name',
-                    autofocus: true,
-                    decoration: BoxDecoration(
-                      color: CupertinoColors.tertiarySystemFill,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  ),
-                  const SizedBox(height: 8),
-                  CupertinoTextField(
-                    controller: descController,
-                    placeholder: 'Description (optional)',
-                    maxLines: 2,
-                    decoration: BoxDecoration(
-                      color: CupertinoColors.tertiarySystemFill,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  ),
-                  if (folders.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: () {
-                        showCupertinoModalPopup(
-                          context: context,
-                          builder: (_) => CupertinoActionSheet(
-                            title: const Text('Select Folder'),
-                            actions: [
-                              CupertinoActionSheetAction(
-                                onPressed: () {
-                                  setState(() => selectedFolderId = null);
-                                  Navigator.pop(context);
-                                },
-                                child: Text(
-                                  'No folder',
-                                  style: TextStyle(
-                                    color: selectedFolderId == null
-                                        ? CupertinoColors.activeBlue
-                                        : CupertinoColors.white,
-                                  ),
-                                ),
-                              ),
-                              ...folders.map(
-                                (f) => CupertinoActionSheetAction(
-                                  onPressed: () {
-                                    setState(() => selectedFolderId = f.id);
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text(
-                                    f.name,
-                                    style: TextStyle(
-                                      color: selectedFolderId == f.id
-                                          ? CupertinoColors.activeBlue
-                                          : CupertinoColors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                            cancelButton: CupertinoActionSheetAction(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('Cancel'),
-                            ),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: CupertinoColors.tertiarySystemFill,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              CupertinoIcons.folder,
-                              size: 16,
-                              color: CupertinoColors.systemGrey,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                selectedFolder?.name ?? 'No folder',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: selectedFolder != null
-                                      ? CupertinoColors.white
-                                      : CupertinoColors.placeholderText,
-                                ),
-                              ),
-                            ),
-                            const Icon(
-                              CupertinoIcons.chevron_down,
-                              size: 12,
-                              color: CupertinoColors.systemGrey,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
+        try {
+          await provider.update(
+            playlist,
+            name: name,
+            description: descController.text.trim(),
+            folderId: selectedFolderId,
+          );
+          Navigator.pop(context);
+          showOverlay(context, caption: 'Playlist updated');
+        } catch (_) {
+          showOverlay(context,
+            caption: 'Error',
+            message: 'Could not update playlist.',
+            icon: Icons.error_outline,
+          );
+        }
+      },
+      builder: (context, setState) {
+        return Column(
+          children: [
+            FormTextField(
+              controller: nameController,
+              placeholder: 'Playlist Name',
+              autofocus: true,
+              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: 8),
+            FormTextField(
+              controller: descController,
+              placeholder: 'Description (optional)',
+              maxLines: 2,
+            ),
+            if (folders.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              FormDropdown<String?>(
+                value: selectedFolderId,
+                items: [null, ...folders.map((f) => f.id)],
+                labelBuilder: (id) {
+                  if (id == null) return 'No folder';
+                  final folder = folders.cast<dynamic>().firstWhere(
+                    (f) => f.id == id, orElse: () => null);
+                  return folder?.name ?? 'No folder';
+                },
+                placeholder: 'No folder',
+                onChanged: (id) => setState(() => selectedFolderId = id),
               ),
-              actions: [
-                CupertinoDialogAction(
-                  child: const Text('Cancel'),
-                  onPressed: () => Navigator.pop(dialogContext),
-                ),
-                CupertinoDialogAction(
-                  isDefaultAction: true,
-                  child: const Text('Save'),
-                  onPressed: () async {
-                    final name = nameController.text.trim();
-                    if (name.isEmpty) return;
-
-                    try {
-                      await provider.update(
-                        playlist,
-                        name: name,
-                        description: descController.text.trim(),
-                        folderId: selectedFolderId,
-                      );
-                      Navigator.pop(dialogContext);
-                      showOverlay(context, caption: 'Playlist updated');
-                    } catch (_) {
-                      Navigator.pop(dialogContext);
-                    }
-                  },
-                ),
-              ],
-            );
-          },
+            ],
+          ],
         );
       },
     );

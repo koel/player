@@ -87,17 +87,6 @@ class AppRouter {
   }
 
   Future<void> showAddPodcastSheet(BuildContext context) async {
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return Container(
-          height: MediaQuery.of(context).size.height,
-          child: const AddPodcastSheet(),
-        );
-      },
-    );
+    await showAddPodcastDialog(context);
   }
 }

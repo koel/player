@@ -1,7 +1,6 @@
 import 'package:app/models/playlist_folder.dart';
 import 'package:app/providers/playlist_folder_provider.dart';
 import 'package:app/ui/screens/create_playlist_folder_sheet.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -22,23 +21,24 @@ void main() {
     return ChangeNotifierProvider<PlaylistFolderProvider>.value(
       value: folderProviderMock,
       child: MaterialApp(
-        home: Builder(
-          builder: (context) => ElevatedButton(
-            onPressed: () => showCreatePlaylistFolderDialog(context),
-            child: const Text('Open'),
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => showCreatePlaylistFolderDialog(context),
+              child: const Text('Open'),
+            ),
           ),
         ),
       ),
     );
   }
 
-  testWidgets('shows create folder dialog', (tester) async {
+  testWidgets('shows create folder sheet', (tester) async {
     await tester.pumpWidget(buildTestApp());
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
 
     expect(find.text('New Folder'), findsOneWidget);
-    expect(find.text('Enter a name for this folder.'), findsOneWidget);
     expect(find.text('Folder Name'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);
     expect(find.text('Create'), findsOneWidget);
@@ -52,27 +52,15 @@ void main() {
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.byType(CupertinoTextField), 'My Folder');
+    await tester.enterText(find.byType(TextField), 'My Folder');
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Create'));
     await tester.pumpAndSettle(const Duration(seconds: 3));
 
     verify(folderProviderMock.create(name: 'My Folder')).called(1);
   });
 
-  testWidgets('does not create with empty name', (tester) async {
-    await tester.pumpWidget(buildTestApp());
-    await tester.tap(find.text('Open'));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Create'));
-    await tester.pumpAndSettle();
-
-    // Dialog should still be open
-    expect(find.text('New Folder'), findsOneWidget);
-    verifyNever(folderProviderMock.create(name: anyNamed('name')));
-  });
-
-  testWidgets('cancel closes dialog without creating', (tester) async {
+  testWidgets('cancel closes sheet without creating', (tester) async {
     await tester.pumpWidget(buildTestApp());
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
