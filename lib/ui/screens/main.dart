@@ -10,6 +10,7 @@ import 'package:app/ui/screens/screens.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -67,7 +68,9 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      child: Scaffold(
+      child: CupertinoScaffold(
+        transitionBackgroundColor: Colors.black,
+        body: Scaffold(
         body: _isOffline
             ? Stack(
                 children: [
@@ -127,6 +130,7 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                 ],
               ),
+      ),
       ),
       onWillPop: () async {
         if (!Platform.isAndroid || Navigator.of(context).canPop()) return true;

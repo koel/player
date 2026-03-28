@@ -3,6 +3,7 @@ import 'package:app/ui/screens/screens.dart';
 import 'package:app/ui/widgets/now_playing_page_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class AppRouter {
   const AppRouter();
@@ -78,10 +79,11 @@ class AppRouter {
     BuildContext context, {
     required Playable playable,
   }) async {
-    showModalBottomSheet<void>(
-      useRootNavigator: true, // covering everything else
+    CupertinoScaffold.showCupertinoModalBottomSheet(
+      useRootNavigator: true,
       context: context,
-      isScrollControlled: true,
+      expand: true,
+      backgroundColor: const Color(0xFF0a0416),
       builder: (_) => PlayableActionSheet(playable: playable),
     );
   }

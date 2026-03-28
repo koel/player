@@ -2,6 +2,7 @@ import 'package:app/constants/constants.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 /// A reusable bottom sheet with a title, form fields, and action buttons.
 /// Used for creating/editing playlists, folders, radio stations, etc.
@@ -13,23 +14,34 @@ Future<void> showFormSheet(
   required Future<void> Function() onSubmit,
   bool Function()? canSubmit,
 }) async {
-  await showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (context) {
-      return SizedBox(
-        height: MediaQuery.of(context).size.height * 0.85,
-        child: _FormSheet(
-          title: title,
-          builder: builder,
-          submitLabel: submitLabel,
-          onSubmit: onSubmit,
-          canSubmit: canSubmit,
-        ),
-      );
-    },
+  final sheet = _FormSheet(
+    title: title,
+    builder: builder,
+    submitLabel: submitLabel,
+    onSubmit: onSubmit,
+    canSubmit: canSubmit,
   );
+
+  final hasCupertinoScaffold = CupertinoScaffold.of(context) != null;
+
+  if (hasCupertinoScaffold) {
+    await CupertinoScaffold.showCupertinoModalBottomSheet(
+      context: context,
+      expand: true,
+      backgroundColor: const Color(0xFF0a0416),
+      builder: (_) => sheet,
+    );
+  } else {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => SizedBox(
+        height: MediaQuery.of(context).size.height * 0.85,
+        child: sheet,
+      ),
+    );
+  }
 }
 
 class _FormSheet extends StatefulWidget {
@@ -57,16 +69,17 @@ class _FormSheetState extends State<_FormSheet> {
   @override
   Widget build(BuildContext context) {
     return GradientDecoratedContainer(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: 24,
-          right: 24,
-          top: 20,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-        ),
-        child: StatefulBuilder(
-          builder: (context, setState) {
-            return Column(
+      child: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+          ),
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Center(
@@ -142,7 +155,8 @@ class _FormSheetState extends State<_FormSheet> {
                 ),
               ],
             );
-          },
+            },
+          ),
         ),
       ),
     );

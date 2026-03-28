@@ -10,6 +10,7 @@ import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class InfoSheet extends StatefulWidget {
@@ -50,7 +51,7 @@ class _InfoSheetState extends State<InfoSheet> {
           child: Scaffold(
             appBar: AppBar(
               automaticallyImplyLeading: false,
-              backgroundColor: Colors.transparent,
+              backgroundColor: const Color(0xFF0a0416),
               elevation: 0,
               bottom: TabBar(
                 tabs: [
@@ -125,11 +126,10 @@ class InfoHtml extends StatelessWidget {
 }
 
 Future<void> showInfoSheet(BuildContext context, {required Playable playable}) {
-  return showModalBottomSheet<void>(
+  return CupertinoScaffold.showCupertinoModalBottomSheet(
     context: context,
-    isScrollControlled: true,
-    enableDrag: true,
-    backgroundColor: Colors.transparent,
+    expand: true,
+    backgroundColor: const Color(0xFF0a0416),
     builder: (_) {
       return DraggableScrollableSheet(
         initialChildSize: 1,

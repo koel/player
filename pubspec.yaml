@@ -60,6 +60,7 @@ dependencies:
   collection: any
   faker: any
   ulid: ^2.0.1
+  modal_bottom_sheet: ^3.0.0
 dev_dependencies:
   fake_async: ^1.2.0
   mockito: ^5.0.12
