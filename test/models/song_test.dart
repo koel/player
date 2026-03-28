@@ -159,10 +159,13 @@ void main() {
       expect(value, contains('Test Artist'));
     });
 
-    test('returns track for track sort', () {
+    test('returns disc-track composite for track sort', () {
       final config =
           PlayableSortConfig(field: 'track', order: SortOrder.asc);
-      expect(song.valueToCompare(config), song.track);
+      final value = song.valueToCompare(config) as String;
+      final expected =
+          '${song.disc.toString().padLeft(6, '0')}${song.track.toString().padLeft(6, '0')}';
+      expect(value, expected);
     });
 
     test('returns createdAt for created_at sort', () {
