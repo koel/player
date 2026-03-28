@@ -60,6 +60,16 @@ class AppRouter {
     ));
   }
 
+  gotoGenreDetailsScreen(
+    BuildContext context, {
+    required Genre genre,
+  }) async {
+    await Navigator.of(context).push(CupertinoPageRoute(
+      builder: (_) => const GenreDetailsScreen(),
+      settings: RouteSettings(arguments: genre),
+    ));
+  }
+
   Future<void> openNowPlayingScreen(BuildContext context) async {
     await Navigator.of(context, rootNavigator: true).push(
       NowPlayingPageRoute(builder: (_) => const NowPlayingScreen()),

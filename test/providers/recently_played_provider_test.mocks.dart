@@ -118,6 +118,39 @@ class MockPlayableProvider extends _i1.Mock implements _i3.PlayableProvider {
       ) as _i5.Future<List<_i4.Playable<dynamic>>>);
 
   @override
+  _i5.Future<_i2.PaginationResult<_i4.Playable<dynamic>>> paginateByGenre(
+    String? genreId, {
+    int? page = 1,
+    String? sort = 'title',
+    _i6.SortOrder? order = _i6.SortOrder.asc,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #paginateByGenre,
+          [genreId],
+          {
+            #page: page,
+            #sort: sort,
+            #order: order,
+          },
+        ),
+        returnValue:
+            _i5.Future<_i2.PaginationResult<_i4.Playable<dynamic>>>.value(
+                _FakePaginationResult_0<_i4.Playable<dynamic>>(
+          this,
+          Invocation.method(
+            #paginateByGenre,
+            [genreId],
+            {
+              #page: page,
+              #sort: sort,
+              #order: order,
+            },
+          ),
+        )),
+      ) as _i5.Future<_i2.PaginationResult<_i4.Playable<dynamic>>>);
+
+  @override
   _i5.Future<List<_i4.Playable<dynamic>>> fetchForAlbum(
     dynamic albumId, {
     bool? forceRefresh = false,

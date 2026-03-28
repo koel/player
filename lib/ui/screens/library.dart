@@ -51,6 +51,13 @@ class LibraryScreen extends StatelessWidget {
           ),
         ),
         LibraryMenuItem(
+          icon: CupertinoIcons.guitars,
+          label: 'Genres',
+          onTap: () => Navigator.of(context).push(
+            CupertinoPageRoute(builder: (_) => const GenresScreen()),
+          ),
+        ),
+        LibraryMenuItem(
           icon: CupertinoIcons.music_albums,
           label: 'Albums',
           onTap: () => Navigator.of(context).push(

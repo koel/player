@@ -74,6 +74,17 @@ class MockAppRouter extends _i1.Mock implements _i2.AppRouter {
       ));
 
   @override
+  dynamic gotoGenreDetailsScreen(
+    _i4.BuildContext? context, {
+    required _i5.Genre? genre,
+  }) =>
+      super.noSuchMethod(Invocation.method(
+        #gotoGenreDetailsScreen,
+        [context],
+        {#genre: genre},
+      ));
+
+  @override
   _i3.Future<void> openNowPlayingScreen(_i4.BuildContext? context) =>
       (super.noSuchMethod(
         Invocation.method(

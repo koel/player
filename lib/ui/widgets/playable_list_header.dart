@@ -14,7 +14,8 @@ enum PlayableListContext {
   other,
   downloads,
   recentlyPlayed,
-  podcast
+  podcast,
+  genre
 }
 
 class PlayableListHeader extends StatefulWidget {
