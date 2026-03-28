@@ -9,6 +9,8 @@ export 'create_playlist_sheet.dart';
 export 'data_loading.dart';
 export 'downloaded.dart';
 export 'favorites.dart';
+export 'genre_details.dart';
+export 'genres.dart';
 export 'home.dart';
 export 'info_sheet/info_sheet.dart';
 export 'initial.dart';

@@ -1,6 +1,7 @@
 export 'album.dart';
 export 'artist.dart';
 export 'episode.dart';
+export 'genre.dart';
 export 'interaction.dart';
 export 'playable.dart';
 export 'playlist.dart';

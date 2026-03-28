@@ -59,7 +59,7 @@ class _MessageOverlayState extends State<MessageOverlay> {
         child: Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 130, left: 32, right: 32),
+            padding: const EdgeInsets.only(bottom: 80, left: 32, right: 32),
             child: AnimatedOpacity(
               opacity: _visible ? 1 : 0,
               duration: _animationDuration,

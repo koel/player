@@ -79,6 +79,30 @@ class PlayableProvider with ChangeNotifier, StreamSubscriber {
     );
   }
 
+  Future<PaginationResult<Playable>> paginateByGenre(
+    String genreId, {
+    int page = 1,
+    String sort = 'title',
+    SortOrder order = SortOrder.asc,
+  }) async {
+    final res = await get(
+      'genres/$genreId/songs'
+      '?page=$page'
+      '&sort=$sort'
+      '&order=${order.value}',
+    );
+
+    final items =
+        res['data'].map<Playable>((j) => Playable.fromJson(j)).toList();
+    final synced = syncWithVault(items);
+
+    return PaginationResult(
+      items: synced,
+      nextPage:
+          res['links']['next'] == null ? null : ++res['meta']['current_page'],
+    );
+  }
+
   Future<List<Playable>> fetchForAlbum(
     dynamic albumId, {
     bool forceRefresh = false,
