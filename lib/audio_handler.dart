@@ -133,11 +133,10 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
       queue.stream.listen((mediaItems) {
         var playableIds = mediaItems.map((item) => item.id).toList();
-        if (playableIds.isEmpty) return;
 
         put('queue/state', data: {
           'songs': playableIds,
-          'song': _currentMediaItem.id,
+          'song': playableIds.isEmpty ? '' : _currentMediaItem.id,
         });
       });
 

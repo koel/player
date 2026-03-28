@@ -30,6 +30,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
   Playable? _playable;
   late PlayableProvider _playableProvider;
   var _dragOffset = 0.0;
+  var _queuePlayables = <Playable>[];
+  final _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -45,26 +47,48 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
       if (value == null) return;
       setState(() => _playable = _playableProvider.byId(value.id));
     }));
+
+    subscribe(audioHandler.queue.listen((List<MediaItem> value) {
+      setState(() {
+        _queuePlayables = value
+            .map((item) => _playableProvider.byId(item.id))
+            .where((p) => p != null)
+            .cast<Playable>()
+            .toList();
+      });
+    }));
   }
 
   @override
   void dispose() {
+    _scrollController.dispose();
     unsubscribeAll();
     super.dispose();
   }
 
-  void _onVerticalDragUpdate(DragUpdateDetails details) {
-    if (details.delta.dy < 0 && _dragOffset <= 0) return;
-    setState(() {
-      _dragOffset = (_dragOffset + details.delta.dy).clamp(0.0, double.infinity);
-    });
+  void _onPointerMove(PointerMoveEvent event) {
+    final atTop = !_scrollController.hasClients ||
+        _scrollController.offset <= 0;
+
+    if (_dragOffset > 0) {
+      // Already dismissing — track in both directions
+      setState(() {
+        _dragOffset = (_dragOffset + event.delta.dy).clamp(0.0, double.infinity);
+      });
+    } else if (atTop && event.delta.dy > 0) {
+      // At top and dragging down — start dismiss
+      setState(() {
+        _dragOffset = event.delta.dy;
+      });
+    }
   }
 
-  void _onVerticalDragEnd(DragEndDetails details) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final velocity = details.primaryVelocity ?? 0;
+  void _onPointerUp(PointerUpEvent event) {
+    if (_dragOffset <= 0) return;
 
-    if (_dragOffset > screenHeight * 0.2 || velocity > 800) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    if (_dragOffset > screenHeight * 0.15) {
       Navigator.of(context).pop();
     } else {
       setState(() => _dragOffset = 0);
@@ -78,6 +102,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
     if (playable == null || _state == null) return const SizedBox.shrink();
 
     final bottomIconColor = Colors.white54;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     final frostBackground = SizedBox(
       width: double.infinity,
@@ -98,44 +123,12 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
       ),
     );
 
-    final thumbnail = Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24),
-      child: Hero(
-        tag: 'hero-now-playing-thumbnail',
-        child: PlayableThumbnail.xl(playable: playable),
-      ),
-    );
-
-    final infoPane = Column(
-      children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Expanded(child: PlayableInfo(playable: playable)),
-            const SizedBox(width: 8),
-            PlayableCacheIcon(playable: playable),
-            GestureDetector(
-              onTap: () => widget.router.showPlayableActionSheet(
-                context,
-                playable: playable,
-              ),
-              child: const Icon(CupertinoIcons.ellipsis),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        ProgressBar(playable: playable),
-      ],
-    );
-
-    return GestureDetector(
-      onVerticalDragUpdate: _onVerticalDragUpdate,
-      onVerticalDragEnd: _onVerticalDragEnd,
+    return Listener(
+      onPointerMove: _onPointerMove,
+      onPointerUp: _onPointerUp,
       child: AnimatedContainer(
-        duration: _dragOffset == 0
-            ? const Duration(milliseconds: 200)
-            : Duration.zero,
+        duration:
+            _dragOffset == 0 ? const Duration(milliseconds: 200) : Duration.zero,
         curve: Curves.easeOut,
         transform: Matrix4.translationValues(0, _dragOffset, 0),
         child: ClipRRect(
@@ -145,76 +138,188 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
           child: Material(
             type: MaterialType.transparency,
             child: Stack(
-      children: <Widget>[
-        const GradientDecoratedContainer(),
-        frostBackground,
-        Container(color: Colors.black38),
-        Container(
-          padding: const EdgeInsets.all(24),
-          child: ConstrainedBox(
-            constraints: BoxConstraints.tightFor(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                // Drag handle
-                Center(
-                  child: Container(
-                    width: 36,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: Colors.white30,
-                      borderRadius: BorderRadius.circular(2.5),
+                const GradientDecoratedContainer(),
+                frostBackground,
+                Container(color: Colors.black38),
+                CustomScrollView(
+                  controller: _scrollController,
+                  // Freeze scroll while dismissing; bounce normally otherwise
+                  physics: _dragOffset > 0
+                      ? const NeverScrollableScrollPhysics()
+                      : const BouncingScrollPhysics(),
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Container(
+                        height: _queuePlayables.isEmpty
+                            ? screenHeight
+                            : screenHeight - 106,
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            Center(
+                              child: Container(
+                                width: 36,
+                                height: 5,
+                                decoration: BoxDecoration(
+                                  color: Colors.white30,
+                                  borderRadius: BorderRadius.circular(2.5),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 24),
+                              child: Hero(
+                                tag: 'hero-now-playing-thumbnail',
+                                child: PlayableThumbnail.xl(
+                                    playable: playable),
+                              ),
+                            ),
+                            Column(
+                              children: <Widget>[
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.center,
+                                  children: <Widget>[
+                                    Expanded(
+                                        child: PlayableInfo(
+                                            playable: playable)),
+                                    const SizedBox(width: 8),
+                                    PlayableCacheIcon(playable: playable),
+                                    GestureDetector(
+                                      onTap: () => widget.router
+                                          .showPlayableActionSheet(
+                                        context,
+                                        playable: playable,
+                                      ),
+                                      child: const Icon(
+                                          CupertinoIcons.ellipsis),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                ProgressBar(playable: playable),
+                              ],
+                            ),
+                            const AudioControls(),
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                const VolumeSlider(),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: <Widget>[
+                                    const RepeatModeButton(),
+                                    IconButton(
+                                      onPressed: () => showInfoSheet(
+                                        context,
+                                        playable: playable,
+                                      ),
+                                      icon: Icon(
+                                        CupertinoIcons.text_quote,
+                                        color: bottomIconColor,
+                                      ),
+                                    ),
+                                    if (playable is Song)
+                                      IconButton(
+                                        onPressed: () {
+                                          context
+                                              .read<InteractionProvider>()
+                                              .toggleLike(
+                                                  song: playable as Song);
+                                          setState(() {});
+                                        },
+                                        icon: Icon(
+                                          playable.liked
+                                              ? CupertinoIcons.heart_fill
+                                              : CupertinoIcons.heart,
+                                          color: playable.liked
+                                              ? Colors.red
+                                              : bottomIconColor,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                thumbnail,
-                infoPane,
-                const AudioControls(),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const VolumeSlider(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        const RepeatModeButton(),
-                        IconButton(
-                          onPressed: () => showInfoSheet(
-                            context,
-                            playable: playable,
-                          ),
-                          icon: Icon(
-                            CupertinoIcons.text_quote,
-                            color: bottomIconColor,
+                    if (_queuePlayables.isNotEmpty) ...[
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                              left: 16, right: 8, top: 4, bottom: 4),
+                          child: Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Queued',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () async =>
+                                    await audioHandler.clearQueue(),
+                                child: const Text(
+                                  'Clear',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        IconButton(
-                          onPressed: () {
-                            FocusManager.instance.primaryFocus?.unfocus();
-                            Navigator.of(context, rootNavigator: true)
-                                .pushNamed(QueueScreen.routeName);
-                          },
-                          icon: Icon(
-                            CupertinoIcons.list_number,
-                            color: bottomIconColor,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                      SliverReorderableList(
+                        itemCount: _queuePlayables.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Dismissible(
+                            direction: DismissDirection.endToStart,
+                            onDismissed: (_) async {
+                              await audioHandler
+                                  .removeQueueItemAt(index);
+                            },
+                            background: Container(
+                              alignment:
+                                  AlignmentDirectional.centerEnd,
+                              color: Colors.red,
+                              child: const Padding(
+                                padding: EdgeInsets.only(right: 16),
+                                child:
+                                    Icon(CupertinoIcons.delete),
+                              ),
+                            ),
+                            key: ValueKey(_queuePlayables[index]),
+                            child: PlayableRow(
+                              index: index,
+                              key: ValueKey(
+                                  _queuePlayables[index]),
+                              playable: _queuePlayables[index],
+                              listContext:
+                                  PlayableListContext.queue,
+                            ),
+                          );
+                        },
+                        onReorder: audioHandler.moveQueueItem,
+                      ),
+                      const BottomSpace(height: 120),
+                    ],
                   ],
                 ),
               ],
             ),
           ),
         ),
-      ],
-    ),
-    ),
-    ),
-    ),
+      ),
     );
   }
 }
