@@ -12,6 +12,6 @@ class AppColors {
   static const highlight = const Color(0xFFF80A95);
   static const highlightAccent = const Color(0xFFC20C75);
 
-  static const staticScreenHeaderBackground = Colors.transparent;
+  static const staticScreenHeaderBackground = Color(0xFF101010);
   static const flexibleScreenHeaderBackground = Color.fromRGBO(25, 0, 64, .5);
 }
