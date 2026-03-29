@@ -110,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
           body: CupertinoTheme(
             data: CupertinoThemeData(
               primaryColor: AppColors.white,
-              barBackgroundColor: headerBackgroundColor,
+              barBackgroundColor: Colors.transparent,
             ),
             child: PullToRefresh(
               onRefresh: () => context.read<OverviewProvider>().refresh(),
@@ -120,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     : <Widget>[
                         CupertinoSliverNavigationBar(
                           backgroundColor:
-                              headerBackgroundColor,
+                              Colors.transparent,
                           largeTitle: const LargeTitle(text: 'Home'),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,

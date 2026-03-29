@@ -22,10 +22,6 @@ Color get highlightAccentColor {
   return hsl.withLightness((hsl.lightness - 0.1).clamp(0.0, 1.0)).toColor();
 }
 
-Color get headerBackgroundColor {
-  final hsl = HSLColor.fromColor(highlightColor);
-  return hsl.withLightness(0.08).withSaturation(0.5).toColor();
-}
 
 class GradientDecoratedContainer extends StatelessWidget {
   final Widget child;
