@@ -24,6 +24,8 @@ class PlayableListHeader extends StatefulWidget {
   final Function(String keywords)? onSearchQueryChanged;
   final Function()? onPlayPressed;
   final Function()? onShufflePressed;
+  final Function()? onSearchOpened;
+  final Function()? onSearchClosed;
 
   const PlayableListHeader({
     Key? key,
@@ -32,6 +34,8 @@ class PlayableListHeader extends StatefulWidget {
     this.onSearchQueryChanged,
     this.onPlayPressed,
     this.onShufflePressed,
+    this.onSearchOpened,
+    this.onSearchClosed,
   }) : super(key: key);
 
   @override
@@ -74,6 +78,7 @@ class _PlayableListHeaderState extends State<PlayableListHeader>
     setState(() => _searching = true);
     _animController.forward();
     _focusNode.requestFocus();
+    widget.onSearchOpened?.call();
   }
 
   void _closeSearch() {
@@ -82,6 +87,7 @@ class _PlayableListHeaderState extends State<PlayableListHeader>
     _animController.reverse().then((_) {
       if (mounted) setState(() => _searching = false);
     });
+    widget.onSearchClosed?.call();
   }
 
   @override

@@ -251,6 +251,8 @@ class _SongListHeaderState extends State<SongListHeader> {
       playables: [],
       scrollController: widget.scrollController,
       onSearchQueryChanged: widget.onSearchQueryChanged,
+      onSearchOpened: widget.onSearchExpanded,
+      onSearchClosed: widget.onSearchCollapsed,
       onPlayPressed: () async {
         if (_fetchingSongsToPlayAll || _fetchingSongsToShuffle) return;
         await fetchSongsToPlayAll();

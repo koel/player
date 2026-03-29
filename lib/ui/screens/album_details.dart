@@ -35,6 +35,12 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final albumId = ModalRoute.of(context)!.settings.arguments;
 
