@@ -12,7 +12,7 @@ class HomeScreenPlaceholder extends StatelessWidget {
       child: CustomScrollView(
         physics: NeverScrollableScrollPhysics(),
         slivers: <Widget>[
-          const CupertinoSliverNavigationBar(
+          const CupertinoSliverNavigationBar(enableBackgroundFilterBlur: false,
             largeTitle: Text(''),
             trailing: CirclePlaceholder(size: 24),
           ),

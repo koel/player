@@ -66,7 +66,7 @@ class _GenresScreenState extends State<GenresScreen> {
                 onRefresh: fetchData,
                 child: CustomScrollView(
                   slivers: [
-                    CupertinoSliverNavigationBar(
+                    CupertinoSliverNavigationBar(enableBackgroundFilterBlur: false,
                       backgroundColor: Colors.transparent,
                       largeTitle: const LargeTitle(text: 'Genres'),
                     ),

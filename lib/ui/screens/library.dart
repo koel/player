@@ -95,7 +95,7 @@ class LibraryScreen extends StatelessWidget {
         child: GradientDecoratedContainer(
           child: CustomScrollView(
             slivers: <Widget>[
-              CupertinoSliverNavigationBar(
+              CupertinoSliverNavigationBar(enableBackgroundFilterBlur: false,
                 backgroundColor: Colors.transparent,
                 largeTitle: const LargeTitle(text: 'Library'),
               ),

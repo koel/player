@@ -111,7 +111,7 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                     CustomScrollView(
                     controller: _scrollController,
                     slivers: <Widget>[
-                      CupertinoSliverNavigationBar(
+                      CupertinoSliverNavigationBar(enableBackgroundFilterBlur: false,
                         backgroundColor: Colors.transparent,
                         largeTitle: const LargeTitle(text: 'Albums'),
                         trailing: Transform.scale(

@@ -110,7 +110,7 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
                     CustomScrollView(
                     controller: _scrollController,
                     slivers: [
-                      CupertinoSliverNavigationBar(
+                      CupertinoSliverNavigationBar(enableBackgroundFilterBlur: false,
                         backgroundColor: Colors.transparent,
                         largeTitle: const LargeTitle(text: 'Artists'),
                         trailing: Transform.scale(

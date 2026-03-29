@@ -118,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 slivers: overviewProvider.isEmpty
                     ? [SliverToBoxAdapter(child: const EmptyHomeScreen())]
                     : <Widget>[
-                        CupertinoSliverNavigationBar(
+                        CupertinoSliverNavigationBar(enableBackgroundFilterBlur: false,
                           backgroundColor:
                               Colors.transparent,
                           largeTitle: const LargeTitle(text: 'Home'),

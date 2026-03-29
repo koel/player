@@ -131,7 +131,7 @@ class _PodcastScreenState extends State<PodcastsScreen> {
                 child: CustomScrollView(slivers: widgets),
               );
             },
-            child: CupertinoSliverNavigationBar(
+            child: CupertinoSliverNavigationBar(enableBackgroundFilterBlur: false,
               backgroundColor: Colors.transparent,
               largeTitle: const LargeTitle(text: 'Podcasts'),
               trailing: Row(

@@ -64,7 +64,7 @@ class AddToPlaylistScreen extends StatelessWidget {
               ],
             );
           },
-          child: CupertinoSliverNavigationBar(
+          child: CupertinoSliverNavigationBar(enableBackgroundFilterBlur: false,
             backgroundColor: Colors.transparent,
             largeTitle: const LargeTitle(text: 'Add to a Playlist'),
             trailing: IconButton(

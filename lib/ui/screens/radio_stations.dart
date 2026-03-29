@@ -57,7 +57,7 @@ class _RadioStationsScreenState extends State<RadioStationsScreen> {
                 onRefresh: () => _loading ? Future(() => null) : _fetchData(),
                 child: CustomScrollView(
                   slivers: [
-                    CupertinoSliverNavigationBar(
+                    CupertinoSliverNavigationBar(enableBackgroundFilterBlur: false,
                       backgroundColor: Colors.transparent,
                       largeTitle: const LargeTitle(text: 'Radio'),
                       trailing: IconButton(
