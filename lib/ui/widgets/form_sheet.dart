@@ -18,8 +18,10 @@ Future<void> showFormSheet(
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (context) {
-      return SizedBox(
-        height: MediaQuery.of(context).size.height * 0.85,
+      return ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.85,
+        ),
         child: _FormSheet(
           title: title,
           builder: builder,
@@ -93,7 +95,6 @@ class _FormSheetState extends State<_FormSheet> {
                     child: widget.builder(context, setState),
                   ),
                 ),
-                const Spacer(),
                 const SizedBox(height: 32),
                 Row(
                   children: [
