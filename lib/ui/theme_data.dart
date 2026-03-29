@@ -43,7 +43,7 @@ ThemeData themeData(BuildContext context) {
     popupMenuTheme: PopupMenuThemeData(
       shadowColor: Colors.transparent,
       elevation: 0,
-      color: const Color(0xFF1B0047),
+      color: Color.alphaBlend(highlight.withOpacity(.8), Colors.black),
       shape: SmoothRectangleBorder(
         borderRadius: SmoothBorderRadius(
           cornerRadius: 8,

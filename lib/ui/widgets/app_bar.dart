@@ -44,7 +44,7 @@ class AppBar extends StatelessWidget {
                 opacity: t,
                 child: Container(
                   height: collapsedHeight,
-                  color: const Color.fromRGBO(25, 0, 64, 0.95),
+                  color: highlightColor.withOpacity(0.95),
                 ),
               ),
               FlexibleSpaceBar(
