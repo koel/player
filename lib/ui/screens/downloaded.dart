@@ -90,6 +90,8 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                 slivers: <Widget>[
                   AppBar(
                     headingText: 'Downloaded',
+                    backgroundImage: backgroundImageFromPlayables(
+                        provider.playables),
                     actions: [
                       SortButton(
                         fields: ['title', 'artist_name', 'created_at'],

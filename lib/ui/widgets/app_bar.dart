@@ -1,6 +1,28 @@
 import 'package:app/constants/constants.dart';
+import 'package:app/models/models.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/material.dart';
+
+Widget? backgroundImageFromPlayables(List<Playable> playables) {
+  final playable = playables.cast<Playable?>().firstWhere(
+        (p) => p!.hasCustomImage,
+        orElse: () => null,
+      );
+
+  if (playable == null) return null;
+
+  return SizedBox.expand(
+    child: DecoratedBox(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: playable.image,
+          fit: BoxFit.cover,
+          alignment: Alignment.topCenter,
+        ),
+      ),
+    ),
+  );
+}
 
 class AppBar extends StatelessWidget {
   final String headingText;

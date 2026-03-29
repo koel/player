@@ -123,6 +123,8 @@ class _SongsScreenState extends State<SongsScreen> {
               slivers: [
                 AppBar(
                   headingText: 'All songs',
+                  backgroundImage: backgroundImageFromPlayables(
+                      provider.playables),
                   actions: [
                     SortButton(
                       fields: ['title', 'artist_name', 'created_at'],

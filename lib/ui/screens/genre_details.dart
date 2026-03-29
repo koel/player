@@ -154,6 +154,7 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
                     AppBar(
                       headingText:
                           _genre.name.isEmpty ? 'Unknown Genre' : _genre.name,
+                      backgroundImage: backgroundImageFromPlayables(_songs),
                       actions: [
                         SortButton(
                           fields: const [

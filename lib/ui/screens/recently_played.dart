@@ -90,6 +90,8 @@ class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
               slivers: <Widget>[
                 AppBar(
                   headingText: 'Recently Played',
+                  backgroundImage: backgroundImageFromPlayables(
+                      provider.playables),
                 ),
                 SliverToBoxAdapter(
                   child: PlayableListHeader(

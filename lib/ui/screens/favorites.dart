@@ -132,6 +132,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       : <Widget>[
                           AppBar(
                             headingText: 'Favorites',
+                            backgroundImage: backgroundImageFromPlayables(
+                                provider.playables),
                             actions: [
                               SortButton(
                                 fields: ['title', 'artist_name', 'created_at'],

@@ -32,6 +32,24 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
     _playlistProvider = context.read();
   }
 
+  Widget? _buildBackgroundImage(Playlist playlist, List<Playable> playables) {
+    if (playlist.hasCover) {
+      return SizedBox.expand(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: CachedNetworkImageProvider(playlist.cover!),
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return backgroundImageFromPlayables(playables);
+  }
+
   Future<List<Playable>> buildRequest(
     var playlistId, {
     bool forceRefresh = false,
@@ -82,21 +100,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                 slivers: <Widget>[
                   AppBar(
                     headingText: playlist.name,
-                    backgroundImage: playlist.hasCover
-                        ? SizedBox.expand(
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                image: DecorationImage(
-                                  image: CachedNetworkImageProvider(
-                                    playlist.cover!,
-                                  ),
-                                  fit: BoxFit.cover,
-                                  alignment: Alignment.topCenter,
-                                ),
-                              ),
-                            ),
-                          )
-                        : null,
+                    backgroundImage: _buildBackgroundImage(playlist, playables),
                     actions: [
                       SortButton(
                         fields: ['title', 'artist_name', 'created_at'],
