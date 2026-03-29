@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 enum ProfileAvatarMenuItems {
   changeBackground,
@@ -58,8 +59,8 @@ class ProfileAvatar extends StatelessWidget {
 
     final appDir = await getApplicationDocumentsDirectory();
     final ext = path.extension(picked.path);
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final dest = File('${appDir.path}/background_$timestamp$ext');
+    final id = const Uuid().v4();
+    final dest = File('${appDir.path}/background_$id$ext');
 
     // Remove the old custom background file
     final oldPath = preferences.backgroundImagePath;
