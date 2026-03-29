@@ -1,4 +1,7 @@
+import 'package:app/audio_handler.dart';
 import 'package:app/models/radio_station.dart';
+import 'package:app/providers/radio_player_provider.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -51,17 +54,12 @@ void main() {
   });
 
   group('RadioStationsScreen thumbnail overlay logic', () {
-    // These tests verify the conditional logic used in _RadioStationRow
-    // to determine what to show on the thumbnail overlay.
-
     test('shows animation when playing', () {
       final isPlaying = true;
       final loading = false;
       final playing = true;
 
-      // Overlay is shown when isPlaying (current station matches)
       expect(isPlaying, isTrue);
-      // Animation is shown when loading or playing
       expect(loading || playing, isTrue);
     });
 
@@ -79,19 +77,61 @@ void main() {
       final loading = false;
       final playing = false;
 
-      // Overlay still shown (station is active)
       expect(isPlaying, isTrue);
-      // But no animation
       expect(loading || playing, isFalse);
     });
 
     test('no overlay when station is not active', () {
       final isPlaying = false;
-      final loading = false;
-      final playing = true;
 
-      // No overlay at all
       expect(isPlaying, isFalse);
+    });
+  });
+
+  group('Radio media session integration', () {
+    test('mediaItemForStation produces correct MediaItem', () {
+      final station = RadioStation.fake(id: 'station-1', name: 'Jazz FM');
+      final mediaItem = RadioPlayerProvider.mediaItemForStation(station);
+
+      expect(mediaItem.id, 'radio-station-1');
+      expect(mediaItem.title, 'Jazz FM');
+      expect(mediaItem.artist, 'Radio');
+      expect(mediaItem.duration, isNull);
+    });
+
+    test('mediaItemForStation includes art URI when logo is present', () {
+      final station = RadioStation(
+        id: 'station-1',
+        name: 'Jazz FM',
+        url: 'https://stream.example.com/live',
+        logo: 'https://example.com/logo.png',
+      );
+      final mediaItem = RadioPlayerProvider.mediaItemForStation(station);
+
+      expect(mediaItem.artUri, Uri.parse('https://example.com/logo.png'));
+    });
+
+    test('mediaItemForStation has no art URI when logo is null', () {
+      final station = RadioStation.fake(id: 'station-1');
+      final mediaItem = RadioPlayerProvider.mediaItemForStation(station);
+
+      expect(mediaItem.artUri, isNull);
+    });
+
+    test('radioControls returns pause when playing', () {
+      final controls = KoelAudioHandler.radioControls(playing: true);
+
+      expect(controls, [MediaControl.pause]);
+      expect(controls, isNot(contains(MediaControl.skipToNext)));
+      expect(controls, isNot(contains(MediaControl.skipToPrevious)));
+      expect(controls, isNot(contains(MediaControl.stop)));
+    });
+
+    test('radioControls returns play when paused', () {
+      final controls = KoelAudioHandler.radioControls(playing: false);
+
+      expect(controls, [MediaControl.play]);
+      expect(controls, isNot(contains(MediaControl.pause)));
     });
   });
 }
