@@ -109,7 +109,8 @@ class _PlayableListHeaderState extends State<PlayableListHeader>
                 final expandedWidth =
                     searchButtonWidth + (totalWidth - searchButtonWidth) * t;
 
-                return Row(
+                return ClipRect(
+                  child: Row(
                   children: [
                     // Search button / expanded search pill
                     SizedBox(
@@ -174,7 +175,7 @@ class _PlayableListHeaderState extends State<PlayableListHeader>
                       ),
                     ),
                     // Play and Shuffle buttons — fade and shrink as search expands
-                    if (t < 1.0) ...[
+                    if (t < 0.5) ...[
                       SizedBox(width: gap * (1 - t)),
                       Expanded(
                         child: Opacity(
@@ -229,7 +230,7 @@ class _PlayableListHeaderState extends State<PlayableListHeader>
                       ),
                     ],
                   ],
-                );
+                ));
               },
             );
           },
