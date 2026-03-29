@@ -1,5 +1,6 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/main.dart';
+import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:app/models/models.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -91,7 +92,7 @@ class _PlayableListHeaderState extends State<PlayableListHeader> {
             padding: const EdgeInsets.all(16),
             elevation: 0,
             shape: CircleBorder(),
-            backgroundColor: AppColors.highlight,
+            backgroundColor: highlightColor,
           ),
         ),
       ],

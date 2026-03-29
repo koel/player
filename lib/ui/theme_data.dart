@@ -1,13 +1,17 @@
 import 'dart:io';
 
 import 'package:app/constants/constants.dart';
+import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:app/utils/full_width_slider_track_shape.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 
 ThemeData themeData(BuildContext context) {
+  final highlight = highlightColor;
+  final accent = highlightAccentColor;
+
   return ThemeData(
-    splashColor: AppColors.highlightAccent,
+    splashColor: accent,
     dividerTheme: const DividerThemeData(
       color: Colors.white12,
       space: 0,
@@ -16,7 +20,7 @@ ThemeData themeData(BuildContext context) {
     tabBarTheme: TabBarThemeData(
       labelColor: Colors.white,
       unselectedLabelColor: Colors.white54,
-      indicatorColor: AppColors.highlight,
+      indicatorColor: highlight,
       dividerColor: Colors.white12,
     ),
     scaffoldBackgroundColor: Colors.transparent,
@@ -135,9 +139,9 @@ ThemeData themeData(BuildContext context) {
             fontWeight: FontWeight.w500,
           ),
         ),
-        backgroundColor: WidgetStateProperty.all(AppColors.highlight),
+        backgroundColor: WidgetStateProperty.all(highlight),
         foregroundColor: WidgetStateProperty.all(AppColors.white),
-        overlayColor: WidgetStateProperty.all(AppColors.highlightAccent),
+        overlayColor: WidgetStateProperty.all(accent),
         elevation: WidgetStateProperty.all(0),
         padding: WidgetStateProperty.all(AppDimensions.inputPadding),
       ),
@@ -187,7 +191,7 @@ ThemeData themeData(BuildContext context) {
           fontSize: 16.0,
           fontWeight: FontWeight.w500,
         ),
-        foregroundColor: AppColors.highlight,
+        foregroundColor: highlight,
         shape: RoundedRectangleBorder(
           borderRadius: AppDimensions.inputBorderRadius,
         ),

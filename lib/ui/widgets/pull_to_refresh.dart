@@ -1,4 +1,5 @@
 import 'package:app/constants/colors.dart';
+import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:flutter/material.dart';
 
 class PullToRefresh extends StatefulWidget {
@@ -19,7 +20,7 @@ class _PullToRefreshState extends State<PullToRefresh> {
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
-      backgroundColor: AppColors.highlight.withOpacity(.8),
+      backgroundColor: highlightColor.withOpacity(.8),
       onRefresh: widget.onRefresh,
       color: Colors.white,
       displacement: 0,

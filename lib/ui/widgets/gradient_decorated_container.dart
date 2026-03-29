@@ -1,12 +1,25 @@
 import 'dart:io';
 
+import 'package:app/constants/constants.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:flutter/material.dart';
 
 final backgroundImageNotifier = ValueNotifier<String?>(null);
+final highlightColorNotifier = ValueNotifier<Color>(AppColors.highlight);
 
 void initBackgroundPreference() {
   backgroundImageNotifier.value = preferences.backgroundImagePath;
+  final savedColor = preferences.highlightColor;
+  if (savedColor != null) {
+    highlightColorNotifier.value = savedColor;
+  }
+}
+
+Color get highlightColor => highlightColorNotifier.value;
+
+Color get highlightAccentColor {
+  final hsl = HSLColor.fromColor(highlightColor);
+  return hsl.withLightness((hsl.lightness - 0.1).clamp(0.0, 1.0)).toColor();
 }
 
 class GradientDecoratedContainer extends StatelessWidget {

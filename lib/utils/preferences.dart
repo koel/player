@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -54,3 +56,11 @@ set backgroundImagePath(String? path) =>
     path == null ? _delete('backgroundImagePath') : _set('backgroundImagePath', path);
 
 String? get backgroundImagePath => _get<String>('backgroundImagePath');
+
+set highlightColor(Color? color) =>
+    color == null ? _delete('highlightColor') : _set('highlightColor', color.value);
+
+Color? get highlightColor {
+  final value = _get<int>('highlightColor');
+  return value != null ? Color(value) : null;
+}

@@ -61,6 +61,7 @@ dependencies:
   collection: any
   faker: any
   ulid: ^2.0.1
+  palette_generator: ^0.3.3+7
 dev_dependencies:
   fake_async: ^1.2.0
   mockito: ^5.0.12

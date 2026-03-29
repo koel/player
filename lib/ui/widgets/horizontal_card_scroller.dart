@@ -77,7 +77,7 @@ class PlaceholderCard extends StatelessWidget {
           onPressed: onPressed,
           child: Icon(icon, size: 32),
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.highlight,
+            backgroundColor: highlightColor,
           ),
         ),
       ),

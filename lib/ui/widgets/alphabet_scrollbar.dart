@@ -1,4 +1,5 @@
 import 'package:app/constants/constants.dart';
+import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -139,7 +140,7 @@ class _AlphabetScrollbarState extends State<AlphabetScrollbar> {
                             height: 1,
                             fontWeight:
                                 isActive ? FontWeight.bold : FontWeight.normal,
-                            color: isActive ? AppColors.highlight : Colors.white,
+                            color: isActive ? highlightColor : Colors.white,
                           ),
                         ),
                       ),

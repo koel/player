@@ -1,4 +1,5 @@
 import 'package:app/constants/constants.dart';
+import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:app/enums.dart';
 import 'package:app/main.dart';
 import 'package:app/mixins/stream_subscriber.dart';
@@ -115,7 +116,7 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
     return Container(
       width: 36,
       height: 36,
-      color: AppColors.highlight.withOpacity(0.3),
+      color: highlightColor.withOpacity(0.3),
       child: const Icon(
         CupertinoIcons.antenna_radiowaves_left_right,
         size: 18,

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:app/constants/constants.dart';
 import 'package:app/main.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/screens.dart';
@@ -10,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:palette_generator/palette_generator.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -74,11 +76,27 @@ class ProfileAvatar extends StatelessWidget {
 
     preferences.backgroundImagePath = dest.path;
     backgroundImageNotifier.value = dest.path;
+
+    // Extract dominant color for the highlight
+    try {
+      final palette = await PaletteGenerator.fromImageProvider(
+        FileImage(dest),
+        maximumColorCount: 8,
+      );
+      final color = palette.vibrantColor?.color
+          ?? palette.dominantColor?.color;
+      if (color != null) {
+        preferences.highlightColor = color;
+        highlightColorNotifier.value = color;
+      }
+    } catch (_) {}
   }
 
   void _resetBackground() {
     preferences.backgroundImagePath = null;
+    preferences.highlightColor = null;
     backgroundImageNotifier.value = null;
+    highlightColorNotifier.value = AppColors.highlight;
   }
 
   @override

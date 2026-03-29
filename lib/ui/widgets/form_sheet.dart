@@ -207,7 +207,7 @@ class _FormTextFieldState extends State<FormTextField> {
         widget.onChanged?.call(value);
       },
       style: const TextStyle(color: Colors.white, fontSize: 14),
-      cursorColor: AppColors.highlight,
+      cursorColor: highlightColor,
       decoration: InputDecoration(
         hintText: _showLabel ? null : widget.placeholder,
         hintStyle: const TextStyle(color: Colors.white30, fontSize: 14),

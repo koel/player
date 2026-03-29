@@ -472,7 +472,7 @@ class _RadioStationRow extends StatelessWidget {
               station.name,
               overflow: TextOverflow.ellipsis,
               style: isPlaying
-                  ? const TextStyle(color: AppColors.highlight)
+                  ? TextStyle(color: highlightColor)
                   : null,
             ),
             subtitle: station.description != null &&
@@ -486,7 +486,7 @@ class _RadioStationRow extends StatelessWidget {
             trailing: Icon(
               CupertinoIcons.antenna_radiowaves_left_right,
               size: 16,
-              color: isPlaying ? AppColors.highlight : Colors.white38,
+              color: isPlaying ? highlightColor : Colors.white38,
             ),
           ),
         );
