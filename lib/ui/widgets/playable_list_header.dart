@@ -38,8 +38,12 @@ class PlayableListHeader extends StatefulWidget {
   State<StatefulWidget> createState() => _PlayableListHeaderState();
 }
 
-class _PlayableListHeaderState extends State<PlayableListHeader> {
+class _PlayableListHeaderState extends State<PlayableListHeader>
+    with SingleTickerProviderStateMixin {
   final _searchController = TextEditingController();
+  final _focusNode = FocusNode();
+  late final AnimationController _animController;
+  late final Animation<double> _searchWidth;
   var _searching = false;
 
   @override
@@ -48,21 +52,36 @@ class _PlayableListHeaderState extends State<PlayableListHeader> {
     _searchController.addListener(() {
       widget.onSearchQueryChanged?.call(_searchController.text);
     });
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
+    _searchWidth = CurvedAnimation(
+      parent: _animController,
+      curve: Curves.easeOutCubic,
+    );
   }
 
   @override
   void dispose() {
+    _animController.dispose();
     _searchController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   void _openSearch() {
     setState(() => _searching = true);
+    _animController.forward();
+    _focusNode.requestFocus();
   }
 
   void _closeSearch() {
     _searchController.clear();
-    setState(() => _searching = false);
+    _focusNode.unfocus();
+    _animController.reverse().then((_) {
+      if (mounted) setState(() => _searching = false);
+    });
   }
 
   @override
@@ -73,105 +92,144 @@ class _PlayableListHeaderState extends State<PlayableListHeader> {
     final onShufflePressed = widget.onShufflePressed ??
         () => audioHandler.replaceQueue(widget.playables, shuffle: true);
 
-    const rowHeight = 48.0;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: SizedBox(
-        height: rowHeight,
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          child: _searching
-              ? Row(
-                  key: const ValueKey('search'),
+        height: 48,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final totalWidth = constraints.maxWidth;
+            const searchButtonWidth = 48.0;
+            const gap = 10.0;
+
+            return AnimatedBuilder(
+              animation: _searchWidth,
+              builder: (context, _) {
+                final t = _searchWidth.value;
+                final expandedWidth =
+                    searchButtonWidth + (totalWidth - searchButtonWidth) * t;
+
+                return Row(
                   children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: rowHeight,
-                        child: CupertinoSearchTextField(
-                          controller: _searchController,
-                          autofocus: true,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: BoxDecoration(
-                            color: Colors.white10,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                    ),
-                    CupertinoButton(
-                      padding: const EdgeInsets.only(left: 12),
-                      onPressed: _closeSearch,
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                    ),
-                  ],
-                )
-              : Row(
-                  key: const ValueKey('buttons'),
-                  children: [
+                    // Search button / expanded search pill
                     SizedBox(
-                      height: rowHeight,
-                      child: CupertinoButton(
-                        padding: const EdgeInsets.symmetric(horizontal: 14),
-                        color: Colors.white10,
-                        borderRadius: BorderRadius.circular(100),
-                        minSize: 0,
-                        onPressed: _openSearch,
-                        child: const Icon(CupertinoIcons.search,
-                            size: 20, color: Colors.white70),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: SizedBox(
-                        height: rowHeight,
-                        child: CupertinoButton(
-                          padding: EdgeInsets.zero,
+                      width: expandedWidth,
+                      height: 48,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
                           color: Colors.white10,
                           borderRadius: BorderRadius.circular(100),
-                          onPressed: onPlayPressed,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(CupertinoIcons.play_fill,
-                                  size: 18, color: AppColors.highlight),
-                              const SizedBox(width: 8),
-                              Text('Play',
-                                  style:
-                                      TextStyle(color: AppColors.highlight)),
-                            ],
+                        ),
+                        child: t < 0.3
+                            ? Center(
+                                child: GestureDetector(
+                                  onTap: _openSearch,
+                                  behavior: HitTestBehavior.opaque,
+                                  child: const SizedBox(
+                                    width: 48,
+                                    height: 48,
+                                    child: Icon(CupertinoIcons.search,
+                                        size: 20, color: Colors.white70),
+                                  ),
+                                ),
+                              )
+                            : Row(
+                                children: [
+                                  const SizedBox(width: 14),
+                                  const Icon(CupertinoIcons.search,
+                                      size: 18, color: Colors.white38),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: TextField(
+                                      controller: _searchController,
+                                      focusNode: _focusNode,
+                                      style: const TextStyle(
+                                          color: Colors.white, fontSize: 16),
+                                      cursorColor: AppColors.highlight,
+                                      decoration: const InputDecoration(
+                                        hintText: 'Search',
+                                        hintStyle: TextStyle(
+                                            color: Colors.white30,
+                                            fontSize: 16),
+                                        border: InputBorder.none,
+                                        isDense: true,
+                                        contentPadding: EdgeInsets.zero,
+                                      ),
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: _closeSearch,
+                                    child: const Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 12),
+                                      child: Icon(CupertinoIcons.xmark_circle_fill,
+                                          size: 18, color: Colors.white38),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                      ),
+                    ),
+                    // Play and Shuffle buttons — fade and shrink as search expands
+                    if (t < 1.0) ...[
+                      SizedBox(width: gap * (1 - t)),
+                      Expanded(
+                        child: Opacity(
+                          opacity: (1 - t * 2).clamp(0.0, 1.0),
+                          child: SizedBox(
+                            height: 48,
+                            child: CupertinoButton(
+                              padding: EdgeInsets.zero,
+                              color: Colors.white10,
+                              borderRadius: BorderRadius.circular(100),
+                              onPressed: _searching ? null : onPlayPressed,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(CupertinoIcons.play_fill,
+                                      size: 18, color: AppColors.highlight),
+                                  const SizedBox(width: 8),
+                                  Text('Play',
+                                      style: TextStyle(
+                                          color: AppColors.highlight)),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: SizedBox(
-                        height: rowHeight,
-                        child: CupertinoButton(
-                          padding: EdgeInsets.zero,
-                          color: Colors.white10,
-                          borderRadius: BorderRadius.circular(100),
-                          onPressed: onShufflePressed,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(CupertinoIcons.shuffle,
-                                  size: 18, color: AppColors.highlight),
-                              const SizedBox(width: 8),
-                              Text('Shuffle',
-                                  style:
-                                      TextStyle(color: AppColors.highlight)),
-                            ],
+                      SizedBox(width: gap * (1 - t)),
+                      Expanded(
+                        child: Opacity(
+                          opacity: (1 - t * 2).clamp(0.0, 1.0),
+                          child: SizedBox(
+                            height: 48,
+                            child: CupertinoButton(
+                              padding: EdgeInsets.zero,
+                              color: Colors.white10,
+                              borderRadius: BorderRadius.circular(100),
+                              onPressed: _searching ? null : onShufflePressed,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(CupertinoIcons.shuffle,
+                                      size: 18, color: AppColors.highlight),
+                                  const SizedBox(width: 8),
+                                  Text('Shuffle',
+                                      style: TextStyle(
+                                          color: AppColors.highlight)),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
-                ),
+                );
+              },
+            );
+          },
         ),
       ),
     );
