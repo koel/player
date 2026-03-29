@@ -118,7 +118,7 @@ class _PlayableListHeaderState extends State<PlayableListHeader>
                       height: 48,
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: Colors.black38,
+                          color: Color.fromRGBO(25, 0, 64, .5),
                           borderRadius: BorderRadius.circular(100),
                         ),
                         child: t < 0.3
@@ -184,18 +184,18 @@ class _PlayableListHeaderState extends State<PlayableListHeader>
                             height: 48,
                             child: CupertinoButton(
                               padding: EdgeInsets.zero,
-                              color: Colors.black38,
+                              color: Color.fromRGBO(25, 0, 64, .5),
                               borderRadius: BorderRadius.circular(100),
                               onPressed: _searching ? null : onPlayPressed,
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(CupertinoIcons.play_fill,
-                                      size: 18, color: AppColors.highlight),
+                                      size: 18, color: Colors.white70),
                                   const SizedBox(width: 8),
                                   Text('Play',
                                       style: TextStyle(
-                                          color: AppColors.highlight)),
+                                          color: Colors.white70)),
                                 ],
                               ),
                             ),
@@ -210,18 +210,18 @@ class _PlayableListHeaderState extends State<PlayableListHeader>
                             height: 48,
                             child: CupertinoButton(
                               padding: EdgeInsets.zero,
-                              color: Colors.black38,
+                              color: Color.fromRGBO(25, 0, 64, .5),
                               borderRadius: BorderRadius.circular(100),
                               onPressed: _searching ? null : onShufflePressed,
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(CupertinoIcons.shuffle,
-                                      size: 18, color: AppColors.highlight),
+                                      size: 18, color: Colors.white70),
                                   const SizedBox(width: 8),
                                   Text('Shuffle',
                                       style: TextStyle(
-                                          color: AppColors.highlight)),
+                                          color: Colors.white70)),
                                 ],
                               ),
                             ),

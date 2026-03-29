@@ -7,8 +7,8 @@ Widget? backgroundImageFromPlayables(List<Playable> playables) {
   final candidates = playables.where((p) => p.hasCustomImage).toList();
   if (candidates.isEmpty) return null;
 
-  candidates.shuffle();
-  final playable = candidates.first;
+  final index = DateTime.now().day % candidates.length;
+  final playable = candidates[index];
 
   return SizedBox.expand(
     child: DecoratedBox(
