@@ -69,6 +69,7 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                 if (mounted) setState(() {});
               },
               child: CustomScrollView(
+                  controller: _scrollController,
                   slivers: <Widget>[
                     AppBar(
                       headingText: album.name,

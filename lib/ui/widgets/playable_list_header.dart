@@ -121,7 +121,7 @@ class _PlayableListHeaderState extends State<PlayableListHeader> {
                 child: CupertinoButton(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   color: Colors.white10,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(100),
                   onPressed: onPlayPressed,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -140,7 +140,7 @@ class _PlayableListHeaderState extends State<PlayableListHeader> {
                 child: CupertinoButton(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   color: Colors.white10,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(100),
                   onPressed: onShufflePressed,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,

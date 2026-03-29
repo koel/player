@@ -73,6 +73,7 @@ class _PodcastDetailsScreen extends State<PodcastDetailsScreen> {
                 if (mounted) setState(() {});
               },
               child: CustomScrollView(
+                  controller: _scrollController,
                   slivers: <Widget>[
                     AppBar(
                       headingText: podcast.title,

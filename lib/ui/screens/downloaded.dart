@@ -88,6 +88,7 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                 provider.playables.$sort(sortConfig).$filter(_searchQuery);
 
             return CustomScrollView(
+                controller: _scrollController,
                 slivers: <Widget>[
                   AppBar(
                     headingText: 'Downloaded',

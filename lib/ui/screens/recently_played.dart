@@ -88,6 +88,7 @@ class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
             final playables = provider.playables.$filter(_searchQuery);
 
             return CustomScrollView(
+              controller: _scrollController,
               slivers: <Widget>[
                 AppBar(
                   headingText: 'Recently Played',
