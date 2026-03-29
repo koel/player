@@ -180,8 +180,7 @@ class CoverImage extends StatelessWidget {
           decoration: BoxDecoration(
             image: DecorationImage(
               colorFilter: ColorFilter.mode(
-                AppColors.flexibleScreenHeaderBackground
-                    .withOpacity(overlayOpacity),
+                highlightColor.withOpacity(overlayOpacity * .5),
                 BlendMode.srcOver,
               ),
               image: imageUrl == null
@@ -190,9 +189,9 @@ class CoverImage extends StatelessWidget {
               fit: BoxFit.cover,
               alignment: Alignment.center,
             ),
-            boxShadow: const <BoxShadow>[
-              const BoxShadow(
-                color: AppColors.flexibleScreenHeaderBackground,
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: highlightColor.withOpacity(.5),
                 blurRadius: 10.0,
                 offset: const Offset(0, 6),
               ),
