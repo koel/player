@@ -42,6 +42,7 @@ class _PlayableListHeaderState extends State<PlayableListHeader> {
   final _searchController = TextEditingController();
   var _showSearch = false;
   double _lastScrollOffset = 0;
+  double _accumulatedDelta = 0;
 
   @override
   void initState() {
@@ -71,10 +72,22 @@ class _PlayableListHeaderState extends State<PlayableListHeader> {
     final delta = offset - _lastScrollOffset;
     _lastScrollOffset = offset;
 
-    if (delta < -2 && !_showSearch) {
+    // Reset accumulator when direction changes
+    if (delta > 0 && _accumulatedDelta < 0 ||
+        delta < 0 && _accumulatedDelta > 0) {
+      _accumulatedDelta = 0;
+    }
+
+    _accumulatedDelta += delta;
+
+    if (_accumulatedDelta < -30 && !_showSearch) {
       setState(() => _showSearch = true);
-    } else if (delta > 2 && _showSearch && _searchController.text.isEmpty) {
+      _accumulatedDelta = 0;
+    } else if (_accumulatedDelta > 50 &&
+        _showSearch &&
+        _searchController.text.isEmpty) {
       setState(() => _showSearch = false);
+      _accumulatedDelta = 0;
     }
   }
 
