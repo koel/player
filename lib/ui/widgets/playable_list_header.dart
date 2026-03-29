@@ -175,11 +175,11 @@ class _PlayableListHeaderState extends State<PlayableListHeader>
                       ),
                     ),
                     // Play and Shuffle buttons — fade and shrink as search expands
-                    if (t < 0.5) ...[
+                    if (t < 0.3) ...[
                       SizedBox(width: gap * (1 - t)),
                       Expanded(
                         child: Opacity(
-                          opacity: (1 - t * 2).clamp(0.0, 1.0),
+                          opacity: (1 - t * 4).clamp(0.0, 1.0),
                           child: SizedBox(
                             height: 48,
                             child: CupertinoButton(
@@ -205,7 +205,7 @@ class _PlayableListHeaderState extends State<PlayableListHeader>
                       SizedBox(width: gap * (1 - t)),
                       Expanded(
                         child: Opacity(
-                          opacity: (1 - t * 2).clamp(0.0, 1.0),
+                          opacity: (1 - t * 4).clamp(0.0, 1.0),
                           child: SizedBox(
                             height: 48,
                             child: CupertinoButton(
