@@ -88,11 +88,12 @@ class _FormSheetState extends State<_FormSheet> {
                   ),
                 ),
                 const SizedBox(height: 28),
-                Expanded(
+                Flexible(
                   child: SingleChildScrollView(
                     child: widget.builder(context, setState),
                   ),
                 ),
+                const Spacer(),
                 const SizedBox(height: 32),
                 Row(
                   children: [
