@@ -39,6 +39,12 @@ class _PodcastDetailsScreen extends State<PodcastDetailsScreen> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final podcastId = ModalRoute.of(context)!.settings.arguments as String;
 
