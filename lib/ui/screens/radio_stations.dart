@@ -6,6 +6,7 @@ import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -420,36 +421,76 @@ class _RadioStationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: ListTile(
-        shape: Border(bottom: Divider.createBorderSide(context)),
-        leading: ClipOval(
-          child: station.logo != null
-              ? CachedNetworkImage(
-                  imageUrl: station.logo!,
-                  width: 40,
-                  height: 40,
-                  fit: BoxFit.cover,
-                  errorWidget: (_, __, ___) => _defaultIcon(),
-                )
-              : _defaultIcon(),
-        ),
-        title: Text(station.name, overflow: TextOverflow.ellipsis),
-        subtitle: station.description != null &&
-                station.description!.isNotEmpty
-            ? Text(
-                station.description!,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.white60),
-              )
-            : null,
-        trailing: const Icon(
-          CupertinoIcons.antenna_radiowaves_left_right,
-          size: 16,
-          color: Colors.white38,
-        ),
-      ),
+    return Consumer<RadioPlayerProvider>(
+      builder: (context, radioPlayer, _) {
+        final isPlaying = radioPlayer.currentStation?.id == station.id;
+
+        return InkWell(
+          onTap: onTap,
+          child: ListTile(
+            shape: Border(bottom: Divider.createBorderSide(context)),
+            leading: ClipSmoothRect(
+              radius: SmoothBorderRadius(
+                cornerRadius: 8,
+                cornerSmoothing: .8,
+              ),
+              child: SizedBox(
+                width: 40,
+                height: 40,
+                child: Stack(
+                  children: [
+                    if (station.logo != null)
+                      CachedNetworkImage(
+                        imageUrl: station.logo!,
+                        width: 40,
+                        height: 40,
+                        fit: BoxFit.cover,
+                        errorWidget: (_, __, ___) => _defaultIcon(),
+                      )
+                    else
+                      _defaultIcon(),
+                    if (isPlaying) ...[
+                      Container(
+                        width: 40,
+                        height: 40,
+                        color: const Color(0xFF410928).withOpacity(.7),
+                      ),
+                      if (radioPlayer.loading || radioPlayer.playing)
+                        Center(
+                          child: SizedBox.square(
+                            dimension: 16,
+                            child: Image.asset(
+                                'assets/images/loading-animation.gif'),
+                          ),
+                        ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            title: Text(
+              station.name,
+              overflow: TextOverflow.ellipsis,
+              style: isPlaying
+                  ? const TextStyle(color: AppColors.highlight)
+                  : null,
+            ),
+            subtitle: station.description != null &&
+                    station.description!.isNotEmpty
+                ? Text(
+                    station.description!,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white60),
+                  )
+                : null,
+            trailing: Icon(
+              CupertinoIcons.antenna_radiowaves_left_right,
+              size: 16,
+              color: isPlaying ? AppColors.highlight : Colors.white38,
+            ),
+          ),
+        );
+      },
     );
   }
 
