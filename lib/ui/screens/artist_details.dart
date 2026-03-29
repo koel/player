@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:app/app_state.dart';
 import 'package:app/enums.dart';
 import 'package:app/extensions/extensions.dart';
@@ -22,7 +20,6 @@ class ArtistDetailsScreen extends StatefulWidget {
 
 class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
   var _searchQuery = '';
-  var cover = CoverImageStack(playables: []);
   final _scrollController = ScrollController();
 
   Future<List<Object>> buildRequest(dynamic artistId, {bool forceRefresh = false}) {
@@ -58,10 +55,6 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
 
             final songs = snapshot.requireData[1] as List<Playable>;
 
-            if (cover.isEmpty) {
-              cover = CoverImageStack(playables: songs);
-            }
-
             final artist = snapshot.requireData[0] as Artist;
             final displayedSongs =
                 songs.$sort(sortConfig).$filter(_searchQuery);
@@ -91,13 +84,9 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                           },
                         ),
                       ],
-                      backgroundImage: SizedBox.square(
-                        dimension: double.infinity,
-                        child: ImageFiltered(
-                          imageFilter: ImageFilter.blur(
-                            sigmaX: 20.0,
-                            sigmaY: 20.0,
-                          ),
+                      backgroundImage: Hero(
+                        tag: 'artist-hero-${artist.id}',
+                        child: SizedBox.expand(
                           child: DecoratedBox(
                             decoration: BoxDecoration(
                               image: DecorationImage(
@@ -106,26 +95,6 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                                 alignment: Alignment.topCenter,
                               ),
                             ),
-                          ),
-                        ),
-                      ),
-                      coverImage: Hero(
-                        tag: "artist-hero-${artist.id}",
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: artist.image,
-                              fit: BoxFit.cover,
-                              alignment: Alignment.topCenter,
-                            ),
-                            shape: BoxShape.circle,
-                            boxShadow: const <BoxShadow>[
-                              const BoxShadow(
-                                color: Colors.black38,
-                                blurRadius: 10.0,
-                                offset: Offset(0, 6),
-                              ),
-                            ],
                           ),
                         ),
                       ),

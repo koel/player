@@ -4,14 +4,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('AppBar', () {
-    testWidgets('renders heading text and cover image', (tester) async {
+    testWidgets('renders heading text', (tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: CustomScrollView(
             slivers: [
               koel.AppBar(
                 headingText: 'Test Album',
-                coverImage: const Icon(Icons.album),
               ),
             ],
           ),
@@ -19,7 +18,6 @@ void main() {
       ));
 
       expect(find.text('Test Album'), findsOneWidget);
-      expect(find.byIcon(Icons.album), findsOneWidget);
     });
 
     testWidgets('renders actions', (tester) async {
@@ -29,7 +27,6 @@ void main() {
             slivers: [
               koel.AppBar(
                 headingText: 'With Actions',
-                coverImage: const SizedBox.shrink(),
                 actions: [
                   IconButton(
                     icon: const Icon(Icons.sort),
@@ -45,14 +42,13 @@ void main() {
       expect(find.byIcon(Icons.sort), findsOneWidget);
     });
 
-    testWidgets('renders without background image', (tester) async {
+    testWidgets('uses default background when none provided', (tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: CustomScrollView(
             slivers: [
               koel.AppBar(
                 headingText: 'No Background',
-                coverImage: const SizedBox.shrink(),
               ),
             ],
           ),
@@ -62,7 +58,7 @@ void main() {
       expect(find.text('No Background'), findsOneWidget);
       expect(
         find.byKey(const Key('appBarBackgroundMask')),
-        findsNothing,
+        findsOneWidget,
       );
     });
 
@@ -74,7 +70,6 @@ void main() {
             slivers: [
               koel.AppBar(
                 headingText: 'With Background',
-                coverImage: const SizedBox.shrink(),
                 backgroundImage: Container(color: Colors.blue),
               ),
             ],
@@ -97,7 +92,6 @@ void main() {
             slivers: [
               koel.AppBar(
                 headingText: 'Expanded',
-                coverImage: const SizedBox.shrink(),
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
@@ -124,7 +118,6 @@ void main() {
             slivers: [
               koel.AppBar(
                 headingText: 'Scrollable',
-                coverImage: const SizedBox.shrink(),
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(

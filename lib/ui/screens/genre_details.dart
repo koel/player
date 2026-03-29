@@ -26,7 +26,6 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
   var _initialLoading = true;
   var _errored = false;
   int? _nextPage = 1;
-  var _cover = CoverImageStack(playables: []);
   final _scrollController = ScrollController();
   final _scrollThreshold = 64.0;
 
@@ -63,10 +62,6 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
         _songs = [..._songs, ...result.items].toSet().toList();
         _nextPage = result.nextPage;
         _initialLoading = false;
-
-        if (_cover.isEmpty && _songs.isNotEmpty) {
-          _cover = CoverImageStack(playables: _songs);
-        }
       });
     } catch (_) {
       if (mounted) setState(() => _errored = true);
@@ -96,7 +91,6 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
       setState(() {
         _songs = result.items.toList();
         _nextPage = result.nextPage;
-        _cover = CoverImageStack(playables: _songs);
       });
     } catch (_) {
       if (mounted && _songs.isEmpty) {
@@ -160,7 +154,7 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
                     AppBar(
                       headingText:
                           _genre.name.isEmpty ? 'Unknown Genre' : _genre.name,
-                      coverImage: _cover,
+                      backgroundImage: backgroundImageFromPlayables(_songs),
                       actions: [
                         SortButton(
                           fields: const [

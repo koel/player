@@ -24,13 +24,30 @@ class PlaylistDetailsScreen extends StatefulWidget {
 class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
   late PlaylistProvider _playlistProvider;
   String _searchQuery = '';
-  CoverImageStack _cover = CoverImageStack(playables: []);
   final _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _playlistProvider = context.read();
+  }
+
+  Widget? _buildBackgroundImage(Playlist playlist, List<Playable> playables) {
+    if (playlist.hasCover) {
+      return SizedBox.expand(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: CachedNetworkImageProvider(playlist.cover!),
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return backgroundImageFromPlayables(playables);
   }
 
   Future<List<Playable>> buildRequest(
@@ -65,35 +82,6 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
             final playables =
                 snapshot.data == null ? <Playable>[] : snapshot.requireData;
 
-            Widget coverWidget;
-
-            if (playlist.hasCover) {
-              coverWidget = DecoratedBox(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: CachedNetworkImageProvider(playlist.cover!),
-                    fit: BoxFit.cover,
-                    alignment: Alignment.topCenter,
-                  ),
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(16),
-                  ),
-                  boxShadow: const <BoxShadow>[
-                    BoxShadow(
-                      color: Colors.black38,
-                      blurRadius: 10.0,
-                      offset: Offset(0, 6),
-                    ),
-                  ],
-                ),
-              );
-            } else {
-              if (_cover.isEmpty && playables.isNotEmpty) {
-                _cover = CoverImageStack(playables: playables);
-              }
-              coverWidget = _cover;
-            }
-
             final displayedPlayables =
                 playables.$sort(sortConfig).$filter(_searchQuery);
 
@@ -112,29 +100,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                 slivers: <Widget>[
                   AppBar(
                     headingText: playlist.name,
-                    coverImage: coverWidget,
-                    backgroundImage: playlist.hasCover
-                        ? SizedBox.square(
-                            dimension: double.infinity,
-                            child: ImageFiltered(
-                              imageFilter: ImageFilter.blur(
-                                sigmaX: 20.0,
-                                sigmaY: 20.0,
-                              ),
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                    image: CachedNetworkImageProvider(
-                                      playlist.cover!,
-                                    ),
-                                    fit: BoxFit.cover,
-                                    alignment: Alignment.topCenter,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          )
-                        : null,
+                    backgroundImage: _buildBackgroundImage(playlist, playables),
                     actions: [
                       SortButton(
                         fields: ['title', 'artist_name', 'created_at'],

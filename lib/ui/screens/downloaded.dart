@@ -22,7 +22,6 @@ class DownloadedScreen extends StatefulWidget {
 
 class _DownloadedScreenState extends State<DownloadedScreen> {
   var _searchQuery = '';
-  var _cover = CoverImageStack(playables: []);
 
   @override
   Widget build(BuildContext context) {
@@ -84,10 +83,6 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
               );
             }
 
-            if (_cover.isEmpty) {
-              _cover = CoverImageStack(playables: provider.playables);
-            }
-
             final displayedPlayables =
                 provider.playables.$sort(sortConfig).$filter(_searchQuery);
 
@@ -95,7 +90,8 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                 slivers: <Widget>[
                   AppBar(
                     headingText: 'Downloaded',
-                    coverImage: _cover,
+                    backgroundImage: backgroundImageFromPlayables(
+                        provider.playables),
                     actions: [
                       SortButton(
                         fields: ['title', 'artist_name', 'created_at'],

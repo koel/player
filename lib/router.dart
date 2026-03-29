@@ -23,7 +23,6 @@ class AppRouter {
     AlbumDetailsScreen.routeName: (_) => const AlbumDetailsScreen(),
     ArtistDetailsScreen.routeName: (_) => const ArtistDetailsScreen(),
     PlaylistDetailsScreen.routeName: (_) => const PlaylistDetailsScreen(),
-    QueueScreen.routeName: (_) => const QueueScreen(),
     AddToPlaylistScreen.routeName: (_) => const AddToPlaylistScreen(),
     DataLoadingScreen.routeName: (_) => const DataLoadingScreen(),
     DownloadedScreen.routeName: (_) => DownloadedScreen(),
