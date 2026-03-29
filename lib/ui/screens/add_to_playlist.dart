@@ -65,7 +65,7 @@ class AddToPlaylistScreen extends StatelessWidget {
             );
           },
           child: CupertinoSliverNavigationBar(enableBackgroundFilterBlur: false,
-            backgroundColor: Colors.transparent,
+            backgroundColor: highlightAccentColor,
             largeTitle: const LargeTitle(text: 'Add to a Playlist'),
             trailing: IconButton(
               onPressed: () => router.showCreatePlaylistSheet(context),

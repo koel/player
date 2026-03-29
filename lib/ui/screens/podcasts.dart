@@ -132,7 +132,7 @@ class _PodcastScreenState extends State<PodcastsScreen> {
               );
             },
             child: CupertinoSliverNavigationBar(enableBackgroundFilterBlur: false,
-              backgroundColor: Colors.transparent,
+              backgroundColor: highlightAccentColor,
               largeTitle: const LargeTitle(text: 'Podcasts'),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,

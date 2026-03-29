@@ -67,7 +67,7 @@ class _GenresScreenState extends State<GenresScreen> {
                 child: CustomScrollView(
                   slivers: [
                     CupertinoSliverNavigationBar(enableBackgroundFilterBlur: false,
-                      backgroundColor: Colors.transparent,
+                      backgroundColor: highlightAccentColor,
                       largeTitle: const LargeTitle(text: 'Genres'),
                     ),
                     SliverList(

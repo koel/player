@@ -58,7 +58,7 @@ class _RadioStationsScreenState extends State<RadioStationsScreen> {
                 child: CustomScrollView(
                   slivers: [
                     CupertinoSliverNavigationBar(enableBackgroundFilterBlur: false,
-                      backgroundColor: Colors.transparent,
+                      backgroundColor: highlightAccentColor,
                       largeTitle: const LargeTitle(text: 'Radio'),
                       trailing: IconButton(
                         onPressed: () => _showAddStation(context, provider),

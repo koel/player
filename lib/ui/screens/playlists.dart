@@ -207,7 +207,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
               );
             },
             child: CupertinoSliverNavigationBar(enableBackgroundFilterBlur: false,
-              backgroundColor: Colors.transparent,
+              backgroundColor: highlightAccentColor,
               largeTitle: const LargeTitle(text: 'Playlists'),
               trailing: PopupMenuButton<String>(
                 icon: const Icon(CupertinoIcons.add_circled),
