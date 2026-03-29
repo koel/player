@@ -4,12 +4,11 @@ import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
 Widget? backgroundImageFromPlayables(List<Playable> playables) {
-  final playable = playables.cast<Playable?>().firstWhere(
-        (p) => p!.hasCustomImage,
-        orElse: () => null,
-      );
+  final candidates = playables.where((p) => p.hasCustomImage).toList();
+  if (candidates.isEmpty) return null;
 
-  if (playable == null) return null;
+  candidates.shuffle();
+  final playable = candidates.first;
 
   return SizedBox.expand(
     child: DecoratedBox(
