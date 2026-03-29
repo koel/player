@@ -114,7 +114,7 @@ class _FormSheetState extends State<_FormSheet> {
                     Expanded(
                       child: CupertinoButton(
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        color: Colors.white12,
+                        color: highlightColor,
                         borderRadius: BorderRadius.circular(8),
                         onPressed: _submitting ||
                                 (widget.canSubmit != null &&
