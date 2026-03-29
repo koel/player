@@ -2,10 +2,13 @@ import 'dart:async';
 
 import 'package:app/main.dart';
 import 'package:app/models/models.dart';
+import 'package:app/utils/api_request.dart' as api;
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
+
+const _pollInterval = Duration(seconds: 15);
 
 class RadioPlayerProvider with ChangeNotifier {
   final _player = AudioPlayer();
@@ -13,6 +16,7 @@ class RadioPlayerProvider with ChangeNotifier {
   var _playing = false;
   var _loading = false;
   String? _streamTitle;
+  Timer? _nowPlayingTimer;
 
   StreamSubscription? _playingSubscription;
   StreamSubscription? _processingSubscription;
@@ -66,11 +70,14 @@ class RadioPlayerProvider with ChangeNotifier {
     });
   }
 
-  static MediaItem mediaItemForStation(RadioStation station) {
+  static MediaItem mediaItemForStation(
+    RadioStation station, {
+    String? streamTitle,
+  }) {
     return MediaItem(
       id: 'radio-${station.id}',
-      title: station.name,
-      artist: 'Radio',
+      title: streamTitle ?? station.name,
+      artist: streamTitle != null ? station.name : 'Radio',
       artUri: station.logo != null ? Uri.tryParse(station.logo!) : null,
     );
   }
@@ -97,6 +104,7 @@ class RadioPlayerProvider with ChangeNotifier {
     try {
       await _player.setUrl(streamUrl);
       await _player.play();
+      _startNowPlayingPolling(station);
     } catch (e) {
       _currentStation = null;
       _loading = false;
@@ -107,6 +115,7 @@ class RadioPlayerProvider with ChangeNotifier {
   }
 
   Future<void> stop() async {
+    _stopNowPlayingPolling();
     await _player.stop();
     _currentStation = null;
     _playing = false;
@@ -124,15 +133,43 @@ class RadioPlayerProvider with ChangeNotifier {
     }
   }
 
-  void updateStreamTitle(String? title) {
-    if (title != _streamTitle) {
-      _streamTitle = title;
-      notifyListeners();
+  void _startNowPlayingPolling(RadioStation station) {
+    _stopNowPlayingPolling();
+    _fetchNowPlaying(station);
+    _nowPlayingTimer = Timer.periodic(_pollInterval, (_) {
+      _fetchNowPlaying(station);
+    });
+  }
+
+  void _stopNowPlayingPolling() {
+    _nowPlayingTimer?.cancel();
+    _nowPlayingTimer = null;
+  }
+
+  Future<void> _fetchNowPlaying(RadioStation station) async {
+    try {
+      final response =
+          await api.get('radio/stations/${station.id}/now-playing');
+      final title = response?['stream_title'] as String?;
+
+      if (!active || _currentStation?.id != station.id) return;
+
+      if (title != _streamTitle) {
+        _streamTitle = title;
+        audioHandler.mediaItem.add(mediaItemForStation(
+          station,
+          streamTitle: title,
+        ));
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('Failed to fetch now-playing metadata: $e');
     }
   }
 
   @override
   void dispose() {
+    _stopNowPlayingPolling();
     _playingSubscription?.cancel();
     _processingSubscription?.cancel();
     _queuePlaybackSubscription?.cancel();
