@@ -151,7 +151,7 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    station.name,
+                    radioPlayer.streamTitle ?? station.name,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
@@ -159,11 +159,10 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
                     const Text(
                       'Connecting…',
                       style: TextStyle(fontSize: 12, color: Colors.white54),
-                    ),
-                  if (radioPlayer.streamTitle != null &&
-                      !radioPlayer.loading)
+                    )
+                  else if (radioPlayer.streamTitle != null)
                     Text(
-                      radioPlayer.streamTitle!,
+                      station.name,
                       overflow: TextOverflow.ellipsis,
                       style:
                           const TextStyle(fontSize: 12, color: Colors.white54),
