@@ -1,4 +1,5 @@
 import 'package:app/models/models.dart';
+import 'package:app/ui/widgets/marquee_text.dart';
 import 'package:flutter/material.dart';
 
 class PlayableInfo extends StatelessWidget {
@@ -21,22 +22,20 @@ class PlayableInfo extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(
-          playable.title,
+        MarqueeText(
+          text: playable.title,
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
           ),
-          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 4),
-        Text(
-          subtitle,
+        MarqueeText(
+          text: subtitle,
           style: const TextStyle(
             color: Colors.white70,
             fontSize: 18,
           ),
-          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
