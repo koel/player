@@ -134,4 +134,54 @@ void main() {
       expect(controls, isNot(contains(MediaControl.pause)));
     });
   });
+
+  group('Radio now-playing metadata', () {
+    test('mediaItemForStation without streamTitle shows station name', () {
+      final station = RadioStation.fake(id: 'station-1', name: 'Jazz FM');
+      final mediaItem = RadioPlayerProvider.mediaItemForStation(station);
+
+      expect(mediaItem.title, 'Jazz FM');
+      expect(mediaItem.artist, 'Radio');
+    });
+
+    test('mediaItemForStation with streamTitle uses it as title', () {
+      final station = RadioStation.fake(id: 'station-1', name: 'Jazz FM');
+      final mediaItem = RadioPlayerProvider.mediaItemForStation(
+        station,
+        streamTitle: 'Miles Davis - So What',
+      );
+
+      expect(mediaItem.title, 'Miles Davis - So What');
+      expect(mediaItem.artist, 'Jazz FM');
+    });
+
+    test('mediaItemForStation with null streamTitle falls back to station name',
+        () {
+      final station = RadioStation.fake(id: 'station-1', name: 'Jazz FM');
+      final mediaItem = RadioPlayerProvider.mediaItemForStation(
+        station,
+        streamTitle: null,
+      );
+
+      expect(mediaItem.title, 'Jazz FM');
+      expect(mediaItem.artist, 'Radio');
+    });
+
+    test('mediaItemForStation preserves station ID and art with streamTitle',
+        () {
+      final station = RadioStation(
+        id: 'station-1',
+        name: 'Jazz FM',
+        url: 'https://stream.example.com/live',
+        logo: 'https://example.com/logo.png',
+      );
+      final mediaItem = RadioPlayerProvider.mediaItemForStation(
+        station,
+        streamTitle: 'Now Playing Track',
+      );
+
+      expect(mediaItem.id, 'radio-station-1');
+      expect(mediaItem.artUri, Uri.parse('https://example.com/logo.png'));
+    });
+  });
 }
