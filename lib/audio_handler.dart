@@ -295,13 +295,13 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   Future<void> _playAtIndex(int index) async {
     if (queue.value.length <= index) return;
-    exitRadioMode();
 
     final mediaItem = queue.value[index];
     final position = getPlaybackPositionFromState(mediaItem.id) ?? 0;
 
     try {
       await _setPlayerSource(mediaItem);
+      exitRadioMode();
       _player.seek(Duration(seconds: position.toInt()));
       await play();
 

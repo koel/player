@@ -71,7 +71,7 @@ class RadioPlayerProvider with ChangeNotifier {
       id: 'radio-${station.id}',
       title: station.name,
       artist: 'Radio',
-      artUri: station.logo != null ? Uri.parse(station.logo!) : null,
+      artUri: station.logo != null ? Uri.tryParse(station.logo!) : null,
     );
   }
 
