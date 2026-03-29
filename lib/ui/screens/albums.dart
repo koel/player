@@ -112,7 +112,7 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                     controller: _scrollController,
                     slivers: <Widget>[
                       CupertinoSliverNavigationBar(
-                        backgroundColor: AppColors.staticScreenHeaderBackground,
+                        backgroundColor: headerBackgroundColor,
                         largeTitle: const LargeTitle(text: 'Albums'),
                         trailing: Transform.scale(
                           scale: 0.8,
