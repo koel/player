@@ -150,9 +150,8 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    radioPlayer.streamTitle ?? station.name,
-                    overflow: TextOverflow.ellipsis,
+                  MarqueeText(
+                    text: radioPlayer.streamTitle ?? station.name,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   if (radioPlayer.loading)
@@ -251,9 +250,8 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
                   child: Padding(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      playable.title,
-                      overflow: TextOverflow.ellipsis,
+                    child: MarqueeText(
+                      text: playable.title,
                     ),
                   ),
                 ),
