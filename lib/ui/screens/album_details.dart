@@ -82,13 +82,16 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                           },
                         ),
                       ],
-                      backgroundImage: SizedBox.expand(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: album.image,
-                              fit: BoxFit.cover,
-                              alignment: Alignment.topCenter,
+                      backgroundImage: Hero(
+                        tag: 'album-hero-${album.id}',
+                        child: SizedBox.expand(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: album.image,
+                                fit: BoxFit.cover,
+                                alignment: Alignment.topCenter,
+                              ),
                             ),
                           ),
                         ),

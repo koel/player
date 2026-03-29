@@ -86,13 +86,16 @@ class _PodcastDetailsScreen extends State<PodcastDetailsScreen> {
                           },
                         ),
                       ],
-                      backgroundImage: SizedBox.expand(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: podcast.image,
-                              fit: BoxFit.cover,
-                              alignment: Alignment.topCenter,
+                      backgroundImage: Hero(
+                        tag: 'podcast-hero-${podcast.id}',
+                        child: SizedBox.expand(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: podcast.image,
+                                fit: BoxFit.cover,
+                                alignment: Alignment.topCenter,
+                              ),
                             ),
                           ),
                         ),

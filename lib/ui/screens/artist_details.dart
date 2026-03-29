@@ -84,13 +84,16 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                           },
                         ),
                       ],
-                      backgroundImage: SizedBox.expand(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: artist.image,
-                              fit: BoxFit.cover,
-                              alignment: Alignment.topCenter,
+                      backgroundImage: Hero(
+                        tag: 'artist-hero-${artist.id}',
+                        child: SizedBox.expand(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: artist.image,
+                                fit: BoxFit.cover,
+                                alignment: Alignment.topCenter,
+                              ),
                             ),
                           ),
                         ),
