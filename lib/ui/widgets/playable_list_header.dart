@@ -73,85 +73,105 @@ class _PlayableListHeaderState extends State<PlayableListHeader> {
     final onShufflePressed = widget.onShufflePressed ??
         () => audioHandler.replaceQueue(widget.playables, shuffle: true);
 
+    const rowHeight = 48.0;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: AnimatedCrossFade(
-        duration: const Duration(milliseconds: 200),
-        crossFadeState:
-            _searching ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-        firstChild: Row(
-          children: [
-            CupertinoButton(
-              padding: const EdgeInsets.all(12),
-              color: Colors.white10,
-              borderRadius: BorderRadius.circular(100),
-              minSize: 0,
-              onPressed: _openSearch,
-              child: const Icon(CupertinoIcons.search,
-                  size: 20, color: Colors.white70),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: CupertinoButton(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                color: Colors.white10,
-                borderRadius: BorderRadius.circular(100),
-                onPressed: onPlayPressed,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+      child: SizedBox(
+        height: rowHeight,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: _searching
+              ? Row(
+                  key: const ValueKey('search'),
                   children: [
-                    Icon(CupertinoIcons.play_fill,
-                        size: 18, color: AppColors.highlight),
-                    const SizedBox(width: 8),
-                    Text('Play',
-                        style: TextStyle(color: AppColors.highlight)),
+                    Expanded(
+                      child: SizedBox(
+                        height: rowHeight,
+                        child: CupertinoSearchTextField(
+                          controller: _searchController,
+                          autofocus: true,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: BoxDecoration(
+                            color: Colors.white10,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+                    CupertinoButton(
+                      padding: const EdgeInsets.only(left: 12),
+                      onPressed: _closeSearch,
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  key: const ValueKey('buttons'),
+                  children: [
+                    SizedBox(
+                      height: rowHeight,
+                      child: CupertinoButton(
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        color: Colors.white10,
+                        borderRadius: BorderRadius.circular(100),
+                        minSize: 0,
+                        onPressed: _openSearch,
+                        child: const Icon(CupertinoIcons.search,
+                            size: 20, color: Colors.white70),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: SizedBox(
+                        height: rowHeight,
+                        child: CupertinoButton(
+                          padding: EdgeInsets.zero,
+                          color: Colors.white10,
+                          borderRadius: BorderRadius.circular(100),
+                          onPressed: onPlayPressed,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(CupertinoIcons.play_fill,
+                                  size: 18, color: AppColors.highlight),
+                              const SizedBox(width: 8),
+                              Text('Play',
+                                  style:
+                                      TextStyle(color: AppColors.highlight)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: SizedBox(
+                        height: rowHeight,
+                        child: CupertinoButton(
+                          padding: EdgeInsets.zero,
+                          color: Colors.white10,
+                          borderRadius: BorderRadius.circular(100),
+                          onPressed: onShufflePressed,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(CupertinoIcons.shuffle,
+                                  size: 18, color: AppColors.highlight),
+                              const SizedBox(width: 8),
+                              Text('Shuffle',
+                                  style:
+                                      TextStyle(color: AppColors.highlight)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: CupertinoButton(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                color: Colors.white10,
-                borderRadius: BorderRadius.circular(100),
-                onPressed: onShufflePressed,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(CupertinoIcons.shuffle,
-                        size: 18, color: AppColors.highlight),
-                    const SizedBox(width: 8),
-                    Text('Shuffle',
-                        style: TextStyle(color: AppColors.highlight)),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        secondChild: Row(
-          children: [
-            Expanded(
-              child: CupertinoSearchTextField(
-                controller: _searchController,
-                autofocus: true,
-                style: const TextStyle(color: Colors.white),
-                decoration: BoxDecoration(
-                  color: Colors.white10,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            ),
-            CupertinoButton(
-              padding: const EdgeInsets.only(left: 12),
-              onPressed: _closeSearch,
-              child: Text(
-                'Cancel',
-                style: TextStyle(color: Colors.white70),
-              ),
-            ),
-          ],
         ),
       ),
     );
