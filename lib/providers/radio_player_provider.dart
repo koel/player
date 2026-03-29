@@ -104,7 +104,13 @@ class RadioPlayerProvider with ChangeNotifier {
     try {
       await _player.setUrl(streamUrl);
       await _player.play();
-      _startNowPlayingPolling(station);
+      // Delay the first poll briefly to let the playing state propagate
+      // so the UI is ready to display the stream title.
+      Future.delayed(const Duration(seconds: 2), () {
+        if (active && _currentStation?.id == station.id) {
+          _startNowPlayingPolling(station);
+        }
+      });
     } catch (e) {
       _currentStation = null;
       _loading = false;
