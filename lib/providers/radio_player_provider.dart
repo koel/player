@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:app/main.dart';
 import 'package:app/models/models.dart';
 import 'package:app/utils/preferences.dart' as preferences;
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -26,6 +27,14 @@ class RadioPlayerProvider with ChangeNotifier {
   RadioPlayerProvider() {
     _playingSubscription = _player.playingStream.listen((playing) {
       _playing = playing;
+      if (active) {
+        audioHandler.updateRadioPlaybackState(
+          playing: playing,
+          processingState: _loading
+              ? AudioProcessingState.buffering
+              : AudioProcessingState.ready,
+        );
+      }
       notifyListeners();
     });
 
@@ -33,28 +42,50 @@ class RadioPlayerProvider with ChangeNotifier {
         _player.processingStateStream.listen((state) {
       _loading = state == ProcessingState.loading ||
           state == ProcessingState.buffering;
+      if (active) {
+        audioHandler.updateRadioPlaybackState(
+          playing: _playing,
+          processingState: const {
+            ProcessingState.idle: AudioProcessingState.idle,
+            ProcessingState.loading: AudioProcessingState.loading,
+            ProcessingState.buffering: AudioProcessingState.buffering,
+            ProcessingState.ready: AudioProcessingState.ready,
+            ProcessingState.completed: AudioProcessingState.completed,
+          }[state]!,
+        );
+      }
       notifyListeners();
     });
 
     // When queue playback starts, stop radio
     _queuePlaybackSubscription =
         audioHandler.playbackState.listen((state) {
-      if (state.playing && active) {
+      if (state.playing && active && !audioHandler.isRadioMode) {
         stop();
       }
     });
   }
 
   Future<void> play(RadioStation station) async {
-    // Pause the main queue player when radio starts
+    // Pause the main queue player before entering radio mode
     if (audioHandler.playbackState.value.playing) {
       await audioHandler.pause();
     }
+
+    audioHandler.enterRadioMode(_player);
 
     _currentStation = station;
     _streamTitle = null;
     _loading = true;
     notifyListeners();
+
+    // Push radio station info to the OS media session
+    audioHandler.mediaItem.add(MediaItem(
+      id: 'radio-${station.id}',
+      title: station.name,
+      artist: 'Radio',
+      artUri: station.logo != null ? Uri.parse(station.logo!) : null,
+    ));
 
     final streamUrl =
         '${preferences.host}/radio/stream/${station.id}?t=${preferences.audioToken}';
@@ -65,6 +96,7 @@ class RadioPlayerProvider with ChangeNotifier {
     } catch (e) {
       _currentStation = null;
       _loading = false;
+      audioHandler.exitRadioMode();
       notifyListeners();
       rethrow;
     }
@@ -76,6 +108,7 @@ class RadioPlayerProvider with ChangeNotifier {
     _playing = false;
     _loading = false;
     _streamTitle = null;
+    audioHandler.exitRadioMode();
     notifyListeners();
   }
 

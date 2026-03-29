@@ -22,10 +22,14 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   var _errorCount = 0;
   var _initialized = false;
   var _currentMediaItem = MediaItem(id: '', title: '');
+  var _isRadioMode = false;
+  AudioPlayer? _radioPlayer;
 
   final _player = AudioPlayer();
 
   AudioPlayer get player => _player;
+
+  bool get isRadioMode => _isRadioMode;
 
   int get currentQueueIndex => queue.value.indexOf(_currentMediaItem);
 
@@ -55,8 +59,33 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     _initialized = true;
   }
 
+  void enterRadioMode(AudioPlayer radioPlayer) {
+    _isRadioMode = true;
+    _radioPlayer = radioPlayer;
+  }
+
+  void exitRadioMode() {
+    _isRadioMode = false;
+    _radioPlayer = null;
+  }
+
+  void updateRadioPlaybackState({
+    required bool playing,
+    required AudioProcessingState processingState,
+  }) {
+    playbackState.add(playbackState.value.copyWith(
+      controls: [
+        if (playing) MediaControl.pause else MediaControl.play,
+        MediaControl.stop,
+      ],
+      processingState: processingState,
+      playing: playing,
+    ));
+  }
+
   void _subscribeToPlayerPlaybackEvents() {
     _player.playbackEventStream.listen((PlaybackEvent event) {
+      if (_isRadioMode) return;
       final playing = _player.playing;
       playbackState.add(playbackState.value.copyWith(
         controls: [
@@ -96,6 +125,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   void _subscribeToPlayerProcessingStateEvents() {
     _player.processingStateStream.listen((state) async {
+      if (_isRadioMode) return;
       if (state == ProcessingState.completed) {
         if (repeatMode == AudioServiceRepeatMode.one) {
           await _player.seek(Duration.zero);
@@ -183,12 +213,20 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   @override
   Future<void> play() async {
+    if (_isRadioMode && _radioPlayer != null) {
+      await _radioPlayer!.play();
+      return;
+    }
     playbackState.add(playbackState.value.copyWith(playing: true));
     await _player.play();
   }
 
   @override
   Future<void> pause() async {
+    if (_isRadioMode && _radioPlayer != null) {
+      await _radioPlayer!.pause();
+      return;
+    }
     playbackState.add(playbackState.value.copyWith(playing: false));
     await _player.pause();
   }
@@ -243,6 +281,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   Future<void> _playAtIndex(int index) async {
     if (queue.value.length <= index) return;
+    exitRadioMode();
 
     final mediaItem = queue.value[index];
     final position = getPlaybackPositionFromState(mediaItem.id) ?? 0;

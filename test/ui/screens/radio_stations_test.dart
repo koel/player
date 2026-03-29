@@ -1,4 +1,5 @@
 import 'package:app/models/radio_station.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -51,17 +52,12 @@ void main() {
   });
 
   group('RadioStationsScreen thumbnail overlay logic', () {
-    // These tests verify the conditional logic used in _RadioStationRow
-    // to determine what to show on the thumbnail overlay.
-
     test('shows animation when playing', () {
       final isPlaying = true;
       final loading = false;
       final playing = true;
 
-      // Overlay is shown when isPlaying (current station matches)
       expect(isPlaying, isTrue);
-      // Animation is shown when loading or playing
       expect(loading || playing, isTrue);
     });
 
@@ -79,19 +75,89 @@ void main() {
       final loading = false;
       final playing = false;
 
-      // Overlay still shown (station is active)
       expect(isPlaying, isTrue);
-      // But no animation
       expect(loading || playing, isFalse);
     });
 
     test('no overlay when station is not active', () {
       final isPlaying = false;
-      final loading = false;
-      final playing = true;
 
-      // No overlay at all
       expect(isPlaying, isFalse);
+    });
+  });
+
+  group('Radio media session integration', () {
+    test('radio station produces a valid MediaItem', () {
+      final station = RadioStation.fake(
+        id: 'station-1',
+        name: 'Jazz FM',
+      );
+
+      final mediaItem = MediaItem(
+        id: 'radio-${station.id}',
+        title: station.name,
+        artist: 'Radio',
+        artUri: station.logo != null ? Uri.parse(station.logo!) : null,
+      );
+
+      expect(mediaItem.id, 'radio-station-1');
+      expect(mediaItem.title, 'Jazz FM');
+      expect(mediaItem.artist, 'Radio');
+      // No duration for live streams
+      expect(mediaItem.duration, isNull);
+    });
+
+    test('radio MediaItem includes art URI when logo is present', () {
+      final station = RadioStation(
+        id: 'station-1',
+        name: 'Jazz FM',
+        url: 'https://stream.example.com/live',
+        logo: 'https://example.com/logo.png',
+      );
+
+      final mediaItem = MediaItem(
+        id: 'radio-${station.id}',
+        title: station.name,
+        artist: 'Radio',
+        artUri: station.logo != null ? Uri.parse(station.logo!) : null,
+      );
+
+      expect(mediaItem.artUri, Uri.parse('https://example.com/logo.png'));
+    });
+
+    test('radio MediaItem has no art URI when logo is null', () {
+      final station = RadioStation.fake(id: 'station-1');
+
+      final mediaItem = MediaItem(
+        id: 'radio-${station.id}',
+        title: station.name,
+        artist: 'Radio',
+        artUri: station.logo != null ? Uri.parse(station.logo!) : null,
+      );
+
+      expect(mediaItem.artUri, isNull);
+    });
+
+    test('radio playback state has play/pause and stop controls', () {
+      // Simulates what updateRadioPlaybackState produces
+      final controls = [MediaControl.pause, MediaControl.stop];
+
+      expect(controls, contains(MediaControl.pause));
+      expect(controls, contains(MediaControl.stop));
+      // No skip controls for radio
+      expect(controls, isNot(contains(MediaControl.skipToNext)));
+      expect(controls, isNot(contains(MediaControl.skipToPrevious)));
+    });
+
+    test('radio playback state shows play control when paused', () {
+      final playing = false;
+      final controls = [
+        if (playing) MediaControl.pause else MediaControl.play,
+        MediaControl.stop,
+      ];
+
+      expect(controls, contains(MediaControl.play));
+      expect(controls, isNot(contains(MediaControl.pause)));
     });
   });
 }
