@@ -85,6 +85,8 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
             final displayedPlayables =
                 playables.$sort(sortConfig).$filter(_searchQuery);
 
+            final showScrollbar = AlphabetScrollbar.shouldShow(itemCount: displayedPlayables.length, sortField: sortConfig.field, nameSortField: 'title');
+
             return PullToRefresh(
               onRefresh: () async {
                 await buildRequest(playlist.id, forceRefresh: true);
@@ -119,6 +121,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                         : PlayableListHeader(
                             playables: displayedPlayables,
                             scrollController: _scrollController,
+                            rightPadding: showScrollbar ? alphabetScrollbarWidth : 0,
                             onSearchQueryChanged: (query) {
                               setState(() => _searchQuery = query);
                             },
@@ -139,6 +142,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                   else
                     SliverPlayableList(
                       playables: displayedPlayables,
+                      rightPadding: showScrollbar ? alphabetScrollbarWidth : 0,
                       onDismissed: playlist.isStandard
                           ? (playable) => _playlistProvider.removeFromPlaylist(
                                 playable,
@@ -149,7 +153,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                   const BottomSpace(),
                 ],
               ),
-              if (AlphabetScrollbar.shouldShow(itemCount: displayedPlayables.length, sortField: sortConfig.field, nameSortField: 'title'))
+              if (showScrollbar)
                 AlphabetScrollbar(
                   labels: displayedPlayables.map((s) => s.title).toList(),
                   scrollController: _scrollController,

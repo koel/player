@@ -115,6 +115,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             final songs =
                 provider.playables.$sort(sortConfig).$filter(_searchQuery);
 
+            final showScrollbar = AlphabetScrollbar.shouldShow(itemCount: songs.length, sortField: sortConfig.field, nameSortField: 'title');
+
             return PullToRefresh(
               onRefresh: () {
                 return _loading
@@ -150,6 +152,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                             child: PlayableListHeader(
                               playables: songs,
                               scrollController: _scrollController,
+                              rightPadding: showScrollbar ? alphabetScrollbarWidth : 0,
                               onSearchQueryChanged: (String query) {
                                 setState(() => _searchQuery = query);
                               },
@@ -158,13 +161,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                           SliverPlayableList(
                             playables: songs,
                             listContext: PlayableListContext.favorites,
+                            rightPadding: showScrollbar ? alphabetScrollbarWidth : 0,
                             onDismissed: provider.unlike,
                             dismissIcon: const Icon(CupertinoIcons.heart_slash),
                           ),
                           const BottomSpace(),
                         ],
                 ),
-                if (AlphabetScrollbar.shouldShow(itemCount: songs.length, sortField: sortConfig.field, nameSortField: 'title'))
+                if (showScrollbar)
                   AlphabetScrollbar(
                     labels: songs.map((s) => s.title).toList(),
                     scrollController: _scrollController,

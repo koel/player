@@ -113,6 +113,8 @@ class _SongsScreenState extends State<SongsScreen> {
                   displayedSongs.$sort(_paginationConfig.sortConfig);
             }
 
+            final showScrollbar = AlphabetScrollbar.shouldShow(itemCount: displayedSongs.length, sortField: _paginationConfig.sortField, nameSortField: 'title');
+
             return PrimaryScrollController(
               controller: _scrollController,
               child: Stack(
@@ -151,6 +153,7 @@ class _SongsScreenState extends State<SongsScreen> {
                     sortField: _paginationConfig.sortField,
                     sortOrder: _paginationConfig.sortOrder,
                     scrollController: _scrollController,
+                    rightPadding: showScrollbar ? alphabetScrollbarWidth : 0,
                     onSearchExpanded: () =>
                         setState(() => _inSearchMode = true),
                     onSearchCollapsed: () => setState(
@@ -165,6 +168,7 @@ class _SongsScreenState extends State<SongsScreen> {
                 SliverPlayableList(
                   playables: displayedSongs,
                   listContext: PlayableListContext.allSongs,
+                  rightPadding: showScrollbar ? alphabetScrollbarWidth : 0,
                 ),
                 _loading
                     ? SliverToBoxAdapter(
@@ -177,7 +181,7 @@ class _SongsScreenState extends State<SongsScreen> {
                 const BottomSpace(),
               ],
             ),
-            if (AlphabetScrollbar.shouldShow(itemCount: displayedSongs.length, sortField: _paginationConfig.sortField, nameSortField: 'title'))
+            if (showScrollbar)
               AlphabetScrollbar(
                 labels: displayedSongs.map((s) => s.title).toList(),
                 scrollController: _scrollController,
@@ -198,6 +202,7 @@ class SongListHeader extends StatefulWidget {
   final String sortField;
   final SortOrder sortOrder;
   final ScrollController? scrollController;
+  final double rightPadding;
   final Function(String) onSearchQueryChanged;
   final Function() onSearchExpanded;
   final Function() onSearchCollapsed;
@@ -207,6 +212,7 @@ class SongListHeader extends StatefulWidget {
     required this.sortField,
     required this.sortOrder,
     this.scrollController,
+    this.rightPadding = 0,
     required this.onSearchQueryChanged,
     required this.onSearchExpanded,
     required this.onSearchCollapsed,
@@ -250,6 +256,7 @@ class _SongListHeaderState extends State<SongListHeader> {
     return PlayableListHeader(
       playables: [],
       scrollController: widget.scrollController,
+      rightPadding: widget.rightPadding,
       onSearchQueryChanged: widget.onSearchQueryChanged,
       onSearchOpened: widget.onSearchExpanded,
       onSearchClosed: widget.onSearchCollapsed,
