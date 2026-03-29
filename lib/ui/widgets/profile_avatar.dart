@@ -58,7 +58,17 @@ class ProfileAvatar extends StatelessWidget {
 
     final appDir = await getApplicationDocumentsDirectory();
     final ext = path.extension(picked.path);
-    final dest = File('${appDir.path}/background$ext');
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final dest = File('${appDir.path}/background_$timestamp$ext');
+
+    // Remove the old custom background file
+    final oldPath = preferences.backgroundImagePath;
+    if (oldPath != null) {
+      try {
+        await File(oldPath).delete();
+      } catch (_) {}
+    }
+
     await File(picked.path).copy(dest.path);
 
     preferences.backgroundImagePath = dest.path;
