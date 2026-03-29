@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:app/audio_handler.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/app.dart';
+import 'package:app/ui/widgets/gradient_decorated_container.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
@@ -102,6 +103,7 @@ Future<void> main() async {
 
   await GetStorage.init('Preferences');
   await GetStorage.init(DownloadProvider.serializedPlayableContainer);
+  initBackgroundPreference();
 
   runApp(
     MultiProvider(

@@ -49,3 +49,8 @@ AudioServiceRepeatMode get repeatMode {
 set volume(double volume) => _set('volume', volume);
 
 double get volume => _get<double>('volume') ?? 0.7;
+
+set backgroundImagePath(String? path) =>
+    path == null ? _delete('backgroundImagePath') : _set('backgroundImagePath', path);
+
+String? get backgroundImagePath => _get<String>('backgroundImagePath');

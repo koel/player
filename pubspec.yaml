@@ -53,6 +53,7 @@ dependencies:
     git:
       url: https://github.com/roman-yerin/native_qr.git
       ref: 8d84d3706f53594d40a47c15b49cf19f41d075be
+  image_picker: ^1.0.7
   lucide_icons: ^0.257.0
   timeago: ^3.6.1
   url_launcher: ^6.3.0

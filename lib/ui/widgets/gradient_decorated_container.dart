@@ -1,4 +1,13 @@
+import 'dart:io';
+
+import 'package:app/utils/preferences.dart' as preferences;
 import 'package:flutter/material.dart';
+
+final backgroundImageNotifier = ValueNotifier<String?>(null);
+
+void initBackgroundPreference() {
+  backgroundImageNotifier.value = preferences.backgroundImagePath;
+}
 
 class GradientDecoratedContainer extends StatelessWidget {
   final Widget child;
@@ -10,16 +19,29 @@ class GradientDecoratedContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: child,
-      padding: padding,
-      decoration: const BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage('assets/images/background.webp'),
-          fit: BoxFit.cover,
-          alignment: Alignment.bottomLeft,
-        ),
-      ),
+    return ValueListenableBuilder<String?>(
+      valueListenable: backgroundImageNotifier,
+      builder: (context, customPath, _) {
+        final ImageProvider image;
+
+        if (customPath != null && File(customPath).existsSync()) {
+          image = FileImage(File(customPath));
+        } else {
+          image = const AssetImage('assets/images/background.webp');
+        }
+
+        return Container(
+          child: child,
+          padding: padding,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: image,
+              fit: BoxFit.cover,
+              alignment: Alignment.bottomLeft,
+            ),
+          ),
+        );
+      },
     );
   }
 }

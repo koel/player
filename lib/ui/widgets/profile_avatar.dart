@@ -1,11 +1,20 @@
+import 'dart:io';
+
 import 'package:app/main.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/screens.dart';
+import 'package:app/ui/widgets/gradient_decorated_container.dart';
+import 'package:app/utils/preferences.dart' as preferences;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import 'package:provider/provider.dart';
 
 enum ProfileAvatarMenuItems {
+  changeBackground,
+  resetBackground,
   clearDownloads,
   logout,
 }
@@ -42,13 +51,39 @@ class ProfileAvatar extends StatelessWidget {
     );
   }
 
+  Future<void> _changeBackground() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+    if (picked == null) return;
+
+    final appDir = await getApplicationDocumentsDirectory();
+    final ext = path.extension(picked.path);
+    final dest = File('${appDir.path}/background$ext');
+    await File(picked.path).copy(dest.path);
+
+    preferences.backgroundImagePath = dest.path;
+    backgroundImageNotifier.value = dest.path;
+  }
+
+  void _resetBackground() {
+    preferences.backgroundImagePath = null;
+    backgroundImageNotifier.value = null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final downloads = context.read<DownloadProvider>();
+    final hasCustomBackground = preferences.backgroundImagePath != null;
 
     return PopupMenuButton<ProfileAvatarMenuItems>(
       onSelected: (item) {
         switch (item) {
+          case ProfileAvatarMenuItems.changeBackground:
+            _changeBackground();
+            break;
+          case ProfileAvatarMenuItems.resetBackground:
+            _resetBackground();
+            break;
           case ProfileAvatarMenuItems.clearDownloads:
             downloads.clear();
             break;
@@ -60,6 +95,16 @@ class ProfileAvatar extends StatelessWidget {
       child: const Icon(CupertinoIcons.person_alt_circle, size: 24),
       offset: const Offset(0, 32),
       itemBuilder: (_) => [
+        const PopupMenuItem(
+          value: ProfileAvatarMenuItems.changeBackground,
+          child: Text('Change background'),
+        ),
+        if (hasCustomBackground)
+          const PopupMenuItem(
+            value: ProfileAvatarMenuItems.resetBackground,
+            child: Text('Reset background'),
+          ),
+        const PopupMenuDivider(height: .5),
         const PopupMenuItem(
           value: ProfileAvatarMenuItems.clearDownloads,
           child: Text('Clear downloads'),
