@@ -30,7 +30,6 @@ class _SongsScreenState extends State<SongsScreen> {
   var _currentScrollOffset = AppState.get('songs.scrollOffSet', 0.0)!;
   final _scrollThreshold = 64.0;
   var _searchQuery = '';
-  var _cover = CoverImageStack(playables: []);
   var _loading = false;
   var _errored = false;
   var _inSearchMode = false;
@@ -107,10 +106,6 @@ class _SongsScreenState extends State<SongsScreen> {
               if (_errored) return OopsBox(onRetry: makeRequest);
             }
 
-            if (_cover.isEmpty) {
-              _cover = CoverImageStack(playables: provider.playables);
-            }
-
             var displayedSongs = provider.playables;
 
             if (_inSearchMode) {
@@ -149,7 +144,6 @@ class _SongsScreenState extends State<SongsScreen> {
                       },
                     ),
                   ],
-                  coverImage: _cover,
                 ),
                 SliverToBoxAdapter(
                   child: SongListHeader(

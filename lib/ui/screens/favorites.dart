@@ -23,7 +23,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   var _errored = false;
   var _loading = false;
   var _searchQuery = '';
-  var cover = CoverImageStack(playables: []);
   final _scrollController = ScrollController();
 
   @override
@@ -113,10 +112,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               if (_errored) return OopsBox(onRetry: makeRequest);
             }
 
-            if (cover.isEmpty) {
-              cover = CoverImageStack(playables: provider.playables);
-            }
-
             final songs =
                 provider.playables.$sort(sortConfig).$filter(_searchQuery);
 
@@ -137,7 +132,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       : <Widget>[
                           AppBar(
                             headingText: 'Favorites',
-                            coverImage: cover,
                             actions: [
                               SortButton(
                                 fields: ['title', 'artist_name', 'created_at'],

@@ -50,7 +50,6 @@ class _QueueScreenState extends State<QueueScreen> with StreamSubscriber {
           slivers: <Widget>[
             AppBar(
               headingText: 'Current Queue',
-              coverImage: CoverImageStack(playables: _playables),
               actions: <Widget>[
                 if (_playables.isNotEmpty)
                   TextButton(

@@ -82,26 +82,7 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                           },
                         ),
                       ],
-                      backgroundImage: SizedBox.square(
-                        dimension: double.infinity,
-                        child: ImageFiltered(
-                          imageFilter: ImageFilter.blur(
-                            sigmaX: 20.0,
-                            sigmaY: 20.0,
-                          ),
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                image: album.image,
-                                fit: BoxFit.cover,
-                                alignment: Alignment.topCenter,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      coverImage: Hero(
-                        tag: "album-hero-${album.id}",
+                      backgroundImage: SizedBox.expand(
                         child: DecoratedBox(
                           decoration: BoxDecoration(
                             image: DecorationImage(
@@ -109,16 +90,6 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                               fit: BoxFit.cover,
                               alignment: Alignment.topCenter,
                             ),
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(16),
-                            ),
-                            boxShadow: const <BoxShadow>[
-                              const BoxShadow(
-                                color: Colors.black38,
-                                blurRadius: 10.0,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
                           ),
                         ),
                       ),

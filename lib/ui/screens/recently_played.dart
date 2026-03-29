@@ -21,7 +21,6 @@ class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
   var _loading = false;
   var _errored = false;
   var _searchQuery = '';
-  var _cover = CoverImageStack(playables: []);
 
   @override
   void initState() {
@@ -85,15 +84,12 @@ class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
               );
             }
 
-            _cover = CoverImageStack(playables: provider.playables);
-
             final playables = provider.playables.$filter(_searchQuery);
 
             return CustomScrollView(
               slivers: <Widget>[
                 AppBar(
                   headingText: 'Recently Played',
-                  coverImage: _cover,
                 ),
                 SliverToBoxAdapter(
                   child: PlayableListHeader(
