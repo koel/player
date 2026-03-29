@@ -40,62 +40,29 @@ class PlayableListHeader extends StatefulWidget {
 
 class _PlayableListHeaderState extends State<PlayableListHeader> {
   final _searchController = TextEditingController();
-  var _showSearch = false;
-  double _lastScrollOffset = 0;
-  double _accumulatedDelta = 0;
+  var _searching = false;
 
   @override
   void initState() {
     super.initState();
-
     _searchController.addListener(() {
       widget.onSearchQueryChanged?.call(_searchController.text);
     });
-
-    widget.scrollController?.addListener(_onScroll);
-  }
-
-  @override
-  void didUpdateWidget(covariant PlayableListHeader oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.scrollController != widget.scrollController) {
-      oldWidget.scrollController?.removeListener(_onScroll);
-      widget.scrollController?.addListener(_onScroll);
-    }
-  }
-
-  void _onScroll() {
-    final controller = widget.scrollController;
-    if (controller == null || !controller.hasClients) return;
-
-    final offset = controller.offset;
-    final delta = offset - _lastScrollOffset;
-    _lastScrollOffset = offset;
-
-    // Reset accumulator when direction changes
-    if (delta > 0 && _accumulatedDelta < 0 ||
-        delta < 0 && _accumulatedDelta > 0) {
-      _accumulatedDelta = 0;
-    }
-
-    _accumulatedDelta += delta;
-
-    if (_accumulatedDelta < -30 && !_showSearch) {
-      setState(() => _showSearch = true);
-      _accumulatedDelta = 0;
-    } else if (_accumulatedDelta > 50 &&
-        _showSearch &&
-        _searchController.text.isEmpty) {
-      setState(() => _showSearch = false);
-      _accumulatedDelta = 0;
-    }
   }
 
   @override
   void dispose() {
-    widget.scrollController?.removeListener(_onScroll);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _openSearch() {
+    setState(() => _searching = true);
+  }
+
+  void _closeSearch() {
+    _searchController.clear();
+    setState(() => _searching = false);
   }
 
   @override
@@ -107,19 +74,68 @@ class _PlayableListHeaderState extends State<PlayableListHeader> {
         () => audioHandler.replaceQueue(widget.playables, shuffle: true);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        children: [
-          AnimatedCrossFade(
-            duration: const Duration(milliseconds: 250),
-            crossFadeState: _showSearch
-                ? CrossFadeState.showSecond
-                : CrossFadeState.showFirst,
-            firstChild: const SizedBox(width: double.infinity),
-            secondChild: Padding(
-              padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: AnimatedCrossFade(
+        duration: const Duration(milliseconds: 200),
+        crossFadeState:
+            _searching ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+        firstChild: Row(
+          children: [
+            CupertinoButton(
+              padding: const EdgeInsets.all(12),
+              color: Colors.white10,
+              borderRadius: BorderRadius.circular(100),
+              minSize: 0,
+              onPressed: _openSearch,
+              child: const Icon(CupertinoIcons.search,
+                  size: 20, color: Colors.white70),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: CupertinoButton(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                color: Colors.white10,
+                borderRadius: BorderRadius.circular(100),
+                onPressed: onPlayPressed,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(CupertinoIcons.play_fill,
+                        size: 18, color: AppColors.highlight),
+                    const SizedBox(width: 8),
+                    Text('Play',
+                        style: TextStyle(color: AppColors.highlight)),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: CupertinoButton(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                color: Colors.white10,
+                borderRadius: BorderRadius.circular(100),
+                onPressed: onShufflePressed,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(CupertinoIcons.shuffle,
+                        size: 18, color: AppColors.highlight),
+                    const SizedBox(width: 8),
+                    Text('Shuffle',
+                        style: TextStyle(color: AppColors.highlight)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        secondChild: Row(
+          children: [
+            Expanded(
               child: CupertinoSearchTextField(
                 controller: _searchController,
+                autofocus: true,
                 style: const TextStyle(color: Colors.white),
                 decoration: BoxDecoration(
                   color: Colors.white10,
@@ -127,50 +143,16 @@ class _PlayableListHeaderState extends State<PlayableListHeader> {
                 ),
               ),
             ),
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: CupertinoButton(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  color: Colors.white10,
-                  borderRadius: BorderRadius.circular(100),
-                  onPressed: onPlayPressed,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(CupertinoIcons.play_fill,
-                          size: 18, color: AppColors.highlight),
-                      const SizedBox(width: 8),
-                      Text('Play',
-                          style: TextStyle(color: AppColors.highlight)),
-                    ],
-                  ),
-                ),
+            CupertinoButton(
+              padding: const EdgeInsets.only(left: 12),
+              onPressed: _closeSearch,
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.white70),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: CupertinoButton(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  color: Colors.white10,
-                  borderRadius: BorderRadius.circular(100),
-                  onPressed: onShufflePressed,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(CupertinoIcons.shuffle,
-                          size: 18, color: AppColors.highlight),
-                      const SizedBox(width: 8),
-                      Text('Shuffle',
-                          style: TextStyle(color: AppColors.highlight)),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
