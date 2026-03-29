@@ -18,6 +18,7 @@ class RecentlyPlayedScreen extends StatefulWidget {
 
 class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
   late final RecentlyPlayedProvider _recentlyPlayedProvider;
+  final _scrollController = ScrollController();
   var _loading = false;
   var _errored = false;
   var _searchQuery = '';
@@ -96,6 +97,7 @@ class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
                 SliverToBoxAdapter(
                   child: PlayableListHeader(
                     playables: playables,
+                    scrollController: _scrollController,
                     onSearchQueryChanged: (String query) {
                       setState(() => _searchQuery = query);
                     },

@@ -20,6 +20,7 @@ class AlbumDetailsScreen extends StatefulWidget {
 }
 
 class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
+  final _scrollController = ScrollController();
   var _searchQuery = '';
 
   Future<List<Object>> buildRequest(dynamic albumId, {bool forceRefresh = false}) {
@@ -101,6 +102,7 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                       SliverToBoxAdapter(
                         child: PlayableListHeader(
                           playables: displayedPlayables,
+                          scrollController: _scrollController,
                           onSearchQueryChanged: (String query) {
                             setState(() => _searchQuery = query);
                           },

@@ -21,6 +21,7 @@ class DownloadedScreen extends StatefulWidget {
 }
 
 class _DownloadedScreenState extends State<DownloadedScreen> {
+  final _scrollController = ScrollController();
   var _searchQuery = '';
 
   @override
@@ -107,6 +108,7 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                   SliverToBoxAdapter(
                     child: PlayableListHeader(
                       playables: displayedPlayables,
+                      scrollController: _scrollController,
                       onSearchQueryChanged: (String query) {
                         setState(() => _searchQuery = query);
                       },

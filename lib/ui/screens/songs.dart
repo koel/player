@@ -5,10 +5,8 @@ import 'package:app/extensions/extensions.dart';
 import 'package:app/main.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
-import 'package:app/ui/widgets/playable_list_header.dart' as BaseSongListHeader;
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/material.dart' hide AppBar;
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 
 class SongsScreen extends StatefulWidget {
@@ -151,6 +149,7 @@ class _SongsScreenState extends State<SongsScreen> {
                   child: SongListHeader(
                     sortField: _paginationConfig.sortField,
                     sortOrder: _paginationConfig.sortOrder,
+                    scrollController: _scrollController,
                     onSearchExpanded: () =>
                         setState(() => _inSearchMode = true),
                     onSearchCollapsed: () => setState(
@@ -164,7 +163,7 @@ class _SongsScreenState extends State<SongsScreen> {
                 ),
                 SliverPlayableList(
                   playables: displayedSongs,
-                  listContext: BaseSongListHeader.PlayableListContext.allSongs,
+                  listContext: PlayableListContext.allSongs,
                 ),
                 _loading
                     ? SliverToBoxAdapter(
@@ -197,6 +196,7 @@ class _SongsScreenState extends State<SongsScreen> {
 class SongListHeader extends StatefulWidget {
   final String sortField;
   final SortOrder sortOrder;
+  final ScrollController? scrollController;
   final Function(String) onSearchQueryChanged;
   final Function() onSearchExpanded;
   final Function() onSearchCollapsed;
@@ -205,6 +205,7 @@ class SongListHeader extends StatefulWidget {
     Key? key,
     required this.sortField,
     required this.sortOrder,
+    this.scrollController,
     required this.onSearchQueryChanged,
     required this.onSearchExpanded,
     required this.onSearchCollapsed,
@@ -245,16 +246,9 @@ class _SongListHeaderState extends State<SongListHeader> {
 
   @override
   Widget build(BuildContext context) {
-    return BaseSongListHeader.PlayableListHeader(
+    return PlayableListHeader(
       playables: [],
-      playIcon: _fetchingSongsToPlayAll
-          ? SpinKitThreeBounce(color: AppColors.white.withOpacity(.5), size: 16)
-          : null,
-      shuffleIcon: _fetchingSongsToShuffle
-          ? SpinKitThreeBounce(color: AppColors.white.withOpacity(.5), size: 16)
-          : null,
-      onSearchExpanded: widget.onSearchExpanded,
-      onSearchCollapsed: widget.onSearchCollapsed,
+      scrollController: widget.scrollController,
       onSearchQueryChanged: widget.onSearchQueryChanged,
       onPlayPressed: () async {
         if (_fetchingSongsToPlayAll || _fetchingSongsToShuffle) return;

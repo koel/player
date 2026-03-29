@@ -20,24 +20,18 @@ enum PlayableListContext {
 
 class PlayableListHeader extends StatefulWidget {
   final List<Playable> playables;
+  final ScrollController? scrollController;
   final Function(String keywords)? onSearchQueryChanged;
   final Function()? onPlayPressed;
   final Function()? onShufflePressed;
-  final Function()? onSearchExpanded;
-  final Function()? onSearchCollapsed;
-  final Widget? playIcon;
-  final Widget? shuffleIcon;
 
   const PlayableListHeader({
     Key? key,
     required this.playables,
+    this.scrollController,
     this.onSearchQueryChanged,
-    this.onSearchExpanded,
-    this.onSearchCollapsed,
     this.onPlayPressed,
     this.onShufflePressed,
-    this.playIcon,
-    this.shuffleIcon,
   }) : super(key: key);
 
   @override
@@ -45,8 +39,9 @@ class PlayableListHeader extends StatefulWidget {
 }
 
 class _PlayableListHeaderState extends State<PlayableListHeader> {
-  var _displayingSearch = false;
   final _searchController = TextEditingController();
+  var _showSearch = false;
+  double _lastScrollOffset = 0;
 
   @override
   void initState() {
@@ -55,88 +50,114 @@ class _PlayableListHeaderState extends State<PlayableListHeader> {
     _searchController.addListener(() {
       widget.onSearchQueryChanged?.call(_searchController.text);
     });
+
+    widget.scrollController?.addListener(_onScroll);
+  }
+
+  @override
+  void didUpdateWidget(covariant PlayableListHeader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.scrollController != widget.scrollController) {
+      oldWidget.scrollController?.removeListener(_onScroll);
+      widget.scrollController?.addListener(_onScroll);
+    }
+  }
+
+  void _onScroll() {
+    final controller = widget.scrollController;
+    if (controller == null || !controller.hasClients) return;
+
+    final offset = controller.offset;
+    final delta = offset - _lastScrollOffset;
+    _lastScrollOffset = offset;
+
+    if (delta > 2 && !_showSearch && offset > 50) {
+      setState(() => _showSearch = true);
+    } else if (delta < -2 && _showSearch && _searchController.text.isEmpty) {
+      setState(() => _showSearch = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.scrollController?.removeListener(_onScroll);
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final playIcon = widget.playIcon ?? const Icon(CupertinoIcons.play_fill);
-    final shuffleIcon =
-        widget.shuffleIcon ?? const Icon(CupertinoIcons.shuffle);
-
     final onPlayPressed = widget.onPlayPressed ??
         () => audioHandler.replaceQueue(widget.playables);
 
     final onShufflePressed = widget.onShufflePressed ??
         () => audioHandler.replaceQueue(widget.playables, shuffle: true);
 
-    final Widget buttonsHeader = Row(
-      children: <Widget>[
-        IconButton(
-          onPressed: () {
-            setState(() => _displayingSearch = true);
-            widget.onSearchExpanded?.call();
-          },
-          icon: const Icon(CupertinoIcons.search),
-        ),
-        const Spacer(),
-        IconButton(
-          onPressed: onPlayPressed,
-          icon: SizedBox.square(dimension: 24, child: playIcon),
-        ),
-        const SizedBox(width: 6),
-        ElevatedButton(
-          onPressed: onShufflePressed,
-          child: SizedBox.square(dimension: 24, child: shuffleIcon),
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.all(16),
-            elevation: 0,
-            shape: CircleBorder(),
-            backgroundColor: AppColors.highlight,
-          ),
-        ),
-      ],
-    );
-
-    final Widget searchHeader = Row(
-      children: <Widget>[
-        Expanded(
-          child: CupertinoSearchTextField(
-            controller: _searchController,
-            style: const TextStyle(color: Colors.white),
-            autofocus: true,
-            decoration: BoxDecoration(
-              color: Colors.white10,
-              borderRadius: AppDimensions.inputBorderRadius,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: [
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 250),
+            crossFadeState: _showSearch
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            firstChild: const SizedBox(width: double.infinity),
+            secondChild: Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: CupertinoSearchTextField(
+                controller: _searchController,
+                style: const TextStyle(color: Colors.white),
+                decoration: BoxDecoration(
+                  color: Colors.white10,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
             ),
           ),
-        ),
-        CupertinoButton(
-          onPressed: () {
-            setState(() => _displayingSearch = false);
-            _searchController.clear();
-            widget.onSearchCollapsed?.call();
-          },
-          child: Text(
-            'Cancel',
-            style: TextStyle(color: AppColors.white.withOpacity(.7)),
+          Row(
+            children: [
+              Expanded(
+                child: CupertinoButton(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  color: Colors.white10,
+                  borderRadius: BorderRadius.circular(10),
+                  onPressed: onPlayPressed,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(CupertinoIcons.play_fill,
+                          size: 18, color: AppColors.highlight),
+                      const SizedBox(width: 8),
+                      Text('Play',
+                          style: TextStyle(color: AppColors.highlight)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: CupertinoButton(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  color: Colors.white10,
+                  borderRadius: BorderRadius.circular(10),
+                  onPressed: onShufflePressed,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(CupertinoIcons.shuffle,
+                          size: 18, color: AppColors.highlight),
+                      const SizedBox(width: 8),
+                      Text('Shuffle',
+                          style: TextStyle(color: AppColors.highlight)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-      ],
-    );
-
-    final double verticalPadding = _displayingSearch ? 10 : 8;
-
-    return AnimatedSwitcher(
-      duration: Duration(milliseconds: 300),
-      child: Container(
-        key: ValueKey<bool>(_displayingSearch),
-        padding: EdgeInsets.fromLTRB(
-          _displayingSearch ? 16 : 8,
-          verticalPadding,
-          _displayingSearch ? 0 : 8,
-          verticalPadding,
-        ),
-        child: _displayingSearch ? searchHeader : buttonsHeader,
+          const SizedBox(height: 8),
+        ],
       ),
     );
   }

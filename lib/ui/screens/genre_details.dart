@@ -181,6 +181,7 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
                           ? const SizedBox.shrink()
                           : PlayableListHeader(
                               playables: displayedSongs,
+                              scrollController: _scrollController,
                               onSearchQueryChanged: (query) {
                                 setState(() => _searchQuery = query);
                               },

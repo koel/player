@@ -118,6 +118,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                         ? const SizedBox.shrink()
                         : PlayableListHeader(
                             playables: displayedPlayables,
+                            scrollController: _scrollController,
                             onSearchQueryChanged: (query) {
                               setState(() => _searchQuery = query);
                             },

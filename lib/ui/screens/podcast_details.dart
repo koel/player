@@ -21,6 +21,7 @@ class PodcastDetailsScreen extends StatefulWidget {
 }
 
 class _PodcastDetailsScreen extends State<PodcastDetailsScreen> {
+  final _scrollController = ScrollController();
   String _searchQuery = '';
 
   Future<List<Object>> buildRequest(
@@ -105,6 +106,7 @@ class _PodcastDetailsScreen extends State<PodcastDetailsScreen> {
                       SliverToBoxAdapter(
                         child: PlayableListHeader(
                           playables: displayedPlayables,
+                          scrollController: _scrollController,
                           onSearchQueryChanged: (String query) {
                             setState(() => _searchQuery = query);
                           },

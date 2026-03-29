@@ -149,6 +149,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                           SliverToBoxAdapter(
                             child: PlayableListHeader(
                               playables: songs,
+                              scrollController: _scrollController,
                               onSearchQueryChanged: (String query) {
                                 setState(() => _searchQuery = query);
                               },
