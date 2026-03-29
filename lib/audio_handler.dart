@@ -69,15 +69,18 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     _radioPlayer = null;
   }
 
+  static List<MediaControl> radioControls({required bool playing}) {
+    return [
+      if (playing) MediaControl.pause else MediaControl.play,
+    ];
+  }
+
   void updateRadioPlaybackState({
     required bool playing,
     required AudioProcessingState processingState,
   }) {
-    playbackState.add(playbackState.value.copyWith(
-      controls: [
-        if (playing) MediaControl.pause else MediaControl.play,
-        MediaControl.stop,
-      ],
+    playbackState.add(PlaybackState(
+      controls: radioControls(playing: playing),
       processingState: processingState,
       playing: playing,
     ));
@@ -229,6 +232,17 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     }
     playbackState.add(playbackState.value.copyWith(playing: false));
     await _player.pause();
+  }
+
+  @override
+  Future<void> stop() async {
+    if (_isRadioMode && _radioPlayer != null) {
+      await _radioPlayer!.stop();
+      exitRadioMode();
+      playbackState.add(PlaybackState());
+      return;
+    }
+    await _player.stop();
   }
 
   Future<void> queueAndPlay(Playable playable) async {

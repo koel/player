@@ -27,7 +27,7 @@ class RadioPlayerProvider with ChangeNotifier {
   RadioPlayerProvider() {
     _playingSubscription = _player.playingStream.listen((playing) {
       _playing = playing;
-      if (active) {
+      if (active && audioHandler.isRadioMode) {
         audioHandler.updateRadioPlaybackState(
           playing: playing,
           processingState: _loading
@@ -42,7 +42,7 @@ class RadioPlayerProvider with ChangeNotifier {
         _player.processingStateStream.listen((state) {
       _loading = state == ProcessingState.loading ||
           state == ProcessingState.buffering;
-      if (active) {
+      if (active && audioHandler.isRadioMode) {
         audioHandler.updateRadioPlaybackState(
           playing: _playing,
           processingState: const {
@@ -66,6 +66,15 @@ class RadioPlayerProvider with ChangeNotifier {
     });
   }
 
+  static MediaItem mediaItemForStation(RadioStation station) {
+    return MediaItem(
+      id: 'radio-${station.id}',
+      title: station.name,
+      artist: 'Radio',
+      artUri: station.logo != null ? Uri.parse(station.logo!) : null,
+    );
+  }
+
   Future<void> play(RadioStation station) async {
     // Pause the main queue player before entering radio mode
     if (audioHandler.playbackState.value.playing) {
@@ -80,12 +89,7 @@ class RadioPlayerProvider with ChangeNotifier {
     notifyListeners();
 
     // Push radio station info to the OS media session
-    audioHandler.mediaItem.add(MediaItem(
-      id: 'radio-${station.id}',
-      title: station.name,
-      artist: 'Radio',
-      artUri: station.logo != null ? Uri.parse(station.logo!) : null,
-    ));
+    audioHandler.mediaItem.add(mediaItemForStation(station));
 
     final streamUrl =
         '${preferences.host}/radio/stream/${station.id}?t=${preferences.audioToken}';

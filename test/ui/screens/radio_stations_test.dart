@@ -1,4 +1,6 @@
+import 'package:app/audio_handler.dart';
 import 'package:app/models/radio_station.dart';
+import 'package:app/providers/radio_player_provider.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -87,76 +89,48 @@ void main() {
   });
 
   group('Radio media session integration', () {
-    test('radio station produces a valid MediaItem', () {
-      final station = RadioStation.fake(
-        id: 'station-1',
-        name: 'Jazz FM',
-      );
-
-      final mediaItem = MediaItem(
-        id: 'radio-${station.id}',
-        title: station.name,
-        artist: 'Radio',
-        artUri: station.logo != null ? Uri.parse(station.logo!) : null,
-      );
+    test('mediaItemForStation produces correct MediaItem', () {
+      final station = RadioStation.fake(id: 'station-1', name: 'Jazz FM');
+      final mediaItem = RadioPlayerProvider.mediaItemForStation(station);
 
       expect(mediaItem.id, 'radio-station-1');
       expect(mediaItem.title, 'Jazz FM');
       expect(mediaItem.artist, 'Radio');
-      // No duration for live streams
       expect(mediaItem.duration, isNull);
     });
 
-    test('radio MediaItem includes art URI when logo is present', () {
+    test('mediaItemForStation includes art URI when logo is present', () {
       final station = RadioStation(
         id: 'station-1',
         name: 'Jazz FM',
         url: 'https://stream.example.com/live',
         logo: 'https://example.com/logo.png',
       );
-
-      final mediaItem = MediaItem(
-        id: 'radio-${station.id}',
-        title: station.name,
-        artist: 'Radio',
-        artUri: station.logo != null ? Uri.parse(station.logo!) : null,
-      );
+      final mediaItem = RadioPlayerProvider.mediaItemForStation(station);
 
       expect(mediaItem.artUri, Uri.parse('https://example.com/logo.png'));
     });
 
-    test('radio MediaItem has no art URI when logo is null', () {
+    test('mediaItemForStation has no art URI when logo is null', () {
       final station = RadioStation.fake(id: 'station-1');
-
-      final mediaItem = MediaItem(
-        id: 'radio-${station.id}',
-        title: station.name,
-        artist: 'Radio',
-        artUri: station.logo != null ? Uri.parse(station.logo!) : null,
-      );
+      final mediaItem = RadioPlayerProvider.mediaItemForStation(station);
 
       expect(mediaItem.artUri, isNull);
     });
 
-    test('radio playback state has play/pause and stop controls', () {
-      // Simulates what updateRadioPlaybackState produces
-      final controls = [MediaControl.pause, MediaControl.stop];
+    test('radioControls returns pause when playing', () {
+      final controls = KoelAudioHandler.radioControls(playing: true);
 
-      expect(controls, contains(MediaControl.pause));
-      expect(controls, contains(MediaControl.stop));
-      // No skip controls for radio
+      expect(controls, [MediaControl.pause]);
       expect(controls, isNot(contains(MediaControl.skipToNext)));
       expect(controls, isNot(contains(MediaControl.skipToPrevious)));
+      expect(controls, isNot(contains(MediaControl.stop)));
     });
 
-    test('radio playback state shows play control when paused', () {
-      final playing = false;
-      final controls = [
-        if (playing) MediaControl.pause else MediaControl.play,
-        MediaControl.stop,
-      ];
+    test('radioControls returns play when paused', () {
+      final controls = KoelAudioHandler.radioControls(playing: false);
 
-      expect(controls, contains(MediaControl.play));
+      expect(controls, [MediaControl.play]);
       expect(controls, isNot(contains(MediaControl.pause)));
     });
   });
