@@ -21,6 +21,7 @@ class PodcastDetailsScreen extends StatefulWidget {
 }
 
 class _PodcastDetailsScreen extends State<PodcastDetailsScreen> {
+  final _scrollController = ScrollController();
   String _searchQuery = '';
 
   Future<List<Object>> buildRequest(
@@ -35,6 +36,12 @@ class _PodcastDetailsScreen extends State<PodcastDetailsScreen> {
           .read<PlayableProvider>()
           .fetchForPodcast(podcastId, forceRefresh: forceRefresh),
     ]);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -72,6 +79,7 @@ class _PodcastDetailsScreen extends State<PodcastDetailsScreen> {
                 if (mounted) setState(() {});
               },
               child: CustomScrollView(
+                  controller: _scrollController,
                   slivers: <Widget>[
                     AppBar(
                       headingText: podcast.title,
@@ -105,6 +113,7 @@ class _PodcastDetailsScreen extends State<PodcastDetailsScreen> {
                       SliverToBoxAdapter(
                         child: PlayableListHeader(
                           playables: displayedPlayables,
+                          scrollController: _scrollController,
                           onSearchQueryChanged: (String query) {
                             setState(() => _searchQuery = query);
                           },

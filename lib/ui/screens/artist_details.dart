@@ -103,6 +103,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                       SliverToBoxAdapter(
                         child: PlayableListHeader(
                           playables: displayedSongs,
+                          scrollController: _scrollController,
                           onSearchQueryChanged: (String query) {
                             setState(() => _searchQuery = query);
                           },

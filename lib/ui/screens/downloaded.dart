@@ -21,6 +21,7 @@ class DownloadedScreen extends StatefulWidget {
 }
 
 class _DownloadedScreenState extends State<DownloadedScreen> {
+  final _scrollController = ScrollController();
   var _searchQuery = '';
 
   @override
@@ -87,6 +88,7 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                 provider.playables.$sort(sortConfig).$filter(_searchQuery);
 
             return CustomScrollView(
+                controller: _scrollController,
                 slivers: <Widget>[
                   AppBar(
                     headingText: 'Downloaded',
@@ -107,6 +109,7 @@ class _DownloadedScreenState extends State<DownloadedScreen> {
                   SliverToBoxAdapter(
                     child: PlayableListHeader(
                       playables: displayedPlayables,
+                      scrollController: _scrollController,
                       onSearchQueryChanged: (String query) {
                         setState(() => _searchQuery = query);
                       },

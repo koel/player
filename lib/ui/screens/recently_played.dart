@@ -18,6 +18,7 @@ class RecentlyPlayedScreen extends StatefulWidget {
 
 class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
   late final RecentlyPlayedProvider _recentlyPlayedProvider;
+  final _scrollController = ScrollController();
   var _loading = false;
   var _errored = false;
   var _searchQuery = '';
@@ -50,6 +51,12 @@ class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
     } finally {
       setState(() => _loading = false);
     }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -87,6 +94,7 @@ class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
             final playables = provider.playables.$filter(_searchQuery);
 
             return CustomScrollView(
+              controller: _scrollController,
               slivers: <Widget>[
                 AppBar(
                   headingText: 'Recently Played',
@@ -96,6 +104,7 @@ class _RecentlyPlayedScreenState extends State<RecentlyPlayedScreen> {
                 SliverToBoxAdapter(
                   child: PlayableListHeader(
                     playables: playables,
+                    scrollController: _scrollController,
                     onSearchQueryChanged: (String query) {
                       setState(() => _searchQuery = query);
                     },

@@ -20,6 +20,7 @@ class AlbumDetailsScreen extends StatefulWidget {
 }
 
 class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
+  final _scrollController = ScrollController();
   var _searchQuery = '';
 
   Future<List<Object>> buildRequest(dynamic albumId, {bool forceRefresh = false}) {
@@ -31,6 +32,12 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
           .read<PlayableProvider>()
           .fetchForAlbum(albumId, forceRefresh: forceRefresh),
     ]);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -68,6 +75,7 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                 if (mounted) setState(() {});
               },
               child: CustomScrollView(
+                  controller: _scrollController,
                   slivers: <Widget>[
                     AppBar(
                       headingText: album.name,
@@ -101,6 +109,7 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                       SliverToBoxAdapter(
                         child: PlayableListHeader(
                           playables: displayedPlayables,
+                          scrollController: _scrollController,
                           onSearchQueryChanged: (String query) {
                             setState(() => _searchQuery = query);
                           },
