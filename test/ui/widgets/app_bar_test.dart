@@ -42,7 +42,7 @@ void main() {
       expect(find.byIcon(Icons.sort), findsOneWidget);
     });
 
-    testWidgets('renders without background image', (tester) async {
+    testWidgets('uses default background when none provided', (tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: CustomScrollView(
@@ -58,7 +58,7 @@ void main() {
       expect(find.text('No Background'), findsOneWidget);
       expect(
         find.byKey(const Key('appBarBackgroundMask')),
-        findsNothing,
+        findsOneWidget,
       );
     });
 

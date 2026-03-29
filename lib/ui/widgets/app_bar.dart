@@ -36,9 +36,21 @@ class AppBar extends StatelessWidget {
     this.actions = const [],
   }) : super(key: key);
 
+  static final Widget _defaultBackground = SizedBox.expand(
+    child: DecoratedBox(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(AppImages.defaultImageAssetName),
+          fit: BoxFit.cover,
+          alignment: Alignment.topCenter,
+        ),
+      ),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
-    final backgroundImage = this.backgroundImage;
+    final backgroundImage = this.backgroundImage ?? _defaultBackground;
 
     return SliverAppBar(
       pinned: true,
@@ -75,8 +87,7 @@ class AppBar extends StatelessWidget {
           style: Theme.of(context).textTheme.headlineSmall,
           textAlign: TextAlign.center,
         ),
-        background: backgroundImage != null
-            ? ShaderMask(
+        background: ShaderMask(
                 key: const Key('appBarBackgroundMask'),
                 shaderCallback: (bounds) {
                   return const LinearGradient(
@@ -100,8 +111,7 @@ class AppBar extends StatelessWidget {
                   ]),
                   child: backgroundImage,
                 ),
-              )
-            : null,
+              ),
       ),
             ],
           );
