@@ -71,9 +71,9 @@ class _PlayableListHeaderState extends State<PlayableListHeader> {
     final delta = offset - _lastScrollOffset;
     _lastScrollOffset = offset;
 
-    if (delta > 2 && !_showSearch && offset > 50) {
+    if (delta < -2 && !_showSearch) {
       setState(() => _showSearch = true);
-    } else if (delta < -2 && _showSearch && _searchController.text.isEmpty) {
+    } else if (delta > 2 && _showSearch && _searchController.text.isEmpty) {
       setState(() => _showSearch = false);
     }
   }
