@@ -27,13 +27,24 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   var _isOffline = AppState.get('mode', AppMode.online) == AppMode.offline;
 
+  final _navigatorKeys = List.generate(
+    3,
+    (_) => GlobalKey<NavigatorState>(),
+  );
+
   static const List<Widget> _widgetOptions = [
     const HomeScreen(),
     const SearchScreen(),
     const LibraryScreen(),
   ];
 
-  void _onItemTapped(int index) => setState(() => _selectedIndex = index);
+  void _onItemTapped(int index) {
+    if (index == _selectedIndex) {
+      _navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
+    } else {
+      setState(() => _selectedIndex = index);
+    }
+  }
 
   @override
   void initState() {
@@ -90,6 +101,7 @@ class _MainScreenState extends State<MainScreen> {
                 CupertinoTabScaffold(
                   tabBuilder: (_, index) {
                     return CupertinoTabView(
+                        navigatorKey: _navigatorKeys[index],
                         builder: (_) => _widgetOptions[index]);
                   },
                   tabBar: CupertinoTabBar(
