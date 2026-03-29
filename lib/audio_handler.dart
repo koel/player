@@ -208,7 +208,8 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     final download = downloadProvider.getForPlayable(playable);
 
     if (download == null) {
-      await _player.setUrl(mediaItem.extras?['sourceUrl'] as String);
+      final uri = Uri.parse(mediaItem.extras?['sourceUrl'] as String);
+      await _player.setAudioSource(LockCachingAudioSource(uri));
     } else {
       await _player.setFilePath(download.path);
     }
