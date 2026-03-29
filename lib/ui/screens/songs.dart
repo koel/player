@@ -31,6 +31,7 @@ class _SongsScreenState extends State<SongsScreen> {
   var _loading = false;
   var _errored = false;
   var _inSearchMode = false;
+  Widget? _cachedBackground;
 
   void _scrollListener() {
     _currentScrollOffset = _scrollController.offset;
@@ -121,8 +122,8 @@ class _SongsScreenState extends State<SongsScreen> {
               slivers: [
                 AppBar(
                   headingText: 'All songs',
-                  backgroundImage: backgroundImageFromPlayables(
-                      provider.playables),
+                  backgroundImage: _cachedBackground ??=
+                      backgroundImageFromPlayables(provider.playables),
                   actions: [
                     SortButton(
                       fields: ['title', 'artist_name', 'created_at'],
