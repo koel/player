@@ -91,7 +91,15 @@ class AppBar extends StatelessWidget {
                   ).createShader(bounds);
                 },
                 blendMode: BlendMode.dstIn,
-                child: backgroundImage,
+                child: ColorFiltered(
+                  colorFilter: const ColorFilter.matrix(<double>[
+                    1.2, 0, 0, 0, -20,
+                    0, 1.2, 0, 0, -20,
+                    0, 0, 1.2, 0, -20,
+                    0, 0, 0, 1, 0,
+                  ]),
+                  child: backgroundImage,
+                ),
               )
             : null,
       ),
