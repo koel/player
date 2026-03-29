@@ -170,6 +170,7 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
                     TextFormField(
                       keyboardType: TextInputType.url,
                       autocorrect: false,
+                      autofillHints: null,
                       onChanged: (value) => _host = value,
                       onSaved: (value) => _host = value ?? '',
                       decoration: InputDecoration(
@@ -182,6 +183,7 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
                     TextFormField(
                       keyboardType: TextInputType.emailAddress,
                       autocorrect: false,
+                      autofillHints: [AutofillHints.email],
                       onChanged: (value) => _email = value,
                       onSaved: (value) => _email = value ?? '',
                       decoration: InputDecoration(
@@ -194,6 +196,7 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
                     TextFormField(
                       obscureText: !_showPassword,
                       keyboardType: TextInputType.visiblePassword,
+                      autofillHints: [AutofillHints.password],
                       onChanged: (value) => _password = value,
                       onSaved: (value) => _password = value ?? '',
                       decoration: InputDecoration(
