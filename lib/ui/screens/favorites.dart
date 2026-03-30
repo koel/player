@@ -152,7 +152,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                             child: PlayableListHeader(
                               playables: songs,
                               scrollController: _scrollController,
-                              rightPadding: showScrollbar ? alphabetScrollbarWidth : 0,
+                              rightPadding: showScrollbar ? alphabetScrollbarWidth / 2 : 0,
                               onSearchQueryChanged: (String query) {
                                 setState(() => _searchQuery = query);
                               },
@@ -161,7 +161,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                           SliverPlayableList(
                             playables: songs,
                             listContext: PlayableListContext.favorites,
-                            rightPadding: showScrollbar ? alphabetScrollbarWidth : 0,
+                            rightPadding: showScrollbar ? alphabetScrollbarWidth / 2 : 0,
                             onDismissed: provider.unlike,
                             dismissIcon: const Icon(CupertinoIcons.heart_slash),
                           ),

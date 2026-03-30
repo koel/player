@@ -153,7 +153,7 @@ class _SongsScreenState extends State<SongsScreen> {
                     sortField: _paginationConfig.sortField,
                     sortOrder: _paginationConfig.sortOrder,
                     scrollController: _scrollController,
-                    rightPadding: showScrollbar ? alphabetScrollbarWidth : 0,
+                    rightPadding: showScrollbar ? alphabetScrollbarWidth / 2 : 0,
                     onSearchExpanded: () =>
                         setState(() => _inSearchMode = true),
                     onSearchCollapsed: () => setState(
@@ -168,7 +168,7 @@ class _SongsScreenState extends State<SongsScreen> {
                 SliverPlayableList(
                   playables: displayedSongs,
                   listContext: PlayableListContext.allSongs,
-                  rightPadding: showScrollbar ? alphabetScrollbarWidth : 0,
+                  rightPadding: showScrollbar ? alphabetScrollbarWidth / 2 : 0,
                 ),
                 _loading
                     ? SliverToBoxAdapter(

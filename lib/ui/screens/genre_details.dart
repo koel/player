@@ -182,7 +182,7 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
                           : PlayableListHeader(
                               playables: displayedSongs,
                               scrollController: _scrollController,
-                              rightPadding: showScrollbar ? alphabetScrollbarWidth : 0,
+                              rightPadding: showScrollbar ? alphabetScrollbarWidth / 2 : 0,
                               onSearchQueryChanged: (query) {
                                 setState(() => _searchQuery = query);
                               },
@@ -191,7 +191,7 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
                     SliverPlayableList(
                       playables: displayedSongs,
                       listContext: PlayableListContext.genre,
-                      rightPadding: showScrollbar ? alphabetScrollbarWidth : 0,
+                      rightPadding: showScrollbar ? alphabetScrollbarWidth / 2 : 0,
                     ),
                     if (_loading)
                       SliverToBoxAdapter(

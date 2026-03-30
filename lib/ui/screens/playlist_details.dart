@@ -121,7 +121,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                         : PlayableListHeader(
                             playables: displayedPlayables,
                             scrollController: _scrollController,
-                            rightPadding: showScrollbar ? alphabetScrollbarWidth : 0,
+                            rightPadding: showScrollbar ? alphabetScrollbarWidth / 2 : 0,
                             onSearchQueryChanged: (query) {
                               setState(() => _searchQuery = query);
                             },
@@ -142,7 +142,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                   else
                     SliverPlayableList(
                       playables: displayedPlayables,
-                      rightPadding: showScrollbar ? alphabetScrollbarWidth : 0,
+                      rightPadding: showScrollbar ? alphabetScrollbarWidth / 2 : 0,
                       onDismissed: playlist.isStandard
                           ? (playable) => _playlistProvider.removeFromPlaylist(
                                 playable,
