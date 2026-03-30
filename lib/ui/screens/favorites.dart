@@ -65,7 +65,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const Icon(
-                CupertinoIcons.heart,
+                CupertinoIcons.star,
                 size: 56.0,
                 color: Colors.grey,
               ),
@@ -85,7 +85,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: 5.0),
                         child: Icon(
-                          CupertinoIcons.heart_solid,
+                          CupertinoIcons.star_fill,
                           size: 16.0,
                         ),
                       ),
@@ -163,7 +163,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                             listContext: PlayableListContext.favorites,
                             rightPadding: showScrollbar ? alphabetScrollbarWidth * 0.75 : 0,
                             onDismissed: provider.unlike,
-                            dismissIcon: const Icon(CupertinoIcons.heart_slash),
+                            dismissIcon: const Icon(CupertinoIcons.star_slash),
                           ),
                           const BottomSpace(),
                         ],

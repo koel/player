@@ -236,10 +236,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                                         },
                                         icon: Icon(
                                           playable.liked
-                                              ? CupertinoIcons.heart_fill
-                                              : CupertinoIcons.heart,
+                                              ? CupertinoIcons.star_fill
+                                              : CupertinoIcons.star,
                                           color: playable.liked
-                                              ? Colors.red
+                                              ? Colors.white
                                               : bottomIconColor,
                                         ),
                                       ),

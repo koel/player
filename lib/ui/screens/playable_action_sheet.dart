@@ -149,8 +149,8 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                       : 'Mark as Favorite',
                   icon: Icon(
                     playable.liked
-                        ? CupertinoIcons.heart_fill
-                        : CupertinoIcons.heart,
+                        ? CupertinoIcons.star_fill
+                        : CupertinoIcons.star,
                     color: Colors.white30,
                   ),
                   onTap: () {
@@ -161,8 +161,8 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                           ? 'Removed from Favorites.'
                           : 'Added to Favorites.',
                       icon: playable.liked
-                          ? CupertinoIcons.heart_slash
-                          : CupertinoIcons.heart_fill,
+                          ? CupertinoIcons.star_slash
+                          : CupertinoIcons.star_fill,
                     );
                     favoriteProvider.toggleOne(playable: playable);
                   },
