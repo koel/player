@@ -151,7 +151,7 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                     playable.liked
                         ? CupertinoIcons.star_fill
                         : CupertinoIcons.star,
-                    color: playable.liked ? Colors.amber : Colors.white30,
+                    color: Colors.white30,
                   ),
                   onTap: () {
                     showOverlay(
