@@ -30,7 +30,7 @@ class LibraryScreen extends StatelessWidget {
           ),
         ),
         LibraryMenuItem(
-          icon: CupertinoIcons.heart_fill,
+          icon: CupertinoIcons.star_fill,
           label: 'Favorites',
           onTap: () => Navigator.of(context).push(
             CupertinoPageRoute(builder: (_) => const FavoritesScreen()),
