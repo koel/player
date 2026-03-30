@@ -139,7 +139,7 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                       ),
                       SliverPadding(
                         padding: EdgeInsets.only(
-                          right: showScrollbar ? alphabetScrollbarWidth / 2 : 0,
+                          right: showScrollbar ? alphabetScrollbarWidth * 0.75 : 0,
                         ),
                         sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(

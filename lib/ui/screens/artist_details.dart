@@ -106,7 +106,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                         child: PlayableListHeader(
                           playables: displayedSongs,
                           scrollController: _scrollController,
-                          rightPadding: showScrollbar ? alphabetScrollbarWidth / 2 : 0,
+                          rightPadding: showScrollbar ? alphabetScrollbarWidth * 0.75 : 0,
                           onSearchQueryChanged: (String query) {
                             setState(() => _searchQuery = query);
                           },
@@ -115,7 +115,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                     SliverPlayableList(
                       playables: displayedSongs,
                       listContext: PlayableListContext.artist,
-                      rightPadding: showScrollbar ? alphabetScrollbarWidth / 2 : 0,
+                      rightPadding: showScrollbar ? alphabetScrollbarWidth * 0.75 : 0,
                     ),
                     const BottomSpace(),
                   ],
