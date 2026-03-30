@@ -59,6 +59,8 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
             final displayedSongs =
                 songs.$sort(sortConfig).$filter(_searchQuery);
 
+            final showScrollbar = AlphabetScrollbar.shouldShow(itemCount: displayedSongs.length, sortField: sortConfig.field, nameSortField: 'title');
+
             return PullToRefresh(
               onRefresh: () async {
                 await buildRequest(artistId, forceRefresh: true);
@@ -104,6 +106,7 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                         child: PlayableListHeader(
                           playables: displayedSongs,
                           scrollController: _scrollController,
+                          rightPadding: showScrollbar ? alphabetScrollbarWidth * 0.75 : 0,
                           onSearchQueryChanged: (String query) {
                             setState(() => _searchQuery = query);
                           },
@@ -112,11 +115,12 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                     SliverPlayableList(
                       playables: displayedSongs,
                       listContext: PlayableListContext.artist,
+                      rightPadding: showScrollbar ? alphabetScrollbarWidth * 0.75 : 0,
                     ),
                     const BottomSpace(),
                   ],
                 ),
-                if (AlphabetScrollbar.shouldShow(itemCount: displayedSongs.length, sortField: sortConfig.field, nameSortField: 'title'))
+                if (showScrollbar)
                   AlphabetScrollbar(
                     labels: displayedSongs.map((s) => s.title).toList(),
                     scrollController: _scrollController,

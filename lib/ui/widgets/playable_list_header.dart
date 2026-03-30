@@ -26,6 +26,7 @@ class PlayableListHeader extends StatefulWidget {
   final Function()? onShufflePressed;
   final Function()? onSearchOpened;
   final Function()? onSearchClosed;
+  final double rightPadding;
 
   const PlayableListHeader({
     Key? key,
@@ -36,6 +37,7 @@ class PlayableListHeader extends StatefulWidget {
     this.onShufflePressed,
     this.onSearchOpened,
     this.onSearchClosed,
+    this.rightPadding = 0,
   }) : super(key: key);
 
   @override
@@ -99,7 +101,8 @@ class _PlayableListHeaderState extends State<PlayableListHeader>
         () => audioHandler.replaceQueue(widget.playables, shuffle: true);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.only(
+          left: 16, right: 16 + widget.rightPadding, top: 8, bottom: 8),
       child: SizedBox(
         height: 48,
         child: LayoutBuilder(

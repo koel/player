@@ -10,6 +10,7 @@ class SliverPlayableList extends StatelessWidget {
   final PlayableListContext listContext;
   final Widget dismissIcon;
   final Function(Playable playable)? onDismissed;
+  final double rightPadding;
 
   SliverPlayableList({
     Key? key,
@@ -17,11 +18,14 @@ class SliverPlayableList extends StatelessWidget {
     this.listContext = PlayableListContext.other,
     this.onDismissed,
     this.dismissIcon = const Icon(CupertinoIcons.delete),
+    this.rightPadding = 0,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return SliverList(
+    return SliverPadding(
+      padding: EdgeInsets.only(right: rightPadding),
+      sliver: SliverList(
       delegate: SliverChildBuilderDelegate(
         (_, int index) {
           final canDismiss = onDismissed != null;
@@ -74,6 +78,6 @@ class SliverPlayableList extends StatelessWidget {
         },
         childCount: playables.length,
       ),
-    );
+    ));
   }
 }

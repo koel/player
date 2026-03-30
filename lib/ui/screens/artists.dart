@@ -138,7 +138,7 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
                       ),
                       SliverPadding(
                         padding: EdgeInsets.only(
-                          right: showScrollbar ? alphabetScrollbarWidth : 0,
+                          right: showScrollbar ? alphabetScrollbarWidth * 0.75 : 0,
                         ),
                         sliver: SliverList(
                           delegate: SliverChildBuilderDelegate((
