@@ -6,6 +6,8 @@ import 'package:app/models/models.dart';
 import 'package:app/models/playable.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
+import 'package:app/ui/screens/radio_now_playing.dart';
+import 'package:app/ui/widgets/now_playing_page_route.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -55,6 +57,13 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
   void dispose() {
     unsubscribeAll();
     super.dispose();
+  }
+
+  void _openRadioNowPlaying(BuildContext context) {
+    Navigator.of(context, rootNavigator: true).push(
+      NowPlayingPageRoute(
+          builder: (_) => const RadioNowPlayingScreen()),
+    );
   }
 
   @override
@@ -128,58 +137,61 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
     final station = radioPlayer.currentStation!;
 
     return _buildShell(
-      content: Row(
-        children: <Widget>[
-          // Station logo
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: station.logo != null
-                ? CachedNetworkImage(
-                    imageUrl: station.logo!,
-                    width: 36,
-                    height: 36,
-                    fit: BoxFit.cover,
-                    errorWidget: (_, __, ___) => _radioDefaultIcon(),
-                  )
-                : _radioDefaultIcon(),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  MarqueeText(
-                    text: radioPlayer.streamTitle ?? station.name,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  if (radioPlayer.loading)
-                    const Text(
-                      'Connecting…',
-                      style: TextStyle(fontSize: 12, color: Colors.white54),
+      content: InkWell(
+        onTap: () => _openRadioNowPlaying(context),
+        child: Row(
+          children: <Widget>[
+            // Station logo
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: station.logo != null
+                  ? CachedNetworkImage(
+                      imageUrl: station.logo!,
+                      width: 36,
+                      height: 36,
+                      fit: BoxFit.cover,
+                      errorWidget: (_, __, ___) => _radioDefaultIcon(),
                     )
-                  else if (radioPlayer.streamTitle != null)
-                    Text(
-                      station.name,
-                      overflow: TextOverflow.ellipsis,
-                      style:
-                          const TextStyle(fontSize: 12, color: Colors.white54),
+                  : _radioDefaultIcon(),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    MarqueeText(
+                      text: radioPlayer.streamTitle ?? station.name,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
-                ],
+                    if (radioPlayer.loading)
+                      const Text(
+                        'Connecting…',
+                        style: TextStyle(fontSize: 12, color: Colors.white54),
+                      )
+                    else if (radioPlayer.streamTitle != null)
+                      Text(
+                        station.name,
+                        overflow: TextOverflow.ellipsis,
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.white54),
+                      ),
+                  ],
+                ),
               ),
             ),
-          ),
-          IconButton(
-            onPressed: radioPlayer.togglePlayPause,
-            icon: Icon(
-              radioPlayer.playing
-                  ? CupertinoIcons.pause_fill
-                  : CupertinoIcons.play_fill,
-              size: 24,
+            IconButton(
+              onPressed: radioPlayer.togglePlayPause,
+              icon: Icon(
+                radioPlayer.playing
+                    ? CupertinoIcons.pause_fill
+                    : CupertinoIcons.play_fill,
+                size: 24,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
