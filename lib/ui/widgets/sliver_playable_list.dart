@@ -23,9 +23,7 @@ class SliverPlayableList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SliverPadding(
-      padding: EdgeInsets.only(right: rightPadding),
-      sliver: SliverList(
+    return SliverList(
       delegate: SliverChildBuilderDelegate(
         (_, int index) {
           final canDismiss = onDismissed != null;
@@ -70,14 +68,17 @@ class SliverPlayableList extends StatelessWidget {
                   )
                 : null,
             key: ValueKey(playables[index]),
-            child: PlayableRow(
-              playable: playables[index],
-              listContext: listContext,
+            child: Padding(
+              padding: EdgeInsets.only(right: rightPadding),
+              child: PlayableRow(
+                playable: playables[index],
+                listContext: listContext,
+              ),
             ),
           );
         },
         childCount: playables.length,
       ),
-    ));
+    );
   }
 }
