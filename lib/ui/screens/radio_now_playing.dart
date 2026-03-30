@@ -18,18 +18,14 @@ class RadioNowPlayingScreen extends StatefulWidget {
 class _RadioNowPlayingScreenState extends State<RadioNowPlayingScreen> {
   var _dragOffset = 0.0;
 
-  void _onPointerMove(PointerMoveEvent event) {
-    if (_dragOffset > 0 || event.delta.dy > 0) {
-      setState(() {
-        _dragOffset =
-            (_dragOffset + event.delta.dy).clamp(0.0, double.infinity);
-      });
-    }
+  void _onDragUpdate(DragUpdateDetails details) {
+    setState(() {
+      _dragOffset =
+          (_dragOffset + details.delta.dy).clamp(0.0, double.infinity);
+    });
   }
 
-  void _onPointerUp(PointerUpEvent event) {
-    if (_dragOffset <= 0) return;
-
+  void _onDragEnd(DragEndDetails details) {
     final screenHeight = MediaQuery.of(context).size.height;
 
     if (_dragOffset > screenHeight * 0.15) {
@@ -76,10 +72,7 @@ class _RadioNowPlayingScreenState extends State<RadioNowPlayingScreen> {
           ),
         );
 
-        return Listener(
-          onPointerMove: _onPointerMove,
-          onPointerUp: _onPointerUp,
-          child: AnimatedContainer(
+        return AnimatedContainer(
             duration: _dragOffset == 0
                 ? const Duration(milliseconds: 200)
                 : Duration.zero,
@@ -102,7 +95,11 @@ class _RadioNowPlayingScreenState extends State<RadioNowPlayingScreen> {
                       child: Container(
                         height: screenHeight,
                         padding: const EdgeInsets.all(24),
-                        child: Column(
+                        child: GestureDetector(
+                          onVerticalDragUpdate: _onDragUpdate,
+                          onVerticalDragEnd: _onDragEnd,
+                          behavior: HitTestBehavior.translucent,
+                          child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
                             // Drag handle
@@ -231,15 +228,14 @@ class _RadioNowPlayingScreenState extends State<RadioNowPlayingScreen> {
                             // Volume slider
                             const VolumeSlider(),
                           ],
-                        ),
+                        )),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-          ),
-        );
+          );
       },
     );
   }
