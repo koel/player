@@ -62,6 +62,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   void enterRadioMode(AudioPlayer radioPlayer) {
     _isRadioMode = true;
     _radioPlayer = radioPlayer;
+    radioPlayer.setVolume(preferences.volume);
   }
 
   void exitRadioMode() {
@@ -366,7 +367,10 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     await updateQueue([]);
   }
 
-  Future<void> setVolume(double value) async => await _player.setVolume(value);
+  Future<void> setVolume(double value) async {
+    await _player.setVolume(value);
+    await _radioPlayer?.setVolume(value);
+  }
 
   Future<void> replaceQueue(
     List<Playable> playables, {
