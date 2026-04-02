@@ -1,5 +1,6 @@
 import 'package:app/models/radio_station.dart';
 import 'package:app/ui/widgets/radio_station_card.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -35,8 +36,24 @@ void main() {
     await tester.pumpAppWidget(RadioStationCard(station: station));
 
     expect(find.text('Rock Radio'), findsOneWidget);
-    // Only the name text widget should be present
-    expect(find.byType(Text), findsOneWidget);
+    expect(find.byType(CachedNetworkImage), findsNothing);
+  });
+
+  testWidgets('uses CachedNetworkImage when logo is present',
+      (WidgetTester tester) async {
+    final station = RadioStation(
+      id: 'station-1',
+      name: 'Logo FM',
+      url: 'https://stream.example.com/live',
+      logo: 'https://example.com/logo.png',
+    );
+
+    await tester.pumpAppWidget(RadioStationCard(station: station));
+
+    final image = tester.widget<CachedNetworkImage>(
+      find.byType(CachedNetworkImage),
+    );
+    expect(image.imageUrl, 'https://example.com/logo.png');
   });
 
   testWidgets('shows default icon when no logo', (WidgetTester tester) async {

@@ -49,6 +49,7 @@ class _RadioStationCardState extends State<RadioStationCard> {
                         width: _cardWidth,
                         height: _cardWidth,
                         fit: BoxFit.cover,
+                        placeholder: (_, __) => _defaultIcon(),
                         errorWidget: (_, __, ___) => _defaultIcon(),
                       )
                     : _defaultIcon(),
