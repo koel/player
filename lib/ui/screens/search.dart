@@ -24,6 +24,7 @@ class _SearchScreenState extends State<SearchScreen> {
   var _artists = <Artist>[];
   var _albums = <Album>[];
   var _podcasts = <Podcast>[];
+  var _radioStations = <RadioStation>[];
 
   late final SearchProvider searchProvider;
   final _controller = TextEditingController(text: '');
@@ -55,6 +56,7 @@ class _SearchScreenState extends State<SearchScreen> {
           _albums = result.albums;
           _artists = result.artists;
           _podcasts = result.podcasts;
+          _radioStations = result.radioStations;
         });
       });
 
@@ -177,6 +179,22 @@ class _SearchScreenState extends State<SearchScreen> {
                               ),
                             ),
                         ],
+                        const SizedBox(height: 32),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: AppDimensions.hPadding,
+                          ),
+                          child: const Heading5(text: 'Radio Stations'),
+                        ),
+                        if (_radioStations.isEmpty)
+                          noResults
+                        else
+                          HorizontalCardScroller(
+                            cards: _radioStations.map(
+                              (station) =>
+                                  RadioStationCard(station: station),
+                            ),
+                          ),
                         const BottomSpace(asSliver: false),
                       ],
                     ),
