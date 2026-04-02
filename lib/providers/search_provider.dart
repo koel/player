@@ -9,12 +9,14 @@ class SearchResult {
   var artists = <Artist>[];
   var albums = <Album>[];
   var podcasts = <Podcast>[];
+  var radioStations = <RadioStation>[];
 
   SearchResult({
     this.playables = const [],
     this.artists = const [],
     this.albums = const [],
     this.podcasts = const [],
+    this.radioStations = const [],
   });
 }
 
@@ -50,6 +52,12 @@ class SearchProvider with ChangeNotifier {
         ? []
         : res['podcasts'].map<Podcast>((j) => Podcast.fromJson(j)).toList();
 
+    final List<RadioStation> radioStations = res['radio_stations'] == null
+        ? []
+        : res['radio_stations']
+            .map<RadioStation>((j) => RadioStation.fromJson(j))
+            .toList();
+
     return AppState.set(
       cacheKey,
       SearchResult(
@@ -57,6 +65,7 @@ class SearchProvider with ChangeNotifier {
         artists: artists,
         albums: albums,
         podcasts: podcasts,
+        radioStations: radioStations,
       ),
     );
   }
