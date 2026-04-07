@@ -44,6 +44,29 @@ void main() {
       expect(song.albumCoverUrl, 'https://example.com/cover.jpg');
     });
 
+    test('handles liked as int for older API versions', () {
+      final jsonLiked = {
+        'id': 'abc-123',
+        'title': 'Test Song',
+        'length': 240,
+        'liked': 1,
+        'created_at': '2023-06-15T10:30:00.000Z',
+        'artist_id': 'a1',
+        'artist_name': 'Artist',
+        'album_id': 'b1',
+        'album_name': 'Album',
+        'album_cover': null,
+        'album_artist_id': 'a1',
+        'album_artist_name': 'Artist',
+      };
+
+      final jsonNotLiked = Map<String, dynamic>.from(jsonLiked)
+        ..['liked'] = 0;
+
+      expect(Song.fromJson(jsonLiked).liked, isTrue);
+      expect(Song.fromJson(jsonNotLiked).liked, isFalse);
+    });
+
     test('handles null optional fields', () {
       final json = {
         'id': 'abc-123',

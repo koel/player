@@ -148,7 +148,7 @@ class Song extends Playable<Song> {
       disc: json['disc'] ?? 1,
       year: json['year'] == null ? null : int.parse(json['year'].toString()),
       genre: json['genre'] ?? '',
-      liked: json['liked'] ?? false,
+      liked: json['liked'] is bool ? json['liked'] : (json['liked'] ?? 0) != 0,
     );
   }
 

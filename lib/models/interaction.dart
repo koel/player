@@ -13,7 +13,7 @@ class Interaction {
     return Interaction(
       songId: json['song_id'],
       playCount: json['play_count'],
-      liked: json['liked'] ?? false,
+      liked: json['liked'] is bool ? json['liked'] : (json['liked'] ?? 0) != 0,
     );
   }
 }
