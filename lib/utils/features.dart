@@ -4,11 +4,13 @@ import 'package:version/version.dart';
 enum Feature {
   podcasts,
   queueStateSync,
+  radioStations,
 }
 
 Map<Feature, String> supportedVersionMap = {
   Feature.podcasts: '7.0.0',
-  Feature.queueStateSync: '6.11.6'
+  Feature.queueStateSync: '6.11.6',
+  Feature.radioStations: '7.13.0',
 };
 
 extension FeatureExtension on Feature {

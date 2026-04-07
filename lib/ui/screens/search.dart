@@ -179,22 +179,24 @@ class _SearchScreenState extends State<SearchScreen> {
                               ),
                             ),
                         ],
-                        const SizedBox(height: 32),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: AppDimensions.hPadding,
-                          ),
-                          child: const Heading5(text: 'Radio Stations'),
-                        ),
-                        if (_radioStations.isEmpty)
-                          noResults
-                        else
-                          HorizontalCardScroller(
-                            cards: _radioStations.map(
-                              (station) =>
-                                  RadioStationCard(station: station),
+                        if (Feature.radioStations.isSupported()) ...[
+                          const SizedBox(height: 32),
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: AppDimensions.hPadding,
                             ),
+                            child: const Heading5(text: 'Radio Stations'),
                           ),
+                          if (_radioStations.isEmpty)
+                            noResults
+                          else
+                            HorizontalCardScroller(
+                              cards: _radioStations.map(
+                                (station) =>
+                                    RadioStationCard(station: station),
+                              ),
+                            ),
+                        ],
                         const BottomSpace(asSliver: false),
                       ],
                     ),
