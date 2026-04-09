@@ -104,10 +104,12 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
                         direction: DismissDirection.startToEnd,
                         confirmDismiss: (_) async {
                           final playableProvider = context.read<PlayableProvider>();
-                          final songs = <Playable>[];
-                          for (final p in folderPlaylists) {
-                            songs.addAll(await playableProvider.fetchForPlaylist(p.id));
-                          }
+                          final results = await Future.wait(
+                            folderPlaylists.map((p) => playableProvider
+                                .fetchForPlaylist(p.id)
+                                .catchError((_) => <Playable>[])),
+                          );
+                          final songs = results.expand((s) => s).toList();
                           if (songs.isNotEmpty) {
                             for (final song in songs) {
                               await audioHandler.queueToBottom(song);
@@ -247,7 +249,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
             child: Icon(CupertinoIcons.text_badge_plus),
           ),
         ),
-        key: ValueKey(playlist),
+        key: ValueKey(playlist.id),
         child: Padding(
           padding: EdgeInsets.only(left: indented ? 24 : 0),
           child: PlaylistRow(playlist: playlist),

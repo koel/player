@@ -92,11 +92,9 @@ class _PodcastScreenState extends State<PodcastsScreen> {
                       (BuildContext context, int index) {
                         var podcast = podcasts[index];
 
-                        return Card(
-                          child: PodcastRow(
-                            podcast: podcast,
-                            router: widget.router,
-                          ),
+                        return PodcastRow(
+                          podcast: podcast,
+                          router: widget.router,
                         );
                       },
                       childCount: podcasts.length,
@@ -195,8 +193,8 @@ class PodcastSortConfig {
 class PodcastSortButton extends StatelessWidget {
   final void Function(PodcastSortConfig sortConfig)? onMenuItemSelected;
 
-  PodcastSortField currentField;
-  SortOrder currentOrder;
+  final PodcastSortField currentField;
+  final SortOrder currentOrder;
 
   static const fields = <PodcastSortField, String>{
     PodcastSortField.lastPlayedAt: 'Last played',
@@ -205,12 +203,12 @@ class PodcastSortButton extends StatelessWidget {
     PodcastSortField.author: 'Author',
   };
 
-  PodcastSortButton({
+  const PodcastSortButton({
     Key? key,
     required this.currentField,
     required this.currentOrder,
     this.onMenuItemSelected,
-  }) : super(key: key) {}
+  }) : super(key: key);
 
   PopupMenuItem<PodcastSortField> buildMenuItem(
     PodcastSortField field,
@@ -245,16 +243,13 @@ class PodcastSortButton extends StatelessWidget {
         size: 25,
       ),
       onSelected: (item) {
-        if (item == currentField) {
-          currentOrder =
-              currentOrder == SortOrder.asc ? SortOrder.desc : SortOrder.asc;
-        } else {
-          currentOrder = SortOrder.asc;
-        }
+        final newOrder = item == currentField
+            ? (currentOrder == SortOrder.asc ? SortOrder.desc : SortOrder.asc)
+            : SortOrder.asc;
 
         onMenuItemSelected?.call(PodcastSortConfig(
           field: item,
-          order: currentOrder,
+          order: newOrder,
         ));
       },
       itemBuilder: (_) =>

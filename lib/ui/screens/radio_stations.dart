@@ -19,6 +19,7 @@ class RadioStationsScreen extends StatefulWidget {
 
 class _RadioStationsScreenState extends State<RadioStationsScreen> {
   var _loading = false;
+  var _errored = false;
 
   @override
   void initState() {
@@ -28,11 +29,15 @@ class _RadioStationsScreenState extends State<RadioStationsScreen> {
 
   Future<void> _fetchData() async {
     if (_loading) return;
-    setState(() => _loading = true);
+    setState(() {
+      _errored = false;
+      _loading = true;
+    });
 
     try {
       await context.read<RadioStationProvider>().fetchAll();
     } catch (_) {
+      if (mounted) setState(() => _errored = true);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -46,6 +51,11 @@ class _RadioStationsScreenState extends State<RadioStationsScreen> {
         child: GradientDecoratedContainer(
           child: Consumer<RadioStationProvider>(
             builder: (context, provider, navigationBar) {
+              if (provider.stations.isEmpty) {
+                if (_loading) return const Center(child: Spinner(size: 16));
+                if (_errored) return OopsBox(onRetry: _fetchData);
+              }
+
               final stations = provider.stations
                 ..sort((a, b) => a.name.compareTo(b.name));
 
