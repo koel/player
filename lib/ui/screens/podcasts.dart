@@ -80,12 +80,8 @@ class _PodcastScreenState extends State<PodcastsScreen> {
 
               if (podcasts.isEmpty) {
                 widgets = [
-                  SliverToBoxAdapter(
-                    child: NoPodcastsScreen(
-                      onTap: () {
-                        widget.router.showAddPodcastSheet(context);
-                      },
-                    ),
+                  const SliverToBoxAdapter(
+                    child: NoPodcastsScreen(),
                   )
                 ];
               } else {
@@ -97,25 +93,9 @@ class _PodcastScreenState extends State<PodcastsScreen> {
                         var podcast = podcasts[index];
 
                         return Card(
-                          child: Dismissible(
-                            direction: DismissDirection.endToStart,
-                            confirmDismiss: (_) => confirmUnsubscribe(context),
-                            onDismissed: (_) => provider.unsubscribePodcast(
-                              podcast,
-                            ),
-                            background: Container(
-                              alignment: AlignmentDirectional.centerEnd,
-                              color: AppColors.red,
-                              child: const Padding(
-                                padding: EdgeInsets.only(right: 28),
-                                child: Icon(CupertinoIcons.delete),
-                              ),
-                            ),
-                            key: ValueKey(podcast),
-                            child: PodcastRow(
-                              podcast: podcast,
-                              router: widget.router,
-                            ),
+                          child: PodcastRow(
+                            podcast: podcast,
+                            router: widget.router,
                           ),
                         );
                       },
@@ -134,26 +114,13 @@ class _PodcastScreenState extends State<PodcastsScreen> {
             child: CupertinoSliverNavigationBar(
               backgroundColor: AppColors.staticScreenHeaderBackground,
               largeTitle: const LargeTitle(text: 'Podcasts'),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  IconButton(
-                    visualDensity: VisualDensity.compact,
-                    onPressed: () => widget.router.showAddPodcastSheet(context),
-                    icon: const Icon(
-                      CupertinoIcons.add_circled,
-                      size: 23,
-                    ),
-                  ),
-                  PodcastSortButton(
-                    currentField: _sortConfig.field,
-                    currentOrder: _sortConfig.order,
-                    onMenuItemSelected: (config) {
-                      setState(() => _sortConfig = config);
-                      AppState.set('podcast.sort', _sortConfig);
-                    },
-                  ),
-                ],
+              trailing: PodcastSortButton(
+                currentField: _sortConfig.field,
+                currentOrder: _sortConfig.order,
+                onMenuItemSelected: (config) {
+                  setState(() => _sortConfig = config);
+                  AppState.set('podcast.sort', _sortConfig);
+                },
               ),
             ),
           ),
@@ -162,31 +129,6 @@ class _PodcastScreenState extends State<PodcastsScreen> {
     );
   }
 
-  Future<bool> confirmUnsubscribe(BuildContext context) async {
-    return await showCupertinoDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(text: 'Unsubscribe from this podcast?'),
-          ),
-          content: const Text('You cannot undo this action.'),
-          actions: <Widget>[
-            CupertinoDialogAction(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.pop(context, false),
-            ),
-            CupertinoDialogAction(
-              child: const Text('Confirm'),
-              isDestructiveAction: true,
-              onPressed: () => Navigator.pop(context, true),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }
 
 class PodcastRow extends StatelessWidget {
@@ -220,26 +162,23 @@ class PodcastRow extends StatelessWidget {
 }
 
 class NoPodcastsScreen extends StatelessWidget {
-  final void Function() onTap;
-
-  const NoPodcastsScreen({Key? key, required this.onTap}) : super(key: key);
+  const NoPodcastsScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height,
       alignment: Alignment.center,
-      child: Wrap(
+      child: const Wrap(
         spacing: 16.0,
         direction: Axis.vertical,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: <Widget>[
-          const Icon(
+          Icon(
             CupertinoIcons.exclamationmark_square,
             size: 56.0,
           ),
-          const Text('No podcasts available.'),
-          ElevatedButton(onPressed: onTap, child: Text('Add a Podcast')),
+          Text('No podcasts available.'),
         ],
       ),
     );

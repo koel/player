@@ -22,15 +22,8 @@ class PlaylistDetailsScreen extends StatefulWidget {
 }
 
 class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
-  late PlaylistProvider _playlistProvider;
   String _searchQuery = '';
   final _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    _playlistProvider = context.read();
-  }
 
   Widget? _buildBackgroundImage(Playlist playlist, List<Playable> playables) {
     if (playlist.hasCover) {
@@ -143,12 +136,6 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                     SliverPlayableList(
                       playables: displayedPlayables,
                       rightPadding: showScrollbar ? alphabetScrollbarWidth * 0.75 : 0,
-                      onDismissed: playlist.isStandard
-                          ? (playable) => _playlistProvider.removeFromPlaylist(
-                                playable,
-                                playlist: playlist,
-                              )
-                          : null,
                     ),
                   const BottomSpace(),
                 ],

@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:app/constants/constants.dart';
-import 'package:app/exceptions/http_response_exception.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/widgets.dart';
@@ -9,7 +6,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class RadioStationsScreen extends StatefulWidget {
@@ -60,10 +56,6 @@ class _RadioStationsScreenState extends State<RadioStationsScreen> {
                     CupertinoSliverNavigationBar(
                       backgroundColor: AppColors.staticScreenHeaderBackground,
                       largeTitle: const LargeTitle(text: 'Radio'),
-                      trailing: IconButton(
-                        onPressed: () => _showAddStation(context, provider),
-                        icon: const Icon(CupertinoIcons.add_circled),
-                      ),
                     ),
                     if (stations.isEmpty && !_loading)
                       SliverFillRemaining(
@@ -85,7 +77,7 @@ class _RadioStationsScreenState extends State<RadioStationsScreen> {
                               ),
                               const SizedBox(height: 8),
                               const Text(
-                                'Add a station to start listening.',
+                                'No radio stations available.',
                                 style: TextStyle(color: Colors.white54),
                               ),
                             ],
@@ -99,36 +91,10 @@ class _RadioStationsScreenState extends State<RadioStationsScreen> {
                             if (index >= stations.length) return null;
                             final station = stations[index];
 
-                            return GestureDetector(
-                              onLongPress: () => _showStationActions(
-                                context,
+                            return Card(
+                              child: _RadioStationRow(
                                 station: station,
-                                provider: provider,
-                              ),
-                              child: Card(
-                                child: Dismissible(
-                                  direction: DismissDirection.endToStart,
-                                  confirmDismiss: (_) async {
-                                    return await _confirmDelete(
-                                      context,
-                                      station: station,
-                                    );
-                                  },
-                                  onDismissed: (_) => provider.remove(station),
-                                  background: Container(
-                                    alignment: AlignmentDirectional.centerEnd,
-                                    color: AppColors.red,
-                                    child: const Padding(
-                                      padding: EdgeInsets.only(right: 28),
-                                      child: Icon(CupertinoIcons.delete),
-                                    ),
-                                  ),
-                                  key: ValueKey(station.id),
-                                  child: _RadioStationRow(
-                                    station: station,
-                                    onTap: () => _playStation(station),
-                                  ),
-                                ),
+                                onTap: () => _playStation(station),
                               ),
                             );
                           },
@@ -168,245 +134,6 @@ class _RadioStationsScreenState extends State<RadioStationsScreen> {
     }
   }
 
-  void _showAddStation(
-      BuildContext context, RadioStationProvider provider) async {
-    final nameController = TextEditingController();
-    final urlController = TextEditingController();
-    final descController = TextEditingController();
-    var isPublic = false;
-
-    await showFormSheet(
-      context,
-      title: 'Add Radio Station',
-      submitLabel: 'Add',
-      canSubmit: () =>
-          nameController.text.trim().isNotEmpty &&
-          urlController.text.trim().isNotEmpty,
-      onSubmit: () async {
-        final name = nameController.text.trim();
-        final url = urlController.text.trim();
-        if (name.isEmpty || url.isEmpty) return;
-
-        try {
-          await provider.create(
-            name: name,
-            url: url,
-            description: descController.text.trim(),
-            isPublic: isPublic,
-          );
-          Navigator.pop(context);
-          showOverlay(context, caption: 'Station added');
-        } catch (e) {
-          var message = 'Something went wrong.';
-          if (e is HttpResponseException) {
-            try {
-              final body = jsonDecode(e.response.body);
-              if (body['message'] != null) {
-                message = body['message'];
-              }
-            } catch (_) {}
-          }
-          showOverlay(
-            context,
-            caption: 'Error',
-            message: message,
-            icon: CupertinoIcons.exclamationmark_triangle,
-          );
-        }
-      },
-      builder: (context, setState) => Column(
-        children: [
-          FormTextField(
-            controller: nameController,
-            placeholder: 'Station Name',
-            autofocus: true,
-            onChanged: (_) => setState(() {}),
-          ),
-          const SizedBox(height: 8),
-          FormTextField(
-            controller: urlController,
-            placeholder: 'Stream URL',
-            keyboardType: TextInputType.url,
-            onChanged: (_) => setState(() {}),
-          ),
-          const SizedBox(height: 8),
-          FormTextField(
-            controller: descController,
-            placeholder: 'Description (optional)',
-            maxLines: 2,
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              CupertinoSwitch(
-                value: isPublic,
-                onChanged: (v) => setState(() => isPublic = v),
-              ),
-              const SizedBox(width: 8),
-              const Text('This station is public',
-                  style: TextStyle(fontSize: 14)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _showStationActions(
-    BuildContext context, {
-    required RadioStation station,
-    required RadioStationProvider provider,
-  }) async {
-    HapticFeedback.mediumImpact();
-
-    await showCupertinoModalPopup(
-      context: context,
-      builder: (sheetContext) => CupertinoActionSheet(
-        title: Text(station.name),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(sheetContext);
-              _playStation(station);
-            },
-            child: const Text('Play'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(sheetContext);
-              _showEditStation(context, station: station, provider: provider);
-            },
-            child: const Text('Edit'),
-          ),
-          CupertinoActionSheetAction(
-            isDestructiveAction: true,
-            onPressed: () async {
-              Navigator.pop(sheetContext);
-              final confirmed =
-                  await _confirmDelete(context, station: station);
-              if (confirmed) provider.remove(station);
-            },
-            child: const Text('Delete'),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(sheetContext),
-          child: const Text('Cancel'),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _showEditStation(
-    BuildContext context, {
-    required RadioStation station,
-    required RadioStationProvider provider,
-  }) async {
-    final nameController = TextEditingController(text: station.name);
-    final urlController = TextEditingController(text: station.url);
-    final descController =
-        TextEditingController(text: station.description ?? '');
-    var isPublic = station.isPublic;
-
-    await showFormSheet(
-      context,
-      title: 'Edit Radio Station',
-      submitLabel: 'Save',
-      canSubmit: () =>
-          nameController.text.trim().isNotEmpty &&
-          urlController.text.trim().isNotEmpty,
-      onSubmit: () async {
-        final name = nameController.text.trim();
-        final url = urlController.text.trim();
-        if (name.isEmpty || url.isEmpty) return;
-
-        try {
-          await provider.update(
-            station,
-            name: name,
-            url: url,
-            description: descController.text.trim(),
-            isPublic: isPublic,
-          );
-          Navigator.pop(context);
-          showOverlay(context, caption: 'Station updated');
-        } catch (e) {
-          var message = 'Something went wrong.';
-          if (e is HttpResponseException) {
-            try {
-              final body = jsonDecode(e.response.body);
-              if (body['message'] != null) message = body['message'];
-            } catch (_) {}
-          }
-          showOverlay(context,
-            caption: 'Error',
-            message: message,
-            icon: CupertinoIcons.exclamationmark_triangle,
-          );
-        }
-      },
-      builder: (context, setState) => Column(
-        children: [
-          FormTextField(
-            controller: nameController,
-            placeholder: 'Station Name',
-            autofocus: true,
-            onChanged: (_) => setState(() {}),
-          ),
-          const SizedBox(height: 8),
-          FormTextField(
-            controller: urlController,
-            placeholder: 'Stream URL',
-            keyboardType: TextInputType.url,
-            onChanged: (_) => setState(() {}),
-          ),
-          const SizedBox(height: 8),
-          FormTextField(
-            controller: descController,
-            placeholder: 'Description (optional)',
-            maxLines: 2,
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              CupertinoSwitch(
-                value: isPublic,
-                onChanged: (v) => setState(() => isPublic = v),
-              ),
-              const SizedBox(width: 8),
-              const Text('This station is public',
-                  style: TextStyle(fontSize: 14)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<bool> _confirmDelete(
-    BuildContext context, {
-    required RadioStation station,
-  }) async {
-    return await showCupertinoDialog<bool>(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: Text('Delete "${station.name}"?'),
-            content: const Text('You cannot undo this action.'),
-            actions: [
-              CupertinoDialogAction(
-                child: const Text('Cancel'),
-                onPressed: () => Navigator.pop(context, false),
-              ),
-              CupertinoDialogAction(
-                isDestructiveAction: true,
-                child: const Text('Delete'),
-                onPressed: () => Navigator.pop(context, true),
-              ),
-            ],
-          ),
-        ) ??
-        false;
-  }
 }
 
 class _RadioStationRow extends StatelessWidget {
