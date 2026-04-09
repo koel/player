@@ -51,11 +51,6 @@ class _RadioStationsScreenState extends State<RadioStationsScreen> {
         child: GradientDecoratedContainer(
           child: Consumer<RadioStationProvider>(
             builder: (context, provider, navigationBar) {
-              if (provider.stations.isEmpty) {
-                if (_loading) return const Center(child: Spinner(size: 16));
-                if (_errored) return OopsBox(onRetry: _fetchData);
-              }
-
               final stations = provider.stations
                 ..sort((a, b) => a.name.compareTo(b.name));
 
@@ -67,7 +62,12 @@ class _RadioStationsScreenState extends State<RadioStationsScreen> {
                       backgroundColor: AppColors.staticScreenHeaderBackground,
                       largeTitle: const LargeTitle(text: 'Radio'),
                     ),
-                    if (stations.isEmpty && !_loading)
+                    if (_errored && stations.isEmpty)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: OopsBox(onRetry: _fetchData),
+                      )
+                    else if (stations.isEmpty && !_loading)
                       SliverFillRemaining(
                         hasScrollBody: false,
                         child: Center(
@@ -94,7 +94,7 @@ class _RadioStationsScreenState extends State<RadioStationsScreen> {
                           ),
                         ),
                       )
-                    else
+                    else if (stations.isNotEmpty)
                       SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
