@@ -81,7 +81,8 @@ class _PodcastScreenState extends State<PodcastsScreen> {
               if (podcasts.isEmpty) {
                 widgets = [
                   navigationBar!,
-                  const SliverToBoxAdapter(
+                  const SliverFillRemaining(
+                    hasScrollBody: false,
                     child: NoPodcastsScreen(),
                   )
                 ];
@@ -165,10 +166,8 @@ class NoPodcastsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height,
-      alignment: Alignment.center,
-      child: const Wrap(
+    return const Center(
+      child: Wrap(
         spacing: 16.0,
         direction: Axis.vertical,
         crossAxisAlignment: WrapCrossAlignment.center,
