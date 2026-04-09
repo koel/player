@@ -80,6 +80,7 @@ class _PodcastScreenState extends State<PodcastsScreen> {
 
               if (podcasts.isEmpty) {
                 widgets = [
+                  navigationBar!,
                   const SliverToBoxAdapter(
                     child: NoPodcastsScreen(),
                   )
