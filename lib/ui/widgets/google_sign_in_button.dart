@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class GoogleSignInButton extends StatelessWidget {
   const GoogleSignInButton({
@@ -27,11 +28,11 @@ class GoogleSignInButton extends StatelessWidget {
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.network(
+                  SvgPicture.network(
                     'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
                     width: 20,
                     height: 20,
-                    errorBuilder: (_, __, ___) =>
+                    placeholderBuilder: (_) =>
                         const Icon(Icons.g_mobiledata, size: 24),
                   ),
                   const SizedBox(width: 8),

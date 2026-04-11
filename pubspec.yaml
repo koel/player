@@ -57,6 +57,7 @@ dependencies:
   timeago: ^3.6.1
   url_launcher: ^6.3.0
   google_sign_in: ^6.3.0
+  flutter_svg: ^1.1.6
 
   collection: any
   faker: any
