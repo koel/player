@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class GoogleSignInButton extends StatelessWidget {
   const GoogleSignInButton({
@@ -20,6 +19,8 @@ class GoogleSignInButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
           foregroundColor: Colors.black87,
+          iconColor: Colors.black87,
+          disabledIconColor: Colors.black38,
           elevation: 0,
         ),
         onPressed: loading ? null : onPressed,
@@ -28,13 +29,22 @@ class GoogleSignInButton extends StatelessWidget {
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SvgPicture.asset(
-                    'assets/images/google_logo.svg',
+                  Image.asset(
+                    'assets/images/google_logo.png',
                     width: 20,
                     height: 20,
+                    filterQuality: FilterQuality.high,
+                    gaplessPlayback: true,
                   ),
                   const SizedBox(width: 8),
-                  const Text('Sign in with Google'),
+                  Flexible(
+                    child: Text(
+                      'Sign in with Google',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 ],
               ),
       ),
