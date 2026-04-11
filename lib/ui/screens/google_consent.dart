@@ -53,9 +53,35 @@ class _GoogleConsentScreenState extends State<GoogleConsentScreen> {
     }
   }
 
+  bool _isValidHttpUrl(Uri uri) {
+    final scheme = uri.scheme.toLowerCase();
+    if (scheme != 'http' && scheme != 'https') {
+      return false;
+    }
+    return uri.host.isNotEmpty;
+  }
+
   Future<void> _openUrl(String? url) async {
-    if (url != null && url.isNotEmpty) {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    if (url == null) return;
+    final trimmed = url.trim();
+    if (trimmed.isEmpty) return;
+
+    final uri = Uri.tryParse(trimmed);
+    if (uri == null || !_isValidHttpUrl(uri)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open this link.')),
+        );
+      }
+      return;
+    }
+
+    final launched =
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open this link.')),
+      );
     }
   }
 
