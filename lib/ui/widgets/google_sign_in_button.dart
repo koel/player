@@ -28,12 +28,10 @@ class GoogleSignInButton extends StatelessWidget {
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SvgPicture.network(
-                    'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+                  SvgPicture.asset(
+                    'assets/images/google_logo.svg',
                     width: 20,
                     height: 20,
-                    placeholderBuilder: (_) =>
-                        const Icon(Icons.g_mobiledata, size: 24),
                   ),
                   const SizedBox(width: 8),
                   const Text('Sign in with Google'),
