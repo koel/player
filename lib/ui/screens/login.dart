@@ -13,7 +13,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 
 String? _requiredField(String? value) =>
-    value == null || value.isEmpty ? 'This field is required' : null;
+    value == null || value.trim().isEmpty ? 'This field is required' : null;
 
 class LoginScreen extends StatefulWidget {
   static const routeName = '/login';
