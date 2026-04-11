@@ -142,11 +142,21 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
       if (consentData != null) {
         // New user — navigate to consent screen
         if (mounted) {
-          final result = await Navigator.of(context).push<bool>(
+          final rawSsoUser = consentData['sso_user'];
+          final rawLegalUrls = consentData['legal_urls'];
+          if (rawSsoUser is! Map || rawLegalUrls is! Map) {
+            await showErrorDialog(
+              context,
+              message: 'Invalid Google consent response. Please try again.',
+            );
+            return;
+          }
+
+          await Navigator.of(context).push<bool>(
             MaterialPageRoute(
               builder: (_) => GoogleConsentScreen(
-                ssoUser: Map<String, dynamic>.from(consentData['sso_user']),
-                legalUrls: Map<String, dynamic>.from(consentData['legal_urls']),
+                ssoUser: Map<String, dynamic>.from(rawSsoUser),
+                legalUrls: Map<String, dynamic>.from(rawLegalUrls),
               ),
             ),
           );
@@ -157,10 +167,14 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
         await _auth.tryGetAuthUser();
         successful = true;
       }
-    } on Exception catch (e) {
+    } catch (e, stackTrace) {
       if (e.toString().contains('cancelled')) {
         // User cancelled — do nothing
       } else {
+        assert(() {
+          debugPrint('attemptGoogleLogin: $e\n$stackTrace');
+          return true;
+        }());
         await showErrorDialog(context);
       }
     } finally {
