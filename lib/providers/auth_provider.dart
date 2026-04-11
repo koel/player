@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:app/app_state.dart';
+import 'package:app/constants/constants.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:app/utils/preferences.dart' as preferences;
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthProvider with StreamSubscriber {
   late User _authUser;
@@ -52,6 +54,49 @@ class AuthProvider with StreamSubscriber {
     };
 
     final response = await post('me/otp', data: loginData);
+    preferences.apiToken = response['token'];
+    preferences.audioToken = response['audio-token'];
+  }
+
+  /// Returns null on success (tokens stored), or a Map with sso_user/legal_urls
+  /// if consent is required for a new user.
+  Future<Map<String, dynamic>?> loginWithGoogle({required String host}) async {
+    final googleSignIn = GoogleSignIn(
+      // The Web OAuth Client ID — used as audience for the id_token.
+      // This is NOT a secret; it's the same value visible in the web app HTML.
+      serverClientId: AppStrings.googleServerClientId,
+    );
+
+    final account = await googleSignIn.signIn();
+    if (account == null) throw Exception('Google Sign-In cancelled');
+
+    final auth = await account.authentication;
+    final idToken = auth.idToken;
+    if (idToken == null) throw Exception('No ID token received');
+
+    preferences.host = host;
+
+    final response = await post('me/google', data: {'id_token': idToken});
+
+    if (response != null && response['requires_consent'] == true) {
+      return response;
+    }
+
+    preferences.apiToken = response['token'];
+    preferences.audioToken = response['audio-token'];
+    return null;
+  }
+
+  Future<void> completeGoogleConsent({
+    required Map<String, dynamic> ssoUser,
+  }) async {
+    final response = await post('me/google/consent', data: {
+      'sso_user': ssoUser,
+      'terms_accepted': true,
+      'privacy_accepted': true,
+      'age_verified': true,
+    });
+
     preferences.apiToken = response['token'];
     preferences.audioToken = response['audio-token'];
   }

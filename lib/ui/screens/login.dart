@@ -3,6 +3,7 @@ import 'package:app/exceptions/exceptions.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/screens.dart';
+import 'package:app/ui/widgets/google_sign_in_button.dart';
 import 'package:app/ui/widgets/qr_login_button.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:app/utils/preferences.dart' as preferences;
@@ -10,6 +11,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
+
+String? _requiredField(String? value) =>
+    value == null || value.isEmpty ? 'This field is required' : null;
 
 class LoginScreen extends StatefulWidget {
   static const routeName = '/login';
@@ -22,7 +26,10 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
   final formKey = GlobalKey<FormState>();
+  final GlobalKey<FormFieldState<String>> _hostFieldKey =
+      GlobalKey<FormFieldState<String>>();
   var _authenticating = false;
+  var _googleAuthenticating = false;
   var _showPassword = false;
   late final AuthProvider _auth;
 
@@ -118,6 +125,53 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
     }
   }
 
+  Future<void> attemptGoogleLogin() async {
+    final hostField = _hostFieldKey.currentState;
+    if (hostField == null || !hostField.validate()) {
+      return;
+    }
+
+    formKey.currentState?.save();
+    setState(() => _googleAuthenticating = true);
+    var successful = false;
+
+    try {
+      final host = standardizeHost(_host);
+      final consentData = await _auth.loginWithGoogle(host: host);
+
+      if (consentData != null) {
+        // New user — navigate to consent screen
+        if (mounted) {
+          final result = await Navigator.of(context).push<bool>(
+            MaterialPageRoute(
+              builder: (_) => GoogleConsentScreen(
+                ssoUser: Map<String, dynamic>.from(consentData['sso_user']),
+                legalUrls: Map<String, dynamic>.from(consentData['legal_urls']),
+              ),
+            ),
+          );
+          // If consent screen handled login, it already navigated away
+          return;
+        }
+      } else {
+        await _auth.tryGetAuthUser();
+        successful = true;
+      }
+    } on Exception catch (e) {
+      if (e.toString().contains('cancelled')) {
+        // User cancelled — do nothing
+      } else {
+        await showErrorDialog(context);
+      }
+    } finally {
+      if (mounted) setState(() => _googleAuthenticating = false);
+    }
+
+    if (successful) {
+      redirectToDataLoadingScreen();
+    }
+  }
+
   Future<void> attemptLoginWithOtp({
     required String host,
     required String token,
@@ -150,9 +204,6 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
 
   @override
   Widget build(BuildContext context) {
-    String? requireValue(value) =>
-        value == null || value.isEmpty ? 'This field is required' : null;
-
     return Scaffold(
       body: GradientDecoratedContainer(
         child: Center(
@@ -168,6 +219,7 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
                   ...[
                     Image.asset('assets/images/logo.png', width: 160),
                     TextFormField(
+                      key: _hostFieldKey,
                       keyboardType: TextInputType.url,
                       autocorrect: false,
                       autofillHints: null,
@@ -178,7 +230,7 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
                         hintText: 'https://www.koel.music',
                       ),
                       controller: TextEditingController(text: _host),
-                      validator: requireValue,
+                      validator: _requiredField,
                     ),
                     TextFormField(
                       keyboardType: TextInputType.emailAddress,
@@ -191,7 +243,7 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
                         hintText: 'you@koel.music',
                       ),
                       controller: TextEditingController(text: _email),
-                      validator: requireValue,
+                      validator: _requiredField,
                     ),
                     TextFormField(
                       obscureText: !_showPassword,
@@ -212,7 +264,7 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
                           },
                         ),
                       ),
-                      validator: requireValue,
+                      validator: _requiredField,
                     ),
                     SizedBox(
                       width: double.infinity,
@@ -226,7 +278,13 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
                         onPressed: _authenticating ? null : attemptLogin,
                       ),
                     ),
-                    _authenticating
+                    GoogleSignInButton(
+                      onPressed: _authenticating || _googleAuthenticating
+                          ? null
+                          : attemptGoogleLogin,
+                      loading: _googleAuthenticating,
+                    ),
+                    _authenticating || _googleAuthenticating
                         ? SizedBox()
                         : QrLoginButton(
                             onResult: ({

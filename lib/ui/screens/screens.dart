@@ -11,6 +11,7 @@ export 'downloaded.dart';
 export 'favorites.dart';
 export 'genre_details.dart';
 export 'genres.dart';
+export 'google_consent.dart';
 export 'home.dart';
 export 'info_sheet/info_sheet.dart';
 export 'initial.dart';
