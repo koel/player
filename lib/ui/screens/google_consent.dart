@@ -40,8 +40,10 @@ class _GoogleConsentScreenState extends State<GoogleConsentScreen> {
       await auth.tryGetAuthUser();
 
       if (mounted) {
-        Navigator.of(context, rootNavigator: true)
-            .pushReplacementNamed(DataLoadingScreen.routeName);
+        Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
+          DataLoadingScreen.routeName,
+          (_) => false,
+        );
       }
     } catch (_) {
       if (mounted) {
