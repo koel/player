@@ -62,8 +62,7 @@ class AuthProvider with StreamSubscriber {
   /// if consent is required for a new user.
   Future<Map<String, dynamic>?> loginWithGoogle({required String host}) async {
     final googleSignIn = GoogleSignIn(
-      // The Web OAuth Client ID — used as audience for the id_token.
-      // This is NOT a secret; it's the same value visible in the web app HTML.
+      // Web OAuth Client ID used as the audience when validating the id_token server-side.
       serverClientId: AppStrings.googleServerClientId,
     );
 
@@ -78,7 +77,9 @@ class AuthProvider with StreamSubscriber {
 
     final response = await post('me/google', data: {'id_token': idToken});
 
-    if (response != null && response['requires_consent'] == true) {
+    if (response == null) throw Exception('Empty response from server');
+
+    if (response['requires_consent'] == true) {
       return response;
     }
 
