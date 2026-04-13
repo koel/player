@@ -10,6 +10,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthProvider with StreamSubscriber {
   late User _authUser;
+  String? _pendingGoogleIdToken;
 
   User get authUser => _authUser;
 
@@ -73,6 +74,7 @@ class AuthProvider with StreamSubscriber {
     final idToken = auth.idToken;
     if (idToken == null) throw Exception('No ID token received');
 
+    _pendingGoogleIdToken = idToken;
     preferences.host = host;
 
     final response = await post('me/google', data: {'id_token': idToken});
@@ -92,7 +94,7 @@ class AuthProvider with StreamSubscriber {
     required Map<String, dynamic> ssoUser,
   }) async {
     final response = await post('me/google/consent', data: {
-      'sso_user': ssoUser,
+      'id_token': _pendingGoogleIdToken,
       'terms_accepted': true,
       'privacy_accepted': true,
       'age_verified': true,
