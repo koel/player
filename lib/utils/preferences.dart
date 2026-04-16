@@ -49,3 +49,7 @@ AudioServiceRepeatMode get repeatMode {
 set volume(double volume) => _set('volume', volume);
 
 double get volume => _get<double>('volume') ?? 0.7;
+
+set isDarkTheme(bool isDark) => _set('isDarkTheme', isDark);
+
+bool get isDarkTheme => _get<bool>('isDarkTheme') ?? false;

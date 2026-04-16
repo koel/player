@@ -1,18 +1,26 @@
 import 'package:app/main.dart';
 import 'package:app/providers/providers.dart';
+import 'package:app/ui/app.dart';
 import 'package:app/ui/screens/screens.dart';
+import 'package:app/utils/preferences.dart' as preferences;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 enum ProfileAvatarMenuItems {
+  toggleTheme,
   clearDownloads,
   logout,
 }
 
-class ProfileAvatar extends StatelessWidget {
+class ProfileAvatar extends StatefulWidget {
   const ProfileAvatar({Key? key}) : super(key: key);
 
+  @override
+  State<ProfileAvatar> createState() => _ProfileAvatarState();
+}
+
+class _ProfileAvatarState extends State<ProfileAvatar> {
   void logout(BuildContext context) {
     showCupertinoDialog(
       context: context,
@@ -49,6 +57,12 @@ class ProfileAvatar extends StatelessWidget {
     return PopupMenuButton<ProfileAvatarMenuItems>(
       onSelected: (item) {
         switch (item) {
+          case ProfileAvatarMenuItems.toggleTheme:
+            setState(() {
+              preferences.isDarkTheme = !preferences.isDarkTheme;
+              appKey.currentState?.refreshTheme();
+            });
+            break;
           case ProfileAvatarMenuItems.clearDownloads:
             downloads.clear();
             break;
@@ -60,6 +74,24 @@ class ProfileAvatar extends StatelessWidget {
       child: const Icon(CupertinoIcons.person_alt_circle, size: 24),
       offset: const Offset(0, 32),
       itemBuilder: (_) => [
+        PopupMenuItem(
+          value: ProfileAvatarMenuItems.toggleTheme,
+          child: Row(
+            children: [
+              Icon(
+                preferences.isDarkTheme
+                    ? CupertinoIcons.sun_max_fill
+                    : CupertinoIcons.moon_fill,
+                size: 18,
+              ),
+              const SizedBox(width: 12),
+              Text(preferences.isDarkTheme
+                  ? 'Switch to Colorful'
+                  : 'Switch to Black'),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(height: .5),
         const PopupMenuItem(
           value: ProfileAvatarMenuItems.clearDownloads,
           child: Text('Clear downloads'),

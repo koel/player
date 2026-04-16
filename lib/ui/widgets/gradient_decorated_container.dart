@@ -1,3 +1,4 @@
+import 'package:app/utils/preferences.dart' as preferences;
 import 'package:flutter/material.dart';
 
 class GradientDecoratedContainer extends StatelessWidget {
@@ -10,11 +11,14 @@ class GradientDecoratedContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = preferences.isDarkTheme;
+
     return Container(
       child: child,
       padding: padding,
-      decoration: const BoxDecoration(
-        image: DecorationImage(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF000000) : null,
+        image: isDark ? null : const DecorationImage(
           image: AssetImage('assets/images/background.webp'),
           fit: BoxFit.cover,
           alignment: Alignment.bottomLeft,
