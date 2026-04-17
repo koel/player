@@ -90,7 +90,7 @@ class InteractionProvider with ChangeNotifier, StreamSubscriber {
     playable
       ..playCount = interaction.playCount
       ..liked = interaction.liked;
-    if (playable is Song) _downloadProvider.persistMetadataIfNeeded(playable);
+    _downloadProvider.persistMetadataIfNeeded(playable);
   }
 
   @override
