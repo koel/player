@@ -38,6 +38,7 @@ List<SingleChildWidget> _providers = [
     create: (context) => InteractionProvider(
       playableProvider: context.read<PlayableProvider>(),
       recentlyPlayedProvider: context.read<RecentlyPlayedProvider>(),
+      downloadProvider: context.read<DownloadProvider>(),
     ),
     // By setting lazy to false, we ensure that the provider is initialized
     // before the app is launched. This makes sure that the provider listens

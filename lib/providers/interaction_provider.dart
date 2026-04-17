@@ -9,12 +9,15 @@ import 'package:flutter/foundation.dart';
 class InteractionProvider with ChangeNotifier, StreamSubscriber {
   late final PlayableProvider _playableProvider;
   late final RecentlyPlayedProvider _recentlyPlayedProvider;
+  late final DownloadProvider _downloadProvider;
 
   InteractionProvider({
     required PlayableProvider playableProvider,
     required RecentlyPlayedProvider recentlyPlayedProvider,
+    required DownloadProvider downloadProvider,
   })  : _playableProvider = playableProvider,
-        _recentlyPlayedProvider = recentlyPlayedProvider {
+        _recentlyPlayedProvider = recentlyPlayedProvider,
+        _downloadProvider = downloadProvider {
     _subscribeToAudioEvents();
   }
 
@@ -51,13 +54,27 @@ class InteractionProvider with ChangeNotifier, StreamSubscriber {
   Future<void> _like({required Song song}) async {
     song.liked = true;
     notifyListeners();
-    await post('interaction/like', data: {'song': song.id});
+    try {
+      await post('interaction/like', data: {'song': song.id});
+      _downloadProvider.persistMetadataIfNeeded(song);
+    } catch (e) {
+      song.liked = false;
+      notifyListeners();
+      rethrow;
+    }
   }
 
   Future<void> _unlike({required Song song}) async {
     song.liked = false;
     notifyListeners();
-    await post('interaction/like', data: {'song': song.id});
+    try {
+      await post('interaction/like', data: {'song': song.id});
+      _downloadProvider.persistMetadataIfNeeded(song);
+    } catch (e) {
+      song.liked = true;
+      notifyListeners();
+      rethrow;
+    }
   }
 
   Future<void> toggleLike({required Song song}) async {
@@ -73,6 +90,7 @@ class InteractionProvider with ChangeNotifier, StreamSubscriber {
     playable
       ..playCount = interaction.playCount
       ..liked = interaction.liked;
+    _downloadProvider.persistMetadataIfNeeded(playable);
   }
 
   @override

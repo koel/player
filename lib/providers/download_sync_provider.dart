@@ -106,7 +106,8 @@ class DownloadSyncProvider with ChangeNotifier {
         local.track != server.track ||
         local.disc != server.disc ||
         local.genre != server.genre ||
-        local.year != server.year;
+        local.year != server.year ||
+        local.liked != server.liked;
   }
 
   void dispose() {
