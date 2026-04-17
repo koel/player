@@ -24,52 +24,55 @@ class AddToPlaylistScreen extends StatelessWidget {
     final playable = ModalRoute.of(context)!.settings.arguments as Playable;
 
     return Scaffold(
-      body: CupertinoTheme(
-        data: const CupertinoThemeData(primaryColor: Colors.white),
-        child: Consumer<PlaylistProvider>(
-          builder: (context, provider, navigationBar) {
-            if (provider.standardPlaylists.isEmpty) {
-              return NoPlaylistsScreen(
-                onTap: () => router.showCreatePlaylistSheet(context),
-              );
-            }
+      body: GradientDecoratedContainer(
+        child: CupertinoTheme(
+          data: const CupertinoThemeData(primaryColor: Colors.white),
+          child: Consumer<PlaylistProvider>(
+            builder: (context, provider, navigationBar) {
+              if (provider.standardPlaylists.isEmpty) {
+                return NoPlaylistsScreen(
+                  onTap: () => router.showCreatePlaylistSheet(context),
+                );
+              }
 
-            return CustomScrollView(
-              slivers: <Widget>[
-                navigationBar!,
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
-                      Playlist playlist = provider.standardPlaylists[index];
+              return CustomScrollView(
+                slivers: <Widget>[
+                  navigationBar!,
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        Playlist playlist = provider.standardPlaylists[index];
 
-                      return PlaylistRow(
-                        playlist: playlist,
-                        onTap: () {
-                          provider.addToPlaylist(playable, playlist: playlist);
-                          HapticFeedback.mediumImpact();
-                          Navigator.pop(context);
-                          showOverlay(
-                            context,
-                            icon: CupertinoIcons.text_badge_plus,
-                            caption: 'Added',
-                            message: 'Item added to playlist.',
-                          );
-                        },
-                      );
-                    },
-                    childCount: provider.standardPlaylists.length,
+                        return PlaylistRow(
+                          playlist: playlist,
+                          onTap: () {
+                            provider.addToPlaylist(playable,
+                                playlist: playlist);
+                            HapticFeedback.mediumImpact();
+                            Navigator.pop(context);
+                            showOverlay(
+                              context,
+                              icon: CupertinoIcons.text_badge_plus,
+                              caption: 'Added',
+                              message: 'Item added to playlist.',
+                            );
+                          },
+                        );
+                      },
+                      childCount: provider.standardPlaylists.length,
+                    ),
                   ),
-                ),
-                const BottomSpace(),
-              ],
-            );
-          },
-          child: CupertinoSliverNavigationBar(
-            backgroundColor: AppColors.staticScreenHeaderBackground,
-            largeTitle: const LargeTitle(text: 'Add to a Playlist'),
-            trailing: IconButton(
-              onPressed: () => router.showCreatePlaylistSheet(context),
-              icon: const Icon(CupertinoIcons.add_circled),
+                  const BottomSpace(),
+                ],
+              );
+            },
+            child: CupertinoSliverNavigationBar(
+              backgroundColor: AppColors.staticScreenHeaderBackground,
+              largeTitle: const LargeTitle(text: 'Add to a Playlist'),
+              trailing: IconButton(
+                onPressed: () => router.showCreatePlaylistSheet(context),
+                icon: const Icon(CupertinoIcons.add_circled),
+              ),
             ),
           ),
         ),
