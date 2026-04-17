@@ -127,10 +127,13 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               IconButton(
                                 onPressed: () {
-                                  Navigator.of(
-                                    context,
-                                    rootNavigator: true,
-                                  ).pushNamed(RecentlyPlayedScreen.routeName);
+                                  Navigator.of(context).push(CupertinoPageRoute(
+                                    settings: const RouteSettings(
+                                      name: RecentlyPlayedScreen.routeName,
+                                    ),
+                                    builder: (_) =>
+                                        const RecentlyPlayedScreen(),
+                                  ));
                                 },
                                 icon: const Icon(CupertinoIcons.time, size: 23),
                               ),
