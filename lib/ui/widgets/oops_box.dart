@@ -1,5 +1,6 @@
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/screens.dart';
+import 'package:app/utils/route_state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -58,6 +59,7 @@ class OopsBox extends StatelessWidget {
                       key: logOutButtonKey,
                       onPressed: () async {
                         await auth.logout();
+                        RouteState.clear();
                         await Navigator.of(
                           context,
                           rootNavigator: true,

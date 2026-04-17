@@ -8,6 +8,7 @@ import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/screens.dart';
 import 'package:app/ui/widgets/widgets.dart';
+import 'package:app/utils/route_state.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -24,13 +25,15 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   static const tabBarHeight = 60.0;
-  int _selectedIndex = 0;
+  late int _selectedIndex;
   var _isOffline = AppState.get('mode', AppMode.online) == AppMode.offline;
 
   final _navigatorKeys = List.generate(
     3,
     (_) => GlobalKey<NavigatorState>(),
   );
+
+  late final List<RouteStateObserver> _routeObservers;
 
   static const List<Widget> _widgetOptions = [
     const HomeScreen(),
@@ -43,6 +46,7 @@ class _MainScreenState extends State<MainScreen> {
       _navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
     } else {
       setState(() => _selectedIndex = index);
+      RouteState.setTabIndex(index);
     }
   }
 
@@ -50,12 +54,48 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
 
+    RouteState.load();
+    _selectedIndex = RouteState.tabIndex;
+    _routeObservers = List.generate(
+      3,
+      (i) => RouteStateObserver(tabIndex: i),
+    );
+
     audioHandler.init(
       playableProvider: context.read<PlayableProvider>(),
       downloadProvider: context.read<DownloadProvider>(),
     );
 
     context.read<DownloadSyncProvider>().scheduleSync();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => _restoreRoutes());
+  }
+
+  void _restoreRoutes() {
+    // Take a snapshot of the persisted stacks, then clear them.
+    // The observer's didPush calls will re-populate them as routes are pushed.
+    final savedStacks = <int, List<RouteEntry>>{};
+    for (var tab = 0; tab < 3; tab++) {
+      savedStacks[tab] = List.of(RouteState.stackFor(tab));
+    }
+    RouteState.clear();
+    RouteState.setTabIndex(_selectedIndex);
+
+    for (var tab = 0; tab < 3; tab++) {
+      final stack = savedStacks[tab]!;
+      final navigator = _navigatorKeys[tab].currentState;
+      if (navigator == null || stack.isEmpty) continue;
+
+      for (final entry in stack) {
+        final screen = entry.buildScreen();
+        if (screen == null) continue;
+
+        navigator.push(CupertinoPageRoute(
+          settings: RouteSettings(name: entry.name, arguments: entry.argument),
+          builder: (_) => screen,
+        ));
+      }
+    }
   }
 
   BottomNavigationBarItem tabBarItem({
@@ -102,6 +142,7 @@ class _MainScreenState extends State<MainScreen> {
                   tabBuilder: (_, index) {
                     return CupertinoTabView(
                         navigatorKey: _navigatorKeys[index],
+                        navigatorObservers: [_routeObservers[index]],
                         builder: (_) => _widgetOptions[index]);
                   },
                   tabBar: CupertinoTabBar(

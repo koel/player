@@ -35,7 +35,10 @@ class AppRouter {
   }) async {
     await Navigator.of(context).push(CupertinoPageRoute(
       builder: (_) => const AlbumDetailsScreen(),
-      settings: RouteSettings(arguments: albumId),
+      settings: RouteSettings(
+        name: AlbumDetailsScreen.routeName,
+        arguments: albumId,
+      ),
     ));
   }
 
@@ -45,7 +48,10 @@ class AppRouter {
   }) async {
     await Navigator.of(context).push(CupertinoPageRoute(
       builder: (_) => const ArtistDetailsScreen(),
-      settings: RouteSettings(arguments: artistId),
+      settings: RouteSettings(
+        name: ArtistDetailsScreen.routeName,
+        arguments: artistId,
+      ),
     ));
   }
 
@@ -55,7 +61,10 @@ class AppRouter {
   }) async {
     await Navigator.of(context).push(CupertinoPageRoute(
       builder: (_) => const PodcastDetailsScreen(),
-      settings: RouteSettings(arguments: podcastId),
+      settings: RouteSettings(
+        name: PodcastDetailsScreen.routeName,
+        arguments: podcastId,
+      ),
     ));
   }
 
@@ -65,7 +74,10 @@ class AppRouter {
   }) async {
     await Navigator.of(context).push(CupertinoPageRoute(
       builder: (_) => const GenreDetailsScreen(),
-      settings: RouteSettings(arguments: genre),
+      settings: RouteSettings(
+        name: GenreDetailsScreen.routeName,
+        arguments: genre,
+      ),
     ));
   }
 
