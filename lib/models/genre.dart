@@ -22,6 +22,13 @@ class Genre {
     );
   }
 
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'song_count': songCount,
+        'length': length,
+      };
+
   Genre merge(Genre remote) {
     this
       ..name = remote.name

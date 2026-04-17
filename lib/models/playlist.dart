@@ -34,6 +34,15 @@ class Playlist {
     );
   }
 
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'is_smart': isSmart,
+        'folder_id': folderId,
+        'description': description,
+        'cover': cover,
+      };
+
   bool get hasCover => cover != null && cover!.isNotEmpty;
 
   factory Playlist.fake({

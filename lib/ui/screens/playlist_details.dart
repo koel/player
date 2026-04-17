@@ -9,6 +9,7 @@ import 'package:app/values/values.dart';
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
 import 'package:provider/provider.dart';
 
@@ -159,8 +160,11 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
 }
 
 void gotoDetailsScreen(BuildContext context, {required Playlist playlist}) {
-  Navigator.of(context, rootNavigator: true).pushNamed(
-    PlaylistDetailsScreen.routeName,
-    arguments: playlist,
-  );
+  Navigator.of(context).push(CupertinoPageRoute(
+    settings: RouteSettings(
+      name: PlaylistDetailsScreen.routeName,
+      arguments: playlist,
+    ),
+    builder: (_) => const PlaylistDetailsScreen(),
+  ));
 }

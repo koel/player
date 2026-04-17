@@ -1,6 +1,7 @@
 import 'package:app/main.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/screens.dart';
+import 'package:app/utils/route_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -30,6 +31,7 @@ class ProfileAvatar extends StatelessWidget {
               onPressed: () async {
                 await context.read<AuthProvider>().logout();
                 await audioHandler.cleanUpUponLogout();
+                RouteState.clear();
                 Navigator.of(
                   context,
                   rootNavigator: true,
