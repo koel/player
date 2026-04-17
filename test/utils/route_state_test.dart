@@ -365,6 +365,23 @@ void main() {
       expect(restored.name, original.name);
       expect(restored.isSmart, original.isSmart);
     });
+
+    test('round-trips nullable fields', () {
+      final original = Playlist.fake(
+        id: 'test-id',
+        name: 'Test Playlist',
+        isSmart: false,
+        folderId: 'folder-1',
+        description: 'A test playlist',
+        cover: 'https://example.com/cover.jpg',
+      );
+      final json = original.toJson();
+      final restored = Playlist.fromJson(json);
+
+      expect(restored.folderId, 'folder-1');
+      expect(restored.description, 'A test playlist');
+      expect(restored.cover, 'https://example.com/cover.jpg');
+    });
   });
 
   group('Genre.toJson', () {

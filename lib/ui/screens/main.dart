@@ -88,7 +88,10 @@ class _MainScreenState extends State<MainScreen> {
 
       for (final entry in stack) {
         final screen = entry.buildScreen();
-        if (screen == null) continue;
+        if (screen == null) {
+          debugPrint('RouteState: unknown route "${entry.name}", skipping');
+          continue;
+        }
 
         navigator.push(CupertinoPageRoute(
           settings: RouteSettings(name: entry.name, arguments: entry.argument),

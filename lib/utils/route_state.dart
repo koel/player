@@ -190,7 +190,8 @@ class RouteState {
 
     try {
       final data = jsonDecode(raw) as Map<String, dynamic>;
-      _tabIndex = data['tabIndex'] ?? 0;
+      final t = data['tabIndex'];
+      _tabIndex = t is int ? t : 0;
 
       final stacks = data['stacks'] as Map<String, dynamic>? ?? {};
       _stacks = {};
