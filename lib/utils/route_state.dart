@@ -135,6 +135,9 @@ class RouteState {
   static const _storageKey = 'routeState';
   static var _tabIndex = 0;
   static var _stacks = <int, List<RouteEntry>>{0: [], 1: [], 2: []};
+  /// Set to false to disable storage persistence (e.g. in tests).
+  static set persistEnabled(bool value) => _persistEnabled = value;
+  static var _persistEnabled = true;
 
   static int get tabIndex => _tabIndex;
   static List<RouteEntry> stackFor(int tab) => _stacks[tab] ?? [];
@@ -167,6 +170,7 @@ class RouteState {
   }
 
   static void _persist() {
+    if (!_persistEnabled) return;
     final data = {
       'tabIndex': _tabIndex,
       'stacks': _stacks.map(
@@ -180,6 +184,7 @@ class RouteState {
   }
 
   static void load() {
+    if (!_persistEnabled) return;
     final raw = preferences.storage.read<String>(_storageKey);
     if (raw == null) return;
 
@@ -202,8 +207,15 @@ class RouteState {
   }
 
   static void clear() {
+    reset();
+    if (_persistEnabled) {
+      preferences.storage.remove(_storageKey);
+    }
+  }
+
+  /// Resets in-memory state without touching storage.
+  static void reset() {
     _tabIndex = 0;
     _stacks = {0: [], 1: [], 2: []};
-    preferences.storage.remove(_storageKey);
   }
 }

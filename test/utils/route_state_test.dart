@@ -1,9 +1,20 @@
 import 'package:app/models/models.dart';
 import 'package:app/ui/screens/screens.dart';
 import 'package:app/utils/route_state.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+/// A minimal [Route] implementation for testing [RouteStateObserver].
+class FakeRoute extends Route {
+  FakeRoute({required String name, dynamic arguments})
+      : super(settings: RouteSettings(name: name, arguments: arguments));
+}
+
 void main() {
+  RouteState.persistEnabled = false;
+
+  setUp(() => RouteState.reset());
+
   group('RouteEntry serialization', () {
     test('round-trips a route with no argument', () {
       final entry = RouteEntry(name: SongsScreen.routeName);
@@ -147,6 +158,196 @@ void main() {
 
     test('returns null for unknown route', () {
       expect(RouteEntry(name: '/unknown').buildScreen(), isNull);
+    });
+  });
+
+  group('RouteState', () {
+    setUp(() => RouteState.reset());
+
+    test('defaults to tab 0 with empty stacks', () {
+      expect(RouteState.tabIndex, 0);
+      expect(RouteState.stackFor(0), isEmpty);
+      expect(RouteState.stackFor(1), isEmpty);
+      expect(RouteState.stackFor(2), isEmpty);
+    });
+
+    test('setTabIndex updates tab index', () {
+      RouteState.setTabIndex(2);
+      expect(RouteState.tabIndex, 2);
+    });
+
+    test('addEntry appends to the correct tab stack', () {
+      RouteState.addEntry(1, RouteEntry(name: '/songs'));
+      RouteState.addEntry(1, RouteEntry(name: '/albums'));
+
+      expect(RouteState.stackFor(1).length, 2);
+      expect(RouteState.stackFor(1)[0].name, '/songs');
+      expect(RouteState.stackFor(1)[1].name, '/albums');
+      expect(RouteState.stackFor(0), isEmpty);
+    });
+
+    test('removeLastEntry removes the last entry', () {
+      RouteState.addEntry(0, RouteEntry(name: '/songs'));
+      RouteState.addEntry(0, RouteEntry(name: '/albums'));
+
+      RouteState.removeLastEntry(0);
+
+      expect(RouteState.stackFor(0).length, 1);
+      expect(RouteState.stackFor(0).first.name, '/songs');
+    });
+
+    test('removeLastEntry does nothing on empty stack', () {
+      RouteState.removeLastEntry(0);
+      expect(RouteState.stackFor(0), isEmpty);
+    });
+
+    test('removeEntryByName removes the matching entry', () {
+      RouteState.addEntry(0, RouteEntry(name: '/songs'));
+      RouteState.addEntry(0, RouteEntry(name: '/albums'));
+      RouteState.addEntry(0, RouteEntry(name: '/album'));
+
+      RouteState.removeEntryByName(0, '/albums');
+
+      expect(RouteState.stackFor(0).length, 2);
+      expect(RouteState.stackFor(0)[0].name, '/songs');
+      expect(RouteState.stackFor(0)[1].name, '/album');
+    });
+
+    test('removeEntryByName removes last occurrence when duplicates exist', () {
+      RouteState.addEntry(0, RouteEntry(name: '/songs'));
+      RouteState.addEntry(0, RouteEntry(name: '/songs'));
+
+      RouteState.removeEntryByName(0, '/songs');
+
+      expect(RouteState.stackFor(0).length, 1);
+      expect(RouteState.stackFor(0).first.name, '/songs');
+    });
+
+    test('removeEntryByName does nothing for non-existent name', () {
+      RouteState.addEntry(0, RouteEntry(name: '/songs'));
+      RouteState.removeEntryByName(0, '/unknown');
+      expect(RouteState.stackFor(0).length, 1);
+    });
+
+    test('reset clears in-memory state', () {
+      RouteState.setTabIndex(1);
+      RouteState.addEntry(1, RouteEntry(name: '/songs'));
+
+      RouteState.reset();
+
+      expect(RouteState.tabIndex, 0);
+      expect(RouteState.stackFor(0), isEmpty);
+      expect(RouteState.stackFor(1), isEmpty);
+    });
+  });
+
+  group('RouteStateObserver', () {
+    late RouteStateObserver observer;
+
+    setUp(() {
+      RouteState.reset();
+      observer = RouteStateObserver(tabIndex: 0);
+    });
+
+    test('didPush adds entry to stack', () {
+      observer.didPush(FakeRoute(name: '/songs'), null);
+
+      expect(RouteState.stackFor(0).length, 1);
+      expect(RouteState.stackFor(0).first.name, '/songs');
+    });
+
+    test('didPush ignores root route', () {
+      observer.didPush(FakeRoute(name: '/'), null);
+      expect(RouteState.stackFor(0), isEmpty);
+    });
+
+    test('didPush preserves arguments', () {
+      observer.didPush(
+        FakeRoute(name: '/album', arguments: 'album-42'),
+        null,
+      );
+
+      expect(RouteState.stackFor(0).first.argument, 'album-42');
+    });
+
+    test('didPop removes matching top entry', () {
+      observer.didPush(FakeRoute(name: '/songs'), null);
+      observer.didPush(FakeRoute(name: '/albums'), null);
+
+      observer.didPop(FakeRoute(name: '/albums'), null);
+
+      expect(RouteState.stackFor(0).length, 1);
+      expect(RouteState.stackFor(0).first.name, '/songs');
+    });
+
+    test('didPop does not remove if name does not match stack top', () {
+      observer.didPush(FakeRoute(name: '/songs'), null);
+      observer.didPush(FakeRoute(name: '/albums'), null);
+
+      // Pop a route that doesn't match the top (/albums)
+      observer.didPop(FakeRoute(name: '/songs'), null);
+
+      // Stack should remain unchanged
+      expect(RouteState.stackFor(0).length, 2);
+    });
+
+    test('didPop ignores root route', () {
+      observer.didPush(FakeRoute(name: '/songs'), null);
+      observer.didPop(FakeRoute(name: '/'), null);
+      expect(RouteState.stackFor(0).length, 1);
+    });
+
+    test('didReplace swaps the top entry', () {
+      observer.didPush(FakeRoute(name: '/songs'), null);
+
+      observer.didReplace(
+        newRoute: FakeRoute(name: '/albums'),
+        oldRoute: FakeRoute(name: '/songs'),
+      );
+
+      expect(RouteState.stackFor(0).length, 1);
+      expect(RouteState.stackFor(0).first.name, '/albums');
+    });
+
+    test('didReplace handles null oldRoute (add only)', () {
+      observer.didReplace(
+        newRoute: FakeRoute(name: '/songs'),
+        oldRoute: null,
+      );
+
+      expect(RouteState.stackFor(0).length, 1);
+      expect(RouteState.stackFor(0).first.name, '/songs');
+    });
+
+    test('didRemove removes matching entry from middle of stack', () {
+      observer.didPush(FakeRoute(name: '/songs'), null);
+      observer.didPush(FakeRoute(name: '/albums'), null);
+      observer.didPush(FakeRoute(name: '/album'), null);
+
+      observer.didRemove(FakeRoute(name: '/albums'), null);
+
+      expect(RouteState.stackFor(0).length, 2);
+      expect(RouteState.stackFor(0)[0].name, '/songs');
+      expect(RouteState.stackFor(0)[1].name, '/album');
+    });
+
+    test('didRemove ignores root route', () {
+      observer.didPush(FakeRoute(name: '/songs'), null);
+      observer.didRemove(FakeRoute(name: '/'), null);
+      expect(RouteState.stackFor(0).length, 1);
+    });
+
+    test('tracks correct tab index', () {
+      final observer1 = RouteStateObserver(tabIndex: 1);
+      final observer2 = RouteStateObserver(tabIndex: 2);
+
+      observer.didPush(FakeRoute(name: '/songs'), null);
+      observer1.didPush(FakeRoute(name: '/albums'), null);
+      observer2.didPush(FakeRoute(name: '/album'), null);
+
+      expect(RouteState.stackFor(0).first.name, '/songs');
+      expect(RouteState.stackFor(1).first.name, '/albums');
+      expect(RouteState.stackFor(2).first.name, '/album');
     });
   });
 
