@@ -86,9 +86,12 @@ class RouteStateObserver extends NavigatorObserver {
 
   RouteStateObserver({required this.tabIndex});
 
+  bool _isTracked(Route? route) =>
+      route?.settings.name != null && route!.settings.name != '/';
+
   @override
   void didPush(Route route, Route? previousRoute) {
-    if (route.settings.name != null && route.settings.name != '/') {
+    if (_isTracked(route)) {
       RouteState.addEntry(
         tabIndex,
         RouteEntry(name: route.settings.name!, argument: route.settings.arguments),
@@ -98,9 +101,33 @@ class RouteStateObserver extends NavigatorObserver {
 
   @override
   void didPop(Route route, Route? previousRoute) {
-    if (route.settings.name != null && route.settings.name != '/') {
+    if (!_isTracked(route)) return;
+    final stack = RouteState.stackFor(tabIndex);
+    if (stack.isNotEmpty && stack.last.name == route.settings.name) {
       RouteState.removeLastEntry(tabIndex);
     }
+  }
+
+  @override
+  void didReplace({Route? newRoute, Route? oldRoute}) {
+    if (_isTracked(oldRoute)) {
+      RouteState.removeLastEntry(tabIndex);
+    }
+    if (_isTracked(newRoute)) {
+      RouteState.addEntry(
+        tabIndex,
+        RouteEntry(
+          name: newRoute!.settings.name!,
+          argument: newRoute.settings.arguments,
+        ),
+      );
+    }
+  }
+
+  @override
+  void didRemove(Route route, Route? previousRoute) {
+    if (!_isTracked(route)) return;
+    RouteState.removeEntryByName(tabIndex, route.settings.name!);
   }
 }
 
@@ -126,6 +153,15 @@ class RouteState {
   static void removeLastEntry(int tab) {
     if (_stacks[tab] != null && _stacks[tab]!.isNotEmpty) {
       _stacks[tab]!.removeLast();
+      _persist();
+    }
+  }
+
+  static void removeEntryByName(int tab, String name) {
+    if (_stacks[tab] == null) return;
+    final idx = _stacks[tab]!.lastIndexWhere((e) => e.name == name);
+    if (idx >= 0) {
+      _stacks[tab]!.removeAt(idx);
       _persist();
     }
   }
