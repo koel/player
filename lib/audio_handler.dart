@@ -409,7 +409,11 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   @override
   Future<void> setRepeatMode(AudioServiceRepeatMode repeatMode) async {
     playbackState.add(playbackState.value.copyWith(repeatMode: repeatMode));
-    await _player.setLoopMode(LoopMode.values[repeatMode.index]);
+    // Only pass LoopMode.one to the player for gapless single-track repeat.
+    // "Repeat all" is handled by the app's own queue logic in skipToNext().
+    await _player.setLoopMode(
+      repeatMode == AudioServiceRepeatMode.one ? LoopMode.one : LoopMode.off,
+    );
   }
 
   Future<void> cleanUpUponLogout() async {
