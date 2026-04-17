@@ -54,15 +54,27 @@ class InteractionProvider with ChangeNotifier, StreamSubscriber {
   Future<void> _like({required Song song}) async {
     song.liked = true;
     notifyListeners();
-    _downloadProvider.persistMetadataIfNeeded(song);
-    await post('interaction/like', data: {'song': song.id});
+    try {
+      await post('interaction/like', data: {'song': song.id});
+      _downloadProvider.persistMetadataIfNeeded(song);
+    } catch (e) {
+      song.liked = false;
+      notifyListeners();
+      rethrow;
+    }
   }
 
   Future<void> _unlike({required Song song}) async {
     song.liked = false;
     notifyListeners();
-    _downloadProvider.persistMetadataIfNeeded(song);
-    await post('interaction/like', data: {'song': song.id});
+    try {
+      await post('interaction/like', data: {'song': song.id});
+      _downloadProvider.persistMetadataIfNeeded(song);
+    } catch (e) {
+      song.liked = true;
+      notifyListeners();
+      rethrow;
+    }
   }
 
   Future<void> toggleLike({required Song song}) async {
@@ -78,6 +90,7 @@ class InteractionProvider with ChangeNotifier, StreamSubscriber {
     playable
       ..playCount = interaction.playCount
       ..liked = interaction.liked;
+    if (playable is Song) _downloadProvider.persistMetadataIfNeeded(playable);
   }
 
   @override
