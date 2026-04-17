@@ -24,7 +24,8 @@ class AddToPlaylistScreen extends StatelessWidget {
     final playable = ModalRoute.of(context)!.settings.arguments as Playable;
 
     return Scaffold(
-      body: CupertinoTheme(
+      body: GradientDecoratedContainer(
+        child: CupertinoTheme(
         data: const CupertinoThemeData(primaryColor: Colors.white),
         child: Consumer<PlaylistProvider>(
           builder: (context, provider, navigationBar) {
@@ -73,6 +74,7 @@ class AddToPlaylistScreen extends StatelessWidget {
             ),
           ),
         ),
+      ),
       ),
     );
   }
