@@ -172,6 +172,7 @@ class Song extends Playable<Song> {
       'disc': disc,
       'year': year,
       'genre': genre,
+      'liked': liked,
     };
   }
 

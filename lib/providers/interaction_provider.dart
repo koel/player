@@ -9,12 +9,15 @@ import 'package:flutter/foundation.dart';
 class InteractionProvider with ChangeNotifier, StreamSubscriber {
   late final PlayableProvider _playableProvider;
   late final RecentlyPlayedProvider _recentlyPlayedProvider;
+  late final DownloadProvider _downloadProvider;
 
   InteractionProvider({
     required PlayableProvider playableProvider,
     required RecentlyPlayedProvider recentlyPlayedProvider,
+    required DownloadProvider downloadProvider,
   })  : _playableProvider = playableProvider,
-        _recentlyPlayedProvider = recentlyPlayedProvider {
+        _recentlyPlayedProvider = recentlyPlayedProvider,
+        _downloadProvider = downloadProvider {
     _subscribeToAudioEvents();
   }
 
@@ -51,12 +54,14 @@ class InteractionProvider with ChangeNotifier, StreamSubscriber {
   Future<void> _like({required Song song}) async {
     song.liked = true;
     notifyListeners();
+    _downloadProvider.persistMetadataIfNeeded(song);
     await post('interaction/like', data: {'song': song.id});
   }
 
   Future<void> _unlike({required Song song}) async {
     song.liked = false;
     notifyListeners();
+    _downloadProvider.persistMetadataIfNeeded(song);
     await post('interaction/like', data: {'song': song.id});
   }
 

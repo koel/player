@@ -114,6 +114,17 @@ void main() {
       expect(restored.year, 2020);
       expect(json['type'], 'songs');
     });
+
+    test('preserves liked status through round-trip', () {
+      final song = Song.fake();
+      song.liked = true;
+
+      final json = song.toJson();
+      final restored = Song.fromJson(json);
+
+      expect(json['liked'], isTrue);
+      expect(restored.liked, isTrue);
+    });
   });
 
   group('Song.matchKeywords', () {
