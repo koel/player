@@ -100,50 +100,52 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                     horizontal: 16.0,
                     vertical: 8.0,
                   ),
-                  child: Row(
-                    children: [
-                      _QuickAction(
-                        label: 'Favorite',
-                        icon: playable.liked
-                            ? CupertinoIcons.star_fill
-                            : CupertinoIcons.star,
-                        enabled: !inOfflineMode,
-                        onTap: () {
-                          favoriteProvider.toggleOne(playable: playable);
-                          setState(() {});
-                        },
-                      ),
-                      const SizedBox(width: 8),
-                      _QuickAction(
-                        label: 'Details',
-                        icon: CupertinoIcons.text_quote,
-                        onTap: () {
-                          Navigator.pop(context);
-                          showInfoSheet(context, playable: playable);
-                        },
-                      ),
-                      const SizedBox(width: 8),
-                      _QuickAction(
-                        label: _downloaded ? 'Downloaded' : 'Download',
-                        icon: _downloaded
-                            ? CupertinoIcons.trash
-                            : CupertinoIcons.cloud_download,
-                        enabled: _downloaded || !inOfflineMode,
-                        onTap: () async {
-                          final downloadProvider =
-                              context.read<DownloadProvider>();
-                          if (_downloaded) {
-                            await downloadProvider
-                                .removeForPlayable(playable);
-                            if (mounted) setState(() => _downloaded = false);
-                          } else {
-                            await downloadProvider.download(
-                                playable: playable);
-                            if (mounted) setState(() => _downloaded = true);
-                          }
-                        },
-                      ),
-                    ],
+                  child: IntrinsicHeight(
+                    child: Row(
+                      children: [
+                        _QuickAction(
+                          label: 'Favorite',
+                          icon: playable.liked
+                              ? CupertinoIcons.star_fill
+                              : CupertinoIcons.star,
+                          enabled: !inOfflineMode,
+                          onTap: () {
+                            favoriteProvider.toggleOne(playable: playable);
+                            setState(() {});
+                          },
+                        ),
+                        const _QuickActionDivider(),
+                        _QuickAction(
+                          label: 'Details',
+                          icon: CupertinoIcons.text_quote,
+                          onTap: () {
+                            Navigator.pop(context);
+                            showInfoSheet(context, playable: playable);
+                          },
+                        ),
+                        const _QuickActionDivider(),
+                        _QuickAction(
+                          label: _downloaded ? 'Downloaded' : 'Download',
+                          icon: _downloaded
+                              ? CupertinoIcons.trash
+                              : CupertinoIcons.cloud_download,
+                          enabled: _downloaded || !inOfflineMode,
+                          onTap: () async {
+                            final downloadProvider =
+                                context.read<DownloadProvider>();
+                            if (_downloaded) {
+                              await downloadProvider
+                                  .removeForPlayable(playable);
+                              if (mounted) setState(() => _downloaded = false);
+                            } else {
+                              await downloadProvider.download(
+                                  playable: playable);
+                              if (mounted) setState(() => _downloaded = true);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const Divider(indent: 16, endIndent: 16),
@@ -296,33 +298,54 @@ class _QuickAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = enabled ? Colors.white : Colors.white30;
-    final borderRadius = BorderRadius.circular(12);
 
     return Expanded(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: borderRadius,
-          border: Border.all(color: Colors.white.withOpacity(0.2)),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: enabled ? onTap : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 26, color: color),
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 12, color: color),
+                ),
+              ],
+            ),
+          ),
         ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: enabled ? onTap : null,
-            borderRadius: borderRadius,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon, size: 26, color: color),
-                  const SizedBox(height: 6),
-                  Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 12, color: color),
-                  ),
+      ),
+    );
+  }
+}
+
+class _QuickActionDivider extends StatelessWidget {
+  const _QuickActionDivider({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 1,
+      child: Center(
+        child: FractionallySizedBox(
+          heightFactor: 2 / 3,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Colors.white.withValues(alpha: 0.4),
+                  Colors.transparent,
                 ],
               ),
             ),
