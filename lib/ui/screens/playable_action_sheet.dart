@@ -25,6 +25,7 @@ class PlayableActionSheet extends StatefulWidget {
 class _PlayableActionSheetState extends State<PlayableActionSheet> {
   var _queued = false;
   var _downloaded = false;
+  var _downloading = false;
 
   initState() {
     super.initState();
@@ -105,9 +106,9 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                       children: [
                         _QuickAction(
                           label: 'Favorite',
-                          icon: playable.liked
+                          icon: Icon(playable.liked
                               ? CupertinoIcons.star_fill
-                              : CupertinoIcons.star,
+                              : CupertinoIcons.star),
                           enabled: !inOfflineMode,
                           onTap: () {
                             favoriteProvider.toggleOne(playable: playable);
@@ -117,7 +118,7 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                         const _QuickActionDivider(),
                         _QuickAction(
                           label: 'Details',
-                          icon: CupertinoIcons.text_quote,
+                          icon: const Icon(CupertinoIcons.text_quote),
                           onTap: () {
                             Navigator.pop(context);
                             showInfoSheet(context, playable: playable);
@@ -126,10 +127,16 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                         const _QuickActionDivider(),
                         _QuickAction(
                           label: _downloaded ? 'Downloaded' : 'Download',
-                          icon: _downloaded
-                              ? CupertinoIcons.trash
-                              : CupertinoIcons.cloud_download,
-                          enabled: _downloaded || !inOfflineMode,
+                          icon: _downloading
+                              ? const CupertinoActivityIndicator(
+                                  radius: 11,
+                                  color: Colors.white,
+                                )
+                              : Icon(_downloaded
+                                  ? LucideIcons.cloudOff
+                                  : CupertinoIcons.cloud_download),
+                          enabled: !_downloading &&
+                              (_downloaded || !inOfflineMode),
                           onTap: () async {
                             final downloadProvider =
                                 context.read<DownloadProvider>();
@@ -138,9 +145,22 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                                   .removeForPlayable(playable);
                               if (mounted) setState(() => _downloaded = false);
                             } else {
-                              await downloadProvider.download(
-                                  playable: playable);
-                              if (mounted) setState(() => _downloaded = true);
+                              setState(() => _downloading = true);
+                              try {
+                                await downloadProvider.download(
+                                    playable: playable);
+                                if (mounted) {
+                                  setState(() {
+                                    _downloaded = true;
+                                    _downloading = false;
+                                  });
+                                }
+                              } catch (_) {
+                                if (mounted) {
+                                  setState(() => _downloading = false);
+                                }
+                                rethrow;
+                              }
                             }
                           },
                         ),
@@ -283,7 +303,7 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
 
 class _QuickAction extends StatelessWidget {
   final String label;
-  final IconData icon;
+  final Widget icon;
   final VoidCallback onTap;
   final bool enabled;
 
@@ -309,7 +329,10 @@ class _QuickAction extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(icon, color: color),
+                IconTheme(
+                  data: IconThemeData(color: color),
+                  child: icon,
+                ),
                 const SizedBox(height: 6),
                 Text(
                   label,
