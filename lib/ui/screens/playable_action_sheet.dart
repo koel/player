@@ -126,7 +126,7 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                         label:
                             _downloaded ? 'Remove Download' : 'Download',
                         icon: _downloaded
-                            ? CupertinoIcons.checkmark_alt_circle_fill
+                            ? CupertinoIcons.trash
                             : CupertinoIcons.cloud_download,
                         enabled: _downloaded || !inOfflineMode,
                         onTap: () async {
