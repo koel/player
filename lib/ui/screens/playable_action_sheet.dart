@@ -32,10 +32,8 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
       setState(() => _queued = queued);
     });
 
-    setState(() {
-      _downloaded =
-          context.read<DownloadProvider>().has(playable: widget.playable);
-    });
+    _downloaded =
+        context.read<DownloadProvider>().has(playable: widget.playable);
   }
 
   @override
