@@ -126,7 +126,7 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                         ),
                         const PlayableQuickActionDivider(),
                         PlayableQuickAction(
-                          label: _downloaded ? 'Undo Download' : 'Download',
+                          label: _downloaded ? 'Remove' : 'Download',
                           icon: Icon(_downloaded
                               ? CupertinoIcons.xmark_circle_fill
                               : CupertinoIcons.cloud_download),
