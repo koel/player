@@ -115,8 +115,8 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                         },
                       ),
                       _QuickAction(
-                        label: 'Info',
-                        icon: CupertinoIcons.info,
+                        label: 'Details',
+                        icon: CupertinoIcons.text_quote,
                         onTap: () {
                           Navigator.pop(context);
                           showInfoSheet(context, playable: playable);
