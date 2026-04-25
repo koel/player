@@ -43,6 +43,7 @@ void main() {
   Future<void> _mountSheet(
     WidgetTester tester, {
     required bool downloaded,
+    Size? surfaceSize,
   }) async {
     when(downloadProviderMock.has(playable: song)).thenReturn(downloaded);
 
@@ -56,10 +57,7 @@ void main() {
         ],
         child: PlayableActionSheet(playable: song),
       ),
-      // The sheet is normally shown via showModalBottomSheet with
-      // isScrollControlled, which lets it overflow / scroll. When mounted
-      // bare, give it enough vertical room to lay out without overflow.
-      surfaceSize: const Size(414, 1024),
+      surfaceSize: surfaceSize ?? const Size(375, 812),
     );
   }
 
@@ -112,6 +110,19 @@ void main() {
 
       verify(downloadProviderMock.removeForPlayable(song)).called(1);
       verifyNever(downloadProviderMock.download(playable: song));
+    },
+  );
+
+  testWidgets(
+    'lays out without overflow on small screens (iPhone SE)',
+    (tester) async {
+      await _mountSheet(
+        tester,
+        downloaded: true,
+        surfaceSize: const Size(320, 568),
+      );
+
+      expect(tester.takeException(), isNull);
     },
   );
 }

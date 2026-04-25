@@ -91,10 +91,10 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                 ),
               ],
             ),
-            ListView(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              children: <Widget>[
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                children: <Widget>[
                 if (!isCurrent)
                   PlayableActionButton(
                     text: 'Play Next',
@@ -269,6 +269,7 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                   hideSheetOnTap: false,
                 ),
               ],
+              ),
             ),
           ],
         ),
