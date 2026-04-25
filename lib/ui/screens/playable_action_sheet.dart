@@ -123,8 +123,7 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                         },
                       ),
                       _QuickAction(
-                        label:
-                            _downloaded ? 'Remove Download' : 'Download',
+                        label: _downloaded ? 'Delete' : 'Download',
                         icon: _downloaded
                             ? CupertinoIcons.trash
                             : CupertinoIcons.cloud_download,

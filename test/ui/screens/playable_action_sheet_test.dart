@@ -64,7 +64,7 @@ void main() {
       await _mountSheet(tester, downloaded: false);
 
       expect(find.text('Download'), findsOneWidget);
-      expect(find.text('Remove Download'), findsNothing);
+      expect(find.text('Delete'), findsNothing);
     },
   );
 
@@ -73,7 +73,7 @@ void main() {
     (tester) async {
       await _mountSheet(tester, downloaded: true);
 
-      expect(find.text('Remove Download'), findsOneWidget);
+      expect(find.text('Delete'), findsOneWidget);
       expect(find.text('Download'), findsNothing);
     },
   );
@@ -101,7 +101,7 @@ void main() {
           .thenAnswer((_) async {});
 
       await _mountSheet(tester, downloaded: true);
-      await tester.tap(find.text('Remove Download'));
+      await tester.tap(find.text('Delete'));
       await tester.pump();
       await tester.pump(const Duration(seconds: 3));
 
