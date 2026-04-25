@@ -9,7 +9,6 @@ import 'package:app/ui/screens/info_sheet/info_sheet.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
@@ -104,7 +103,7 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                   child: IntrinsicHeight(
                     child: Row(
                       children: [
-                        _QuickAction(
+                        PlayableQuickAction(
                           label: playable.liked ? 'Undo' : 'Favorite',
                           icon: Icon(playable.liked
                               ? CupertinoIcons.star_fill
@@ -115,8 +114,8 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                             favoriteProvider.toggleOne(playable: playable);
                           },
                         ),
-                        const _QuickActionDivider(),
-                        _QuickAction(
+                        const PlayableQuickActionDivider(),
+                        PlayableQuickAction(
                           label: 'Details',
                           icon: const Icon(CupertinoIcons.text_quote),
                           onTap: () {
@@ -124,8 +123,8 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                             showInfoSheet(context, playable: playable);
                           },
                         ),
-                        const _QuickActionDivider(),
-                        _QuickAction(
+                        const PlayableQuickActionDivider(),
+                        PlayableQuickAction(
                           label: _downloaded ? 'Remove' : 'Download',
                           icon: _downloaded
                               ? const _CloudMinusIcon()
@@ -279,60 +278,6 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
   }
 }
 
-class _QuickAction extends StatelessWidget {
-  final String label;
-  final Widget icon;
-  final VoidCallback onTap;
-  final bool enabled;
-
-  const _QuickAction({
-    Key? key,
-    required this.label,
-    required this.icon,
-    required this.onTap,
-    this.enabled = true,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final color = enabled ? Colors.white : Colors.white30;
-
-    return Expanded(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: enabled
-              ? () {
-                  HapticFeedback.mediumImpact();
-                  onTap();
-                }
-              : null,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconTheme(
-                  data: IconThemeData(color: color),
-                  child: icon,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 12, color: color),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _CloudMinusIcon extends StatelessWidget {
   const _CloudMinusIcon({Key? key}) : super(key: key);
 
@@ -368,31 +313,6 @@ class _CloudMinusIcon extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _QuickActionDivider extends StatelessWidget {
-  const _QuickActionDivider({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final dividerColor =
-        DividerTheme.of(context).color ?? Theme.of(context).dividerColor;
-
-    return Container(
-      width: 1,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.transparent,
-            dividerColor,
-            Colors.transparent,
-          ],
-        ),
       ),
     );
   }
