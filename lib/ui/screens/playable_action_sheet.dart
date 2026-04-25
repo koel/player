@@ -9,6 +9,7 @@ import 'package:app/ui/screens/info_sheet/info_sheet.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
@@ -104,7 +105,7 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                     child: Row(
                       children: [
                         _QuickAction(
-                          label: 'Favorite',
+                          label: playable.liked ? 'Undo' : 'Favorite',
                           icon: Icon(playable.liked
                               ? CupertinoIcons.star_fill
                               : CupertinoIcons.star),
@@ -125,7 +126,7 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                         ),
                         const _QuickActionDivider(),
                         _QuickAction(
-                          label: _downloaded ? 'Downloaded' : 'Download',
+                          label: _downloaded ? 'Remove' : 'Download',
                           icon: _downloaded
                               ? const _CloudMinusIcon()
                               : const Icon(CupertinoIcons.cloud_download),
@@ -300,7 +301,12 @@ class _QuickAction extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: enabled ? onTap : null,
+          onTap: enabled
+              ? () {
+                  HapticFeedback.mediumImpact();
+                  onTap();
+                }
+              : null,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 12.0),
             child: Column(
