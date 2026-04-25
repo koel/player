@@ -1,4 +1,5 @@
 import 'package:app/app_state.dart';
+import 'package:app/constants/constants.dart';
 import 'package:app/enums.dart';
 import 'package:app/main.dart';
 import 'package:app/models/models.dart';
@@ -132,9 +133,10 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                                   radius: 11,
                                   color: Colors.white,
                                 )
-                              : Icon(_downloaded
-                                  ? LucideIcons.cloudOff
-                                  : CupertinoIcons.cloud_download),
+                              : (_downloaded
+                                  ? const _CloudMinusIcon()
+                                  : const Icon(
+                                      CupertinoIcons.cloud_download)),
                           enabled: !_downloading &&
                               (_downloaded || !inOfflineMode),
                           onTap: () async {
@@ -345,6 +347,46 @@ class _QuickAction extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _CloudMinusIcon extends StatelessWidget {
+  const _CloudMinusIcon({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final iconColor = IconTheme.of(context).color ?? Colors.white;
+    final size = IconTheme.of(context).size ?? 24.0;
+    final badgeSize = size * 0.55;
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Icon(CupertinoIcons.cloud_fill, size: size, color: iconColor),
+          Positioned(
+            right: -2,
+            bottom: -2,
+            child: Container(
+              width: badgeSize,
+              height: badgeSize,
+              alignment: Alignment.center,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.red,
+              ),
+              child: Icon(
+                CupertinoIcons.minus,
+                size: badgeSize * 0.7,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
