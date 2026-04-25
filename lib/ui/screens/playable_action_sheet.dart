@@ -309,7 +309,7 @@ class _QuickAction extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(icon, size: 26, color: color),
+                Icon(icon, color: color),
                 const SizedBox(height: 6),
                 Text(
                   label,
