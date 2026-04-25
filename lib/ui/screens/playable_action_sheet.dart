@@ -1,5 +1,4 @@
 import 'package:app/app_state.dart';
-import 'package:app/constants/constants.dart';
 import 'package:app/enums.dart';
 import 'package:app/main.dart';
 import 'package:app/models/models.dart';
@@ -377,7 +376,7 @@ class _CloudMinusIcon extends StatelessWidget {
               alignment: Alignment.center,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.red,
+                color: CupertinoColors.systemRed,
               ),
               child: Icon(
                 CupertinoIcons.minus,
