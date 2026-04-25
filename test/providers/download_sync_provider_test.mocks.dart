@@ -119,6 +119,16 @@ class MockDownloadProvider extends _i1.Mock implements _i3.DownloadProvider {
       );
 
   @override
+  void persistMetadataIfNeeded(_i4.Playable<dynamic>? playable) =>
+      super.noSuchMethod(
+        Invocation.method(
+          #persistMetadataIfNeeded,
+          [playable],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
   _i5.Future<void> removeForPlayable(_i4.Playable<dynamic>? playable) =>
       (super.noSuchMethod(
         Invocation.method(
