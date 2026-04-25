@@ -302,7 +302,7 @@ class _QuickAction extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: borderRadius,
-          border: Border.all(color: Theme.of(context).dividerColor),
+          border: Border.all(color: Colors.white.withOpacity(0.2)),
         ),
         child: Material(
           color: Colors.transparent,
