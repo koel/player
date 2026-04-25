@@ -101,7 +101,6 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                     vertical: 8.0,
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _QuickAction(
                         label: 'Favorite',
@@ -114,6 +113,7 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                           setState(() {});
                         },
                       ),
+                      const SizedBox(width: 8),
                       _QuickAction(
                         label: 'Details',
                         icon: CupertinoIcons.text_quote,
@@ -122,6 +122,7 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                           showInfoSheet(context, playable: playable);
                         },
                       ),
+                      const SizedBox(width: 8),
                       _QuickAction(
                         label: _downloaded ? 'Downloaded' : 'Download',
                         icon: _downloaded
@@ -295,26 +296,36 @@ class _QuickAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = enabled ? Colors.white : Colors.white30;
+    final borderRadius = BorderRadius.circular(12);
 
     return Expanded(
-      child: InkWell(
-        onTap: enabled ? onTap : null,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 28, color: color),
-              const SizedBox(height: 6),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 12, color: color),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: borderRadius,
+          border: Border.all(color: Theme.of(context).dividerColor),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: enabled ? onTap : null,
+            borderRadius: borderRadius,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, size: 26, color: color),
+                  const SizedBox(height: 6),
+                  Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 12, color: color),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
