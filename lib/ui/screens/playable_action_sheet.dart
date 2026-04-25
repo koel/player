@@ -25,7 +25,6 @@ class PlayableActionSheet extends StatefulWidget {
 class _PlayableActionSheetState extends State<PlayableActionSheet> {
   var _queued = false;
   var _downloaded = false;
-  var _downloading = false;
 
   initState() {
     super.initState();
@@ -111,8 +110,8 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                               : CupertinoIcons.star),
                           enabled: !inOfflineMode,
                           onTap: () {
+                            Navigator.pop(context);
                             favoriteProvider.toggleOne(playable: playable);
-                            setState(() {});
                           },
                         ),
                         const _QuickActionDivider(),
@@ -127,41 +126,18 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                         const _QuickActionDivider(),
                         _QuickAction(
                           label: _downloaded ? 'Downloaded' : 'Download',
-                          icon: _downloading
-                              ? const CupertinoActivityIndicator(
-                                  radius: 11,
-                                  color: Colors.white,
-                                )
-                              : (_downloaded
-                                  ? const _CloudMinusIcon()
-                                  : const Icon(
-                                      CupertinoIcons.cloud_download)),
-                          enabled: !_downloading &&
-                              (_downloaded || !inOfflineMode),
-                          onTap: () async {
+                          icon: _downloaded
+                              ? const _CloudMinusIcon()
+                              : const Icon(CupertinoIcons.cloud_download),
+                          enabled: _downloaded || !inOfflineMode,
+                          onTap: () {
+                            Navigator.pop(context);
                             final downloadProvider =
                                 context.read<DownloadProvider>();
                             if (_downloaded) {
-                              await downloadProvider
-                                  .removeForPlayable(playable);
-                              if (mounted) setState(() => _downloaded = false);
+                              downloadProvider.removeForPlayable(playable);
                             } else {
-                              setState(() => _downloading = true);
-                              try {
-                                await downloadProvider.download(
-                                    playable: playable);
-                                if (mounted) {
-                                  setState(() {
-                                    _downloaded = true;
-                                    _downloading = false;
-                                  });
-                                }
-                              } catch (_) {
-                                if (mounted) {
-                                  setState(() => _downloading = false);
-                                }
-                                rethrow;
-                              }
+                              downloadProvider.download(playable: playable);
                             }
                           },
                         ),
