@@ -104,7 +104,8 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                     child: Row(
                       children: [
                         PlayableQuickAction(
-                          label: playable.liked ? 'Undo' : 'Favorite',
+                          label:
+                              playable.liked ? 'Undo Favorite' : 'Favorite',
                           icon: Icon(playable.liked
                               ? CupertinoIcons.star_fill
                               : CupertinoIcons.star),
@@ -125,10 +126,10 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                         ),
                         const PlayableQuickActionDivider(),
                         PlayableQuickAction(
-                          label: _downloaded ? 'Remove' : 'Download',
-                          icon: _downloaded
-                              ? const _CloudMinusIcon()
-                              : const Icon(CupertinoIcons.cloud_download),
+                          label: _downloaded ? 'Remove Download' : 'Download',
+                          icon: Icon(_downloaded
+                              ? CupertinoIcons.xmark_circle_fill
+                              : CupertinoIcons.cloud_download),
                           enabled: _downloaded || !inOfflineMode,
                           onTap: () {
                             Navigator.pop(context);
@@ -273,46 +274,6 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _CloudMinusIcon extends StatelessWidget {
-  const _CloudMinusIcon({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final iconColor = IconTheme.of(context).color ?? Colors.white;
-    final size = IconTheme.of(context).size ?? 24.0;
-    final badgeSize = size * 0.55;
-
-    return SizedBox(
-      width: size,
-      height: size,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Icon(CupertinoIcons.cloud_fill, size: size, color: iconColor),
-          Positioned(
-            right: -2,
-            bottom: -2,
-            child: Container(
-              width: badgeSize,
-              height: badgeSize,
-              alignment: Alignment.center,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: CupertinoColors.systemRed,
-              ),
-              child: Icon(
-                CupertinoIcons.minus,
-                size: badgeSize * 0.7,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
