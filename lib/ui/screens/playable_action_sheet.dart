@@ -332,6 +332,9 @@ class _QuickActionDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dividerColor =
+        DividerTheme.of(context).color ?? Theme.of(context).dividerColor;
+
     return Container(
       width: 1,
       decoration: BoxDecoration(
@@ -340,7 +343,7 @@ class _QuickActionDivider extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: [
             Colors.transparent,
-            Colors.white.withValues(alpha: 0.4),
+            dividerColor,
             Colors.transparent,
           ],
         ),
