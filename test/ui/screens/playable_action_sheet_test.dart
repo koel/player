@@ -5,7 +5,6 @@ import 'package:app/providers/download_provider.dart';
 import 'package:app/providers/favorite_provider.dart';
 import 'package:app/ui/screens/playable_action_sheet.dart';
 import 'package:audio_service/audio_service.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -27,11 +26,13 @@ void main() {
     audioHandlerMock = MockKoelAudioHandler();
     downloadProviderMock = MockDownloadProvider();
     favoriteProviderMock = MockFavoriteProvider();
-    song = Song.fake();
+    // Pin `liked` so tests that look up the unliked-state label
+    // ("Favorite") aren't flaky against Song.fake's random boolean.
+    song = Song.fake(liked: false);
 
     mediaItemSubject = BehaviorSubject<MediaItem?>.seeded(null);
     when(audioHandlerMock.mediaItem).thenAnswer((_) => mediaItemSubject);
-    when(audioHandlerMock.queued(song)).thenAnswer((_) async => false);
+    when(audioHandlerMock.queued(any)).thenAnswer((_) async => false);
 
     app.audioHandler = audioHandlerMock;
   });
@@ -56,10 +57,6 @@ void main() {
         ],
         child: PlayableActionSheet(playable: song),
       ),
-      // The sheet is normally shown via showModalBottomSheet with
-      // isScrollControlled, which lets it overflow / scroll. When mounted
-      // bare, give it enough vertical room to lay out without overflow.
-      surfaceSize: const Size(414, 1024),
     );
   }
 
@@ -69,17 +66,39 @@ void main() {
       await _mountSheet(tester, downloaded: false);
 
       expect(find.text('Download'), findsOneWidget);
-      expect(find.text('Remove Download'), findsNothing);
+      expect(find.text('Remove'), findsNothing);
     },
   );
 
   testWidgets(
-    'shows "Remove Download" when the song is downloaded',
+    'shows "Remove" when the song is downloaded',
     (tester) async {
       await _mountSheet(tester, downloaded: true);
 
-      expect(find.text('Remove Download'), findsOneWidget);
+      expect(find.text('Remove'), findsOneWidget);
       expect(find.text('Download'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'shows "Favorite" when the song is not liked',
+    (tester) async {
+      song = Song.fake(liked: false);
+      await _mountSheet(tester, downloaded: false);
+
+      expect(find.text('Favorite'), findsOneWidget);
+      expect(find.text('Undo Favorite'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'shows "Undo Favorite" when the song is liked',
+    (tester) async {
+      song = Song.fake(liked: true);
+      await _mountSheet(tester, downloaded: false);
+
+      expect(find.text('Undo Favorite'), findsOneWidget);
+      expect(find.text('Favorite'), findsNothing);
     },
   );
 
@@ -100,18 +119,32 @@ void main() {
   );
 
   testWidgets(
-    'tapping "Remove Download" delegates to DownloadProvider.removeForPlayable',
+    'tapping "Remove" delegates to DownloadProvider.removeForPlayable',
     (tester) async {
       when(downloadProviderMock.removeForPlayable(song))
           .thenAnswer((_) async {});
 
       await _mountSheet(tester, downloaded: true);
-      await tester.tap(find.text('Remove Download'));
+      await tester.tap(find.text('Remove'));
       await tester.pump();
       await tester.pump(const Duration(seconds: 3));
 
       verify(downloadProviderMock.removeForPlayable(song)).called(1);
       verifyNever(downloadProviderMock.download(playable: song));
+    },
+  );
+
+  testWidgets(
+    'tapping "Favorite" toggles via FavoriteProvider',
+    (tester) async {
+      when(favoriteProviderMock.toggleOne(playable: song))
+          .thenAnswer((_) async {});
+
+      await _mountSheet(tester, downloaded: false);
+      await tester.tap(find.text('Favorite'));
+      await tester.pump();
+
+      verify(favoriteProviderMock.toggleOne(playable: song)).called(1);
     },
   );
 }

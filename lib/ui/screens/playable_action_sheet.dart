@@ -5,6 +5,7 @@ import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/screens/add_to_playlist.dart';
+import 'package:app/ui/screens/info_sheet/info_sheet.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -91,187 +92,228 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                 ),
               ],
             ),
-            ListView(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              children: <Widget>[
-                if (!isCurrent)
-                  PlayableActionButton(
-                    text: 'Play Next',
-                    icon: const Icon(
-                      CupertinoIcons.arrow_right_circle_fill,
-                      color: Colors.white30,
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
+                  child: IntrinsicHeight(
+                    child: Row(
+                      children: [
+                        PlayableQuickAction(
+                          label:
+                              playable.liked ? 'Undo Favorite' : 'Favorite',
+                          icon: Icon(playable.liked
+                              ? CupertinoIcons.star_fill
+                              : CupertinoIcons.star),
+                          enabled: !inOfflineMode,
+                          onTap: () {
+                            Navigator.pop(context);
+                            favoriteProvider.toggleOne(playable: playable);
+                          },
+                        ),
+                        const PlayableQuickActionDivider(),
+                        PlayableQuickAction(
+                          label: 'Details',
+                          icon: const Icon(CupertinoIcons.text_quote),
+                          onTap: () {
+                            Navigator.pop(context);
+                            showInfoSheet(context, playable: playable);
+                          },
+                        ),
+                        const PlayableQuickActionDivider(),
+                        PlayableQuickAction(
+                          label: _downloaded ? 'Remove' : 'Download',
+                          icon: _downloaded
+                              ? const _CloudMinusIcon()
+                              : const Icon(CupertinoIcons.cloud_download),
+                          enabled: _downloaded || !inOfflineMode,
+                          onTap: () {
+                            Navigator.pop(context);
+                            final downloadProvider =
+                                context.read<DownloadProvider>();
+                            if (_downloaded) {
+                              downloadProvider.removeForPlayable(playable);
+                            } else {
+                              downloadProvider.download(playable: playable);
+                            }
+                          },
+                        ),
+                      ],
                     ),
-                    onTap: () async {
-                      await audioHandler.queueAfterCurrent(playable);
-                      showOverlay(
-                        context,
-                        icon: CupertinoIcons.arrow_right_circle_fill,
-                        caption: 'Queued',
-                        message: 'To be played next.',
-                      );
-                    },
                   ),
-                if (!isCurrent)
-                  PlayableActionButton(
-                    text: 'Play Last',
-                    icon: const Icon(
-                      CupertinoIcons.arrow_down_right_circle_fill,
-                      color: Colors.white30,
-                    ),
-                    onTap: () async {
-                      await audioHandler.queueToBottom(playable);
-                      showOverlay(
-                        context,
-                        icon: CupertinoIcons.arrow_down_right_circle_fill,
-                        caption: 'Queued',
-                        message: 'Queued to bottom.',
-                      );
-                    },
-                  ),
-                if (_queued)
-                  PlayableActionButton(
-                    text: 'Remove from Queue',
-                    icon: const Icon(
-                      CupertinoIcons.text_badge_minus,
-                      color: Colors.white30,
-                    ),
-                    onTap: () async {
-                      await audioHandler.removeFromQueue(playable);
-                      showOverlay(
-                        context,
-                        icon: CupertinoIcons.text_badge_minus,
-                        caption: 'Removed',
-                        message: 'Removed from queue.',
-                      );
-                    },
-                  ),
-                PlayableActionButton(
-                  enabled: _downloaded || !inOfflineMode,
-                  text: _downloaded ? 'Remove Download' : 'Download',
-                  icon: Icon(
-                    _downloaded
-                        ? CupertinoIcons.trash
-                        : CupertinoIcons.cloud_download_fill,
-                    color: Colors.white30,
-                  ),
-                  onTap: () async {
-                    final downloadProvider = context.read<DownloadProvider>();
-
-                    if (_downloaded) {
-                      await downloadProvider.removeForPlayable(playable);
-                      showOverlay(
-                        context,
-                        icon: CupertinoIcons.trash,
-                        caption: 'Removed',
-                        message: 'Removed from device.',
-                      );
-                    } else {
-                      showOverlay(
-                        context,
-                        icon: CupertinoIcons.cloud_download_fill,
-                        caption: 'Downloading',
-                        message: 'Saving for offline playback.',
-                      );
-                      await downloadProvider.download(playable: playable);
-                    }
-                  },
-                ),
-                PlayableActionButton(
-                  enabled: !inOfflineMode,
-                  text: playable.liked
-                      ? 'Remove as Favorite'
-                      : 'Mark as Favorite',
-                  icon: Icon(
-                    playable.liked
-                        ? CupertinoIcons.star_fill
-                        : CupertinoIcons.star,
-                    color: Colors.white30,
-                  ),
-                  onTap: () {
-                    showOverlay(
-                      context,
-                      caption: playable.liked ? 'Unliked' : 'Liked',
-                      message: playable.liked
-                          ? 'Removed from Favorites.'
-                          : 'Added to Favorites.',
-                      icon: playable.liked
-                          ? CupertinoIcons.star_slash
-                          : CupertinoIcons.star_fill,
-                    );
-                    favoriteProvider.toggleOne(playable: playable);
-                  },
                 ),
                 const Divider(indent: 16, endIndent: 16),
-                if (playable is Song)
-                  PlayableActionButton(
-                    enabled: !inOfflineMode,
-                    text: 'Go to Album',
-                    icon: const Icon(
-                      CupertinoIcons.music_albums_fill,
-                      color: Colors.white30,
+                ListView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  children: <Widget>[
+                    if (!isCurrent)
+                      PlayableActionButton(
+                        text: 'Play Next',
+                        icon: const Icon(
+                          CupertinoIcons.arrow_right_circle_fill,
+                          color: Colors.white30,
+                        ),
+                        onTap: () async {
+                          await audioHandler.queueAfterCurrent(playable);
+                          showOverlay(
+                            context,
+                            icon: CupertinoIcons.arrow_right_circle_fill,
+                            caption: 'Queued',
+                            message: 'To be played next.',
+                          );
+                        },
+                      ),
+                    if (!isCurrent)
+                      PlayableActionButton(
+                        text: 'Play Last',
+                        icon: const Icon(
+                          CupertinoIcons.arrow_down_right_circle_fill,
+                          color: Colors.white30,
+                        ),
+                        onTap: () async {
+                          await audioHandler.queueToBottom(playable);
+                          showOverlay(
+                            context,
+                            icon: CupertinoIcons.arrow_down_right_circle_fill,
+                            caption: 'Queued',
+                            message: 'Queued to bottom.',
+                          );
+                        },
+                      ),
+                    if (_queued)
+                      PlayableActionButton(
+                        text: 'Remove from Queue',
+                        icon: const Icon(
+                          CupertinoIcons.text_badge_minus,
+                          color: Colors.white30,
+                        ),
+                        onTap: () async {
+                          await audioHandler.removeFromQueue(playable);
+                          showOverlay(
+                            context,
+                            icon: CupertinoIcons.text_badge_minus,
+                            caption: 'Removed',
+                            message: 'Removed from queue.',
+                          );
+                        },
+                      ),
+                    const Divider(indent: 16, endIndent: 16),
+                    if (playable is Song)
+                      PlayableActionButton(
+                        enabled: !inOfflineMode,
+                        text: 'Go to Album',
+                        icon: const Icon(
+                          CupertinoIcons.music_albums_fill,
+                          color: Colors.white30,
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          AppRouter().gotoAlbumDetailsScreen(
+                            context,
+                            albumId: playable.albumId,
+                          );
+                        },
+                        hideSheetOnTap: false,
+                      ),
+                    if (playable is Episode)
+                      PlayableActionButton(
+                        enabled: !inOfflineMode,
+                        text: 'Go to Podcast',
+                        icon: const Icon(
+                          LucideIcons.podcast,
+                          color: Colors.white30,
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          AppRouter().gotoPodcastDetailsScreen(
+                            context,
+                            podcastId: playable.podcastId,
+                          );
+                        },
+                        hideSheetOnTap: false,
+                      ),
+                    if (playable is Song)
+                      PlayableActionButton(
+                        enabled: !inOfflineMode,
+                        text: 'Go to Artist',
+                        icon: const Icon(
+                          CupertinoIcons.music_mic,
+                          color: Colors.white30,
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          AppRouter().gotoArtistDetailsScreen(
+                            context,
+                            artistId: playable.artistId,
+                          );
+                        },
+                        hideSheetOnTap: false,
+                      ),
+                    const Divider(indent: 16, endIndent: 16),
+                    PlayableActionButton(
+                      enabled: !inOfflineMode,
+                      text: 'Add to a Playlist…',
+                      icon: const Icon(
+                        CupertinoIcons.text_badge_plus,
+                        color: Colors.white30,
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        gotoAddToPlaylistScreen(context, playable: playable);
+                      },
+                      hideSheetOnTap: false,
                     ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      AppRouter().gotoAlbumDetailsScreen(
-                        context,
-                        albumId: playable.albumId,
-                      );
-                    },
-                    hideSheetOnTap: false,
-                  ),
-                if (playable is Episode)
-                  PlayableActionButton(
-                    enabled: !inOfflineMode,
-                    text: 'Go to Podcast',
-                    icon: const Icon(
-                      LucideIcons.podcast,
-                      color: Colors.white30,
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      AppRouter().gotoPodcastDetailsScreen(
-                        context,
-                        podcastId: playable.podcastId,
-                      );
-                    },
-                    hideSheetOnTap: false,
-                  ),
-                if (playable is Song)
-                  PlayableActionButton(
-                    enabled: !inOfflineMode,
-                    text: 'Go to Artist',
-                    icon: const Icon(
-                      CupertinoIcons.music_mic,
-                      color: Colors.white30,
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      AppRouter().gotoArtistDetailsScreen(
-                        context,
-                        artistId: playable.artistId,
-                      );
-                    },
-                    hideSheetOnTap: false,
-                  ),
-                const Divider(indent: 16, endIndent: 16),
-                PlayableActionButton(
-                  enabled: !inOfflineMode,
-                  text: 'Add to a Playlist…',
-                  icon: const Icon(
-                    CupertinoIcons.text_badge_plus,
-                    color: Colors.white30,
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    gotoAddToPlaylistScreen(context, playable: playable);
-                  },
-                  hideSheetOnTap: false,
+                  ],
                 ),
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _CloudMinusIcon extends StatelessWidget {
+  const _CloudMinusIcon({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final iconColor = IconTheme.of(context).color ?? Colors.white;
+    final size = IconTheme.of(context).size ?? 24.0;
+    final badgeSize = size * 0.55;
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Icon(CupertinoIcons.cloud_fill, size: size, color: iconColor),
+          Positioned(
+            right: -2,
+            bottom: -2,
+            child: Container(
+              width: badgeSize,
+              height: badgeSize,
+              alignment: Alignment.center,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: CupertinoColors.systemRed,
+              ),
+              child: Icon(
+                CupertinoIcons.minus,
+                size: badgeSize * 0.7,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

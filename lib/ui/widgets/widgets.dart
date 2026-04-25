@@ -19,6 +19,7 @@ export 'now_playing/repeat_mode_button.dart';
 export 'now_playing/volume_slider.dart';
 export 'oops_box.dart';
 export 'playable_cache_icon.dart';
+export 'playable_quick_action.dart';
 export 'playable_list_header.dart';
 export 'playable_list_sort_button.dart';
 export 'playable_row.dart';
