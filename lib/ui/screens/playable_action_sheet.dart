@@ -337,7 +337,7 @@ class _QuickActionDivider extends StatelessWidget {
       child: Center(
         child: FractionallySizedBox(
           heightFactor: 2 / 3,
-          child: DecoratedBox(
+          child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
