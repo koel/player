@@ -23,6 +23,7 @@ class PlayableActionSheet extends StatefulWidget {
 
 class _PlayableActionSheetState extends State<PlayableActionSheet> {
   var _queued = false;
+  var _downloaded = false;
 
   initState() {
     super.initState();
@@ -30,6 +31,9 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
     audioHandler.queued(widget.playable).then((queued) {
       setState(() => _queued = queued);
     });
+
+    _downloaded =
+        context.read<DownloadProvider>().has(playable: widget.playable);
   }
 
   @override
@@ -142,6 +146,37 @@ class _PlayableActionSheetState extends State<PlayableActionSheet> {
                       );
                     },
                   ),
+                PlayableActionButton(
+                  enabled: _downloaded || !inOfflineMode,
+                  text: _downloaded ? 'Remove Download' : 'Download',
+                  icon: Icon(
+                    _downloaded
+                        ? CupertinoIcons.trash
+                        : CupertinoIcons.cloud_download_fill,
+                    color: Colors.white30,
+                  ),
+                  onTap: () async {
+                    final downloadProvider = context.read<DownloadProvider>();
+
+                    if (_downloaded) {
+                      await downloadProvider.removeForPlayable(playable);
+                      showOverlay(
+                        context,
+                        icon: CupertinoIcons.trash,
+                        caption: 'Removed',
+                        message: 'Removed from device.',
+                      );
+                    } else {
+                      showOverlay(
+                        context,
+                        icon: CupertinoIcons.cloud_download_fill,
+                        caption: 'Downloading',
+                        message: 'Saving for offline playback.',
+                      );
+                      await downloadProvider.download(playable: playable);
+                    }
+                  },
+                ),
                 PlayableActionButton(
                   enabled: !inOfflineMode,
                   text: playable.liked
