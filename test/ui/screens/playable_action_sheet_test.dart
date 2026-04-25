@@ -5,7 +5,6 @@ import 'package:app/providers/download_provider.dart';
 import 'package:app/providers/favorite_provider.dart';
 import 'package:app/ui/screens/playable_action_sheet.dart';
 import 'package:audio_service/audio_service.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -56,10 +55,6 @@ void main() {
         ],
         child: PlayableActionSheet(playable: song),
       ),
-      // The sheet is normally shown via showModalBottomSheet with
-      // isScrollControlled, which lets it overflow / scroll. When mounted
-      // bare, give it enough vertical room to lay out without overflow.
-      surfaceSize: const Size(414, 1024),
     );
   }
 
@@ -112,6 +107,20 @@ void main() {
 
       verify(downloadProviderMock.removeForPlayable(song)).called(1);
       verifyNever(downloadProviderMock.download(playable: song));
+    },
+  );
+
+  testWidgets(
+    'tapping "Favorite" toggles via FavoriteProvider',
+    (tester) async {
+      when(favoriteProviderMock.toggleOne(playable: song))
+          .thenAnswer((_) async {});
+
+      await _mountSheet(tester, downloaded: false);
+      await tester.tap(find.text('Favorite'));
+      await tester.pump();
+
+      verify(favoriteProviderMock.toggleOne(playable: song)).called(1);
     },
   );
 }
