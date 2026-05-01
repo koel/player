@@ -146,7 +146,7 @@ class _RadioStationsScreenState extends State<RadioStationsScreen> {
 
 }
 
-class _RadioStationRow extends StatelessWidget {
+class _RadioStationRow extends StatefulWidget {
   final RadioStation station;
   final VoidCallback onTap;
 
@@ -157,13 +157,29 @@ class _RadioStationRow extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<_RadioStationRow> createState() => _RadioStationRowState();
+}
+
+class _RadioStationRowState extends State<_RadioStationRow> {
+  Offset? _lastTapPosition;
+
+  @override
   Widget build(BuildContext context) {
+    final station = widget.station;
+
     return Consumer<RadioPlayerProvider>(
       builder: (context, radioPlayer, _) {
         final isPlaying = radioPlayer.currentStation?.id == station.id;
 
         return InkWell(
-          onTap: onTap,
+          onTap: widget.onTap,
+          onTapDown: (details) => _lastTapPosition = details.globalPosition,
+          onLongPress: () => showRadioStationActionsMenu(
+            context,
+            station: station,
+            position: _lastTapPosition ?? Offset.zero,
+            onUpdated: () => setState(() {}),
+          ),
           child: ListTile(
             shape: Border(bottom: Divider.createBorderSide(context)),
             leading: ClipSmoothRect(
