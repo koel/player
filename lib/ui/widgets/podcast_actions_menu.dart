@@ -62,6 +62,17 @@ Future<void> _confirmAndUnsubscribe(
   if (confirmed != true) return;
   if (!context.mounted) return;
 
-  await context.read<PodcastProvider>().unsubscribePodcast(podcast);
-  if (context.mounted) showOverlay(context, caption: 'Unsubscribed');
+  try {
+    await context.read<PodcastProvider>().unsubscribePodcast(podcast);
+    if (context.mounted) showOverlay(context, caption: 'Unsubscribed');
+  } catch (_) {
+    if (context.mounted) {
+      showOverlay(
+        context,
+        caption: 'Error',
+        message: 'Could not unsubscribe.',
+        icon: CupertinoIcons.exclamationmark_triangle,
+      );
+    }
+  }
 }
