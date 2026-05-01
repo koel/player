@@ -131,7 +131,7 @@ class _PodcastScreenState extends State<PodcastsScreen> {
 
 }
 
-class PodcastRow extends StatelessWidget {
+class PodcastRow extends StatefulWidget {
   final Podcast podcast;
   final AppRouter router;
 
@@ -139,12 +139,27 @@ class PodcastRow extends StatelessWidget {
       : super(key: key);
 
   @override
+  State<PodcastRow> createState() => _PodcastRowState();
+}
+
+class _PodcastRowState extends State<PodcastRow> {
+  Offset? _lastTapPosition;
+
+  @override
   Widget build(BuildContext context) {
+    final podcast = widget.podcast;
+
     return Card(
       child: InkWell(
-        onTap: () => router.gotoPodcastDetailsScreen(
+        onTap: () => widget.router.gotoPodcastDetailsScreen(
           context,
           podcastId: podcast.id,
+        ),
+        onTapDown: (details) => _lastTapPosition = details.globalPosition,
+        onLongPress: () => showPodcastActionsMenu(
+          context,
+          podcast: podcast,
+          position: _lastTapPosition ?? Offset.zero,
         ),
         child: ListTile(
           shape: Border(bottom: Divider.createBorderSide(context)),
