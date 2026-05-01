@@ -8,6 +8,7 @@ import 'package:app/router.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -181,18 +182,37 @@ class NoPodcastsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Wrap(
-        spacing: 16.0,
-        direction: Axis.vertical,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: <Widget>[
-          Icon(
-            CupertinoIcons.exclamationmark_square,
-            size: 56.0,
-          ),
-          Text('No podcasts available.'),
-        ],
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              LucideIcons.podcast,
+              size: 56,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No podcasts',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              "Subscribe to a podcast and it'll show up here.",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white54),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () =>
+                  const AppRouter().showAddPodcastSheet(context),
+              icon: const Icon(CupertinoIcons.add, size: 18),
+              label: const Text('Add a Podcast'),
+            ),
+          ],
+        ),
       ),
     );
   }
