@@ -99,9 +99,8 @@ class _PodcastScreenState extends State<PodcastsScreen> {
                           key: ValueKey(podcast.id),
                           direction: DismissDirection.endToStart,
                           background: const SizedBox.shrink(),
-                          secondaryBackground: const SwipeDestructiveBackground(
-                            label: 'Unsubscribe',
-                          ),
+                          secondaryBackground:
+                              const SwipeDestructiveBackground(),
                           confirmDismiss: (_) => confirmUnsubscribePodcast(
                             context,
                             podcast: podcast,
