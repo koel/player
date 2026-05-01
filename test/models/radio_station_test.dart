@@ -39,6 +39,59 @@ void main() {
       expect(station.description, isNull);
       expect(station.isPublic, isFalse);
     });
+
+    test('parses canEdit and canDelete from permissions', () {
+      final json = {
+        'id': 'station-perm',
+        'name': 'Perm',
+        'url': 'https://stream.example.com/live',
+        'permissions': {'edit': true, 'delete': true},
+      };
+
+      final station = RadioStation.fromJson(json);
+      expect(station.canEdit, isTrue);
+      expect(station.canDelete, isTrue);
+    });
+
+    test('honors per-action permission flags independently', () {
+      final json = {
+        'id': 'station-perm-mixed',
+        'name': 'Mixed',
+        'url': 'https://stream.example.com/live',
+        'permissions': {'edit': true, 'delete': false},
+      };
+
+      final station = RadioStation.fromJson(json);
+      expect(station.canEdit, isTrue);
+      expect(station.canDelete, isFalse);
+    });
+
+    test('defaults canEdit/canDelete to false when permissions is absent',
+        () {
+      final json = {
+        'id': 'station-old',
+        'name': 'Old Server',
+        'url': 'https://stream.example.com/live',
+      };
+
+      final station = RadioStation.fromJson(json);
+      expect(station.canEdit, isFalse);
+      expect(station.canDelete, isFalse);
+    });
+
+    test('defaults to false when permissions keys are missing or non-bool',
+        () {
+      final json = {
+        'id': 'station-partial',
+        'name': 'Partial',
+        'url': 'https://stream.example.com/live',
+        'permissions': {'edit': null},
+      };
+
+      final station = RadioStation.fromJson(json);
+      expect(station.canEdit, isFalse);
+      expect(station.canDelete, isFalse);
+    });
   });
 
   group('RadioStation.fake', () {

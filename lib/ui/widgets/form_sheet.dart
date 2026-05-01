@@ -293,3 +293,46 @@ class FormDropdown<T> extends StatelessWidget {
     );
   }
 }
+
+/// A labeled toggle for use in form sheets, matching the FormTextField style.
+class FormSwitch extends StatelessWidget {
+  final String label;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const FormSwitch({
+    Key? key,
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: CupertinoColors.tertiarySystemFill,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: const EdgeInsets.only(left: 12, right: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+            ),
+          ),
+          Transform.scale(
+            scale: 0.8,
+            child: CupertinoSwitch(
+              value: value,
+              activeTrackColor: AppColors.highlight,
+              onChanged: onChanged,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -1,10 +1,16 @@
 import 'package:app/models/radio_station.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/radio_station_card.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:provider/provider.dart';
 
 import '../../extensions/widget_tester_extension.dart';
+import 'radio_station_card_test.mocks.dart';
+
+@GenerateMocks([RadioStationProvider, RadioPlayerProvider])
 
 void main() {
   testWidgets('renders station name', (WidgetTester tester) async {
@@ -77,5 +83,70 @@ void main() {
 
     await tester.tap(find.text('Tap FM'));
     expect(tapped, isTrue);
+  });
+
+  group('long-press context menu', () {
+    Future<void> mountWithProviders(
+      WidgetTester tester,
+      RadioStation station,
+    ) async {
+      await tester.pumpAppWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider<RadioStationProvider>.value(
+              value: MockRadioStationProvider(),
+            ),
+            ChangeNotifierProvider<RadioPlayerProvider>.value(
+              value: MockRadioPlayerProvider(),
+            ),
+          ],
+          child: RadioStationCard(station: station, onTap: () {}),
+        ),
+      );
+    }
+
+    testWidgets('shows Edit when canEdit', (tester) async {
+      final station = RadioStation.fake(name: 'Editable', canEdit: true);
+      await mountWithProviders(tester, station);
+
+      await tester.longPress(find.byType(RadioStationCard));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Edit'), findsOneWidget);
+      expect(find.text('Delete'), findsNothing);
+    });
+
+    testWidgets('shows Delete when canDelete', (tester) async {
+      final station = RadioStation.fake(name: 'Deletable', canDelete: true);
+      await mountWithProviders(tester, station);
+
+      await tester.longPress(find.byType(RadioStationCard));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Delete'), findsOneWidget);
+      expect(find.text('Edit'), findsNothing);
+    });
+
+    testWidgets('shows both when both permissions granted', (tester) async {
+      final station = RadioStation.fake(canEdit: true, canDelete: true);
+      await mountWithProviders(tester, station);
+
+      await tester.longPress(find.byType(RadioStationCard));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Edit'), findsOneWidget);
+      expect(find.text('Delete'), findsOneWidget);
+    });
+
+    testWidgets('no menu when neither permission is granted', (tester) async {
+      final station = RadioStation.fake();
+      await mountWithProviders(tester, station);
+
+      await tester.longPress(find.byType(RadioStationCard));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Edit'), findsNothing);
+      expect(find.text('Delete'), findsNothing);
+    });
   });
 }
