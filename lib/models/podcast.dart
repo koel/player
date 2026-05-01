@@ -1,6 +1,8 @@
 import 'package:app/enums.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:faker/faker.dart';
 import 'package:flutter/widgets.dart';
+import 'package:ulid/ulid.dart';
 
 class Podcast {
   final String id;
@@ -32,6 +34,26 @@ class Podcast {
   ImageProvider get image {
     this._image ??= CachedNetworkImageProvider(this.imageUrl);
     return this._image!;
+  }
+
+  factory Podcast.fake({
+    String? id,
+    String? title,
+    String? author,
+  }) {
+    final faker = Faker();
+    return Podcast(
+      id: id ?? Ulid().toString(),
+      title: title ?? faker.lorem.sentence(),
+      url: 'https://example.com/feed.xml',
+      link: 'https://example.com',
+      description: faker.lorem.sentences(2).join(' '),
+      author: author ?? faker.person.name(),
+      imageUrl: faker.image.loremPicsum(width: 192, height: 192),
+      subscribedAt: '2026-01-01T00:00:00Z',
+      lastPlayedAt: '2026-01-01T00:00:00Z',
+      state: PodcastState(progresses: {}),
+    );
   }
 
   factory Podcast.fromJson(Map<String, dynamic> json) {
