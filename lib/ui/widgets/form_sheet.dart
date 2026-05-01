@@ -323,10 +323,13 @@ class FormSwitch extends StatelessWidget {
               style: const TextStyle(color: Colors.white, fontSize: 14),
             ),
           ),
-          CupertinoSwitch(
-            value: value,
-            activeTrackColor: AppColors.highlight,
-            onChanged: onChanged,
+          Transform.scale(
+            scale: 0.8,
+            child: CupertinoSwitch(
+              value: value,
+              activeTrackColor: AppColors.highlight,
+              onChanged: onChanged,
+            ),
           ),
         ],
       ),
