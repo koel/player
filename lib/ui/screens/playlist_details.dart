@@ -6,7 +6,6 @@ import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:app/values/values.dart';
-import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
@@ -168,3 +167,4 @@ void gotoDetailsScreen(BuildContext context, {required Playlist playlist}) {
     builder: (_) => const PlaylistDetailsScreen(),
   ));
 }
+

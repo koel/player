@@ -55,4 +55,85 @@ void main() {
     expect(find.text('Smart Mix'), findsOneWidget);
     expect(find.text('Smart playlist'), findsOneWidget);
   });
+
+  group('long-press context menu', () {
+    testWidgets(
+      'shows Edit when canEdit',
+      (WidgetTester tester) async {
+        playlist = Playlist.fake(name: 'Editable', canEdit: true);
+
+        await tester.pumpAppWidget(
+          ChangeNotifierProvider<PlaylistProvider>.value(
+            value: playlistProviderMock,
+            child: PlaylistRow(playlist: playlist),
+          ),
+        );
+
+        await tester.longPress(find.byType(PlaylistRow));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Edit'), findsOneWidget);
+        expect(find.text('Delete'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'shows Delete when canDelete',
+      (WidgetTester tester) async {
+        playlist = Playlist.fake(name: 'Deletable', canDelete: true);
+
+        await tester.pumpAppWidget(
+          ChangeNotifierProvider<PlaylistProvider>.value(
+            value: playlistProviderMock,
+            child: PlaylistRow(playlist: playlist),
+          ),
+        );
+
+        await tester.longPress(find.byType(PlaylistRow));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Delete'), findsOneWidget);
+        expect(find.text('Edit'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'shows both actions when both permissions are granted',
+      (WidgetTester tester) async {
+        playlist = Playlist.fake(canEdit: true, canDelete: true);
+
+        await tester.pumpAppWidget(
+          ChangeNotifierProvider<PlaylistProvider>.value(
+            value: playlistProviderMock,
+            child: PlaylistRow(playlist: playlist),
+          ),
+        );
+
+        await tester.longPress(find.byType(PlaylistRow));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Edit'), findsOneWidget);
+        expect(find.text('Delete'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'no menu when neither permission is granted',
+      (WidgetTester tester) async {
+        // Default Playlist.fake: canEdit=false, canDelete=false.
+        await tester.pumpAppWidget(
+          ChangeNotifierProvider<PlaylistProvider>.value(
+            value: playlistProviderMock,
+            child: PlaylistRow(playlist: playlist),
+          ),
+        );
+
+        await tester.longPress(find.byType(PlaylistRow));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Edit'), findsNothing);
+        expect(find.text('Delete'), findsNothing);
+      },
+    );
+  });
 }

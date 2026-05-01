@@ -181,38 +181,42 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
             child: CupertinoSliverNavigationBar(
               backgroundColor: AppColors.staticScreenHeaderBackground,
               largeTitle: const LargeTitle(text: 'Playlists'),
-              trailing: PopupMenuButton<String>(
-                icon: const Icon(CupertinoIcons.add_circled),
-                offset: const Offset(-12, 48),
-                onSelected: (value) {
-                  if (value == 'playlist') {
-                    widget.router.showCreatePlaylistSheet(context);
-                  } else if (value == 'folder') {
-                    widget.router.showCreatePlaylistFolderSheet(context);
-                  }
-                },
-                itemBuilder: (_) => [
-                  const PopupMenuItem(
-                    value: 'playlist',
-                    child: Row(
-                      children: [
-                        Icon(CupertinoIcons.music_note_list, size: 18),
-                        SizedBox(width: 12),
-                        Text('New Playlist'),
+              trailing: Builder(
+                builder: (buttonContext) => IconButton(
+                  icon: const Icon(CupertinoIcons.add_circled),
+                  onPressed: () async {
+                    final box =
+                        buttonContext.findRenderObject() as RenderBox?;
+                    final origin = box == null
+                        ? Offset.zero
+                        : box.localToGlobal(Offset.zero) +
+                            Offset(0, box.size.height);
+
+                    final selected = await showFrostedContextMenu<String>(
+                      context: buttonContext,
+                      position: origin,
+                      items: const [
+                        FrostedMenuItem(
+                          value: 'playlist',
+                          icon: CupertinoIcons.music_note_list,
+                          label: 'New Playlist',
+                        ),
+                        FrostedMenuItem(
+                          value: 'folder',
+                          icon: CupertinoIcons.folder,
+                          label: 'New Folder',
+                        ),
                       ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'folder',
-                    child: Row(
-                      children: [
-                        Icon(CupertinoIcons.folder, size: 18),
-                        SizedBox(width: 12),
-                        Text('New Folder'),
-                      ],
-                    ),
-                  ),
-                ],
+                    );
+                    if (!buttonContext.mounted) return;
+                    if (selected == 'playlist') {
+                      widget.router.showCreatePlaylistSheet(buttonContext);
+                    } else if (selected == 'folder') {
+                      widget.router
+                          .showCreatePlaylistFolderSheet(buttonContext);
+                    }
+                  },
+                ),
               ),
             ),
           ),
