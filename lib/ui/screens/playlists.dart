@@ -73,7 +73,8 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
 
               if (allPlaylists.isEmpty) {
                 widgets = [
-                  SliverToBoxAdapter(
+                  SliverFillRemaining(
+                    hasScrollBody: false,
                     child: NoPlaylistsScreen(
                       onTap: () {
                         widget.router.showCreatePlaylistSheet(context);
@@ -312,21 +313,39 @@ class NoPlaylistsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height,
-      alignment: Alignment.center,
-      child: Wrap(
-        spacing: 16.0,
-        direction: Axis.vertical,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: <Widget>[
-          const Icon(
-            CupertinoIcons.exclamationmark_square,
-            size: 56.0,
-          ),
-          const Text('You have no playlists in your library.'),
-          ElevatedButton(onPressed: onTap, child: Text('Create Playlist')),
-        ],
+    return Align(
+      // Slightly above visual center to compensate for the mini-player +
+      // tab bar at the bottom, which makes a true Center feel low.
+      alignment: const Alignment(0, -0.4),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              CupertinoIcons.music_note_list,
+              size: 56,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No playlists',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Create a playlist to organize your favorite songs.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white54),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: onTap,
+              icon: const Icon(CupertinoIcons.add, size: 18),
+              label: const Text('Create Playlist'),
+            ),
+          ],
+        ),
       ),
     );
   }
