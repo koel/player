@@ -12,6 +12,7 @@ Future<void> showEditRadioStationDialog(
   final urlController = TextEditingController(text: station.url);
   final descController =
       TextEditingController(text: station.description ?? '');
+  var isPublic = station.isPublic;
   final stationProvider = context.read<RadioStationProvider>();
 
   await showFormSheet(
@@ -32,9 +33,7 @@ Future<void> showEditRadioStationDialog(
           name: name,
           url: url,
           description: descController.text.trim(),
-          // Preserve the existing public/private flag — toggling it is
-          // out of scope for this form.
-          isPublic: station.isPublic,
+          isPublic: isPublic,
         );
         Navigator.pop(context);
         showOverlay(context, caption: 'Station updated');
@@ -67,6 +66,12 @@ Future<void> showEditRadioStationDialog(
             controller: descController,
             placeholder: 'Description (optional)',
             maxLines: 2,
+          ),
+          const SizedBox(height: 8),
+          FormSwitch(
+            label: 'Public',
+            value: isPublic,
+            onChanged: (value) => setState(() => isPublic = value),
           ),
         ],
       );
