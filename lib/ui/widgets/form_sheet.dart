@@ -2,6 +2,7 @@ import 'package:app/constants/constants.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// A reusable bottom sheet with a title, form fields, and action buttons.
 /// Used for creating/editing playlists, folders, radio stations, etc.
@@ -159,6 +160,7 @@ class FormTextField extends StatefulWidget {
   final bool autofocus;
   final int maxLines;
   final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
   final ValueChanged<String>? onChanged;
 
   const FormTextField({
@@ -168,6 +170,7 @@ class FormTextField extends StatefulWidget {
     this.autofocus = false,
     this.maxLines = 1,
     this.keyboardType,
+    this.inputFormatters,
     this.onChanged,
   }) : super(key: key);
 
@@ -204,6 +207,7 @@ class _FormTextFieldState extends State<FormTextField> {
       autofocus: widget.autofocus,
       maxLines: widget.maxLines,
       keyboardType: widget.keyboardType,
+      inputFormatters: widget.inputFormatters,
       onChanged: (value) {
         setState(() {});
         widget.onChanged?.call(value);

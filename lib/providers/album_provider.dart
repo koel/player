@@ -107,4 +107,23 @@ class AlbumProvider with ChangeNotifier, StreamSubscriber {
 
     return paginate();
   }
+
+  Future<void> update(
+    Album album, {
+    required String name,
+    int? year,
+  }) async {
+    final response = await put('albums/${album.id}', data: {
+      'name': name,
+      'year': year,
+    });
+
+    album
+      ..name = response['name']
+      ..year = response['year'] == null
+          ? null
+          : int.parse(response['year'].toString());
+
+    notifyListeners();
+  }
 }

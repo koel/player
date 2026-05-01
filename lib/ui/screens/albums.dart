@@ -192,7 +192,7 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
   }
 }
 
-class AlbumRow extends StatelessWidget {
+class AlbumRow extends StatefulWidget {
   final Album album;
   final AppRouter router;
   final String sortField;
@@ -205,12 +205,30 @@ class AlbumRow extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<AlbumRow> createState() => _AlbumRowState();
+}
+
+class _AlbumRowState extends State<AlbumRow> {
+  Offset? _lastTapPosition;
+
+  @override
   Widget build(BuildContext context) {
+    final album = widget.album;
+
     return Card(
       child: InkWell(
-        onTap: () => router.gotoAlbumDetailsScreen(
+        onTap: () => widget.router.gotoAlbumDetailsScreen(
           context,
           albumId: album.id,
+        ),
+        onTapDown: (details) => _lastTapPosition = details.globalPosition,
+        onLongPress: () => showAlbumActionsMenu(
+          context,
+          album: album,
+          position: _lastTapPosition ?? Offset.zero,
+          onUpdated: () {
+            if (mounted) setState(() {});
+          },
         ),
         child: ListTile(
           shape: Border(bottom: Divider.createBorderSide(context)),
@@ -221,7 +239,7 @@ class AlbumRow extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(color: Colors.white60),
           ),
-          trailing: sortField == 'year' && album.year != null
+          trailing: widget.sortField == 'year' && album.year != null
               ? Transform.translate(
                   offset: const Offset(8, -8),
                   child: Container(
