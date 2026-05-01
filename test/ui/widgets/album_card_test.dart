@@ -1,16 +1,18 @@
 import 'package:app/models/album.dart';
 import 'package:app/models/artist.dart';
+import 'package:app/providers/album_provider.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/album_artist_thumbnail.dart';
 import 'package:app/ui/widgets/album_card.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:provider/provider.dart';
 
 import '../../extensions/widget_tester_extension.dart';
 import 'album_card_test.mocks.dart';
 
-@GenerateMocks([AppRouter])
+@GenerateMocks([AppRouter, AlbumProvider])
 void main() {
   late Album album;
 
@@ -39,5 +41,36 @@ void main() {
 
     await tester.tap(find.text('A Whole New Bunch'));
     verify(router.gotoAlbumDetailsScreen(any, albumId: album.id)).called(1);
+  });
+
+  group('long-press context menu', () {
+    Future<void> mountWithProvider(WidgetTester tester, Album album) async {
+      await tester.pumpAppWidget(
+        ChangeNotifierProvider<AlbumProvider>.value(
+          value: MockAlbumProvider(),
+          child: AlbumCard(album: album),
+        ),
+      );
+    }
+
+    testWidgets('shows Edit when canEdit', (tester) async {
+      final editable = Album.fake(name: 'Editable', canEdit: true);
+      await mountWithProvider(tester, editable);
+
+      await tester.longPress(find.byType(AlbumCard));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Edit'), findsOneWidget);
+    });
+
+    testWidgets('no menu when canEdit is false', (tester) async {
+      final readonly = Album.fake(name: 'Read-only');
+      await mountWithProvider(tester, readonly);
+
+      await tester.longPress(find.byType(AlbumCard));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Edit'), findsNothing);
+    });
   });
 }
