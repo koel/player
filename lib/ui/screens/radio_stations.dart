@@ -70,9 +70,13 @@ class _RadioStationsScreenState extends State<RadioStationsScreen> {
                     else if (stations.isEmpty && !_loading)
                       SliverFillRemaining(
                         hasScrollBody: false,
-                        child: Center(
+                        child: Align(
+                          // Slightly above visual center so the
+                          // mini-player + tab bar at the bottom don't
+                          // make the content read as 'sitting low'.
+                          alignment: const Alignment(0, -0.4),
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(
                                 CupertinoIcons.antenna_radiowaves_left_right,
