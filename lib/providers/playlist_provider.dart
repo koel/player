@@ -108,16 +108,13 @@ class PlaylistProvider with ChangeNotifier, StreamSubscriber {
       'folder_id': folderId,
     });
 
-    // Prefer the server response for fields it may resolve differently
-    // (notably folder_id, where koel's resource serializer reads the
-    // active folder via a separate query).
     playlist
       ..name = response['name']
       ..description = response['description']
       ..folderId = response['folder_id'];
 
-    // Reassign so subscribers that diff on list identity are
-    // guaranteed to pick up the in-place mutation.
+    // Reassign so subscribers that diff on list identity rebuild
+    // even though only one item's fields changed.
     _playlists = List.of(_playlists);
     notifyListeners();
   }
