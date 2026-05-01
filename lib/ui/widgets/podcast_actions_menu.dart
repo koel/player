@@ -32,11 +32,15 @@ Future<void> showPodcastActionsMenu(
   if (!context.mounted) return;
 
   if (selected == 'unsubscribe') {
-    await _confirmAndUnsubscribe(context, podcast: podcast);
+    if (!await confirmUnsubscribePodcast(context, podcast: podcast)) return;
+    if (!context.mounted) return;
+    await unsubscribePodcastWithFeedback(context, podcast: podcast);
   }
 }
 
-Future<void> _confirmAndUnsubscribe(
+/// Asks the user to confirm unsubscribing from [podcast]. Returns `true`
+/// on confirm, `false` on cancel. Does not call any network-backed code.
+Future<bool> confirmUnsubscribePodcast(
   BuildContext context, {
   required Podcast podcast,
 }) async {
@@ -58,10 +62,16 @@ Future<void> _confirmAndUnsubscribe(
       ],
     ),
   );
+  return confirmed == true;
+}
 
-  if (confirmed != true) return;
-  if (!context.mounted) return;
-
+/// Calls [PodcastProvider.unsubscribePodcast] and shows a success or
+/// error overlay. The caller is responsible for confirming with the
+/// user beforehand (see [confirmUnsubscribePodcast]).
+Future<void> unsubscribePodcastWithFeedback(
+  BuildContext context, {
+  required Podcast podcast,
+}) async {
   try {
     await context.read<PodcastProvider>().unsubscribePodcast(podcast);
     if (context.mounted) showOverlay(context, caption: 'Unsubscribed');

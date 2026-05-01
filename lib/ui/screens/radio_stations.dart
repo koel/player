@@ -105,11 +105,31 @@ class _RadioStationsScreenState extends State<RadioStationsScreen> {
                             if (index >= stations.length) return null;
                             final station = stations[index];
 
-                            return Card(
+                            final card = Card(
                               child: _RadioStationRow(
                                 station: station,
                                 onTap: () => _playStation(station),
                               ),
+                            );
+
+                            if (!station.canDelete) return card;
+
+                            return Dismissible(
+                              key: ValueKey(station.id),
+                              direction: DismissDirection.endToStart,
+                              background: const SizedBox.shrink(),
+                              secondaryBackground:
+                                  const SwipeDestructiveBackground(),
+                              confirmDismiss: (_) => confirmDeleteRadioStation(
+                                context,
+                                station: station,
+                              ),
+                              onDismissed: (_) =>
+                                  deleteRadioStationWithFeedback(
+                                context,
+                                station: station,
+                              ),
+                              child: card,
                             );
                           },
                           childCount: stations.length,

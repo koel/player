@@ -37,6 +37,7 @@ export 'radio_station_card.dart';
 export 'simple_playable_list.dart';
 export 'sliver_playable_list.dart';
 export 'song_card.dart';
+export 'swipe_destructive_background.dart';
 export 'spinner.dart';
 export 'swipe_to_queue_dismissible.dart';
 export 'typography.dart';

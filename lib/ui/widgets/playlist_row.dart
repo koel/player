@@ -75,29 +75,9 @@ class _PlaylistRowState extends State<PlaylistRow> with StreamSubscriber {
   }
 
   Future<void> _confirmAndDelete() async {
-    final confirmed = await showCupertinoDialog<bool>(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        title: const Text('Delete playlist?'),
-        content: Text('Delete "${_playlist.name}"? This cannot be undone.'),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
-          ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true) return;
-
-    await playlistProvider.remove(_playlist);
-    if (mounted) showOverlay(context, caption: 'Playlist deleted');
+    if (!await confirmDeletePlaylist(context, playlist: _playlist)) return;
+    if (!mounted) return;
+    deletePlaylistWithFeedback(context, playlist: _playlist);
   }
 
   @override
@@ -116,6 +96,43 @@ class _PlaylistRowState extends State<PlaylistRow> with StreamSubscriber {
       ),
     );
   }
+}
+
+/// Asks the user to confirm deleting [playlist]. Returns `true` on
+/// confirm, `false` on cancel.
+Future<bool> confirmDeletePlaylist(
+  BuildContext context, {
+  required Playlist playlist,
+}) async {
+  final confirmed = await showCupertinoDialog<bool>(
+    context: context,
+    builder: (dialogContext) => CupertinoAlertDialog(
+      title: const Text('Delete playlist?'),
+      content: Text('Delete "${playlist.name}"? This cannot be undone.'),
+      actions: [
+        CupertinoDialogAction(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: const Text('Cancel'),
+        ),
+        CupertinoDialogAction(
+          isDestructiveAction: true,
+          onPressed: () => Navigator.pop(dialogContext, true),
+          child: const Text('Delete'),
+        ),
+      ],
+    ),
+  );
+  return confirmed == true;
+}
+
+/// Calls [PlaylistProvider.remove] (fire-and-forget, locally optimistic)
+/// and shows a 'Playlist deleted' overlay.
+void deletePlaylistWithFeedback(
+  BuildContext context, {
+  required Playlist playlist,
+}) {
+  context.read<PlaylistProvider>().remove(playlist);
+  showOverlay(context, caption: 'Playlist deleted');
 }
 
 class PlaylistThumbnail extends StatelessWidget {
