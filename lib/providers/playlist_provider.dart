@@ -102,35 +102,19 @@ class PlaylistProvider with ChangeNotifier, StreamSubscriber {
     String? description,
     String? folderId,
   }) async {
-    final oldFolderId = playlist.folderId;
-
     final response = await put('playlists/${playlist.id}', data: {
       'name': name,
       'description': description ?? '',
+      'folder_id': folderId,
     });
 
     playlist
       ..name = response['name']
-      ..description = response['description'];
+      ..description = response['description']
+      ..folderId = response['folder_id'];
 
-    // Folder membership goes through the dedicated endpoints, which
-    // are the only ones that actually move a playlist between folders
-    // (and to root). PUT /playlists/:id leaves membership alone.
-    if (oldFolderId != folderId) {
-      if (folderId != null) {
-        // Adding to a folder also detaches from any current folder
-        // owned by this user (server-side behavior).
-        await post('playlist-folders/$folderId/playlists', data: {
-          'playlists': [playlist.id],
-        });
-      } else {
-        await delete('playlist-folders/$oldFolderId/playlists', data: {
-          'playlists': [playlist.id],
-        });
-      }
-      playlist.folderId = folderId;
-    }
-
+    // Reassign so subscribers that diff on list identity rebuild
+    // even though only one item's fields changed.
     _playlists = List.of(_playlists);
     notifyListeners();
   }
