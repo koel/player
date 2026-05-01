@@ -54,7 +54,7 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>NSCameraUsageDescription</key>
-	<string>Require acces to camera to support login via QR code</string>
+	<string>Require access to camera to support login via QR code</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
         <string>https:</string>
