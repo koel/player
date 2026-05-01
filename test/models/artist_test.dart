@@ -27,6 +27,38 @@ void main() {
       final artist = Artist.fromJson(json);
       expect(artist.imageUrl, isNull);
     });
+
+    test('parses canEdit from permissions', () {
+      final json = {
+        'id': 1,
+        'name': 'Perm',
+        'image': null,
+        'permissions': {'edit': true},
+      };
+
+      expect(Artist.fromJson(json).canEdit, isTrue);
+    });
+
+    test('defaults canEdit to false when permissions is absent', () {
+      final json = {
+        'id': 1,
+        'name': 'Old Server',
+        'image': null,
+      };
+
+      expect(Artist.fromJson(json).canEdit, isFalse);
+    });
+
+    test('defaults canEdit to false when permissions.edit is non-bool', () {
+      final json = {
+        'id': 1,
+        'name': 'Partial',
+        'image': null,
+        'permissions': {'edit': null},
+      };
+
+      expect(Artist.fromJson(json).canEdit, isFalse);
+    });
   });
 
   group('Artist boolean properties', () {
@@ -56,6 +88,14 @@ void main() {
 
       expect(local.name, 'New Name');
       expect(local.imageUrl, remote.imageUrl);
+    });
+
+    test('merges canEdit from remote', () {
+      final local = Artist.fake(canEdit: false);
+      final remote = Artist.fake(canEdit: true);
+
+      local.merge(remote);
+      expect(local.canEdit, isTrue);
     });
   });
 

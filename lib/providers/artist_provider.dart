@@ -107,4 +107,14 @@ class ArtistProvider with ChangeNotifier, StreamSubscriber {
 
     return paginate();
   }
+
+  Future<void> update(Artist artist, {required String name}) async {
+    final response = await put('artists/${artist.id}', data: {
+      'name': name,
+    });
+
+    artist.name = response['name'];
+
+    notifyListeners();
+  }
 }

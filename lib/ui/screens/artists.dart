@@ -190,7 +190,7 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
   }
 }
 
-class ArtistRow extends StatelessWidget {
+class ArtistRow extends StatefulWidget {
   final Artist artist;
   final AppRouter router;
 
@@ -198,12 +198,30 @@ class ArtistRow extends StatelessWidget {
       : super(key: key);
 
   @override
+  State<ArtistRow> createState() => _ArtistRowState();
+}
+
+class _ArtistRowState extends State<ArtistRow> {
+  Offset? _lastTapPosition;
+
+  @override
   Widget build(BuildContext context) {
+    final artist = widget.artist;
+
     return Card(
       child: InkWell(
-        onTap: () => router.gotoArtistDetailsScreen(
+        onTap: () => widget.router.gotoArtistDetailsScreen(
           context,
           artistId: artist.id,
+        ),
+        onTapDown: (details) => _lastTapPosition = details.globalPosition,
+        onLongPress: () => showArtistActionsMenu(
+          context,
+          artist: artist,
+          position: _lastTapPosition ?? Offset.zero,
+          onUpdated: () {
+            if (mounted) setState(() {});
+          },
         ),
         child: ListTile(
           shape: Border(bottom: Divider.createBorderSide(context)),
