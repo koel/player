@@ -9,6 +9,7 @@ export 'create_playlist_sheet.dart';
 export 'data_loading.dart';
 export 'downloaded.dart';
 export 'edit_album_sheet.dart';
+export 'edit_artist_sheet.dart';
 export 'edit_playlist_sheet.dart';
 export 'edit_radio_station_sheet.dart';
 export 'favorites.dart';

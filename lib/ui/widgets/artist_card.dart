@@ -21,16 +21,28 @@ class ArtistCard extends StatefulWidget {
 class _ArtistCardState extends State<ArtistCard> {
   var _opacity = 1.0;
   final _cardWidth = 144.0;
+  Offset? _lastTapPosition;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => setState(() => _opacity = 0.4),
+      onTapDown: (details) {
+        _lastTapPosition = details.globalPosition;
+        setState(() => _opacity = 0.4);
+      },
       onTapUp: (_) => setState(() => _opacity = 1.0),
       onTapCancel: () => setState(() => _opacity = 1.0),
       onTap: () => widget.router.gotoArtistDetailsScreen(
         context,
         artistId: widget.artist.id,
+      ),
+      onLongPress: () => showArtistActionsMenu(
+        context,
+        artist: widget.artist,
+        position: _lastTapPosition ?? Offset.zero,
+        onUpdated: () {
+          if (mounted) setState(() {});
+        },
       ),
       behavior: HitTestBehavior.opaque,
       child: AnimatedOpacity(

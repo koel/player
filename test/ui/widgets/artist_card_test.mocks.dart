@@ -3,12 +3,16 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i3;
+import 'dart:async' as _i4;
+import 'dart:ui' as _i9;
 
-import 'package:app/models/models.dart' as _i5;
-import 'package:app/router.dart' as _i2;
-import 'package:flutter/cupertino.dart' as _i4;
+import 'package:app/enums.dart' as _i8;
+import 'package:app/models/models.dart' as _i2;
+import 'package:app/providers/providers.dart' as _i6;
+import 'package:app/router.dart' as _i3;
+import 'package:flutter/cupertino.dart' as _i5;
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:mockito/src/dummies.dart' as _i7;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -24,17 +28,27 @@ import 'package:mockito/mockito.dart' as _i1;
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
 
+class _FakeArtist_0 extends _i1.SmartFake implements _i2.Artist {
+  _FakeArtist_0(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
 /// A class which mocks [AppRouter].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAppRouter extends _i1.Mock implements _i2.AppRouter {
+class MockAppRouter extends _i1.Mock implements _i3.AppRouter {
   MockAppRouter() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<void> gotoAlbumDetailsScreen(
-    _i4.BuildContext? context, {
+  _i4.Future<void> gotoAlbumDetailsScreen(
+    _i5.BuildContext? context, {
     required dynamic albumId,
   }) =>
       (super.noSuchMethod(
@@ -43,13 +57,13 @@ class MockAppRouter extends _i1.Mock implements _i2.AppRouter {
           [context],
           {#albumId: albumId},
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 
   @override
-  _i3.Future<void> gotoArtistDetailsScreen(
-    _i4.BuildContext? context, {
+  _i4.Future<void> gotoArtistDetailsScreen(
+    _i5.BuildContext? context, {
     required dynamic artistId,
   }) =>
       (super.noSuchMethod(
@@ -58,13 +72,13 @@ class MockAppRouter extends _i1.Mock implements _i2.AppRouter {
           [context],
           {#artistId: artistId},
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 
   @override
   dynamic gotoPodcastDetailsScreen(
-    _i4.BuildContext? context, {
+    _i5.BuildContext? context, {
     required String? podcastId,
   }) =>
       super.noSuchMethod(Invocation.method(
@@ -75,8 +89,8 @@ class MockAppRouter extends _i1.Mock implements _i2.AppRouter {
 
   @override
   dynamic gotoGenreDetailsScreen(
-    _i4.BuildContext? context, {
-    required _i5.Genre? genre,
+    _i5.BuildContext? context, {
+    required _i2.Genre? genre,
   }) =>
       super.noSuchMethod(Invocation.method(
         #gotoGenreDetailsScreen,
@@ -85,42 +99,42 @@ class MockAppRouter extends _i1.Mock implements _i2.AppRouter {
       ));
 
   @override
-  _i3.Future<void> openNowPlayingScreen(_i4.BuildContext? context) =>
+  _i4.Future<void> openNowPlayingScreen(_i5.BuildContext? context) =>
       (super.noSuchMethod(
         Invocation.method(
           #openNowPlayingScreen,
           [context],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 
   @override
-  _i3.Future<void> showCreatePlaylistSheet(_i4.BuildContext? context) =>
+  _i4.Future<void> showCreatePlaylistSheet(_i5.BuildContext? context) =>
       (super.noSuchMethod(
         Invocation.method(
           #showCreatePlaylistSheet,
           [context],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 
   @override
-  _i3.Future<void> showCreatePlaylistFolderSheet(_i4.BuildContext? context) =>
+  _i4.Future<void> showCreatePlaylistFolderSheet(_i5.BuildContext? context) =>
       (super.noSuchMethod(
         Invocation.method(
           #showCreatePlaylistFolderSheet,
           [context],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 
   @override
-  _i3.Future<void> showPlayableActionSheet(
-    _i4.BuildContext? context, {
-    required _i5.Playable<dynamic>? playable,
+  _i4.Future<void> showPlayableActionSheet(
+    _i5.BuildContext? context, {
+    required _i2.Playable<dynamic>? playable,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -128,18 +142,209 @@ class MockAppRouter extends _i1.Mock implements _i2.AppRouter {
           [context],
           {#playable: playable},
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 
   @override
-  _i3.Future<void> showAddPodcastSheet(_i4.BuildContext? context) =>
+  _i4.Future<void> showAddPodcastSheet(_i5.BuildContext? context) =>
       (super.noSuchMethod(
         Invocation.method(
           #showAddPodcastSheet,
           [context],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+}
+
+/// A class which mocks [ArtistProvider].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockArtistProvider extends _i1.Mock implements _i6.ArtistProvider {
+  MockArtistProvider() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  List<_i2.Artist> get artists => (super.noSuchMethod(
+        Invocation.getter(#artists),
+        returnValue: <_i2.Artist>[],
+      ) as List<_i2.Artist>);
+
+  @override
+  String get sortField => (super.noSuchMethod(
+        Invocation.getter(#sortField),
+        returnValue: _i7.dummyValue<String>(
+          this,
+          Invocation.getter(#sortField),
+        ),
+      ) as String);
+
+  @override
+  _i8.SortOrder get sortOrder => (super.noSuchMethod(
+        Invocation.getter(#sortOrder),
+        returnValue: _i8.SortOrder.asc,
+      ) as _i8.SortOrder);
+
+  @override
+  set artists(List<_i2.Artist>? _artists) => super.noSuchMethod(
+        Invocation.setter(
+          #artists,
+          _artists,
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  set sortField(String? field) => super.noSuchMethod(
+        Invocation.setter(
+          #sortField,
+          field,
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  set sortOrder(_i8.SortOrder? order) => super.noSuchMethod(
+        Invocation.setter(
+          #sortOrder,
+          order,
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  bool get hasListeners => (super.noSuchMethod(
+        Invocation.getter(#hasListeners),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  List<_i2.Artist> byIds(List<dynamic>? ids) => (super.noSuchMethod(
+        Invocation.method(
+          #byIds,
+          [ids],
+        ),
+        returnValue: <_i2.Artist>[],
+      ) as List<_i2.Artist>);
+
+  @override
+  _i4.Future<_i2.Artist> resolve(
+    dynamic id, {
+    bool? forceRefresh = false,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #resolve,
+          [id],
+          {#forceRefresh: forceRefresh},
+        ),
+        returnValue: _i4.Future<_i2.Artist>.value(_FakeArtist_0(
+          this,
+          Invocation.method(
+            #resolve,
+            [id],
+            {#forceRefresh: forceRefresh},
+          ),
+        )),
+      ) as _i4.Future<_i2.Artist>);
+
+  @override
+  List<_i2.Artist> syncWithVault(dynamic _artists) => (super.noSuchMethod(
+        Invocation.method(
+          #syncWithVault,
+          [_artists],
+        ),
+        returnValue: <_i2.Artist>[],
+      ) as List<_i2.Artist>);
+
+  @override
+  _i4.Future<void> paginate() => (super.noSuchMethod(
+        Invocation.method(
+          #paginate,
+          [],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> refresh() => (super.noSuchMethod(
+        Invocation.method(
+          #refresh,
+          [],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> update(
+    _i2.Artist? artist, {
+    required String? name,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #update,
+          [artist],
+          {#name: name},
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  void addListener(_i9.VoidCallback? listener) => super.noSuchMethod(
+        Invocation.method(
+          #addListener,
+          [listener],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void removeListener(_i9.VoidCallback? listener) => super.noSuchMethod(
+        Invocation.method(
+          #removeListener,
+          [listener],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void dispose() => super.noSuchMethod(
+        Invocation.method(
+          #dispose,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void notifyListeners() => super.noSuchMethod(
+        Invocation.method(
+          #notifyListeners,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void unsubscribeAll() => super.noSuchMethod(
+        Invocation.method(
+          #unsubscribeAll,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void subscribe(_i4.StreamSubscription<dynamic>? sub) => super.noSuchMethod(
+        Invocation.method(
+          #subscribe,
+          [sub],
+        ),
+        returnValueForMissingStub: null,
+      );
 }
