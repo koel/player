@@ -182,7 +182,10 @@ class NoPodcastsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return Align(
+      // Slightly above visual center to compensate for the mini-player +
+      // tab bar at the bottom, which makes a true Center feel low.
+      alignment: const Alignment(0, -0.4),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
         child: Column(
