@@ -38,7 +38,9 @@ class _RadioStationCardState extends State<RadioStationCard> {
         context,
         station: widget.station,
         position: _lastTapPosition ?? Offset.zero,
-        onUpdated: () => setState(() {}),
+        onUpdated: () {
+          if (mounted) setState(() {});
+        },
       ),
       behavior: HitTestBehavior.opaque,
       child: AnimatedOpacity(

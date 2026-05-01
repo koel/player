@@ -178,7 +178,9 @@ class _RadioStationRowState extends State<_RadioStationRow> {
             context,
             station: station,
             position: _lastTapPosition ?? Offset.zero,
-            onUpdated: () => setState(() {}),
+            onUpdated: () {
+              if (mounted) setState(() {});
+            },
           ),
           child: ListTile(
             shape: Border(bottom: Divider.createBorderSide(context)),
