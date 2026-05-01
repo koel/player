@@ -69,7 +69,7 @@ Future<void> showEditRadioStationDialog(
           ),
           const SizedBox(height: 8),
           FormSwitch(
-            label: 'Public',
+            label: 'Accessible to all users',
             value: isPublic,
             onChanged: (value) => setState(() => isPublic = value),
           ),
