@@ -110,19 +110,11 @@ class PlaylistProvider with ChangeNotifier, StreamSubscriber {
 
     // Prefer the server response for fields it may resolve differently
     // (notably folder_id, where koel's resource serializer reads the
-    // active folder via a separate query). Fall back to the request
-    // values if the server didn't echo them.
-    if (response is Map) {
-      playlist
-        ..name = (response['name'] as String?) ?? name
-        ..description = response['description'] as String?
-        ..folderId = response['folder_id'] as String?;
-    } else {
-      playlist
-        ..name = name
-        ..description = description
-        ..folderId = folderId;
-    }
+    // active folder via a separate query).
+    playlist
+      ..name = response['name']
+      ..description = response['description']
+      ..folderId = response['folder_id'];
 
     // Reassign so subscribers that diff on list identity are
     // guaranteed to pick up the in-place mutation.
