@@ -102,17 +102,31 @@ class PlaylistProvider with ChangeNotifier, StreamSubscriber {
     String? description,
     String? folderId,
   }) async {
-    await put('playlists/${playlist.id}', data: {
+    final response = await put('playlists/${playlist.id}', data: {
       'name': name,
       'description': description ?? '',
       'folder_id': folderId,
     });
 
-    playlist
-      ..name = name
-      ..description = description
-      ..folderId = folderId;
+    // Prefer the server response for fields it may resolve differently
+    // (notably folder_id, where koel's resource serializer reads the
+    // active folder via a separate query). Fall back to the request
+    // values if the server didn't echo them.
+    if (response is Map) {
+      playlist
+        ..name = (response['name'] as String?) ?? name
+        ..description = response['description'] as String?
+        ..folderId = response['folder_id'] as String?;
+    } else {
+      playlist
+        ..name = name
+        ..description = description
+        ..folderId = folderId;
+    }
 
+    // Reassign so subscribers that diff on list identity are
+    // guaranteed to pick up the in-place mutation.
+    _playlists = List.of(_playlists);
     notifyListeners();
   }
 
