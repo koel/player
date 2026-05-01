@@ -2,6 +2,7 @@ import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 Future<void> showEditAlbumDialog(
@@ -52,6 +53,10 @@ Future<void> showEditAlbumDialog(
             controller: yearController,
             placeholder: 'Year (optional)',
             keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(4),
+            ],
           ),
         ],
       );
