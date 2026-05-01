@@ -4,10 +4,8 @@ import 'package:app/extensions/extensions.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
-import 'package:app/ui/screens/edit_playlist_sheet.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:app/values/values.dart';
-import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
@@ -108,11 +106,6 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                           AppState.set('playlist.sort', _sortConfig);
                         },
                       ),
-                      if (playlist.canEdit || playlist.canDelete)
-                        _PlaylistMenuButton(
-                          playlist: playlist,
-                          onUpdated: () => setState(() {}),
-                        ),
                     ],
                   ),
                   SliverToBoxAdapter(
@@ -175,92 +168,3 @@ void gotoDetailsScreen(BuildContext context, {required Playlist playlist}) {
   ));
 }
 
-class _PlaylistMenuButton extends StatelessWidget {
-  final Playlist playlist;
-  final VoidCallback onUpdated;
-
-  const _PlaylistMenuButton({
-    Key? key,
-    required this.playlist,
-    required this.onUpdated,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return PopupMenuButton<String>(
-      icon: const Icon(CupertinoIcons.ellipsis_circle),
-      color: Colors.black87,
-      onSelected: (value) async {
-        switch (value) {
-          case 'edit':
-            await showEditPlaylistDialog(context, playlist: playlist);
-            // PlaylistProvider.update mutates the playlist in place;
-            // ask the screen to rebuild so the app bar title reflects
-            // the new name.
-            onUpdated();
-            break;
-          case 'delete':
-            final confirmed = await _confirmDelete(context);
-            if (!confirmed) return;
-            final provider = context.read<PlaylistProvider>();
-            await provider.remove(playlist);
-            if (context.mounted) {
-              Navigator.pop(context);
-              showOverlay(context, caption: 'Playlist deleted');
-            }
-            break;
-        }
-      },
-      itemBuilder: (_) => [
-        if (playlist.canEdit)
-          const PopupMenuItem(
-            value: 'edit',
-            child: Row(
-              children: [
-                Icon(CupertinoIcons.pencil, size: 18),
-                SizedBox(width: 12),
-                Text('Edit'),
-              ],
-            ),
-          ),
-        if (playlist.canDelete)
-          const PopupMenuItem(
-            value: 'delete',
-            child: Row(
-              children: [
-                Icon(CupertinoIcons.trash, size: 18, color: Colors.redAccent),
-                SizedBox(width: 12),
-                Text('Delete', style: TextStyle(color: Colors.redAccent)),
-              ],
-            ),
-          ),
-      ],
-    );
-  }
-
-  Future<bool> _confirmDelete(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Delete playlist?'),
-        content: Text(
-          'Delete "${playlist.name}"? This cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.redAccent),
-            ),
-          ),
-        ],
-      ),
-    );
-    return confirmed ?? false;
-  }
-}

@@ -1,6 +1,7 @@
 import 'package:app/main.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/screens.dart';
+import 'package:app/ui/widgets/widgets.dart';
 import 'package:app/utils/route_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -46,32 +47,47 @@ class ProfileAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final downloads = context.read<DownloadProvider>();
+    return Builder(
+      builder: (buttonContext) => IconButton(
+        icon: const Icon(CupertinoIcons.person_alt_circle, size: 24),
+        onPressed: () async {
+          final box = buttonContext.findRenderObject() as RenderBox?;
+          final origin = box == null
+              ? Offset.zero
+              : box.localToGlobal(Offset.zero) + Offset(0, box.size.height);
 
-    return PopupMenuButton<ProfileAvatarMenuItems>(
-      onSelected: (item) {
-        switch (item) {
-          case ProfileAvatarMenuItems.clearDownloads:
-            downloads.clear();
-            break;
-          case ProfileAvatarMenuItems.logout:
-            logout(context);
-            break;
-        }
-      },
-      child: const Icon(CupertinoIcons.person_alt_circle, size: 24),
-      offset: const Offset(0, 32),
-      itemBuilder: (_) => [
-        const PopupMenuItem(
-          value: ProfileAvatarMenuItems.clearDownloads,
-          child: Text('Clear downloads'),
-        ),
-        const PopupMenuDivider(height: .5),
-        const PopupMenuItem(
-          value: ProfileAvatarMenuItems.logout,
-          child: Text('Log out'),
-        ),
-      ],
+          final selected =
+              await showFrostedContextMenu<ProfileAvatarMenuItems>(
+            context: buttonContext,
+            position: origin,
+            items: const [
+              FrostedMenuItem(
+                value: ProfileAvatarMenuItems.clearDownloads,
+                icon: CupertinoIcons.cloud_download,
+                label: 'Clear downloads',
+              ),
+              FrostedMenuItem(
+                value: ProfileAvatarMenuItems.logout,
+                icon: CupertinoIcons.square_arrow_right,
+                label: 'Log out',
+                destructive: true,
+              ),
+            ],
+          );
+          if (!buttonContext.mounted) return;
+
+          switch (selected) {
+            case ProfileAvatarMenuItems.clearDownloads:
+              buttonContext.read<DownloadProvider>().clear();
+              break;
+            case ProfileAvatarMenuItems.logout:
+              logout(buttonContext);
+              break;
+            case null:
+              break;
+          }
+        },
+      ),
     );
   }
 }
