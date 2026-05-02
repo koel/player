@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/app_state.dart';
 import 'package:app/audio_handler.dart';
 import 'package:app/main.dart' as app;
@@ -7,6 +9,7 @@ import 'package:app/providers/playable_provider.dart';
 import 'package:app/providers/podcast_provider.dart';
 import 'package:app/ui/screens/podcast_action_sheet.dart';
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -316,25 +319,40 @@ void main() {
     );
 
     testWidgets(
-      'tapping Refresh forces a feed re-fetch',
+      'Refresh shows a spinner while in flight, then dismisses + toasts',
       (tester) async {
         final podcast = Podcast.fake();
+        final completer = Completer<List<Song>>();
         when(playableProviderMock.fetchForPodcast(
           podcast.id,
           forceRefresh: anyNamed('forceRefresh'),
           getUpdates: anyNamed('getUpdates'),
-        )).thenAnswer((_) async => <Song>[]);
+        )).thenAnswer((_) => completer.future);
 
         await mount(tester, podcast);
         await tester.tap(find.text('Refresh'));
+        await tester.pump();
+
+        // While the fetch is pending the row replaces its label with
+        // "Refreshing…" and shows a spinner; the sheet stays open.
+        expect(find.text('Refresh'), findsNothing);
+        expect(find.text('Refreshing…'), findsOneWidget);
+        expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
+
+        // Resolve. Sheet pops, success toast appears.
+        completer.complete(<Song>[]);
         await tester.pumpAndSettle();
-        await tester.pump(const Duration(seconds: 3));
 
         verify(playableProviderMock.fetchForPodcast(
           podcast.id,
           forceRefresh: true,
           getUpdates: true,
         )).called(1);
+        expect(find.text('Refreshing…'), findsNothing);
+        expect(find.text('Feed refreshed'), findsOneWidget);
+
+        // Drain showOverlay's auto-dismiss timer.
+        await tester.pump(const Duration(seconds: 3));
       },
     );
 

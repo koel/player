@@ -19,12 +19,39 @@ class PodcastActionSheet extends StatefulWidget {
 }
 
 class _PodcastActionSheetState extends State<PodcastActionSheet> {
+  var _refreshing = false;
+
   Future<List<Playable>> _fetchEpisodes({bool getUpdates = false}) {
     return context.read<PlayableProvider>().fetchForPodcast(
           widget.podcast.id,
           forceRefresh: getUpdates,
           getUpdates: getUpdates,
         );
+  }
+
+  Future<void> _refresh() async {
+    setState(() => _refreshing = true);
+
+    try {
+      await _fetchEpisodes(getUpdates: true);
+    } catch (_) {
+      if (!mounted) return;
+      Navigator.pop(context);
+      showOverlay(
+        context,
+        icon: CupertinoIcons.exclamationmark_triangle,
+        caption: 'Refresh failed',
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    Navigator.pop(context);
+    showOverlay(
+      context,
+      icon: CupertinoIcons.arrow_clockwise,
+      caption: 'Feed refreshed',
+    );
   }
 
   @override
@@ -203,31 +230,27 @@ class _PodcastActionSheetState extends State<PodcastActionSheet> {
                   physics: const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
                   children: <Widget>[
-                    PlayableActionButton(
-                      text: 'Refresh',
-                      icon: const Icon(
-                        CupertinoIcons.arrow_clockwise,
-                        color: Colors.white30,
+                    ListTile(
+                      leading: SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: _refreshing
+                            ? const CupertinoActivityIndicator(
+                                color: Colors.white54,
+                              )
+                            : const Icon(
+                                CupertinoIcons.arrow_clockwise,
+                                color: Colors.white30,
+                              ),
                       ),
-                      onTap: () async {
-                        try {
-                          await _fetchEpisodes(getUpdates: true);
-                        } catch (_) {
-                          if (!mounted) return;
-                          showOverlay(
-                            context,
-                            icon: CupertinoIcons.exclamationmark_triangle,
-                            caption: 'Refresh failed',
-                          );
-                          return;
-                        }
-                        if (!mounted) return;
-                        showOverlay(
-                          context,
-                          icon: CupertinoIcons.arrow_clockwise,
-                          caption: 'Feed refreshed',
-                        );
-                      },
+                      minLeadingWidth: 16,
+                      title: Text(
+                        _refreshing ? 'Refreshing…' : 'Refresh',
+                        style: _refreshing
+                            ? const TextStyle(color: Colors.white54)
+                            : null,
+                      ),
+                      onTap: _refreshing ? null : _refresh,
                     ),
                     const Divider(indent: 16, endIndent: 16),
                     PlayableActionButton(

@@ -134,10 +134,17 @@ class PlayableProvider with ChangeNotifier, StreamSubscriber {
   }) async {
     if (forceRefresh) AppState.delete(['podcast.episodes', podcastId]);
 
-    return _stateAwareFetch(
+    final episodes = await _stateAwareFetch(
       'podcasts/$podcastId/episodes${getUpdates ? '?refresh=1' : ''}',
       ['podcast.episodes', podcastId],
     );
+
+    // A forced refresh repopulates the cache with fresh data — let any
+    // screen rendering the episode list (e.g. PodcastDetailsScreen)
+    // know it should rebuild.
+    if (forceRefresh) notifyListeners();
+
+    return episodes;
   }
 
   Future<List<Playable>> _stateAwareFetch(String url, Object cacheKey) async {
