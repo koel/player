@@ -3,6 +3,7 @@ export 'add_to_playlist.dart';
 export 'album_action_sheet.dart';
 export 'album_details.dart';
 export 'albums.dart';
+export 'artist_action_sheet.dart';
 export 'artist_details.dart';
 export 'artists.dart';
 export 'create_playlist_folder_sheet.dart';

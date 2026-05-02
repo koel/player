@@ -59,6 +59,33 @@ void main() {
 
       expect(Artist.fromJson(json).canEdit, isFalse);
     });
+
+    test('parses favorite from JSON', () {
+      final json = {
+        'id': 1,
+        'name': 'Loved',
+        'image': null,
+        'favorite': true,
+      };
+
+      expect(Artist.fromJson(json).favorite, isTrue);
+    });
+
+    test('defaults favorite to false when missing or non-bool', () {
+      expect(
+        Artist.fromJson({'id': 1, 'name': 'X', 'image': null}).favorite,
+        isFalse,
+      );
+      expect(
+        Artist.fromJson({
+          'id': 1,
+          'name': 'X',
+          'image': null,
+          'favorite': null,
+        }).favorite,
+        isFalse,
+      );
+    });
   });
 
   group('Artist boolean properties', () {
@@ -96,6 +123,14 @@ void main() {
 
       local.merge(remote);
       expect(local.canEdit, isTrue);
+    });
+
+    test('merges favorite from remote', () {
+      final local = Artist.fake(favorite: false);
+      final remote = Artist.fake(favorite: true);
+
+      local.merge(remote);
+      expect(local.favorite, isTrue);
     });
   });
 
