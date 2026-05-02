@@ -108,6 +108,23 @@ class AlbumProvider with ChangeNotifier, StreamSubscriber {
     return paginate();
   }
 
+  Future<void> toggleFavorite(Album album) async {
+    // Optimistic flip + restore on failure.
+    album.favorite = !album.favorite;
+    notifyListeners();
+
+    try {
+      await post('favorites/toggle', data: {
+        'type': 'albums',
+        'id': album.id,
+      });
+    } catch (_) {
+      album.favorite = !album.favorite;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   Future<void> update(
     Album album, {
     required String name,
