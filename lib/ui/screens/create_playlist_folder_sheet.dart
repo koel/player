@@ -12,16 +12,18 @@ Future<void> showCreatePlaylistFolderDialog(BuildContext context) async {
     title: 'New Folder',
     submitLabel: 'Create',
     canSubmit: () => controller.text.trim().isNotEmpty,
-    onSubmit: () async {
+    onSubmit: (sheetContext) async {
       final name = controller.text.trim();
       if (name.isEmpty) return;
 
       try {
         await folderProvider.create(name: name);
-        Navigator.pop(context);
-        showOverlay(context, caption: 'Folder created');
+        if (!sheetContext.mounted) return;
+        Navigator.pop(sheetContext);
+        showOverlay(sheetContext, caption: 'Folder created');
       } catch (_) {
-        showOverlay(context,
+        if (!sheetContext.mounted) return;
+        showOverlay(sheetContext,
           caption: 'Error',
           message: 'Could not create folder.',
           icon: Icons.error_outline,

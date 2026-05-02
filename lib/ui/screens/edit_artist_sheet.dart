@@ -16,17 +16,19 @@ Future<void> showEditArtistDialog(
     title: 'Edit Artist',
     submitLabel: 'Save',
     canSubmit: () => nameController.text.trim().isNotEmpty,
-    onSubmit: () async {
+    onSubmit: (sheetContext) async {
       final name = nameController.text.trim();
       if (name.isEmpty) return;
 
       try {
         await artistProvider.update(artist, name: name);
-        Navigator.pop(context);
-        showOverlay(context, caption: 'Artist updated');
+        if (!sheetContext.mounted) return;
+        Navigator.pop(sheetContext);
+        showOverlay(sheetContext, caption: 'Artist updated');
       } catch (_) {
+        if (!sheetContext.mounted) return;
         showOverlay(
-          context,
+          sheetContext,
           caption: 'Error',
           message: 'Could not update artist.',
           icon: Icons.error_outline,
