@@ -3,9 +3,25 @@ import 'dart:io';
 
 import 'package:app/exceptions/exceptions.dart';
 import 'package:app/utils/preferences.dart' as preferences;
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as Http;
 
 enum HttpMethod { get, post, patch, put, delete }
+
+/// The HTTP client used by [request] and the per-method helpers below.
+/// Production code uses a single shared [Http.Client]. Tests can swap
+/// in their own client (typically a `MockClient` from
+/// `package:http/testing.dart`) via [setHttpClientForTesting].
+Http.Client _client = Http.Client();
+
+/// Replace the HTTP client used by [request]. Test-only.
+@visibleForTesting
+void setHttpClientForTesting(Http.Client client) => _client = client;
+
+/// Reset the HTTP client to a fresh default. Test-only — call from
+/// `tearDown` so the override doesn't leak across tests.
+@visibleForTesting
+void resetHttpClientForTesting() => _client = Http.Client();
 
 Future<dynamic> request(
   HttpMethod method,
@@ -26,31 +42,31 @@ Future<dynamic> request(
 
   switch (method) {
     case HttpMethod.get:
-      response = await Http.get(uri, headers: headers);
+      response = await _client.get(uri, headers: headers);
       break;
     case HttpMethod.post:
-      response = await Http.post(
+      response = await _client.post(
         uri,
         headers: headers,
         body: json.encode(data),
       );
       break;
     case HttpMethod.patch:
-      response = await Http.patch(
+      response = await _client.patch(
         uri,
         headers: headers,
         body: json.encode(data),
       );
       break;
     case HttpMethod.put:
-      response = await Http.put(
+      response = await _client.put(
         uri,
         headers: headers,
         body: json.encode(data),
       );
       break;
     case HttpMethod.delete:
-      response = await Http.delete(
+      response = await _client.delete(
         uri,
         headers: headers,
         body: json.encode(data),
