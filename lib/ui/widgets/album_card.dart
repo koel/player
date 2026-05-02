@@ -1,5 +1,6 @@
 import 'package:app/models/models.dart';
 import 'package:app/router.dart';
+import 'package:app/ui/screens/album_action_sheet.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
@@ -20,29 +21,18 @@ class AlbumCard extends StatefulWidget {
 class _AlbumCardState extends State<AlbumCard> {
   var _opacity = 1.0;
   final _cardWidth = 144.0;
-  Offset? _lastTapPosition;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (details) {
-        _lastTapPosition = details.globalPosition;
-        setState(() => _opacity = 0.4);
-      },
+      onTapDown: (_) => setState(() => _opacity = 0.4),
       onTapUp: (_) => setState(() => _opacity = 1.0),
       onTapCancel: () => setState(() => _opacity = 1.0),
       onTap: () => widget.router.gotoAlbumDetailsScreen(
         context,
         albumId: widget.album.id,
       ),
-      onLongPress: () => showAlbumActionsMenu(
-        context,
-        album: widget.album,
-        position: _lastTapPosition ?? Offset.zero,
-        onUpdated: () {
-          if (mounted) setState(() {});
-        },
-      ),
+      onLongPress: () => showAlbumActionSheet(context, album: widget.album),
       behavior: HitTestBehavior.opaque,
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 100),

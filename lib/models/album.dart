@@ -21,6 +21,9 @@ class Album {
   /// permissions (older koel) so the UI hides the action.
   bool canEdit;
 
+  /// Whether the current user has favorited this album.
+  bool favorite;
+
   Album({
     required this.id,
     required this.name,
@@ -29,6 +32,7 @@ class Album {
     required this.artistName,
     this.year,
     this.canEdit = false,
+    this.favorite = false,
   });
 
   ImageProvider get image {
@@ -59,6 +63,7 @@ class Album {
       artistName: json['artist_name'],
       year: json['year'] == null ? null : int.parse(json['year'].toString()),
       canEdit: permissions is Map ? permissions['edit'] == true : false,
+      favorite: json['favorite'] == true,
     );
   }
 
@@ -69,6 +74,7 @@ class Album {
     int? playCount,
     Artist? artist,
     bool canEdit = false,
+    bool favorite = false,
   }) {
     Faker faker = Faker();
 
@@ -81,6 +87,7 @@ class Album {
       artistId: artist.id,
       artistName: artist.name,
       canEdit: canEdit,
+      favorite: favorite,
     )..playCount = playCount ?? faker.randomGenerator.integer(1000);
   }
 
@@ -92,7 +99,8 @@ class Album {
       ..name = remote.name
       ..year = remote.year
       ..playCount = remote.playCount ?? 0
-      ..canEdit = remote.canEdit;
+      ..canEdit = remote.canEdit
+      ..favorite = remote.favorite;
 
     _image = null;
 
