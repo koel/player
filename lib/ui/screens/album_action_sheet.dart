@@ -150,9 +150,15 @@ class _AlbumActionSheetState extends State<AlbumActionSheet> {
                       ),
                       onTap: () async {
                         final songs = await _fetchSongs();
-                        for (final song in songs) {
+                        // queueAfterCurrent inserts each song at the
+                        // same 'after current' index, so iterating
+                        // forward would reverse the album. Iterate
+                        // backward so the resulting queue order
+                        // matches the album order.
+                        for (final song in songs.reversed) {
                           await audioHandler.queueAfterCurrent(song);
                         }
+                        if (!mounted) return;
                         showOverlay(
                           context,
                           icon: CupertinoIcons.arrow_right_circle_fill,
@@ -172,6 +178,7 @@ class _AlbumActionSheetState extends State<AlbumActionSheet> {
                         for (final song in songs) {
                           await audioHandler.queueToBottom(song);
                         }
+                        if (!mounted) return;
                         showOverlay(
                           context,
                           icon: CupertinoIcons.arrow_down_right_circle_fill,

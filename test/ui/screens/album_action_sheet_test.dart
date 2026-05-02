@@ -195,42 +195,54 @@ void main() {
       verify(audioHandlerMock.replaceQueue(songs, shuffle: true)).called(1);
     });
 
-    testWidgets('tapping Play Next queues each song after current',
-        (tester) async {
-      final album = Album.fake(name: 'A');
-      final songs = Song.fakeMany(3);
-      when(playableProviderMock.fetchForAlbum(album.id))
-          .thenAnswer((_) async => songs);
+    testWidgets(
+      'tapping Play Next inserts songs in reverse so the queue ends up '
+      'in album order',
+      (tester) async {
+        final album = Album.fake(name: 'A');
+        final songs = Song.fakeMany(3);
+        when(playableProviderMock.fetchForAlbum(album.id))
+            .thenAnswer((_) async => songs);
 
-      await mount(tester, album);
-      await tester.tap(find.text('Play Next'));
-      await tester.pumpAndSettle();
-      // Flush the showOverlay's auto-dismiss timer so the test
-      // tear-down doesn't complain about pending timers.
-      await tester.pump(const Duration(seconds: 3));
+        await mount(tester, album);
+        await tester.tap(find.text('Play Next'));
+        await tester.pumpAndSettle();
+        // Flush the showOverlay's auto-dismiss timer so the test
+        // tear-down doesn't complain about pending timers.
+        await tester.pump(const Duration(seconds: 3));
 
-      for (final song in songs) {
-        verify(audioHandlerMock.queueAfterCurrent(song)).called(1);
-      }
-      verifyNever(audioHandlerMock.queueToBottom(any));
-    });
+        // queueAfterCurrent inserts at a fixed 'after current' index,
+        // so to land in album order [0, 1, 2] the implementation has
+        // to call them in reverse: 2, then 1, then 0.
+        verifyInOrder([
+          audioHandlerMock.queueAfterCurrent(songs[2]),
+          audioHandlerMock.queueAfterCurrent(songs[1]),
+          audioHandlerMock.queueAfterCurrent(songs[0]),
+        ]);
+        verifyNever(audioHandlerMock.queueToBottom(any));
+      },
+    );
 
-    testWidgets('tapping Play Last queues each song to the bottom',
-        (tester) async {
-      final album = Album.fake(name: 'A');
-      final songs = Song.fakeMany(3);
-      when(playableProviderMock.fetchForAlbum(album.id))
-          .thenAnswer((_) async => songs);
+    testWidgets(
+      'tapping Play Last appends songs in album order',
+      (tester) async {
+        final album = Album.fake(name: 'A');
+        final songs = Song.fakeMany(3);
+        when(playableProviderMock.fetchForAlbum(album.id))
+            .thenAnswer((_) async => songs);
 
-      await mount(tester, album);
-      await tester.tap(find.text('Play Last'));
-      await tester.pumpAndSettle();
-      await tester.pump(const Duration(seconds: 3));
+        await mount(tester, album);
+        await tester.tap(find.text('Play Last'));
+        await tester.pumpAndSettle();
+        await tester.pump(const Duration(seconds: 3));
 
-      for (final song in songs) {
-        verify(audioHandlerMock.queueToBottom(song)).called(1);
-      }
-      verifyNever(audioHandlerMock.queueAfterCurrent(any));
-    });
+        verifyInOrder([
+          audioHandlerMock.queueToBottom(songs[0]),
+          audioHandlerMock.queueToBottom(songs[1]),
+          audioHandlerMock.queueToBottom(songs[2]),
+        ]);
+        verifyNever(audioHandlerMock.queueAfterCurrent(any));
+      },
+    );
   });
 }
