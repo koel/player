@@ -104,7 +104,16 @@ class _AlbumActionSheetState extends State<AlbumActionSheet> {
                                 : CupertinoIcons.star),
                             onTap: () {
                               Navigator.pop(context);
-                              albumProvider.toggleFavorite(album);
+                              // toggleFavorite rethrows on failure (after
+                              // rolling back the optimistic flip
+                              // internally). The sheet has just been
+                              // popped, so swallow here to avoid an
+                              // unhandled async error — the UI auto-
+                              // corrects from the rollback's
+                              // notifyListeners.
+                              albumProvider
+                                  .toggleFavorite(album)
+                                  .catchError((_) {});
                             },
                           ),
                           const PlayableQuickActionDivider(),
