@@ -56,12 +56,18 @@ Future<void> showRadioStationActionsMenu(
       onUpdated?.call();
       break;
     case 'delete':
-      await _confirmAndDelete(context, station: station);
+      if (!await confirmDeleteRadioStation(context, station: station)) {
+        break;
+      }
+      if (!context.mounted) break;
+      deleteRadioStationWithFeedback(context, station: station);
       break;
   }
 }
 
-Future<void> _confirmAndDelete(
+/// Asks the user to confirm deleting [station]. Returns `true` on
+/// confirm, `false` on cancel.
+Future<bool> confirmDeleteRadioStation(
   BuildContext context, {
   required RadioStation station,
 }) async {
@@ -83,10 +89,15 @@ Future<void> _confirmAndDelete(
       ],
     ),
   );
+  return confirmed == true;
+}
 
-  if (confirmed != true) return;
-  if (!context.mounted) return;
-
-  await context.read<RadioStationProvider>().remove(station);
-  if (context.mounted) showOverlay(context, caption: 'Station deleted');
+/// Calls [RadioStationProvider.remove] (fire-and-forget, locally
+/// optimistic) and shows a 'Station deleted' overlay.
+void deleteRadioStationWithFeedback(
+  BuildContext context, {
+  required RadioStation station,
+}) {
+  context.read<RadioStationProvider>().remove(station);
+  showOverlay(context, caption: 'Station deleted');
 }

@@ -232,8 +232,15 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
   }) {
     return Card(
       child: Dismissible(
-        direction: DismissDirection.startToEnd,
-        confirmDismiss: (_) async {
+        key: ValueKey(playlist.id),
+        direction: playlist.canDelete
+            ? DismissDirection.horizontal
+            : DismissDirection.startToEnd,
+        confirmDismiss: (direction) async {
+          if (direction == DismissDirection.endToStart) {
+            return confirmDeletePlaylist(context, playlist: playlist);
+          }
+          // startToEnd: queue songs and bounce back (no actual dismiss).
           final playableProvider = context.read<PlayableProvider>();
           final songs = await playableProvider.fetchForPlaylist(playlist.id);
           if (songs.isNotEmpty) {
@@ -246,6 +253,11 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
           }
           return false;
         },
+        onDismissed: (direction) {
+          if (direction == DismissDirection.endToStart) {
+            deletePlaylistWithFeedback(context, playlist: playlist);
+          }
+        },
         background: Container(
           alignment: AlignmentDirectional.centerStart,
           color: Colors.green,
@@ -254,7 +266,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
             child: Icon(CupertinoIcons.text_badge_plus),
           ),
         ),
-        key: ValueKey(playlist.id),
+        secondaryBackground: const SwipeDestructiveBackground(),
         child: Padding(
           padding: EdgeInsets.only(left: indented ? 24 : 0),
           child: PlaylistRow(playlist: playlist),

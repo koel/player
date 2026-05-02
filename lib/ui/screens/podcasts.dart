@@ -95,9 +95,24 @@ class _PodcastScreenState extends State<PodcastsScreen> {
                       (BuildContext context, int index) {
                         var podcast = podcasts[index];
 
-                        return PodcastRow(
-                          podcast: podcast,
-                          router: widget.router,
+                        return Dismissible(
+                          key: ValueKey(podcast.id),
+                          direction: DismissDirection.endToStart,
+                          background: const SizedBox.shrink(),
+                          secondaryBackground:
+                              const SwipeDestructiveBackground(),
+                          confirmDismiss: (_) => confirmUnsubscribePodcast(
+                            context,
+                            podcast: podcast,
+                          ),
+                          onDismissed: (_) => unsubscribePodcastWithFeedback(
+                            context,
+                            podcast: podcast,
+                          ),
+                          child: PodcastRow(
+                            podcast: podcast,
+                            router: widget.router,
+                          ),
                         );
                       },
                       childCount: podcasts.length,

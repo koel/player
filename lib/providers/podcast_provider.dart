@@ -37,12 +37,21 @@ class PodcastProvider with ChangeNotifier, StreamSubscriber {
   }
 
   Future<void> unsubscribePodcast(Podcast podcast) async {
-    await delete('podcasts/${podcast.id}/subscriptions');
-
+    // Optimistic removal so a Dismissible's onDismissed callback can
+    // call this without leaving the dismissed widget in the tree
+    // while the network call is in flight. Restore on failure.
     _podcasts.remove(podcast);
     _vault.remove(podcast.id);
-
     notifyListeners();
+
+    try {
+      await delete('podcasts/${podcast.id}/subscriptions');
+    } catch (_) {
+      _podcasts.add(podcast);
+      _vault[podcast.id] = podcast;
+      notifyListeners();
+      rethrow;
+    }
   }
 
   Future<Podcast> add({required String url}) async {
