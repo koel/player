@@ -3,15 +3,19 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i7;
-import 'dart:ui' as _i8;
+import 'dart:async' as _i9;
+import 'dart:ui' as _i12;
 
-import 'package:app/enums.dart' as _i6;
-import 'package:app/models/models.dart' as _i2;
-import 'package:app/providers/providers.dart' as _i4;
-import 'package:app/values/values.dart' as _i3;
+import 'package:app/audio_handler.dart' as _i7;
+import 'package:app/enums.dart' as _i11;
+import 'package:app/models/models.dart' as _i5;
+import 'package:app/providers/providers.dart' as _i2;
+import 'package:app/values/values.dart' as _i6;
+import 'package:audio_service/audio_service.dart' as _i8;
+import 'package:just_audio/just_audio.dart' as _i3;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i5;
+import 'package:mockito/src/dummies.dart' as _i10;
+import 'package:rxdart/rxdart.dart' as _i4;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -27,8 +31,9 @@ import 'package:mockito/src/dummies.dart' as _i5;
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
 
-class _FakeAlbum_0 extends _i1.SmartFake implements _i2.Album {
-  _FakeAlbum_0(
+class _FakeDownloadProvider_0 extends _i1.SmartFake
+    implements _i2.DownloadProvider {
+  _FakeDownloadProvider_0(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -37,48 +42,999 @@ class _FakeAlbum_0 extends _i1.SmartFake implements _i2.Album {
         );
 }
 
-class _FakePaginationResult_1<T> extends _i1.SmartFake
-    implements _i3.PaginationResult<T> {
-  _FakePaginationResult_1(
+class _FakePlayableProvider_1 extends _i1.SmartFake
+    implements _i2.PlayableProvider {
+  _FakePlayableProvider_1(
     Object parent,
     Invocation parentInvocation,
   ) : super(
           parent,
           parentInvocation,
         );
+}
+
+class _FakeAudioPlayer_2 extends _i1.SmartFake implements _i3.AudioPlayer {
+  _FakeAudioPlayer_2(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakeBehaviorSubject_3<T> extends _i1.SmartFake
+    implements _i4.BehaviorSubject<T> {
+  _FakeBehaviorSubject_3(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakePublishSubject_4<T> extends _i1.SmartFake
+    implements _i4.PublishSubject<T> {
+  _FakePublishSubject_4(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakeValueStream_5<T> extends _i1.SmartFake
+    implements _i4.ValueStream<T> {
+  _FakeValueStream_5(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakeAlbum_6 extends _i1.SmartFake implements _i5.Album {
+  _FakeAlbum_6(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakePaginationResult_7<T> extends _i1.SmartFake
+    implements _i6.PaginationResult<T> {
+  _FakePaginationResult_7(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+/// A class which mocks [KoelAudioHandler].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockKoelAudioHandler extends _i1.Mock implements _i7.KoelAudioHandler {
+  MockKoelAudioHandler() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i2.DownloadProvider get downloadProvider => (super.noSuchMethod(
+        Invocation.getter(#downloadProvider),
+        returnValue: _FakeDownloadProvider_0(
+          this,
+          Invocation.getter(#downloadProvider),
+        ),
+      ) as _i2.DownloadProvider);
+
+  @override
+  _i2.PlayableProvider get playableProvider => (super.noSuchMethod(
+        Invocation.getter(#playableProvider),
+        returnValue: _FakePlayableProvider_1(
+          this,
+          Invocation.getter(#playableProvider),
+        ),
+      ) as _i2.PlayableProvider);
+
+  @override
+  _i8.AudioServiceRepeatMode get repeatMode => (super.noSuchMethod(
+        Invocation.getter(#repeatMode),
+        returnValue: _i8.AudioServiceRepeatMode.none,
+      ) as _i8.AudioServiceRepeatMode);
+
+  @override
+  _i3.AudioPlayer get player => (super.noSuchMethod(
+        Invocation.getter(#player),
+        returnValue: _FakeAudioPlayer_2(
+          this,
+          Invocation.getter(#player),
+        ),
+      ) as _i3.AudioPlayer);
+
+  @override
+  bool get isRadioMode => (super.noSuchMethod(
+        Invocation.getter(#isRadioMode),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  int get currentQueueIndex => (super.noSuchMethod(
+        Invocation.getter(#currentQueueIndex),
+        returnValue: 0,
+      ) as int);
+
+  @override
+  set downloadProvider(_i2.DownloadProvider? _downloadProvider) =>
+      super.noSuchMethod(
+        Invocation.setter(
+          #downloadProvider,
+          _downloadProvider,
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  set playableProvider(_i2.PlayableProvider? _playableProvider) =>
+      super.noSuchMethod(
+        Invocation.setter(
+          #playableProvider,
+          _playableProvider,
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  set repeatMode(_i8.AudioServiceRepeatMode? _repeatMode) => super.noSuchMethod(
+        Invocation.setter(
+          #repeatMode,
+          _repeatMode,
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  _i4.BehaviorSubject<_i8.PlaybackState> get playbackState =>
+      (super.noSuchMethod(
+        Invocation.getter(#playbackState),
+        returnValue: _FakeBehaviorSubject_3<_i8.PlaybackState>(
+          this,
+          Invocation.getter(#playbackState),
+        ),
+      ) as _i4.BehaviorSubject<_i8.PlaybackState>);
+
+  @override
+  _i4.BehaviorSubject<List<_i8.MediaItem>> get queue => (super.noSuchMethod(
+        Invocation.getter(#queue),
+        returnValue: _FakeBehaviorSubject_3<List<_i8.MediaItem>>(
+          this,
+          Invocation.getter(#queue),
+        ),
+      ) as _i4.BehaviorSubject<List<_i8.MediaItem>>);
+
+  @override
+  _i4.BehaviorSubject<String> get queueTitle => (super.noSuchMethod(
+        Invocation.getter(#queueTitle),
+        returnValue: _FakeBehaviorSubject_3<String>(
+          this,
+          Invocation.getter(#queueTitle),
+        ),
+      ) as _i4.BehaviorSubject<String>);
+
+  @override
+  _i4.BehaviorSubject<_i8.MediaItem?> get mediaItem => (super.noSuchMethod(
+        Invocation.getter(#mediaItem),
+        returnValue: _FakeBehaviorSubject_3<_i8.MediaItem?>(
+          this,
+          Invocation.getter(#mediaItem),
+        ),
+      ) as _i4.BehaviorSubject<_i8.MediaItem?>);
+
+  @override
+  _i4.BehaviorSubject<_i8.AndroidPlaybackInfo> get androidPlaybackInfo =>
+      (super.noSuchMethod(
+        Invocation.getter(#androidPlaybackInfo),
+        returnValue: _FakeBehaviorSubject_3<_i8.AndroidPlaybackInfo>(
+          this,
+          Invocation.getter(#androidPlaybackInfo),
+        ),
+      ) as _i4.BehaviorSubject<_i8.AndroidPlaybackInfo>);
+
+  @override
+  _i4.BehaviorSubject<_i8.RatingStyle> get ratingStyle => (super.noSuchMethod(
+        Invocation.getter(#ratingStyle),
+        returnValue: _FakeBehaviorSubject_3<_i8.RatingStyle>(
+          this,
+          Invocation.getter(#ratingStyle),
+        ),
+      ) as _i4.BehaviorSubject<_i8.RatingStyle>);
+
+  @override
+  _i4.PublishSubject<dynamic> get customEvent => (super.noSuchMethod(
+        Invocation.getter(#customEvent),
+        returnValue: _FakePublishSubject_4<dynamic>(
+          this,
+          Invocation.getter(#customEvent),
+        ),
+      ) as _i4.PublishSubject<dynamic>);
+
+  @override
+  _i4.BehaviorSubject<dynamic> get customState => (super.noSuchMethod(
+        Invocation.getter(#customState),
+        returnValue: _FakeBehaviorSubject_3<dynamic>(
+          this,
+          Invocation.getter(#customState),
+        ),
+      ) as _i4.BehaviorSubject<dynamic>);
+
+  @override
+  dynamic init({
+    required _i2.PlayableProvider? playableProvider,
+    required _i2.DownloadProvider? downloadProvider,
+  }) =>
+      super.noSuchMethod(Invocation.method(
+        #init,
+        [],
+        {
+          #playableProvider: playableProvider,
+          #downloadProvider: downloadProvider,
+        },
+      ));
+
+  @override
+  void enterRadioMode(_i3.AudioPlayer? radioPlayer) => super.noSuchMethod(
+        Invocation.method(
+          #enterRadioMode,
+          [radioPlayer],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void exitRadioMode() => super.noSuchMethod(
+        Invocation.method(
+          #exitRadioMode,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void updateRadioPlaybackState({
+    required bool? playing,
+    required _i8.AudioProcessingState? processingState,
+  }) =>
+      super.noSuchMethod(
+        Invocation.method(
+          #updateRadioPlaybackState,
+          [],
+          {
+            #playing: playing,
+            #processingState: processingState,
+          },
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  num? getPlaybackPositionFromState(String? playableId) =>
+      (super.noSuchMethod(Invocation.method(
+        #getPlaybackPositionFromState,
+        [playableId],
+      )) as num?);
+
+  @override
+  void setPlaybackPositionToState(
+    String? playableId,
+    num? position,
+  ) =>
+      super.noSuchMethod(
+        Invocation.method(
+          #setPlaybackPositionToState,
+          [
+            playableId,
+            position,
+          ],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  _i9.Future<void> play() => (super.noSuchMethod(
+        Invocation.method(
+          #play,
+          [],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> pause() => (super.noSuchMethod(
+        Invocation.method(
+          #pause,
+          [],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> stop() => (super.noSuchMethod(
+        Invocation.method(
+          #stop,
+          [],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> queueAndPlay(_i5.Playable<dynamic>? playable) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #queueAndPlay,
+          [playable],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> maybeQueueAndPlay(
+    _i5.Playable<dynamic>? playable, {
+    dynamic position = 0,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #maybeQueueAndPlay,
+          [playable],
+          {#position: position},
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> queueAfterCurrent(_i5.Playable<dynamic>? playable) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #queueAfterCurrent,
+          [playable],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> playOrPause() => (super.noSuchMethod(
+        Invocation.method(
+          #playOrPause,
+          [],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> skipToNext() => (super.noSuchMethod(
+        Invocation.method(
+          #skipToNext,
+          [],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> seek(Duration? position) => (super.noSuchMethod(
+        Invocation.method(
+          #seek,
+          [position],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> skipToPrevious() => (super.noSuchMethod(
+        Invocation.method(
+          #skipToPrevious,
+          [],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<bool> queued(_i5.Playable<dynamic>? playable) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #queued,
+          [playable],
+        ),
+        returnValue: _i9.Future<bool>.value(false),
+      ) as _i9.Future<bool>);
+
+  @override
+  _i9.Future<void> removeQueueItemAt(int? index) => (super.noSuchMethod(
+        Invocation.method(
+          #removeQueueItemAt,
+          [index],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  void moveQueueItem(
+    int? oldIndex,
+    int? newIndex,
+  ) =>
+      super.noSuchMethod(
+        Invocation.method(
+          #moveQueueItem,
+          [
+            oldIndex,
+            newIndex,
+          ],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  _i9.Future<void> clearQueue() => (super.noSuchMethod(
+        Invocation.method(
+          #clearQueue,
+          [],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> setVolume(double? value) => (super.noSuchMethod(
+        Invocation.method(
+          #setVolume,
+          [value],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> replaceQueue(
+    List<_i5.Playable<dynamic>>? playables, {
+    bool? shuffle = false,
+    bool? autoPlay = true,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #replaceQueue,
+          [playables],
+          {
+            #shuffle: shuffle,
+            #autoPlay: autoPlay,
+          },
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<_i8.AudioServiceRepeatMode> rotateRepeatMode() =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #rotateRepeatMode,
+          [],
+        ),
+        returnValue: _i9.Future<_i8.AudioServiceRepeatMode>.value(
+            _i8.AudioServiceRepeatMode.none),
+      ) as _i9.Future<_i8.AudioServiceRepeatMode>);
+
+  @override
+  _i9.Future<void> setRepeatMode(_i8.AudioServiceRepeatMode? repeatMode) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setRepeatMode,
+          [repeatMode],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> cleanUpUponLogout() => (super.noSuchMethod(
+        Invocation.method(
+          #cleanUpUponLogout,
+          [],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> queueToBottom(_i5.Playable<dynamic>? playable) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #queueToBottom,
+          [playable],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> removeFromQueue(_i5.Playable<dynamic>? playable) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #removeFromQueue,
+          [playable],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> prepare() => (super.noSuchMethod(
+        Invocation.method(
+          #prepare,
+          [],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> prepareFromMediaId(
+    String? mediaId, [
+    Map<String, dynamic>? extras,
+  ]) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #prepareFromMediaId,
+          [
+            mediaId,
+            extras,
+          ],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> prepareFromSearch(
+    String? query, [
+    Map<String, dynamic>? extras,
+  ]) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #prepareFromSearch,
+          [
+            query,
+            extras,
+          ],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> prepareFromUri(
+    Uri? uri, [
+    Map<String, dynamic>? extras,
+  ]) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #prepareFromUri,
+          [
+            uri,
+            extras,
+          ],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> playFromMediaId(
+    String? mediaId, [
+    Map<String, dynamic>? extras,
+  ]) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #playFromMediaId,
+          [
+            mediaId,
+            extras,
+          ],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> playFromSearch(
+    String? query, [
+    Map<String, dynamic>? extras,
+  ]) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #playFromSearch,
+          [
+            query,
+            extras,
+          ],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> playFromUri(
+    Uri? uri, [
+    Map<String, dynamic>? extras,
+  ]) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #playFromUri,
+          [
+            uri,
+            extras,
+          ],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> playMediaItem(_i8.MediaItem? mediaItem) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #playMediaItem,
+          [mediaItem],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> click([_i8.MediaButton? button = _i8.MediaButton.media]) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #click,
+          [button],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> addQueueItem(_i8.MediaItem? mediaItem) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #addQueueItem,
+          [mediaItem],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> addQueueItems(List<_i8.MediaItem>? mediaItems) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #addQueueItems,
+          [mediaItems],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> insertQueueItem(
+    int? index,
+    _i8.MediaItem? mediaItem,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #insertQueueItem,
+          [
+            index,
+            mediaItem,
+          ],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> updateQueue(List<_i8.MediaItem>? queue) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #updateQueue,
+          [queue],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> updateMediaItem(_i8.MediaItem? mediaItem) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #updateMediaItem,
+          [mediaItem],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> removeQueueItem(_i8.MediaItem? mediaItem) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #removeQueueItem,
+          [mediaItem],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> fastForward() => (super.noSuchMethod(
+        Invocation.method(
+          #fastForward,
+          [],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> rewind() => (super.noSuchMethod(
+        Invocation.method(
+          #rewind,
+          [],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> skipToQueueItem(int? index) => (super.noSuchMethod(
+        Invocation.method(
+          #skipToQueueItem,
+          [index],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> setRating(
+    _i8.Rating? rating, [
+    Map<String, dynamic>? extras,
+  ]) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setRating,
+          [
+            rating,
+            extras,
+          ],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> setCaptioningEnabled(bool? enabled) => (super.noSuchMethod(
+        Invocation.method(
+          #setCaptioningEnabled,
+          [enabled],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> setShuffleMode(_i8.AudioServiceShuffleMode? shuffleMode) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setShuffleMode,
+          [shuffleMode],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> seekBackward(bool? begin) => (super.noSuchMethod(
+        Invocation.method(
+          #seekBackward,
+          [begin],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> seekForward(bool? begin) => (super.noSuchMethod(
+        Invocation.method(
+          #seekForward,
+          [begin],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> setSpeed(double? speed) => (super.noSuchMethod(
+        Invocation.method(
+          #setSpeed,
+          [speed],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<dynamic> customAction(
+    String? name, [
+    Map<String, dynamic>? extras,
+  ]) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #customAction,
+          [
+            name,
+            extras,
+          ],
+        ),
+        returnValue: _i9.Future<dynamic>.value(),
+      ) as _i9.Future<dynamic>);
+
+  @override
+  _i9.Future<void> onTaskRemoved() => (super.noSuchMethod(
+        Invocation.method(
+          #onTaskRemoved,
+          [],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> onNotificationDeleted() => (super.noSuchMethod(
+        Invocation.method(
+          #onNotificationDeleted,
+          [],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<List<_i8.MediaItem>> getChildren(
+    String? parentMediaId, [
+    Map<String, dynamic>? options,
+  ]) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getChildren,
+          [
+            parentMediaId,
+            options,
+          ],
+        ),
+        returnValue: _i9.Future<List<_i8.MediaItem>>.value(<_i8.MediaItem>[]),
+      ) as _i9.Future<List<_i8.MediaItem>>);
+
+  @override
+  _i4.ValueStream<Map<String, dynamic>> subscribeToChildren(
+          String? parentMediaId) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #subscribeToChildren,
+          [parentMediaId],
+        ),
+        returnValue: _FakeValueStream_5<Map<String, dynamic>>(
+          this,
+          Invocation.method(
+            #subscribeToChildren,
+            [parentMediaId],
+          ),
+        ),
+      ) as _i4.ValueStream<Map<String, dynamic>>);
+
+  @override
+  _i9.Future<_i8.MediaItem?> getMediaItem(String? mediaId) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getMediaItem,
+          [mediaId],
+        ),
+        returnValue: _i9.Future<_i8.MediaItem?>.value(),
+      ) as _i9.Future<_i8.MediaItem?>);
+
+  @override
+  _i9.Future<List<_i8.MediaItem>> search(
+    String? query, [
+    Map<String, dynamic>? extras,
+  ]) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #search,
+          [
+            query,
+            extras,
+          ],
+        ),
+        returnValue: _i9.Future<List<_i8.MediaItem>>.value(<_i8.MediaItem>[]),
+      ) as _i9.Future<List<_i8.MediaItem>>);
+
+  @override
+  _i9.Future<void> androidAdjustRemoteVolume(
+          _i8.AndroidVolumeDirection? direction) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #androidAdjustRemoteVolume,
+          [direction],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
+
+  @override
+  _i9.Future<void> androidSetRemoteVolume(int? volumeIndex) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #androidSetRemoteVolume,
+          [volumeIndex],
+        ),
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
 }
 
 /// A class which mocks [AlbumProvider].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAlbumProvider extends _i1.Mock implements _i4.AlbumProvider {
+class MockAlbumProvider extends _i1.Mock implements _i2.AlbumProvider {
   MockAlbumProvider() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  List<_i2.Album> get albums => (super.noSuchMethod(
+  List<_i5.Album> get albums => (super.noSuchMethod(
         Invocation.getter(#albums),
-        returnValue: <_i2.Album>[],
-      ) as List<_i2.Album>);
+        returnValue: <_i5.Album>[],
+      ) as List<_i5.Album>);
 
   @override
   String get sortField => (super.noSuchMethod(
         Invocation.getter(#sortField),
-        returnValue: _i5.dummyValue<String>(
+        returnValue: _i10.dummyValue<String>(
           this,
           Invocation.getter(#sortField),
         ),
       ) as String);
 
   @override
-  _i6.SortOrder get sortOrder => (super.noSuchMethod(
+  _i11.SortOrder get sortOrder => (super.noSuchMethod(
         Invocation.getter(#sortOrder),
-        returnValue: _i6.SortOrder.asc,
-      ) as _i6.SortOrder);
+        returnValue: _i11.SortOrder.asc,
+      ) as _i11.SortOrder);
 
   @override
-  set albums(List<_i2.Album>? _albums) => super.noSuchMethod(
+  set albums(List<_i5.Album>? _albums) => super.noSuchMethod(
         Invocation.setter(
           #albums,
           _albums,
@@ -96,7 +1052,7 @@ class MockAlbumProvider extends _i1.Mock implements _i4.AlbumProvider {
       );
 
   @override
-  set sortOrder(_i6.SortOrder? order) => super.noSuchMethod(
+  set sortOrder(_i11.SortOrder? order) => super.noSuchMethod(
         Invocation.setter(
           #sortOrder,
           order,
@@ -111,16 +1067,16 @@ class MockAlbumProvider extends _i1.Mock implements _i4.AlbumProvider {
       ) as bool);
 
   @override
-  List<_i2.Album> byIds(List<dynamic>? ids) => (super.noSuchMethod(
+  List<_i5.Album> byIds(List<dynamic>? ids) => (super.noSuchMethod(
         Invocation.method(
           #byIds,
           [ids],
         ),
-        returnValue: <_i2.Album>[],
-      ) as List<_i2.Album>);
+        returnValue: <_i5.Album>[],
+      ) as List<_i5.Album>);
 
   @override
-  _i7.Future<_i2.Album> resolve(
+  _i9.Future<_i5.Album> resolve(
     dynamic id, {
     bool? forceRefresh = false,
   }) =>
@@ -130,7 +1086,7 @@ class MockAlbumProvider extends _i1.Mock implements _i4.AlbumProvider {
           [id],
           {#forceRefresh: forceRefresh},
         ),
-        returnValue: _i7.Future<_i2.Album>.value(_FakeAlbum_0(
+        returnValue: _i9.Future<_i5.Album>.value(_FakeAlbum_6(
           this,
           Invocation.method(
             #resolve,
@@ -138,50 +1094,50 @@ class MockAlbumProvider extends _i1.Mock implements _i4.AlbumProvider {
             {#forceRefresh: forceRefresh},
           ),
         )),
-      ) as _i7.Future<_i2.Album>);
+      ) as _i9.Future<_i5.Album>);
 
   @override
-  List<_i2.Album> syncWithVault(dynamic _albums) => (super.noSuchMethod(
+  List<_i5.Album> syncWithVault(dynamic _albums) => (super.noSuchMethod(
         Invocation.method(
           #syncWithVault,
           [_albums],
         ),
-        returnValue: <_i2.Album>[],
-      ) as List<_i2.Album>);
+        returnValue: <_i5.Album>[],
+      ) as List<_i5.Album>);
 
   @override
-  _i7.Future<void> paginate() => (super.noSuchMethod(
+  _i9.Future<void> paginate() => (super.noSuchMethod(
         Invocation.method(
           #paginate,
           [],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
 
   @override
-  _i7.Future<void> refresh() => (super.noSuchMethod(
+  _i9.Future<void> refresh() => (super.noSuchMethod(
         Invocation.method(
           #refresh,
           [],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
 
   @override
-  _i7.Future<void> toggleFavorite(_i2.Album? album) => (super.noSuchMethod(
+  _i9.Future<void> toggleFavorite(_i5.Album? album) => (super.noSuchMethod(
         Invocation.method(
           #toggleFavorite,
           [album],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
 
   @override
-  _i7.Future<void> update(
-    _i2.Album? album, {
+  _i9.Future<void> update(
+    _i5.Album? album, {
     required String? name,
     int? year,
   }) =>
@@ -194,12 +1150,12 @@ class MockAlbumProvider extends _i1.Mock implements _i4.AlbumProvider {
             #year: year,
           },
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i9.Future<void>.value(),
+        returnValueForMissingStub: _i9.Future<void>.value(),
+      ) as _i9.Future<void>);
 
   @override
-  void addListener(_i8.VoidCallback? listener) => super.noSuchMethod(
+  void addListener(_i12.VoidCallback? listener) => super.noSuchMethod(
         Invocation.method(
           #addListener,
           [listener],
@@ -208,7 +1164,7 @@ class MockAlbumProvider extends _i1.Mock implements _i4.AlbumProvider {
       );
 
   @override
-  void removeListener(_i8.VoidCallback? listener) => super.noSuchMethod(
+  void removeListener(_i12.VoidCallback? listener) => super.noSuchMethod(
         Invocation.method(
           #removeListener,
           [listener],
@@ -244,7 +1200,7 @@ class MockAlbumProvider extends _i1.Mock implements _i4.AlbumProvider {
       );
 
   @override
-  void subscribe(_i7.StreamSubscription<dynamic>? sub) => super.noSuchMethod(
+  void subscribe(_i9.StreamSubscription<dynamic>? sub) => super.noSuchMethod(
         Invocation.method(
           #subscribe,
           [sub],
@@ -256,19 +1212,19 @@ class MockAlbumProvider extends _i1.Mock implements _i4.AlbumProvider {
 /// A class which mocks [PlayableProvider].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockPlayableProvider extends _i1.Mock implements _i4.PlayableProvider {
+class MockPlayableProvider extends _i1.Mock implements _i2.PlayableProvider {
   MockPlayableProvider() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  List<_i2.Playable<dynamic>> get playables => (super.noSuchMethod(
+  List<_i5.Playable<dynamic>> get playables => (super.noSuchMethod(
         Invocation.getter(#playables),
-        returnValue: <_i2.Playable<dynamic>>[],
-      ) as List<_i2.Playable<dynamic>>);
+        returnValue: <_i5.Playable<dynamic>>[],
+      ) as List<_i5.Playable<dynamic>>);
 
   @override
-  set playables(List<_i2.Playable<dynamic>>? _playables) => super.noSuchMethod(
+  set playables(List<_i5.Playable<dynamic>>? _playables) => super.noSuchMethod(
         Invocation.setter(
           #playables,
           _playables,
@@ -283,43 +1239,43 @@ class MockPlayableProvider extends _i1.Mock implements _i4.PlayableProvider {
       ) as bool);
 
   @override
-  List<_i2.Playable<dynamic>> syncWithVault(dynamic _playables) =>
+  List<_i5.Playable<dynamic>> syncWithVault(dynamic _playables) =>
       (super.noSuchMethod(
         Invocation.method(
           #syncWithVault,
           [_playables],
         ),
-        returnValue: <_i2.Playable<dynamic>>[],
-      ) as List<_i2.Playable<dynamic>>);
+        returnValue: <_i5.Playable<dynamic>>[],
+      ) as List<_i5.Playable<dynamic>>);
 
   @override
-  _i2.Playable<dynamic>? byId(String? id) =>
+  _i5.Playable<dynamic>? byId(String? id) =>
       (super.noSuchMethod(Invocation.method(
         #byId,
         [id],
-      )) as _i2.Playable<dynamic>?);
+      )) as _i5.Playable<dynamic>?);
 
   @override
-  _i7.Future<_i3.PaginationResult<_i2.Playable<dynamic>>> paginate(
-          _i4.PlayablePaginationConfig? config) =>
+  _i9.Future<_i6.PaginationResult<_i5.Playable<dynamic>>> paginate(
+          _i2.PlayablePaginationConfig? config) =>
       (super.noSuchMethod(
         Invocation.method(
           #paginate,
           [config],
         ),
         returnValue:
-            _i7.Future<_i3.PaginationResult<_i2.Playable<dynamic>>>.value(
-                _FakePaginationResult_1<_i2.Playable<dynamic>>(
+            _i9.Future<_i6.PaginationResult<_i5.Playable<dynamic>>>.value(
+                _FakePaginationResult_7<_i5.Playable<dynamic>>(
           this,
           Invocation.method(
             #paginate,
             [config],
           ),
         )),
-      ) as _i7.Future<_i3.PaginationResult<_i2.Playable<dynamic>>>);
+      ) as _i9.Future<_i6.PaginationResult<_i5.Playable<dynamic>>>);
 
   @override
-  _i7.Future<List<_i2.Playable<dynamic>>> fetchForArtist(
+  _i9.Future<List<_i5.Playable<dynamic>>> fetchForArtist(
     dynamic artistId, {
     bool? forceRefresh = false,
   }) =>
@@ -329,16 +1285,16 @@ class MockPlayableProvider extends _i1.Mock implements _i4.PlayableProvider {
           [artistId],
           {#forceRefresh: forceRefresh},
         ),
-        returnValue: _i7.Future<List<_i2.Playable<dynamic>>>.value(
-            <_i2.Playable<dynamic>>[]),
-      ) as _i7.Future<List<_i2.Playable<dynamic>>>);
+        returnValue: _i9.Future<List<_i5.Playable<dynamic>>>.value(
+            <_i5.Playable<dynamic>>[]),
+      ) as _i9.Future<List<_i5.Playable<dynamic>>>);
 
   @override
-  _i7.Future<_i3.PaginationResult<_i2.Playable<dynamic>>> paginateByGenre(
+  _i9.Future<_i6.PaginationResult<_i5.Playable<dynamic>>> paginateByGenre(
     String? genreId, {
     int? page = 1,
     String? sort = 'title',
-    _i6.SortOrder? order = _i6.SortOrder.asc,
+    _i11.SortOrder? order = _i11.SortOrder.asc,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -351,8 +1307,8 @@ class MockPlayableProvider extends _i1.Mock implements _i4.PlayableProvider {
           },
         ),
         returnValue:
-            _i7.Future<_i3.PaginationResult<_i2.Playable<dynamic>>>.value(
-                _FakePaginationResult_1<_i2.Playable<dynamic>>(
+            _i9.Future<_i6.PaginationResult<_i5.Playable<dynamic>>>.value(
+                _FakePaginationResult_7<_i5.Playable<dynamic>>(
           this,
           Invocation.method(
             #paginateByGenre,
@@ -364,10 +1320,10 @@ class MockPlayableProvider extends _i1.Mock implements _i4.PlayableProvider {
             },
           ),
         )),
-      ) as _i7.Future<_i3.PaginationResult<_i2.Playable<dynamic>>>);
+      ) as _i9.Future<_i6.PaginationResult<_i5.Playable<dynamic>>>);
 
   @override
-  _i7.Future<List<_i2.Playable<dynamic>>> fetchForAlbum(
+  _i9.Future<List<_i5.Playable<dynamic>>> fetchForAlbum(
     dynamic albumId, {
     bool? forceRefresh = false,
   }) =>
@@ -377,12 +1333,12 @@ class MockPlayableProvider extends _i1.Mock implements _i4.PlayableProvider {
           [albumId],
           {#forceRefresh: forceRefresh},
         ),
-        returnValue: _i7.Future<List<_i2.Playable<dynamic>>>.value(
-            <_i2.Playable<dynamic>>[]),
-      ) as _i7.Future<List<_i2.Playable<dynamic>>>);
+        returnValue: _i9.Future<List<_i5.Playable<dynamic>>>.value(
+            <_i5.Playable<dynamic>>[]),
+      ) as _i9.Future<List<_i5.Playable<dynamic>>>);
 
   @override
-  _i7.Future<List<_i2.Playable<dynamic>>> fetchForPlaylist(
+  _i9.Future<List<_i5.Playable<dynamic>>> fetchForPlaylist(
     dynamic playlistId, {
     bool? forceRefresh = false,
   }) =>
@@ -392,12 +1348,12 @@ class MockPlayableProvider extends _i1.Mock implements _i4.PlayableProvider {
           [playlistId],
           {#forceRefresh: forceRefresh},
         ),
-        returnValue: _i7.Future<List<_i2.Playable<dynamic>>>.value(
-            <_i2.Playable<dynamic>>[]),
-      ) as _i7.Future<List<_i2.Playable<dynamic>>>);
+        returnValue: _i9.Future<List<_i5.Playable<dynamic>>>.value(
+            <_i5.Playable<dynamic>>[]),
+      ) as _i9.Future<List<_i5.Playable<dynamic>>>);
 
   @override
-  _i7.Future<List<_i2.Playable<dynamic>>> fetchForPodcast(
+  _i9.Future<List<_i5.Playable<dynamic>>> fetchForPodcast(
     String? podcastId, {
     bool? forceRefresh = false,
     bool? getUpdates = false,
@@ -411,26 +1367,26 @@ class MockPlayableProvider extends _i1.Mock implements _i4.PlayableProvider {
             #getUpdates: getUpdates,
           },
         ),
-        returnValue: _i7.Future<List<_i2.Playable<dynamic>>>.value(
-            <_i2.Playable<dynamic>>[]),
-      ) as _i7.Future<List<_i2.Playable<dynamic>>>);
+        returnValue: _i9.Future<List<_i5.Playable<dynamic>>>.value(
+            <_i5.Playable<dynamic>>[]),
+      ) as _i9.Future<List<_i5.Playable<dynamic>>>);
 
   @override
-  _i7.Future<List<_i2.Playable<dynamic>>> fetchRandom({int? limit = 500}) =>
+  _i9.Future<List<_i5.Playable<dynamic>>> fetchRandom({int? limit = 500}) =>
       (super.noSuchMethod(
         Invocation.method(
           #fetchRandom,
           [],
           {#limit: limit},
         ),
-        returnValue: _i7.Future<List<_i2.Playable<dynamic>>>.value(
-            <_i2.Playable<dynamic>>[]),
-      ) as _i7.Future<List<_i2.Playable<dynamic>>>);
+        returnValue: _i9.Future<List<_i5.Playable<dynamic>>>.value(
+            <_i5.Playable<dynamic>>[]),
+      ) as _i9.Future<List<_i5.Playable<dynamic>>>);
 
   @override
-  _i7.Future<List<_i2.Playable<dynamic>>> fetchInOrder({
+  _i9.Future<List<_i5.Playable<dynamic>>> fetchInOrder({
     String? sortField = 'title',
-    _i6.SortOrder? order = _i6.SortOrder.asc,
+    _i11.SortOrder? order = _i11.SortOrder.asc,
     int? limit = 500,
   }) =>
       (super.noSuchMethod(
@@ -443,22 +1399,22 @@ class MockPlayableProvider extends _i1.Mock implements _i4.PlayableProvider {
             #limit: limit,
           },
         ),
-        returnValue: _i7.Future<List<_i2.Playable<dynamic>>>.value(
-            <_i2.Playable<dynamic>>[]),
-      ) as _i7.Future<List<_i2.Playable<dynamic>>>);
+        returnValue: _i9.Future<List<_i5.Playable<dynamic>>>.value(
+            <_i5.Playable<dynamic>>[]),
+      ) as _i9.Future<List<_i5.Playable<dynamic>>>);
 
   @override
-  List<_i2.Playable<dynamic>> parseFromJson(dynamic json) =>
+  List<_i5.Playable<dynamic>> parseFromJson(dynamic json) =>
       (super.noSuchMethod(
         Invocation.method(
           #parseFromJson,
           [json],
         ),
-        returnValue: <_i2.Playable<dynamic>>[],
-      ) as List<_i2.Playable<dynamic>>);
+        returnValue: <_i5.Playable<dynamic>>[],
+      ) as List<_i5.Playable<dynamic>>);
 
   @override
-  void addListener(_i8.VoidCallback? listener) => super.noSuchMethod(
+  void addListener(_i12.VoidCallback? listener) => super.noSuchMethod(
         Invocation.method(
           #addListener,
           [listener],
@@ -467,7 +1423,7 @@ class MockPlayableProvider extends _i1.Mock implements _i4.PlayableProvider {
       );
 
   @override
-  void removeListener(_i8.VoidCallback? listener) => super.noSuchMethod(
+  void removeListener(_i12.VoidCallback? listener) => super.noSuchMethod(
         Invocation.method(
           #removeListener,
           [listener],
@@ -503,7 +1459,7 @@ class MockPlayableProvider extends _i1.Mock implements _i4.PlayableProvider {
       );
 
   @override
-  void subscribe(_i7.StreamSubscription<dynamic>? sub) => super.noSuchMethod(
+  void subscribe(_i9.StreamSubscription<dynamic>? sub) => super.noSuchMethod(
         Invocation.method(
           #subscribe,
           [sub],
