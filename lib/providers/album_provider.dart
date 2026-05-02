@@ -115,7 +115,7 @@ class AlbumProvider with ChangeNotifier, StreamSubscriber {
 
     try {
       await post('favorites/toggle', data: {
-        'type': 'albums',
+        'type': 'album',
         'id': album.id,
       });
     } catch (_) {
