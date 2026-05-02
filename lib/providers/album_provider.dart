@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:app/enums.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
+import 'package:app/providers/artist_provider.dart';
 import 'package:app/providers/auth_provider.dart';
 import 'package:app/utils/api_request.dart';
 import 'package:flutter/foundation.dart';
@@ -11,6 +14,12 @@ class AlbumProvider with ChangeNotifier, StreamSubscriber {
   var _page = 1;
   var _sortField = 'name';
   var _sortOrder = SortOrder.asc;
+
+  /// Fires after [update] mutates an album in place. Other providers
+  /// (e.g. PlayableProvider) listen to keep their denormalised
+  /// `albumName` fields in sync.
+  static final _renamedController = StreamController<Album>.broadcast();
+  static final renamedStream = _renamedController.stream;
 
   String get sortField => _sortField;
   SortOrder get sortOrder => _sortOrder;
@@ -36,6 +45,19 @@ class AlbumProvider with ChangeNotifier, StreamSubscriber {
 
       notifyListeners();
     }));
+
+    subscribe(ArtistProvider.renamedStream.listen(_onArtistRenamed));
+  }
+
+  void _onArtistRenamed(Artist artist) {
+    var changed = false;
+    for (final album in _vault.values) {
+      if (album.artistId == artist.id && album.artistName != artist.name) {
+        album.artistName = artist.name;
+        changed = true;
+      }
+    }
+    if (changed) notifyListeners();
   }
 
   List<Album> byIds(List<dynamic> ids) {
@@ -135,6 +157,8 @@ class AlbumProvider with ChangeNotifier, StreamSubscriber {
       'year': year,
     });
 
+    final renamed = album.name != response['name'];
+
     album
       ..name = response['name']
       ..year = response['year'] == null
@@ -142,5 +166,7 @@ class AlbumProvider with ChangeNotifier, StreamSubscriber {
           : int.parse(response['year'].toString());
 
     notifyListeners();
+
+    if (renamed) _renamedController.add(album);
   }
 }

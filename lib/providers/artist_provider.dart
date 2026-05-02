@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/enums.dart';
 import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
@@ -11,6 +13,12 @@ class ArtistProvider with ChangeNotifier, StreamSubscriber {
   var _page = 1;
   var _sortField = 'name';
   var _sortOrder = SortOrder.asc;
+
+  /// Fires after [update] mutates an artist in place. Other providers
+  /// (PlayableProvider, AlbumProvider) listen to keep their
+  /// denormalised `artistName` / `albumArtistName` fields in sync.
+  static final _renamedController = StreamController<Artist>.broadcast();
+  static final renamedStream = _renamedController.stream;
 
   String get sortField => _sortField;
   SortOrder get sortOrder => _sortOrder;
@@ -130,8 +138,12 @@ class ArtistProvider with ChangeNotifier, StreamSubscriber {
       'name': name,
     });
 
+    final renamed = artist.name != response['name'];
+
     artist.name = response['name'];
 
     notifyListeners();
+
+    if (renamed) _renamedController.add(artist);
   }
 }
