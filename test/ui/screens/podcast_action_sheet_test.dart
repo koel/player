@@ -57,12 +57,13 @@ void main() {
   });
 
   Future<void> mount(WidgetTester tester, Podcast podcast) async {
-    // MultiProvider must sit ABOVE the MaterialApp/Navigator so that
-    // contexts captured via Navigator.of(rootNavigator: true) can walk
-    // up to find the providers — mirrors production wiring in main.dart
-    // (`runApp(MultiProvider(... child: App()))`). The default
-    // pumpAppWidget puts providers below the Navigator, which would
-    // break tests that rely on a stable post-pop overlay context.
+    // Mirror production wiring:
+    //  - MultiProvider sits ABOVE MaterialApp so contexts captured via
+    //    `Navigator.of(rootNavigator: true)` can find the providers.
+    //  - The sheet is pushed via `showModalBottomSheet` rather than
+    //    rendered as `home`, so `Navigator.pop` actually pops the
+    //    modal route and the suite exercises the real route boundary
+    //    that the post-pop toast logic depends on.
     await tester.binding.setSurfaceSize(const Size(375, 812));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -77,10 +78,25 @@ void main() {
           ),
         ],
         child: MaterialApp(
-          home: Material(child: PodcastActionSheet(podcast: podcast)),
+          home: Builder(
+            builder: (context) => Material(
+              child: TextButton(
+                onPressed: () => showModalBottomSheet<void>(
+                  context: context,
+                  useRootNavigator: true,
+                  isScrollControlled: true,
+                  builder: (_) => PodcastActionSheet(podcast: podcast),
+                ),
+                child: const Text('Open sheet'),
+              ),
+            ),
+          ),
         ),
       ),
     );
+
+    await tester.tap(find.text('Open sheet'));
+    await tester.pumpAndSettle();
   }
 
   group('structure', () {
