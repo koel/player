@@ -131,8 +131,8 @@ void main() {
         ..willReturn(status: 422, json: {'message': 'nope'})
         ..install();
 
-      expect(
-        () => api.post('favorites/toggle', data: {}),
+      await expectLater(
+        api.post('favorites/toggle', data: {}),
         throwsA(isA<HttpResponseException>()),
       );
     });
