@@ -84,7 +84,16 @@ class _ArtistActionSheetState extends State<ArtistActionSheet> {
                                 : CupertinoIcons.star),
                             onTap: () {
                               Navigator.pop(context);
-                              artistProvider.toggleFavorite(artist);
+                              // toggleFavorite rethrows on failure (after
+                              // rolling back the optimistic flip
+                              // internally). The sheet has just been
+                              // popped, so swallow here to avoid an
+                              // unhandled async error — the UI auto-
+                              // corrects from the rollback's
+                              // notifyListeners.
+                              artistProvider
+                                  .toggleFavorite(artist)
+                                  .catchError((_) {});
                             },
                           ),
                           const PlayableQuickActionDivider(),
