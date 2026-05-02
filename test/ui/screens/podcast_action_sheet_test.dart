@@ -7,6 +7,7 @@ import 'package:app/providers/playable_provider.dart';
 import 'package:app/providers/podcast_provider.dart';
 import 'package:app/ui/screens/podcast_action_sheet.dart';
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -77,6 +78,62 @@ void main() {
 
       expect(find.text('My Show'), findsOneWidget);
       expect(find.text('Jane Doe'), findsOneWidget);
+    });
+
+    testWidgets('renders description, capped at 3 lines with ellipsis',
+        (tester) async {
+      // A long description so we can assert truncation actually applies.
+      const description =
+          'A long-running show about coffee, code, and everything in '
+          'between. Each episode dives into a different topic from the '
+          'industry, with guests, interviews, and stories from listeners. '
+          'The hosts have been at it for years and have hundreds of '
+          'episodes to show for it, covering every corner of the field.';
+      final podcast = Podcast.fake(title: 'My Show');
+      // description is final on the model; build a podcast with it via
+      // the named ctor below.
+      final p = Podcast(
+        id: podcast.id,
+        title: podcast.title,
+        url: podcast.url,
+        link: podcast.link,
+        description: description,
+        author: podcast.author,
+        imageUrl: podcast.imageUrl,
+        subscribedAt: podcast.subscribedAt,
+        lastPlayedAt: podcast.lastPlayedAt,
+        state: podcast.state,
+      );
+
+      await mount(tester, p);
+
+      final descFinder = find.text(description);
+      expect(descFinder, findsOneWidget);
+      final widget = tester.widget<Text>(descFinder);
+      expect(widget.maxLines, 3);
+      expect(widget.overflow, TextOverflow.ellipsis);
+    });
+
+    testWidgets('omits description when empty', (tester) async {
+      final base = Podcast.fake();
+      final p = Podcast(
+        id: base.id,
+        title: base.title,
+        url: base.url,
+        link: base.link,
+        description: '',
+        author: base.author,
+        imageUrl: base.imageUrl,
+        subscribedAt: base.subscribedAt,
+        lastPlayedAt: base.lastPlayedAt,
+        state: base.state,
+      );
+
+      await mount(tester, p);
+
+      // No empty Text widget gets rendered for the description slot.
+      // (Title + author + the action labels are still present.)
+      expect(find.text(''), findsNothing);
     });
 
     testWidgets(

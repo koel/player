@@ -83,6 +83,23 @@ class _PodcastActionSheetState extends State<PodcastActionSheet> {
                     style: const TextStyle(color: Colors.white54),
                   ),
                 ),
+                if (podcast.description.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Text(
+                      podcast.description,
+                      textAlign: TextAlign.center,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white38,
+                        fontSize: 13,
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
             Column(
