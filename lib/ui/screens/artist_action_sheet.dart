@@ -5,7 +5,6 @@ import 'package:app/ui/screens/edit_artist_sheet.dart';
 import 'package:app/ui/screens/playable_action_sheet.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:app/utils/features.dart';
-import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -41,11 +40,7 @@ class _ArtistActionSheetState extends State<ArtistActionSheet> {
             const SizedBox.shrink(),
             Column(
               children: [
-                ClipSmoothRect(
-                  radius: SmoothBorderRadius(
-                    cornerRadius: 24,
-                    cornerSmoothing: .8,
-                  ),
+                ClipOval(
                   child: Image(
                     image: artist.image,
                     width: 192,
