@@ -1,3 +1,4 @@
+import 'package:app/app_state.dart';
 import 'package:app/audio_handler.dart';
 import 'package:app/main.dart' as app;
 import 'package:app/models/album.dart';
@@ -12,6 +13,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:version/version.dart';
 
 import '../../extensions/widget_tester_extension.dart';
 import 'album_action_sheet_test.mocks.dart';
@@ -24,6 +26,11 @@ void main() {
   late BehaviorSubject<MediaItem?> mediaItemSubject;
 
   setUp(() {
+    AppState.clear();
+    // Default to a koel version where the per-entity favorite feature
+    // is supported; individual tests override when they need older.
+    AppState.set(['app', 'apiVersion'], Version.parse('7.11.0'));
+
     audioHandlerMock = MockKoelAudioHandler();
     albumProviderMock = MockAlbumProvider();
     playableProviderMock = MockPlayableProvider();
@@ -126,6 +133,21 @@ void main() {
       await mount(tester, album);
       expect(find.text('Go to Artist'), findsOneWidget);
     });
+
+    testWidgets(
+      'hides Favorite when the koel version is below 7.11.0',
+      (tester) async {
+        AppState.set(['app', 'apiVersion'], Version.parse('7.10.0'));
+
+        await mount(tester, Album.fake(name: 'A'));
+
+        expect(find.text('Favorite'), findsNothing);
+        expect(find.text('Undo Favorite'), findsNothing);
+        // The other two stay.
+        expect(find.text('Play All'), findsOneWidget);
+        expect(find.text('Shuffle All'), findsOneWidget);
+      },
+    );
   });
 
   group('actions', () {

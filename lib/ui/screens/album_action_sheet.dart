@@ -5,6 +5,7 @@ import 'package:app/router.dart';
 import 'package:app/ui/screens/edit_album_sheet.dart';
 import 'package:app/ui/screens/playable_action_sheet.dart';
 import 'package:app/ui/widgets/widgets.dart';
+import 'package:app/utils/features.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,8 @@ class _AlbumActionSheetState extends State<AlbumActionSheet> {
     // to navigate to (i.e., not Unknown / Various).
     final showGoToArtist = album.artistName != 'Unknown Artist' &&
         album.artistName != 'Various Artists';
+    // Favoriting non-song entities only landed in koel 7.11.0.
+    final showFavorite = Feature.favoriteEntities.isSupported();
 
     return FrostedGlassBackground(
       sigma: 40.0,
@@ -91,18 +94,21 @@ class _AlbumActionSheetState extends State<AlbumActionSheet> {
                   child: IntrinsicHeight(
                     child: Row(
                       children: [
-                        PlayableQuickAction(
-                          label:
-                              album.favorite ? 'Undo Favorite' : 'Favorite',
-                          icon: Icon(album.favorite
-                              ? CupertinoIcons.star_fill
-                              : CupertinoIcons.star),
-                          onTap: () {
-                            Navigator.pop(context);
-                            albumProvider.toggleFavorite(album);
-                          },
-                        ),
-                        const PlayableQuickActionDivider(),
+                        if (showFavorite) ...[
+                          PlayableQuickAction(
+                            label: album.favorite
+                                ? 'Undo Favorite'
+                                : 'Favorite',
+                            icon: Icon(album.favorite
+                                ? CupertinoIcons.star_fill
+                                : CupertinoIcons.star),
+                            onTap: () {
+                              Navigator.pop(context);
+                              albumProvider.toggleFavorite(album);
+                            },
+                          ),
+                          const PlayableQuickActionDivider(),
+                        ],
                         PlayableQuickAction(
                           label: 'Play All',
                           icon: const Icon(CupertinoIcons.play_fill),

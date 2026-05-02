@@ -27,6 +27,27 @@ void main() {
     });
   });
 
+  group('Feature.favoriteEntities', () {
+    test('is supported when API version is 7.11.0', () {
+      AppState.set(['app', 'apiVersion'], Version.parse('7.11.0'));
+      expect(Feature.favoriteEntities.isSupported(), isTrue);
+    });
+
+    test('is supported when API version is above 7.11.0', () {
+      AppState.set(['app', 'apiVersion'], Version.parse('7.13.0'));
+      expect(Feature.favoriteEntities.isSupported(), isTrue);
+    });
+
+    test('is not supported when API version is below 7.11.0', () {
+      AppState.set(['app', 'apiVersion'], Version.parse('7.10.0'));
+      expect(Feature.favoriteEntities.isSupported(), isFalse);
+    });
+
+    test('is not supported when API version is not set', () {
+      expect(Feature.favoriteEntities.isSupported(), isFalse);
+    });
+  });
+
   group('Feature.podcasts', () {
     test('is supported when API version is 7.0.0 or above', () {
       AppState.set(['app', 'apiVersion'], Version.parse('7.0.0'));
