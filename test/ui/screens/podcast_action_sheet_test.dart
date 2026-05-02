@@ -1,0 +1,284 @@
+import 'package:app/app_state.dart';
+import 'package:app/audio_handler.dart';
+import 'package:app/main.dart' as app;
+import 'package:app/models/podcast.dart';
+import 'package:app/models/song.dart';
+import 'package:app/providers/playable_provider.dart';
+import 'package:app/providers/podcast_provider.dart';
+import 'package:app/ui/screens/podcast_action_sheet.dart';
+import 'package:audio_service/audio_service.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:version/version.dart';
+
+import '../../extensions/widget_tester_extension.dart';
+import 'podcast_action_sheet_test.mocks.dart';
+
+@GenerateMocks([KoelAudioHandler, PodcastProvider, PlayableProvider])
+void main() {
+  late MockKoelAudioHandler audioHandlerMock;
+  late MockPodcastProvider podcastProviderMock;
+  late MockPlayableProvider playableProviderMock;
+  late BehaviorSubject<MediaItem?> mediaItemSubject;
+
+  setUp(() {
+    AppState.clear();
+    AppState.set(['app', 'apiVersion'], Version.parse('7.11.0'));
+
+    audioHandlerMock = MockKoelAudioHandler();
+    podcastProviderMock = MockPodcastProvider();
+    playableProviderMock = MockPlayableProvider();
+
+    mediaItemSubject = BehaviorSubject<MediaItem?>.seeded(null);
+    when(audioHandlerMock.mediaItem).thenAnswer((_) => mediaItemSubject);
+    when(audioHandlerMock.queued(any)).thenAnswer((_) async => false);
+    when(audioHandlerMock.queueAfterCurrent(any)).thenAnswer((_) async {});
+    when(audioHandlerMock.queueToBottom(any)).thenAnswer((_) async {});
+    when(audioHandlerMock.replaceQueue(
+      any,
+      shuffle: anyNamed('shuffle'),
+      autoPlay: anyNamed('autoPlay'),
+    )).thenAnswer((_) async {});
+    when(audioHandlerMock.maybeQueueAndPlay(any))
+        .thenAnswer((_) async {});
+
+    app.audioHandler = audioHandlerMock;
+  });
+
+  tearDown(() {
+    mediaItemSubject.close();
+  });
+
+  Future<void> mount(WidgetTester tester, Podcast podcast) async {
+    await tester.pumpAppWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<PodcastProvider>.value(
+            value: podcastProviderMock,
+          ),
+          ChangeNotifierProvider<PlayableProvider>.value(
+            value: playableProviderMock,
+          ),
+        ],
+        child: PodcastActionSheet(podcast: podcast),
+      ),
+    );
+  }
+
+  group('structure', () {
+    testWidgets('renders title and author', (tester) async {
+      await mount(
+        tester,
+        Podcast.fake(title: 'My Show', author: 'Jane Doe'),
+      );
+
+      expect(find.text('My Show'), findsOneWidget);
+      expect(find.text('Jane Doe'), findsOneWidget);
+    });
+
+    testWidgets(
+      'shows "Play All" when there is no current episode',
+      (tester) async {
+        await mount(tester, Podcast.fake(title: 'A'));
+
+        expect(find.text('Play All'), findsOneWidget);
+        expect(find.text('Continue'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'shows "Continue" when there is a current episode',
+      (tester) async {
+        final podcast = Podcast.fake(
+          title: 'A',
+          state: PodcastState(
+            currentEpisodeId: 'ep-mid',
+            progresses: {'ep-mid': 120},
+          ),
+        );
+        await mount(tester, podcast);
+
+        expect(find.text('Continue'), findsOneWidget);
+        expect(find.text('Play All'), findsNothing);
+      },
+    );
+
+    testWidgets('renders Favorite + Shuffle in the quick row', (tester) async {
+      await mount(tester, Podcast.fake());
+
+      expect(find.text('Favorite'), findsOneWidget);
+      expect(find.text('Shuffle'), findsOneWidget);
+    });
+
+    testWidgets('shows "Undo Favorite" when podcast.favorite is true',
+        (tester) async {
+      await mount(tester, Podcast.fake(favorite: true));
+
+      expect(find.text('Undo Favorite'), findsOneWidget);
+      expect(find.text('Favorite'), findsNothing);
+    });
+
+    testWidgets(
+      'hides Favorite when koel version is below 7.11.0',
+      (tester) async {
+        AppState.set(['app', 'apiVersion'], Version.parse('7.10.0'));
+
+        await mount(tester, Podcast.fake());
+
+        expect(find.text('Favorite'), findsNothing);
+        expect(find.text('Undo Favorite'), findsNothing);
+        // Play All / Shuffle stay.
+        expect(find.text('Play All'), findsOneWidget);
+        expect(find.text('Shuffle'), findsOneWidget);
+      },
+    );
+
+    testWidgets('renders Refresh and Unsubscribe rows', (tester) async {
+      await mount(tester, Podcast.fake());
+
+      expect(find.text('Refresh'), findsOneWidget);
+      expect(find.text('Unsubscribe'), findsOneWidget);
+    });
+  });
+
+  group('actions', () {
+    testWidgets(
+      'tapping Favorite delegates to PodcastProvider.toggleFavorite',
+      (tester) async {
+        final podcast = Podcast.fake();
+        when(podcastProviderMock.toggleFavorite(podcast))
+            .thenAnswer((_) async {});
+
+        await mount(tester, podcast);
+        await tester.tap(find.text('Favorite'));
+        await tester.pump();
+
+        verify(podcastProviderMock.toggleFavorite(podcast)).called(1);
+      },
+    );
+
+    testWidgets(
+      'tapping Play All replaces the queue without shuffling',
+      (tester) async {
+        final podcast = Podcast.fake();
+        final episodes = Song.fakeMany(3);
+        when(playableProviderMock.fetchForPodcast(
+          podcast.id,
+          forceRefresh: anyNamed('forceRefresh'),
+          getUpdates: anyNamed('getUpdates'),
+        )).thenAnswer((_) async => episodes);
+
+        await mount(tester, podcast);
+        await tester.tap(find.text('Play All'));
+        await tester.pumpAndSettle();
+
+        verify(audioHandlerMock.replaceQueue(episodes)).called(1);
+        verifyNever(audioHandlerMock.maybeQueueAndPlay(any));
+      },
+    );
+
+    testWidgets(
+      'tapping Continue queues all episodes silently and resumes the current one',
+      (tester) async {
+        final podcast = Podcast.fake(
+          state: PodcastState(
+            currentEpisodeId: 'ep-mid',
+            progresses: {'ep-mid': 30},
+          ),
+        );
+        final ep1 = Song.fake(id: 'ep-1');
+        final epMid = Song.fake(id: 'ep-mid');
+        final ep3 = Song.fake(id: 'ep-3');
+        final episodes = [ep1, epMid, ep3];
+        when(playableProviderMock.fetchForPodcast(
+          podcast.id,
+          forceRefresh: anyNamed('forceRefresh'),
+          getUpdates: anyNamed('getUpdates'),
+        )).thenAnswer((_) async => episodes);
+
+        await mount(tester, podcast);
+        await tester.tap(find.text('Continue'));
+        await tester.pumpAndSettle();
+
+        verify(audioHandlerMock.replaceQueue(
+          episodes,
+          autoPlay: false,
+        )).called(1);
+        verify(audioHandlerMock.maybeQueueAndPlay(epMid)).called(1);
+      },
+    );
+
+    testWidgets(
+      'tapping Continue falls back to Play All when the current episode is missing',
+      (tester) async {
+        final podcast = Podcast.fake(
+          state: PodcastState(
+            currentEpisodeId: 'gone',
+            progresses: {'gone': 30},
+          ),
+        );
+        final episodes = Song.fakeMany(2);
+        when(playableProviderMock.fetchForPodcast(
+          podcast.id,
+          forceRefresh: anyNamed('forceRefresh'),
+          getUpdates: anyNamed('getUpdates'),
+        )).thenAnswer((_) async => episodes);
+
+        await mount(tester, podcast);
+        await tester.tap(find.text('Continue'));
+        await tester.pumpAndSettle();
+
+        verify(audioHandlerMock.replaceQueue(episodes)).called(1);
+        verifyNever(audioHandlerMock.maybeQueueAndPlay(any));
+      },
+    );
+
+    testWidgets(
+      'tapping Shuffle replaces the queue with shuffle',
+      (tester) async {
+        final podcast = Podcast.fake();
+        final episodes = Song.fakeMany(3);
+        when(playableProviderMock.fetchForPodcast(
+          podcast.id,
+          forceRefresh: anyNamed('forceRefresh'),
+          getUpdates: anyNamed('getUpdates'),
+        )).thenAnswer((_) async => episodes);
+
+        await mount(tester, podcast);
+        await tester.tap(find.text('Shuffle'));
+        await tester.pumpAndSettle();
+
+        verify(audioHandlerMock.replaceQueue(
+          episodes,
+          shuffle: true,
+        )).called(1);
+      },
+    );
+
+    testWidgets(
+      'tapping Refresh forces a feed re-fetch',
+      (tester) async {
+        final podcast = Podcast.fake();
+        when(playableProviderMock.fetchForPodcast(
+          podcast.id,
+          forceRefresh: anyNamed('forceRefresh'),
+          getUpdates: anyNamed('getUpdates'),
+        )).thenAnswer((_) async => <Song>[]);
+
+        await mount(tester, podcast);
+        await tester.tap(find.text('Refresh'));
+        await tester.pumpAndSettle();
+        await tester.pump(const Duration(seconds: 3));
+
+        verify(playableProviderMock.fetchForPodcast(
+          podcast.id,
+          forceRefresh: true,
+          getUpdates: true,
+        )).called(1);
+      },
+    );
+  });
+}

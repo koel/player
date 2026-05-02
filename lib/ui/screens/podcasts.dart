@@ -6,6 +6,7 @@ import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
+import 'package:app/ui/screens/podcast_action_sheet.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -159,8 +160,6 @@ class PodcastRow extends StatefulWidget {
 }
 
 class _PodcastRowState extends State<PodcastRow> {
-  Offset? _lastTapPosition;
-
   @override
   Widget build(BuildContext context) {
     final podcast = widget.podcast;
@@ -171,12 +170,7 @@ class _PodcastRowState extends State<PodcastRow> {
           context,
           podcastId: podcast.id,
         ),
-        onTapDown: (details) => _lastTapPosition = details.globalPosition,
-        onLongPress: () => showPodcastActionsMenu(
-          context,
-          podcast: podcast,
-          position: _lastTapPosition ?? Offset.zero,
-        ),
+        onLongPress: () => showPodcastActionSheet(context, podcast: podcast),
         child: ListTile(
           shape: Border(bottom: Divider.createBorderSide(context)),
           leading: AlbumArtistThumbnail.sm(entity: podcast, asHero: true),

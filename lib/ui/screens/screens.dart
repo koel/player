@@ -28,6 +28,7 @@ export 'now_playing.dart';
 export 'playable_action_sheet.dart';
 export 'playlist_details.dart';
 export 'playlists.dart';
+export 'podcast_action_sheet.dart';
 export 'podcast_details.dart';
 export 'podcasts.dart';
 export 'radio_now_playing.dart';
