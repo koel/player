@@ -18,6 +18,9 @@ class RadioStation {
   /// See [canEdit] for sourcing.
   bool canDelete;
 
+  /// Whether the current user has favorited this radio station.
+  bool favorite;
+
   RadioStation({
     required this.id,
     required this.name,
@@ -27,6 +30,7 @@ class RadioStation {
     this.isPublic = false,
     this.canEdit = false,
     this.canDelete = false,
+    this.favorite = false,
   });
 
   factory RadioStation.fromJson(Map<String, dynamic> json) {
@@ -41,6 +45,7 @@ class RadioStation {
       isPublic: json['is_public'] ?? false,
       canEdit: permissions is Map ? permissions['edit'] == true : false,
       canDelete: permissions is Map ? permissions['delete'] == true : false,
+      favorite: json['favorite'] == true,
     );
   }
 
@@ -50,6 +55,7 @@ class RadioStation {
     String? url,
     bool canEdit = false,
     bool canDelete = false,
+    bool favorite = false,
   }) {
     final faker = Faker();
     return RadioStation(
@@ -58,6 +64,7 @@ class RadioStation {
       url: url ?? 'https://stream.example.com/live',
       canEdit: canEdit,
       canDelete: canDelete,
+      favorite: favorite,
     );
   }
 }

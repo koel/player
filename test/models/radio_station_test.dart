@@ -92,6 +92,37 @@ void main() {
       expect(station.canEdit, isFalse);
       expect(station.canDelete, isFalse);
     });
+
+    test('parses favorite from JSON', () {
+      final json = {
+        'id': 'station-fav',
+        'name': 'Loved',
+        'url': 'https://stream.example.com/live',
+        'favorite': true,
+      };
+
+      expect(RadioStation.fromJson(json).favorite, isTrue);
+    });
+
+    test('defaults favorite to false when missing or non-bool', () {
+      expect(
+        RadioStation.fromJson({
+          'id': 's',
+          'name': 'X',
+          'url': 'https://stream.example.com/live',
+        }).favorite,
+        isFalse,
+      );
+      expect(
+        RadioStation.fromJson({
+          'id': 's',
+          'name': 'X',
+          'url': 'https://stream.example.com/live',
+          'favorite': null,
+        }).favorite,
+        isFalse,
+      );
+    });
   });
 
   group('RadioStation.fake', () {

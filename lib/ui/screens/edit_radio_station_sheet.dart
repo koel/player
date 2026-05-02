@@ -14,6 +14,7 @@ Future<void> showEditRadioStationDialog(
       TextEditingController(text: station.description ?? '');
   var isPublic = station.isPublic;
   final stationProvider = context.read<RadioStationProvider>();
+  final radioPlayer = context.read<RadioPlayerProvider>();
 
   await showFormSheet(
     context,
@@ -27,6 +28,11 @@ Future<void> showEditRadioStationDialog(
       final url = urlController.text.trim();
       if (name.isEmpty || url.isEmpty) return;
 
+      // Capture before mutation so we can detect what actually changed
+      // and bring the live player into sync.
+      final oldUrl = station.url;
+      final oldName = station.name;
+
       try {
         await stationProvider.update(
           station,
@@ -35,6 +41,20 @@ Future<void> showEditRadioStationDialog(
           description: descController.text.trim(),
           isPublic: isPublic,
         );
+
+        // If we just edited the station that's currently on air, the
+        // player is still streaming the old URL (its setUrl was called
+        // at play time). Restart the stream when the URL changed;
+        // otherwise just refresh the OS media-session metadata so the
+        // lock screen / notification picks up the new name.
+        if (radioPlayer.currentStation?.id == station.id) {
+          if (url != oldUrl) {
+            radioPlayer.play(station).catchError((_) {});
+          } else if (name != oldName) {
+            radioPlayer.refreshMediaItem();
+          }
+        }
+
         Navigator.pop(context);
         showOverlay(context, caption: 'Station updated');
       } catch (_) {

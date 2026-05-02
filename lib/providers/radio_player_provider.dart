@@ -139,6 +139,20 @@ class RadioPlayerProvider with ChangeNotifier {
     }
   }
 
+  /// Re-emit the OS media-session metadata for the current station.
+  /// Use after editing the station's name or logo so the lock-screen /
+  /// notification controls pick up the new values without restarting
+  /// the stream.
+  void refreshMediaItem() {
+    final station = _currentStation;
+    if (station == null) return;
+
+    audioHandler.mediaItem.add(mediaItemForStation(
+      station,
+      streamTitle: _streamTitle,
+    ));
+  }
+
   void _startNowPlayingPolling(RadioStation station) {
     _stopNowPlayingPolling();
     _fetchNowPlaying(station);

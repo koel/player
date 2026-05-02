@@ -1,6 +1,7 @@
 import 'package:app/constants/constants.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
+import 'package:app/ui/screens/radio_station_action_sheet.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:figma_squircle/figma_squircle.dart';
@@ -185,8 +186,6 @@ class _RadioStationRow extends StatefulWidget {
 }
 
 class _RadioStationRowState extends State<_RadioStationRow> {
-  Offset? _lastTapPosition;
-
   @override
   Widget build(BuildContext context) {
     final station = widget.station;
@@ -197,15 +196,8 @@ class _RadioStationRowState extends State<_RadioStationRow> {
 
         return InkWell(
           onTap: widget.onTap,
-          onTapDown: (details) => _lastTapPosition = details.globalPosition,
-          onLongPress: () => showRadioStationActionsMenu(
-            context,
-            station: station,
-            position: _lastTapPosition ?? Offset.zero,
-            onUpdated: () {
-              if (mounted) setState(() {});
-            },
-          ),
+          onLongPress: () =>
+              showRadioStationActionSheet(context, station: station),
           child: ListTile(
             shape: Border(bottom: Divider.createBorderSide(context)),
             leading: ClipSmoothRect(
