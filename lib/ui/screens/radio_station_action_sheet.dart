@@ -112,7 +112,7 @@ class RadioStationActionSheet extends StatelessWidget {
                               onTap: () {
                                 Navigator.pop(context);
                                 if (isStopButton) {
-                                  radioPlayer.stop();
+                                  radioPlayer.stop().catchError((_) {});
                                 } else {
                                   radioPlayer
                                       .play(station)
@@ -150,10 +150,7 @@ class RadioStationActionSheet extends StatelessWidget {
                       PlayableActionButton(
                         text: 'Delete',
                         destructive: true,
-                        icon: const Icon(
-                          CupertinoIcons.trash,
-                          color: Colors.white30,
-                        ),
+                        icon: const Icon(CupertinoIcons.trash),
                         onTap: () async {
                           if (!await confirmDeleteRadioStation(
                             context,
