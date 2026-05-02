@@ -43,9 +43,10 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
 
     return Scaffold(
       body: GradientDecoratedContainer(
-        child: FutureBuilder(
-          future: buildRequest(artistId),
-          builder: (_, AsyncSnapshot<List<dynamic>> snapshot) {
+        child: Consumer<ArtistProvider>(
+          builder: (_, __, ___) => FutureBuilder(
+            future: buildRequest(artistId),
+            builder: (_, AsyncSnapshot<List<dynamic>> snapshot) {
             if (!snapshot.hasData ||
                 snapshot.connectionState == ConnectionState.active)
               return const PlayableListScreenPlaceholder();
@@ -131,7 +132,8 @@ class _ArtistDetailsScreenState extends State<ArtistDetailsScreen> {
                 ),
               ),
             );
-          },
+            },
+          ),
         ),
       ),
     );

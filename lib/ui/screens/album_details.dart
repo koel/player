@@ -51,9 +51,10 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
 
     return Scaffold(
       body: GradientDecoratedContainer(
-        child: FutureBuilder(
-          future: buildRequest(albumId),
-          builder: (_, AsyncSnapshot<List<Object>> snapshot) {
+        child: Consumer<AlbumProvider>(
+          builder: (_, __, ___) => FutureBuilder(
+            future: buildRequest(albumId),
+            builder: (_, AsyncSnapshot<List<Object>> snapshot) {
             if (!snapshot.hasData ||
                 snapshot.connectionState == ConnectionState.active)
               return const PlayableListScreenPlaceholder();
@@ -123,7 +124,8 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
                   ],
               ),
             );
-          },
+            },
+          ),
         ),
       ),
     );
