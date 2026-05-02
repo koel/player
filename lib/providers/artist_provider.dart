@@ -108,6 +108,23 @@ class ArtistProvider with ChangeNotifier, StreamSubscriber {
     return paginate();
   }
 
+  Future<void> toggleFavorite(Artist artist) async {
+    // Optimistic flip + restore on failure.
+    artist.favorite = !artist.favorite;
+    notifyListeners();
+
+    try {
+      await post('favorites/toggle', data: {
+        'type': 'artist',
+        'id': artist.id,
+      });
+    } catch (_) {
+      artist.favorite = !artist.favorite;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   Future<void> update(Artist artist, {required String name}) async {
     final response = await put('artists/${artist.id}', data: {
       'name': name,

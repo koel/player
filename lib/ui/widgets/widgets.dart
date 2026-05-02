@@ -2,7 +2,6 @@ export 'album_artist_thumbnail.dart';
 export 'alphabet_scrollbar.dart';
 export 'album_card.dart';
 export 'app_bar.dart';
-export 'artist_actions_menu.dart';
 export 'artist_card.dart';
 export 'bottom_space.dart';
 export 'decorated_image_box.dart';

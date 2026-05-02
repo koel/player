@@ -4,6 +4,7 @@ import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/placeholders/artists_screen_placeholder.dart';
+import 'package:app/ui/screens/artist_action_sheet.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:app/values/values.dart';
 import 'package:flutter/cupertino.dart';
@@ -202,8 +203,6 @@ class ArtistRow extends StatefulWidget {
 }
 
 class _ArtistRowState extends State<ArtistRow> {
-  Offset? _lastTapPosition;
-
   @override
   Widget build(BuildContext context) {
     final artist = widget.artist;
@@ -214,15 +213,7 @@ class _ArtistRowState extends State<ArtistRow> {
           context,
           artistId: artist.id,
         ),
-        onTapDown: (details) => _lastTapPosition = details.globalPosition,
-        onLongPress: () => showArtistActionsMenu(
-          context,
-          artist: artist,
-          position: _lastTapPosition ?? Offset.zero,
-          onUpdated: () {
-            if (mounted) setState(() {});
-          },
-        ),
+        onLongPress: () => showArtistActionSheet(context, artist: artist),
         child: ListTile(
           shape: Border(bottom: Divider.createBorderSide(context)),
           leading: AlbumArtistThumbnail.sm(entity: artist, asHero: true),
