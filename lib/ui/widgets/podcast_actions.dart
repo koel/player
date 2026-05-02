@@ -2,41 +2,7 @@ import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-
-/// Shows the long-press context menu for a podcast — currently only
-/// Unsubscribe. Unlike the other resource menus, this one isn't gated
-/// on a server permission: a user can always unsubscribe from a
-/// podcast they're subscribed to.
-Future<void> showPodcastActionsMenu(
-  BuildContext context, {
-  required Podcast podcast,
-  required Offset position,
-}) async {
-  HapticFeedback.mediumImpact();
-
-  final selected = await showFrostedContextMenu<String>(
-    context: context,
-    position: position,
-    items: const [
-      FrostedMenuItem(
-        value: 'unsubscribe',
-        icon: CupertinoIcons.minus_circle,
-        label: 'Unsubscribe',
-        destructive: true,
-      ),
-    ],
-  );
-
-  if (!context.mounted) return;
-
-  if (selected == 'unsubscribe') {
-    if (!await confirmUnsubscribePodcast(context, podcast: podcast)) return;
-    if (!context.mounted) return;
-    await unsubscribePodcastWithFeedback(context, podcast: podcast);
-  }
-}
 
 /// Asks the user to confirm unsubscribing from [podcast]. Returns `true`
 /// on confirm, `false` on cancel. Does not call any network-backed code.

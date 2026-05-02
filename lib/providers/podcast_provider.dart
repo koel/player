@@ -36,6 +36,23 @@ class PodcastProvider with ChangeNotifier, StreamSubscriber {
     return fetchAll();
   }
 
+  Future<void> toggleFavorite(Podcast podcast) async {
+    // Optimistic flip + restore on failure.
+    podcast.favorite = !podcast.favorite;
+    notifyListeners();
+
+    try {
+      await post('favorites/toggle', data: {
+        'type': 'podcast',
+        'id': podcast.id,
+      });
+    } catch (_) {
+      podcast.favorite = !podcast.favorite;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   Future<void> unsubscribePodcast(Podcast podcast) async {
     // Optimistic removal so a Dismissible's onDismissed callback can
     // call this without leaving the dismissed widget in the tree

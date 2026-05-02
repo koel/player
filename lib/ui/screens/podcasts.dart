@@ -6,6 +6,7 @@ import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
+import 'package:app/ui/screens/podcast_action_sheet.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -147,7 +148,7 @@ class _PodcastScreenState extends State<PodcastsScreen> {
 
 }
 
-class PodcastRow extends StatefulWidget {
+class PodcastRow extends StatelessWidget {
   final Podcast podcast;
   final AppRouter router;
 
@@ -155,28 +156,14 @@ class PodcastRow extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<PodcastRow> createState() => _PodcastRowState();
-}
-
-class _PodcastRowState extends State<PodcastRow> {
-  Offset? _lastTapPosition;
-
-  @override
   Widget build(BuildContext context) {
-    final podcast = widget.podcast;
-
     return Card(
       child: InkWell(
-        onTap: () => widget.router.gotoPodcastDetailsScreen(
+        onTap: () => router.gotoPodcastDetailsScreen(
           context,
           podcastId: podcast.id,
         ),
-        onTapDown: (details) => _lastTapPosition = details.globalPosition,
-        onLongPress: () => showPodcastActionsMenu(
-          context,
-          podcast: podcast,
-          position: _lastTapPosition ?? Offset.zero,
-        ),
+        onLongPress: () => showPodcastActionSheet(context, podcast: podcast),
         child: ListTile(
           shape: Border(bottom: Divider.createBorderSide(context)),
           leading: AlbumArtistThumbnail.sm(entity: podcast, asHero: true),

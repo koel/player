@@ -16,6 +16,10 @@ class Podcast {
   final String lastPlayedAt;
   final PodcastState state;
 
+  /// Whether the current user has favorited this podcast. Mutable so
+  /// the optimistic favorite toggle can flip it in place.
+  bool favorite;
+
   ImageProvider? _image;
 
   Podcast({
@@ -29,6 +33,7 @@ class Podcast {
     required this.subscribedAt,
     required this.lastPlayedAt,
     required this.state,
+    this.favorite = false,
   });
 
   ImageProvider get image {
@@ -40,6 +45,8 @@ class Podcast {
     String? id,
     String? title,
     String? author,
+    bool favorite = false,
+    PodcastState? state,
   }) {
     final faker = Faker();
     return Podcast(
@@ -52,7 +59,8 @@ class Podcast {
       imageUrl: faker.image.loremPicsum(width: 192, height: 192),
       subscribedAt: '2026-01-01T00:00:00Z',
       lastPlayedAt: '2026-01-01T00:00:00Z',
-      state: PodcastState(progresses: {}),
+      state: state ?? PodcastState(progresses: {}),
+      favorite: favorite,
     );
   }
 
@@ -68,6 +76,7 @@ class Podcast {
       subscribedAt: json['subscribed_at'],
       lastPlayedAt: json['last_played_at'],
       state: PodcastState.fromJson(json['state']),
+      favorite: json['favorite'] == true,
     );
   }
 

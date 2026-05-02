@@ -26,7 +26,7 @@ export 'playable_list_sort_button.dart';
 export 'playable_row.dart';
 export 'playable_thumbnail.dart';
 export 'playlist_row.dart';
-export 'podcast_actions_menu.dart';
+export 'podcast_actions.dart';
 export 'podcast_card.dart';
 export 'profile_avatar.dart';
 export 'pull_to_refresh.dart';
