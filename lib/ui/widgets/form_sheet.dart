@@ -6,12 +6,17 @@ import 'package:flutter/services.dart';
 
 /// A reusable bottom sheet with a title, form fields, and action buttons.
 /// Used for creating/editing playlists, folders, radio stations, etc.
+///
+/// `onSubmit` receives the form sheet's own [BuildContext] — this is the
+/// context callers should use for `Navigator.pop` / `showOverlay` after an
+/// awaited network call. The outer context that opened the sheet may belong
+/// to a route that's already been dismissed by the time `onSubmit` resumes.
 Future<void> showFormSheet(
   BuildContext context, {
   required String title,
   required Widget Function(BuildContext context, StateSetter setState) builder,
   required String submitLabel,
-  required Future<void> Function() onSubmit,
+  required Future<void> Function(BuildContext context) onSubmit,
   bool Function()? canSubmit,
 }) async {
   await showModalBottomSheet(
@@ -39,7 +44,7 @@ class _FormSheet extends StatefulWidget {
   final String title;
   final Widget Function(BuildContext context, StateSetter setState) builder;
   final String submitLabel;
-  final Future<void> Function() onSubmit;
+  final Future<void> Function(BuildContext context) onSubmit;
   final bool Function()? canSubmit;
 
   const _FormSheet({
@@ -126,7 +131,7 @@ class _FormSheetState extends State<_FormSheet> {
                             : () async {
                                 setState(() => _submitting = true);
                                 try {
-                                  await widget.onSubmit();
+                                  await widget.onSubmit(context);
                                 } finally {
                                   if (mounted) {
                                     setState(() => _submitting = false);

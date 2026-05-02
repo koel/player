@@ -17,7 +17,7 @@ void main() {
               context,
               title: 'Test Form',
               submitLabel: 'Submit',
-              onSubmit: () async {},
+              onSubmit: (_) async {},
               builder: (context, setState) => Column(
                 children: [
                   TextField(decoration: InputDecoration(hintText: 'Field 1')),
@@ -55,7 +55,7 @@ void main() {
               context,
               title: 'Test Form',
               submitLabel: 'Save',
-              onSubmit: () async {},
+              onSubmit: (_) async {},
               builder: (context, setState) => Column(
                 children: [
                   TextField(decoration: InputDecoration(hintText: 'Field 1')),
@@ -111,9 +111,9 @@ void main() {
               title: 'Test Form',
               submitLabel: 'Go',
               canSubmit: () => true,
-              onSubmit: () async {
+              onSubmit: (sheetContext) async {
                 submitted = true;
-                Navigator.pop(context);
+                Navigator.pop(sheetContext);
               },
               builder: (context, setState) =>
                   TextField(decoration: InputDecoration(hintText: 'Name')),
@@ -130,6 +130,113 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(submitted, isTrue);
+    });
+  });
+
+  group('onSubmit context lifetime', () {
+    testWidgets(
+      'sheet closes via onSubmit context even after the route that opened '
+      'it is already gone',
+      (tester) async {
+        // Reproduces the artist/album action-sheet flow:
+        //   1. Action sheet's Edit row runs
+        //        Navigator.pop(actionSheetContext)
+        //        showEditDialog(actionSheetContext)   // form sheet opens
+        //   2. The form sheet captures the now-doomed actionSheetContext.
+        //   3. Save tapped, awaits a network round-trip.
+        //   4. By the time onSubmit's body runs, actionSheetContext is
+        //      defunct, so Navigator.pop on it silently fails.
+        //
+        // The fix: showFormSheet hands its own (always-mounted) context
+        // to onSubmit, so the body uses that for pop/showOverlay.
+
+        await tester.pumpWidget(buildTestApp(
+          child: Builder(
+            builder: (rootContext) => ElevatedButton(
+              onPressed: () {
+                Navigator.of(rootContext).push(MaterialPageRoute<void>(
+                  builder: (innerContext) => Scaffold(
+                    body: Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(innerContext);
+                          showFormSheet(
+                            innerContext,
+                            title: 'Edit',
+                            submitLabel: 'Save',
+                            canSubmit: () => true,
+                            onSubmit: (sheetContext) async {
+                              // Simulate a network round-trip; the inner
+                              // route finishes its dismissal animation
+                              // during this gap.
+                              await Future<void>.delayed(
+                                const Duration(milliseconds: 50),
+                              );
+                              if (!sheetContext.mounted) return;
+                              Navigator.pop(sheetContext);
+                            },
+                            builder: (_, __) => const SizedBox(),
+                          );
+                        },
+                        child: const Text('Edit'),
+                      ),
+                    ),
+                  ),
+                ));
+              },
+              child: const Text('Open'),
+            ),
+          ),
+        ));
+
+        await tester.tap(find.text('Open'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Edit'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Save'), findsOneWidget,
+            reason: 'form sheet should be open');
+
+        await tester.tap(find.text('Save'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Save'), findsNothing,
+            reason: 'form sheet must close after Save');
+      },
+    );
+
+    testWidgets('onSubmit receives a mounted context', (tester) async {
+      BuildContext? captured;
+
+      await tester.pumpWidget(buildTestApp(
+        child: Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () => showFormSheet(
+              context,
+              title: 'Test',
+              submitLabel: 'Save',
+              canSubmit: () => true,
+              onSubmit: (sheetContext) async {
+                captured = sheetContext;
+                Navigator.pop(sheetContext);
+              },
+              builder: (_, __) => const SizedBox(),
+            ),
+            child: const Text('Open'),
+          ),
+        ),
+      ));
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      expect(captured, isNotNull);
+      // After pop, the captured context should be unmounted — proving it
+      // was the form sheet's own context, not some outer ancestor.
+      expect(captured!.mounted, isFalse);
     });
   });
 }

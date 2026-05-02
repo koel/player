@@ -19,7 +19,7 @@ Future<void> showEditAlbumDialog(
     title: 'Edit Album',
     submitLabel: 'Save',
     canSubmit: () => nameController.text.trim().isNotEmpty,
-    onSubmit: () async {
+    onSubmit: (sheetContext) async {
       final name = nameController.text.trim();
       if (name.isEmpty) return;
 
@@ -28,11 +28,13 @@ Future<void> showEditAlbumDialog(
 
       try {
         await albumProvider.update(album, name: name, year: year);
-        Navigator.pop(context);
-        showOverlay(context, caption: 'Album updated');
+        if (!sheetContext.mounted) return;
+        Navigator.pop(sheetContext);
+        showOverlay(sheetContext, caption: 'Album updated');
       } catch (_) {
+        if (!sheetContext.mounted) return;
         showOverlay(
-          context,
+          sheetContext,
           caption: 'Error',
           message: 'Could not update album.',
           icon: Icons.error_outline,

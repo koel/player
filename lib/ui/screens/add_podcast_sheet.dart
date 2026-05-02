@@ -14,21 +14,23 @@ Future<void> showAddPodcastDialog(BuildContext context) async {
     title: 'Add Podcast',
     submitLabel: 'Add',
     canSubmit: () => urlController.text.trim().isNotEmpty,
-    onSubmit: () async {
+    onSubmit: (sheetContext) async {
       final url = urlController.text.trim();
       if (url.isEmpty) return;
 
       try {
         await podcastProvider.add(url: url);
-        Navigator.pop(context);
-        showOverlay(context, caption: 'Podcast added');
+        if (!sheetContext.mounted) return;
+        Navigator.pop(sheetContext);
+        showOverlay(sheetContext, caption: 'Podcast added');
       } catch (e) {
+        if (!sheetContext.mounted) return;
         final message =
             e is HttpResponseException && e.response.statusCode == 409
                 ? 'You are already subscribed to this podcast.'
                 : 'Something wrong happened. Please try again.';
         showOverlay(
-          context,
+          sheetContext,
           caption: 'Error',
           message: message,
           icon: CupertinoIcons.exclamationmark_triangle,

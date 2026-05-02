@@ -16,7 +16,7 @@ Future<void> showCreatePlaylistDialog(BuildContext context) async {
     title: 'New Playlist',
     submitLabel: 'Create',
     canSubmit: () => nameController.text.trim().isNotEmpty,
-    onSubmit: () async {
+    onSubmit: (sheetContext) async {
       final name = nameController.text.trim();
       if (name.isEmpty) return;
 
@@ -26,10 +26,12 @@ Future<void> showCreatePlaylistDialog(BuildContext context) async {
           description: descController.text.trim(),
           folderId: selectedFolderId,
         );
-        Navigator.pop(context);
-        showOverlay(context, caption: 'Playlist added');
+        if (!sheetContext.mounted) return;
+        Navigator.pop(sheetContext);
+        showOverlay(sheetContext, caption: 'Playlist added');
       } catch (_) {
-        showOverlay(context,
+        if (!sheetContext.mounted) return;
+        showOverlay(sheetContext,
           caption: 'Error',
           message: 'Could not create playlist.',
           icon: Icons.error_outline,

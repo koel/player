@@ -21,7 +21,7 @@ Future<void> showEditPlaylistDialog(
     title: 'Edit Playlist',
     submitLabel: 'Save',
     canSubmit: () => nameController.text.trim().isNotEmpty,
-    onSubmit: () async {
+    onSubmit: (sheetContext) async {
       final name = nameController.text.trim();
       if (name.isEmpty) return;
 
@@ -32,11 +32,13 @@ Future<void> showEditPlaylistDialog(
           description: descController.text.trim(),
           folderId: selectedFolderId,
         );
-        Navigator.pop(context);
-        showOverlay(context, caption: 'Playlist updated');
+        if (!sheetContext.mounted) return;
+        Navigator.pop(sheetContext);
+        showOverlay(sheetContext, caption: 'Playlist updated');
       } catch (_) {
+        if (!sheetContext.mounted) return;
         showOverlay(
-          context,
+          sheetContext,
           caption: 'Error',
           message: 'Could not update playlist.',
           icon: Icons.error_outline,

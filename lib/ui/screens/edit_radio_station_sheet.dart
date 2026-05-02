@@ -23,7 +23,7 @@ Future<void> showEditRadioStationDialog(
     canSubmit: () =>
         nameController.text.trim().isNotEmpty &&
         urlController.text.trim().isNotEmpty,
-    onSubmit: () async {
+    onSubmit: (sheetContext) async {
       final name = nameController.text.trim();
       final url = urlController.text.trim();
       if (name.isEmpty || url.isEmpty) return;
@@ -42,11 +42,6 @@ Future<void> showEditRadioStationDialog(
           isPublic: isPublic,
         );
 
-        // If we just edited the station that's currently on air, the
-        // player is still streaming the old URL (its setUrl was called
-        // at play time). Restart the stream when the URL changed;
-        // otherwise just refresh the OS media-session metadata so the
-        // lock screen / notification picks up the new name.
         if (radioPlayer.currentStation?.id == station.id) {
           if (url != oldUrl) {
             radioPlayer.play(station).catchError((_) {});
@@ -55,11 +50,13 @@ Future<void> showEditRadioStationDialog(
           }
         }
 
-        Navigator.pop(context);
-        showOverlay(context, caption: 'Station updated');
+        if (!sheetContext.mounted) return;
+        Navigator.pop(sheetContext);
+        showOverlay(sheetContext, caption: 'Station updated');
       } catch (_) {
+        if (!sheetContext.mounted) return;
         showOverlay(
-          context,
+          sheetContext,
           caption: 'Error',
           message: 'Could not update station.',
           icon: Icons.error_outline,
