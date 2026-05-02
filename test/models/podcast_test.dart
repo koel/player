@@ -34,8 +34,14 @@ void main() {
 
     test('defaults favorite to false when missing or non-bool', () {
       expect(Podcast.fromJson(baseJson()).favorite, isFalse);
-      final withNull = baseJson()..['favorite'] = null;
-      expect(Podcast.fromJson(withNull).favorite, isFalse);
+      for (final value in <Object?>[null, 0, 1, 'true', 'false']) {
+        final json = baseJson()..['favorite'] = value;
+        expect(
+          Podcast.fromJson(json).favorite,
+          isFalse,
+          reason: 'favorite should be false for $value',
+        );
+      }
     });
   });
 

@@ -337,5 +337,27 @@ void main() {
         )).called(1);
       },
     );
+
+    testWidgets(
+      'Refresh shows an error overlay when the fetch throws',
+      (tester) async {
+        final podcast = Podcast.fake();
+        when(playableProviderMock.fetchForPodcast(
+          podcast.id,
+          forceRefresh: anyNamed('forceRefresh'),
+          getUpdates: anyNamed('getUpdates'),
+        )).thenThrow(Exception('boom'));
+
+        await mount(tester, podcast);
+        await tester.tap(find.text('Refresh'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Refresh failed'), findsOneWidget);
+        expect(find.text('Feed refreshed'), findsNothing);
+
+        // Drain showOverlay's auto-dismiss timer.
+        await tester.pump(const Duration(seconds: 3));
+      },
+    );
   });
 }

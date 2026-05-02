@@ -148,7 +148,7 @@ class _PodcastScreenState extends State<PodcastsScreen> {
 
 }
 
-class PodcastRow extends StatefulWidget {
+class PodcastRow extends StatelessWidget {
   final Podcast podcast;
   final AppRouter router;
 
@@ -156,17 +156,10 @@ class PodcastRow extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<PodcastRow> createState() => _PodcastRowState();
-}
-
-class _PodcastRowState extends State<PodcastRow> {
-  @override
   Widget build(BuildContext context) {
-    final podcast = widget.podcast;
-
     return Card(
       child: InkWell(
-        onTap: () => widget.router.gotoPodcastDetailsScreen(
+        onTap: () => router.gotoPodcastDetailsScreen(
           context,
           podcastId: podcast.id,
         ),

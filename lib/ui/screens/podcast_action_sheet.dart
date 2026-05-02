@@ -142,7 +142,15 @@ class _PodcastActionSheetState extends State<PodcastActionSheet> {
                           icon: const Icon(CupertinoIcons.play_fill),
                           onTap: () async {
                             Navigator.pop(context);
-                            final episodes = await _fetchEpisodes();
+                            final List<Playable> episodes;
+                            try {
+                              episodes = await _fetchEpisodes();
+                            } catch (_) {
+                              // The sheet is gone; nowhere to surface
+                              // an error. Swallow to avoid an unhandled
+                              // async exception.
+                              return;
+                            }
                             if (episodes.isEmpty) return;
 
                             final currentId = podcast.state.currentEpisodeId;
@@ -173,7 +181,12 @@ class _PodcastActionSheetState extends State<PodcastActionSheet> {
                           icon: const Icon(CupertinoIcons.shuffle),
                           onTap: () async {
                             Navigator.pop(context);
-                            final episodes = await _fetchEpisodes();
+                            final List<Playable> episodes;
+                            try {
+                              episodes = await _fetchEpisodes();
+                            } catch (_) {
+                              return;
+                            }
                             if (episodes.isEmpty) return;
                             await audioHandler.replaceQueue(
                               episodes,
@@ -197,7 +210,17 @@ class _PodcastActionSheetState extends State<PodcastActionSheet> {
                         color: Colors.white30,
                       ),
                       onTap: () async {
-                        await _fetchEpisodes(getUpdates: true);
+                        try {
+                          await _fetchEpisodes(getUpdates: true);
+                        } catch (_) {
+                          if (!mounted) return;
+                          showOverlay(
+                            context,
+                            icon: CupertinoIcons.exclamationmark_triangle,
+                            caption: 'Refresh failed',
+                          );
+                          return;
+                        }
                         if (!mounted) return;
                         showOverlay(
                           context,
