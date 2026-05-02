@@ -14,9 +14,6 @@ class ArtistProvider with ChangeNotifier, StreamSubscriber {
   var _sortField = 'name';
   var _sortOrder = SortOrder.asc;
 
-  /// Fires after [update] mutates an artist in place. Other providers
-  /// (PlayableProvider, AlbumProvider) listen to keep their
-  /// denormalised `artistName` / `albumArtistName` fields in sync.
   static final _renamedController = StreamController<Artist>.broadcast();
   static final renamedStream = _renamedController.stream;
 

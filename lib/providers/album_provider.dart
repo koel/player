@@ -15,9 +15,6 @@ class AlbumProvider with ChangeNotifier, StreamSubscriber {
   var _sortField = 'name';
   var _sortOrder = SortOrder.asc;
 
-  /// Fires after [update] mutates an album in place. Other providers
-  /// (e.g. PlayableProvider) listen to keep their denormalised
-  /// `albumName` fields in sync.
   static final _renamedController = StreamController<Album>.broadcast();
   static final renamedStream = _renamedController.stream;
 

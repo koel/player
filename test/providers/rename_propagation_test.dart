@@ -8,17 +8,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/api_test_setup.dart';
 
-/// Reflective access to PlayableProvider's private vault — providers
-/// don't expose a seeding hook, so route through the public
-/// `syncWithVault` which writes into the vault for new entries.
 PlayableProvider _seedPlayables(List<Song> songs) {
   final provider = PlayableProvider();
-  provider.syncWithVault(songs.cast<dynamic>().toList()
-      .map((s) => s as dynamic)
-      .toList()
-      .cast<Song>());
+  provider.syncWithVault(songs);
   return provider;
 }
+
+Future<void> _flushMicrotasks() => Future<void>.delayed(Duration.zero);
 
 void main() {
   setUpAll(initApiTestEnvironment);
@@ -44,8 +40,7 @@ void main() {
         playables.addListener(() => notifyCount++);
 
         await albumProvider.update(album, name: 'New Album');
-        // Stream is async — yield once so the subscription fires.
-        await Future<void>.delayed(Duration.zero);
+        await _flushMicrotasks();
 
         expect(matching.albumName, 'New Album');
         expect(unrelated.albumName, isNot('New Album'));
@@ -68,7 +63,7 @@ void main() {
         playables.addListener(() => notifyCount++);
 
         await AlbumProvider().update(album, name: 'Same Name');
-        await Future<void>.delayed(Duration.zero);
+        await _flushMicrotasks();
 
         expect(song.albumName, 'Same Name');
         expect(notifyCount, 0);
@@ -86,20 +81,14 @@ void main() {
         final unrelatedArtist = Artist.fake();
         final song = Song.fake(artist: artist);
         final unrelated = Song.fake(artist: unrelatedArtist);
-        final playables = _seedPlayables([song, unrelated]);
+        _seedPlayables([song, unrelated]);
 
         await ArtistProvider().update(artist, name: 'New Artist');
-        await Future<void>.delayed(Duration.zero);
+        await _flushMicrotasks();
 
         expect(song.artistName, 'New Artist');
         expect(unrelated.artistName, isNot('New Artist'));
-        // The album-artist link is independent (set by Song.fake to the
-        // same artist); confirm we updated that field too on the same
-        // song.
         expect(song.albumArtistName, 'New Artist');
-        // Listener attached after the call so we don't assert count
-        // here — the field state is the source of truth.
-        expect(playables, isNotNull);
       }),
     );
 
@@ -118,7 +107,7 @@ void main() {
         _seedPlayables([song]);
 
         await ArtistProvider().update(albumArtist, name: 'Renamed AA');
-        await Future<void>.delayed(Duration.zero);
+        await _flushMicrotasks();
 
         expect(song.albumArtistName, 'Renamed AA');
         expect(song.artistName, 'Featured');
@@ -137,7 +126,6 @@ void main() {
         final artist = Artist.fake(id: 'ar-2')..name = 'Old';
         final unrelatedArtist = Artist.fake();
         final albumProvider = AlbumProvider();
-        // Seed via the public sync API.
         albumProvider.syncWithVault([
           Album.fake(id: 'al-1', artist: artist),
           Album.fake(id: 'al-2', artist: unrelatedArtist),
@@ -147,7 +135,7 @@ void main() {
         albumProvider.addListener(() => notifyCount++);
 
         await ArtistProvider().update(artist, name: 'Rebranded');
-        await Future<void>.delayed(Duration.zero);
+        await _flushMicrotasks();
 
         expect(albumProvider.byId('al-1')!.artistName, 'Rebranded');
         expect(albumProvider.byId('al-2')!.artistName, isNot('Rebranded'));
