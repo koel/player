@@ -57,7 +57,16 @@ void main() {
   });
 
   Future<void> mount(WidgetTester tester, Podcast podcast) async {
-    await tester.pumpAppWidget(
+    // MultiProvider must sit ABOVE the MaterialApp/Navigator so that
+    // contexts captured via Navigator.of(rootNavigator: true) can walk
+    // up to find the providers — mirrors production wiring in main.dart
+    // (`runApp(MultiProvider(... child: App()))`). The default
+    // pumpAppWidget puts providers below the Navigator, which would
+    // break tests that rely on a stable post-pop overlay context.
+    await tester.binding.setSurfaceSize(const Size(375, 812));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
       MultiProvider(
         providers: [
           ChangeNotifierProvider<PodcastProvider>.value(
@@ -67,7 +76,9 @@ void main() {
             value: playableProviderMock,
           ),
         ],
-        child: PodcastActionSheet(podcast: podcast),
+        child: MaterialApp(
+          home: Material(child: PodcastActionSheet(podcast: podcast)),
+        ),
       ),
     );
   }
@@ -375,6 +386,123 @@ void main() {
 
         // Drain showOverlay's auto-dismiss timer.
         await tester.pump(const Duration(seconds: 3));
+      },
+    );
+
+    testWidgets(
+      'other rows are disabled while a refresh is in flight',
+      (tester) async {
+        final podcast = Podcast.fake();
+        final completer = Completer<List<Song>>();
+        when(playableProviderMock.fetchForPodcast(
+          podcast.id,
+          forceRefresh: anyNamed('forceRefresh'),
+          getUpdates: anyNamed('getUpdates'),
+        )).thenAnswer((_) => completer.future);
+
+        await mount(tester, podcast);
+        await tester.tap(find.text('Refresh'));
+        await tester.pump();
+
+        // While in flight, tapping the other actions should be a no-op
+        // (rows are visually dimmed and onTap is null).
+        await tester.tap(find.text('Favorite'));
+        await tester.tap(find.text('Play All'));
+        await tester.tap(find.text('Shuffle'));
+        await tester.tap(find.text('Unsubscribe'));
+        await tester.pump();
+
+        verifyNever(podcastProviderMock.toggleFavorite(any));
+        verifyNever(audioHandlerMock.replaceQueue(
+          any,
+          shuffle: anyNamed('shuffle'),
+          autoPlay: anyNamed('autoPlay'),
+        ));
+        // Confirm dialog must NOT have opened.
+        expect(find.text('Unsubscribe?'), findsNothing);
+
+        // Resolve so the test exits cleanly.
+        completer.complete(<Song>[]);
+        await tester.pumpAndSettle();
+        await tester.pump(const Duration(seconds: 3));
+      },
+    );
+
+    testWidgets(
+      'dismissing the sheet mid-refresh still surfaces the toast on completion',
+      (tester) async {
+        final podcast = Podcast.fake();
+        final completer = Completer<List<Song>>();
+        when(playableProviderMock.fetchForPodcast(
+          podcast.id,
+          forceRefresh: anyNamed('forceRefresh'),
+          getUpdates: anyNamed('getUpdates'),
+        )).thenAnswer((_) => completer.future);
+
+        await mount(tester, podcast);
+        await tester.tap(find.text('Refresh'));
+        await tester.pump();
+        expect(find.text('Refreshing…'), findsOneWidget);
+
+        // Simulate the user swiping the sheet away while refresh is in
+        // flight: pop the sheet's route directly.
+        final sheetContext = tester.element(find.byType(PodcastActionSheet));
+        Navigator.of(sheetContext).pop();
+        await tester.pumpAndSettle();
+        expect(find.byType(PodcastActionSheet), findsNothing);
+
+        // Now resolve. Even though the sheet is gone, the toast still
+        // appears because we captured the root navigator's context
+        // before pop.
+        completer.complete(<Song>[]);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Feed refreshed'), findsOneWidget);
+        await tester.pump(const Duration(seconds: 3));
+      },
+    );
+
+    testWidgets(
+      'tapping Unsubscribe shows a confirm dialog and delegates on confirm',
+      (tester) async {
+        final podcast = Podcast.fake(title: 'Bye');
+        when(podcastProviderMock.unsubscribePodcast(podcast))
+            .thenAnswer((_) async {});
+
+        await mount(tester, podcast);
+        await tester.tap(find.text('Unsubscribe'));
+        await tester.pumpAndSettle();
+
+        // Confirm dialog is up.
+        expect(find.text('Unsubscribe?'), findsOneWidget);
+
+        // Tap the dialog's Unsubscribe button.
+        await tester
+            .tap(find.widgetWithText(CupertinoDialogAction, 'Unsubscribe'));
+        await tester.pumpAndSettle();
+
+        verify(podcastProviderMock.unsubscribePodcast(podcast)).called(1);
+        expect(find.text('Unsubscribed'), findsOneWidget);
+        await tester.pump(const Duration(seconds: 3));
+      },
+    );
+
+    testWidgets(
+      'cancelling the Unsubscribe confirm leaves the podcast alone',
+      (tester) async {
+        final podcast = Podcast.fake(title: 'Stay');
+
+        await mount(tester, podcast);
+        await tester.tap(find.text('Unsubscribe'));
+        await tester.pumpAndSettle();
+
+        await tester
+            .tap(find.widgetWithText(CupertinoDialogAction, 'Cancel'));
+        await tester.pumpAndSettle();
+
+        verifyNever(podcastProviderMock.unsubscribePodcast(any));
+        // Sheet is still open.
+        expect(find.byType(PodcastActionSheet), findsOneWidget);
       },
     );
   });

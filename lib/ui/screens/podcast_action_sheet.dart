@@ -30,27 +30,35 @@ class _PodcastActionSheetState extends State<PodcastActionSheet> {
   }
 
   Future<void> _refresh() async {
+    // Capture a stable context up-front so the toast can surface even
+    // if the user dismisses the sheet via swipe-down while the network
+    // call is in flight (the sheet context would be defunct by then).
+    final rootContext = Navigator.of(context, rootNavigator: true).context;
+
     setState(() => _refreshing = true);
 
+    bool succeeded;
     try {
       await _fetchEpisodes(getUpdates: true);
+      succeeded = true;
     } catch (_) {
-      if (!mounted) return;
-      Navigator.pop(context);
-      showOverlay(
-        context,
-        icon: CupertinoIcons.exclamationmark_triangle,
-        caption: 'Refresh failed',
-      );
-      return;
+      succeeded = false;
     }
 
-    if (!mounted) return;
-    Navigator.pop(context);
+    // While refreshing, every other row is disabled, so the only way
+    // the sheet can vanish is the user swipe-dismissing it — in which
+    // case `mounted` flips to false and we just skip the auto-pop.
+    if (mounted) {
+      setState(() => _refreshing = false);
+      Navigator.pop(context);
+    }
+
     showOverlay(
-      context,
-      icon: CupertinoIcons.arrow_clockwise,
-      caption: 'Feed refreshed',
+      rootContext,
+      icon: succeeded
+          ? CupertinoIcons.arrow_clockwise
+          : CupertinoIcons.exclamationmark_triangle,
+      caption: succeeded ? 'Feed refreshed' : 'Refresh failed',
     );
   }
 
@@ -148,6 +156,7 @@ class _PodcastActionSheetState extends State<PodcastActionSheet> {
                             icon: Icon(podcast.favorite
                                 ? CupertinoIcons.star_fill
                                 : CupertinoIcons.star),
+                            enabled: !_refreshing,
                             onTap: () {
                               Navigator.pop(context);
                               // toggleFavorite rethrows on failure (after
@@ -167,6 +176,7 @@ class _PodcastActionSheetState extends State<PodcastActionSheet> {
                         PlayableQuickAction(
                           label: playLabel,
                           icon: const Icon(CupertinoIcons.play_fill),
+                          enabled: !_refreshing,
                           onTap: () async {
                             Navigator.pop(context);
                             final List<Playable> episodes;
@@ -206,6 +216,7 @@ class _PodcastActionSheetState extends State<PodcastActionSheet> {
                         PlayableQuickAction(
                           label: 'Shuffle',
                           icon: const Icon(CupertinoIcons.shuffle),
+                          enabled: !_refreshing,
                           onTap: () async {
                             Navigator.pop(context);
                             final List<Playable> episodes;
@@ -256,6 +267,7 @@ class _PodcastActionSheetState extends State<PodcastActionSheet> {
                     PlayableActionButton(
                       text: 'Unsubscribe',
                       destructive: true,
+                      enabled: !_refreshing,
                       icon: const Icon(CupertinoIcons.minus_circle),
                       onTap: () async {
                         if (!await confirmUnsubscribePodcast(
@@ -265,9 +277,15 @@ class _PodcastActionSheetState extends State<PodcastActionSheet> {
                           return;
                         }
                         if (!context.mounted) return;
+                        // Capture before pop so the success/error toast
+                        // surfaces even if the sheet (or the route
+                        // underneath) is gone by the time the DELETE
+                        // resolves.
+                        final rootContext =
+                            Navigator.of(context, rootNavigator: true).context;
                         Navigator.pop(context);
                         await unsubscribePodcastWithFeedback(
-                          context,
+                          rootContext,
                           podcast: podcast,
                         );
                       },
