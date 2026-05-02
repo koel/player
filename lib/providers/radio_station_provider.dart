@@ -73,6 +73,23 @@ class RadioStationProvider with ChangeNotifier, StreamSubscriber {
     notifyListeners();
   }
 
+  Future<void> toggleFavorite(RadioStation station) async {
+    // Optimistic flip + restore on failure.
+    station.favorite = !station.favorite;
+    notifyListeners();
+
+    try {
+      await post('favorites/toggle', data: {
+        'type': 'radio-station',
+        'id': station.id,
+      });
+    } catch (_) {
+      station.favorite = !station.favorite;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   Future<Map<String, dynamic>> getNowPlaying(RadioStation station) async {
     return await get('radio/stations/${station.id}/now-playing');
   }

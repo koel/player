@@ -325,6 +325,7 @@ class PlayableActionButton extends StatelessWidget {
   final Function onTap;
   final bool hideSheetOnTap;
   final bool enabled;
+  final bool destructive;
 
   const PlayableActionButton({
     Key? key,
@@ -333,16 +334,27 @@ class PlayableActionButton extends StatelessWidget {
     required this.onTap,
     this.hideSheetOnTap = true,
     this.enabled = true,
+    this.destructive = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final destructiveColor = CupertinoColors.systemRed.resolveFrom(context);
+    final Color? labelColor = !enabled
+        ? Colors.white30
+        : destructive
+            ? destructiveColor
+            : null;
+    final effectiveIcon = destructive && enabled
+        ? Icon(icon.icon, color: destructiveColor)
+        : icon;
+
     return ListTile(
-      leading: icon,
+      leading: effectiveIcon,
       minLeadingWidth: 16,
       title: Text(
         text,
-        style: enabled ? null : const TextStyle(color: Colors.white30),
+        style: labelColor == null ? null : TextStyle(color: labelColor),
       ),
       onTap: enabled
           ? () {
