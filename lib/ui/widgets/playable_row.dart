@@ -101,7 +101,6 @@ class _PlayableRowState extends State<PlayableRow> {
             );
           },
           child: ListTile(
-            key: UniqueKey(),
             shape: widget.bordered
                 ? Border(bottom: Divider.createBorderSide(context))
                 : null,

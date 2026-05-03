@@ -25,6 +25,7 @@ void main() {
   setUp(() {
     artist = Artist.fake(name: 'Banana');
     provider = ArtistProvider();
+    addTearDown(provider.dispose);
     provider.syncWithVault([artist]);
   });
 

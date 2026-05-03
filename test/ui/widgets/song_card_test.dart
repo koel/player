@@ -15,6 +15,7 @@ class _Harness {
 
 _Harness _harness(WidgetTester tester, Playable playable) {
   final provider = PlayableProvider();
+  addTearDown(provider.dispose);
   if (playable is Song) provider.syncWithVault([playable]);
   return _Harness(
     provider,

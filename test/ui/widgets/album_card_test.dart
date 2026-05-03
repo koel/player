@@ -29,6 +29,7 @@ void main() {
       artist: Artist.fake(name: 'Banana'),
     );
     provider = AlbumProvider();
+    addTearDown(provider.dispose);
     provider.syncWithVault([album]);
   });
 
