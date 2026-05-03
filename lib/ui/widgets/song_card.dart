@@ -1,9 +1,11 @@
 import 'package:app/main.dart';
 import 'package:app/models/models.dart';
+import 'package:app/providers/providers.dart';
 import 'package:app/router.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 class SongCard extends StatefulWidget {
   final Playable playable;
@@ -36,46 +38,48 @@ class _SongCardState extends State<SongCard> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _opacity = 0.7),
-      onTapCancel: () => setState(() => _opacity = 1.0),
-      onTap: () async {
-        setState(() => _opacity = 1.0);
-        await audioHandler.queueAndPlay(widget.playable);
-      },
-      onLongPress: () {
-        HapticFeedback.mediumImpact();
-        widget.router
-            .showPlayableActionSheet(context, playable: widget.playable);
-      },
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedOpacity(
-        duration: const Duration(microseconds: 100),
-        opacity: _opacity,
-        child: Column(
-          children: <Widget>[
-            PlayableThumbnail.md(playable: widget.playable),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: _cardWidth,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    widget.playable.title,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    _subtitle,
-                    style: const TextStyle(color: Colors.white54),
-                    overflow: TextOverflow.ellipsis,
-                  )
-                ],
+    return Consumer<PlayableProvider>(
+      builder: (_, __, ___) => GestureDetector(
+        onTapDown: (_) => setState(() => _opacity = 0.7),
+        onTapCancel: () => setState(() => _opacity = 1.0),
+        onTap: () async {
+          setState(() => _opacity = 1.0);
+          await audioHandler.queueAndPlay(widget.playable);
+        },
+        onLongPress: () {
+          HapticFeedback.mediumImpact();
+          widget.router
+              .showPlayableActionSheet(context, playable: widget.playable);
+        },
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedOpacity(
+          duration: const Duration(microseconds: 100),
+          opacity: _opacity,
+          child: Column(
+            children: <Widget>[
+              PlayableThumbnail.md(playable: widget.playable),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: _cardWidth,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      widget.playable.title,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      _subtitle,
+                      style: const TextStyle(color: Colors.white54),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

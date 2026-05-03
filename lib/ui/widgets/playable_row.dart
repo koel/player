@@ -66,67 +66,62 @@ class _PlayableRowState extends State<PlayableRow> {
     return 0;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    late String subtitle;
-
+  String _subtitle() {
     switch (widget.listContext) {
       case PlayableListContext.album:
       case PlayableListContext.artist:
-        subtitle = (widget.playable as Song).albumName;
-        break;
+        return (widget.playable as Song).albumName;
       case PlayableListContext.podcast:
-        var createdAt = (widget.playable as Episode).createdAt;
-        // To be more user-friendly, we display the human readable format,
-        // but not for too old (>6 months in the past) dates.
-        subtitle =
-            DateTime.now().difference(createdAt) > const Duration(days: 180)
-                ? DateFormat.yMMMd().format(createdAt)
-                : timeago.format(createdAt);
-        break;
+        final createdAt = (widget.playable as Episode).createdAt;
+        return DateTime.now().difference(createdAt) > const Duration(days: 180)
+            ? DateFormat.yMMMd().format(createdAt)
+            : timeago.format(createdAt);
       default:
-        if (widget.playable is Episode)
-          subtitle = (widget.playable as Episode).podcastTitle;
-        else if (widget.playable is Song)
-          subtitle = (widget.playable as Song).artistName;
-        break;
+        if (widget.playable is Episode) {
+          return (widget.playable as Episode).podcastTitle;
+        }
+        return (widget.playable as Song).artistName;
     }
+  }
 
-    return Card(
-      child: InkWell(
-        onTap: () async => await audioHandler.maybeQueueAndPlay(
-          widget.playable,
-          position: await getPlaybackStartPosition(widget.playable),
-        ),
-        onLongPress: () {
-          HapticFeedback.mediumImpact();
-          widget.router.showPlayableActionSheet(
-            context,
-            playable: widget.playable,
-          );
-        },
-        child: ListTile(
-          key: UniqueKey(),
-          shape: widget.bordered
-              ? Border(bottom: Divider.createBorderSide(context))
-              : null,
-          leading: widget.listContext == PlayableListContext.album
-              ? PlayableRowTrackNumber(song: widget.playable as Song)
-              : widget.listContext == PlayableListContext.podcast
-                  ? null
-                  : PlayableRowThumbnail(playable: widget.playable),
-          minLeadingWidth:
-              widget.listContext == PlayableListContext.album ? 0 : null,
-          title: Text(widget.playable.title, overflow: TextOverflow.ellipsis),
-          subtitle: Text(
-            subtitle,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.white60),
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<PlayableProvider>(
+      builder: (_, __, ___) => Card(
+        child: InkWell(
+          onTap: () async => await audioHandler.maybeQueueAndPlay(
+            widget.playable,
+            position: await getPlaybackStartPosition(widget.playable),
           ),
-          trailing: PlayableRowTrailingActions(
-            playable: widget.playable,
-            listContext: widget.listContext,
-            index: widget.index,
+          onLongPress: () {
+            HapticFeedback.mediumImpact();
+            widget.router.showPlayableActionSheet(
+              context,
+              playable: widget.playable,
+            );
+          },
+          child: ListTile(
+            shape: widget.bordered
+                ? Border(bottom: Divider.createBorderSide(context))
+                : null,
+            leading: widget.listContext == PlayableListContext.album
+                ? PlayableRowTrackNumber(song: widget.playable as Song)
+                : widget.listContext == PlayableListContext.podcast
+                    ? null
+                    : PlayableRowThumbnail(playable: widget.playable),
+            minLeadingWidth:
+                widget.listContext == PlayableListContext.album ? 0 : null,
+            title: Text(widget.playable.title, overflow: TextOverflow.ellipsis),
+            subtitle: Text(
+              _subtitle(),
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white60),
+            ),
+            trailing: PlayableRowTrailingActions(
+              playable: widget.playable,
+              listContext: widget.listContext,
+              index: widget.index,
+            ),
           ),
         ),
       ),
