@@ -53,13 +53,13 @@ dependencies:
     git:
       url: https://github.com/roman-yerin/native_qr.git
       ref: 8d84d3706f53594d40a47c15b49cf19f41d075be
-  lucide_icons: ^0.257.0
   timeago: ^3.6.1
   url_launcher: ^6.3.0
 
   collection: any
   faker: any
   ulid: ^2.0.1
+  lucide_icons_flutter: ^3.1.14+2
 dev_dependencies:
   fake_async: ^1.2.0
   mockito: ^5.0.12

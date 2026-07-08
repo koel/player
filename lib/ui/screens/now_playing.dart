@@ -226,22 +226,9 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                                       ),
                                     ),
                                     if (playable is Song)
-                                      IconButton(
-                                        onPressed: () {
-                                          context
-                                              .read<InteractionProvider>()
-                                              .toggleLike(
-                                                  song: playable as Song);
-                                          setState(() {});
-                                        },
-                                        icon: Icon(
-                                          playable.liked
-                                              ? CupertinoIcons.star_fill
-                                              : CupertinoIcons.star,
-                                          color: playable.liked
-                                              ? Colors.white
-                                              : bottomIconColor,
-                                        ),
+                                      FavoriteButton(
+                                        song: playable,
+                                        inactiveColor: bottomIconColor,
                                       ),
                                   ],
                                 ),
