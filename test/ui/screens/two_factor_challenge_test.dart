@@ -86,9 +86,9 @@ void main() {
 
     expect(find.byType(OneTimeCodeInput), findsNothing);
     expect(find.text('Enter one of your recovery codes.'), findsOneWidget);
-    expect(find.text('Use authenticator code'), findsOneWidget);
+    expect(find.text('Use authenticator code instead'), findsOneWidget);
 
-    await tester.tap(find.text('Use authenticator code'));
+    await tester.tap(find.text('Use authenticator code instead'));
     await tester.pump();
 
     expect(find.byType(OneTimeCodeInput), findsOneWidget);

@@ -148,35 +148,23 @@ class _TwoFactorChallengeScreenState extends State<TwoFactorChallengeScreen> {
                         onPressed: _verifying ? null : verify,
                       ),
                     ),
-                    IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(
-                            child: _GhostButton(
-                              label: _mode == _CodeMode.totp
-                                  ? 'Use a recovery code'
-                                  : 'Use authenticator code',
-                              onPressed: _verifying
-                                  ? null
-                                  : () => _switchMode(
-                                        _mode == _CodeMode.totp
-                                            ? _CodeMode.recovery
-                                            : _CodeMode.totp,
-                                      ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _GhostButton(
-                              label: 'Back to login',
-                              onPressed: _verifying
-                                  ? null
-                                  : () => Navigator.of(context).pop(),
-                            ),
-                          ),
-                        ],
-                      ),
+                    _FooterButton(
+                      label: _mode == _CodeMode.totp
+                          ? 'Use a recovery code'
+                          : 'Use authenticator code instead',
+                      onPressed: _verifying
+                          ? null
+                          : () => _switchMode(
+                                _mode == _CodeMode.totp
+                                    ? _CodeMode.recovery
+                                    : _CodeMode.totp,
+                              ),
+                    ),
+                    _FooterButton(
+                      label: 'Back to login',
+                      onPressed: _verifying
+                          ? null
+                          : () => Navigator.of(context).pop(),
                     ),
                   ].expand((widget) => [widget, const SizedBox(height: 16)]),
                 ],
@@ -231,23 +219,22 @@ class _TwoFactorChallengeScreenState extends State<TwoFactorChallengeScreen> {
   }
 }
 
-class _GhostButton extends StatelessWidget {
+class _FooterButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
 
-  const _GhostButton({Key? key, required this.label, this.onPressed})
+  const _FooterButton({Key? key, required this.label, this.onPressed})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: Colors.white,
-        side: const BorderSide(color: Colors.white24),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+    return SizedBox(
+      width: double.infinity,
+      child: TextButton(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(foregroundColor: Colors.white),
+        child: Text(label, textAlign: TextAlign.center),
       ),
-      child: Text(label, textAlign: TextAlign.center),
     );
   }
 }
