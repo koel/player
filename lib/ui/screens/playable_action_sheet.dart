@@ -9,7 +9,7 @@ import 'package:app/ui/screens/info_sheet/info_sheet.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class PlayableActionSheet extends StatefulWidget {
