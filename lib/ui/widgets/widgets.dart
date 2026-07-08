@@ -14,6 +14,7 @@ export 'marquee_text.dart';
 export 'message_overlay.dart';
 export 'mini_player.dart';
 export 'now_playing/audio_controls.dart';
+export 'now_playing/favorite_button.dart';
 export 'now_playing/playable_info.dart';
 export 'now_playing/progress_bar.dart';
 export 'now_playing/repeat_mode_button.dart';
