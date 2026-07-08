@@ -22,6 +22,7 @@ export 'info_sheet/info_sheet.dart';
 export 'initial.dart';
 export 'library.dart';
 export 'login.dart';
+export 'two_factor_challenge.dart';
 export 'main.dart';
 export 'no_connection.dart';
 export 'now_playing.dart';

@@ -25,7 +25,9 @@ class AuthProvider with StreamSubscriber {
     }));
   }
 
-  Future<void> login(
+  /// Returns a [TwoFactorChallenge] when the server requires a second factor,
+  /// or `null` when the credentials alone completed the login.
+  Future<TwoFactorChallenge?> login(
       {required String host,
       required String email,
       required String password}) async {
@@ -37,8 +39,25 @@ class AuthProvider with StreamSubscriber {
     };
 
     final response = await post('me', data: loginData);
-    preferences.apiToken = response['token'];
-    preferences.audioToken = response['audio-token'];
+
+    if (response['two_factor'] == true) {
+      return TwoFactorChallenge(loginToken: response['login_token']);
+    }
+
+    _storeCompositeToken(response);
+    return null;
+  }
+
+  Future<void> completeTwoFactorChallenge({
+    required String loginToken,
+    required String code,
+  }) async {
+    final response = await post('me/two-factor-challenge', data: {
+      'login_token': loginToken,
+      'code': code,
+    });
+
+    _storeCompositeToken(response);
   }
 
   Future<void> loginWithOneTimeToken({
@@ -51,7 +70,10 @@ class AuthProvider with StreamSubscriber {
       'token': token,
     };
 
-    final response = await post('me/otp', data: loginData);
+    _storeCompositeToken(await post('me/otp', data: loginData));
+  }
+
+  void _storeCompositeToken(dynamic response) {
     preferences.apiToken = response['token'];
     preferences.audioToken = response['audio-token'];
   }
@@ -78,4 +100,10 @@ class AuthProvider with StreamSubscriber {
 
     _userLoggedOut.add(null);
   }
+}
+
+class TwoFactorChallenge {
+  final String loginToken;
+
+  const TwoFactorChallenge({required this.loginToken});
 }

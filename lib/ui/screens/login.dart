@@ -95,7 +95,14 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
 
     try {
       _host = standardizeHost(_host);
-      await _auth.login(host: _host, email: _email, password: _password);
+      final challenge =
+          await _auth.login(host: _host, email: _email, password: _password);
+
+      if (challenge != null) {
+        _gotoTwoFactorChallenge(challenge);
+        return;
+      }
+
       await _auth.tryGetAuthUser();
       successful = true;
     } on HttpResponseException catch (error) {
@@ -116,6 +123,16 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
       preferences.userEmail = _email;
       redirectToDataLoadingScreen();
     }
+  }
+
+  void _gotoTwoFactorChallenge(TwoFactorChallenge challenge) {
+    Navigator.of(context).push(CupertinoPageRoute(
+      builder: (_) => TwoFactorChallengeScreen(
+        host: _host,
+        email: _email,
+        loginToken: challenge.loginToken,
+      ),
+    ));
   }
 
   Future<void> attemptLoginWithOtp({
