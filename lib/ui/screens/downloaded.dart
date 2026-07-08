@@ -2,6 +2,7 @@ import 'package:app/app_state.dart';
 import 'package:app/constants/constants.dart';
 import 'package:app/enums.dart';
 import 'package:app/extensions/extensions.dart';
+import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:app/values/values.dart';
@@ -20,9 +21,29 @@ class DownloadedScreen extends StatefulWidget {
   State<StatefulWidget> createState() => _DownloadedScreenState();
 }
 
-class _DownloadedScreenState extends State<DownloadedScreen> {
+class _DownloadedScreenState extends State<DownloadedScreen>
+    with StreamSubscriber {
   final _scrollController = ScrollController();
   var _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+
+    final downloadProvider = context.read<DownloadProvider>();
+    final refresh = () => setState(() {});
+
+    subscribe(downloadProvider.downloadRemovedStream.listen((_) => refresh()));
+    subscribe(downloadProvider.downloadsClearedStream.listen((_) => refresh()));
+    subscribe(downloadProvider.playableDownloadedStream.listen((_) => refresh()));
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    unsubscribeAll();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
