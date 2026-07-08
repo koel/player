@@ -83,6 +83,7 @@ class _TwoFactorChallengeScreenState extends State<TwoFactorChallengeScreen> {
       await _auth.tryGetAuthUser();
       successful = true;
     } on HttpResponseException catch (error) {
+      if (!mounted) return;
       _resetTotpInput();
       await showErrorDialog(
         context,
@@ -91,13 +92,14 @@ class _TwoFactorChallengeScreenState extends State<TwoFactorChallengeScreen> {
             : null,
       );
     } catch (error) {
+      if (!mounted) return;
       _resetTotpInput();
       await showErrorDialog(context);
     } finally {
-      setState(() => _verifying = false);
+      if (mounted) setState(() => _verifying = false);
     }
 
-    if (successful) {
+    if (successful && mounted) {
       preferences.host = widget.host;
       preferences.userEmail = widget.email;
       Navigator.of(context, rootNavigator: true)
@@ -166,7 +168,7 @@ class _TwoFactorChallengeScreenState extends State<TwoFactorChallengeScreen> {
                           ? null
                           : () => Navigator.of(context).pop(),
                     ),
-                  ].expand((widget) => [widget, const SizedBox(height: 16)]),
+                  ].expand((child) => [child, const SizedBox(height: 16)]),
                 ],
               ),
             ),

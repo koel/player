@@ -97,6 +97,7 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
       _host = standardizeHost(_host);
       final challenge =
           await _auth.login(host: _host, email: _email, password: _password);
+      if (!mounted) return;
 
       if (challenge != null) {
         _gotoTwoFactorChallenge(challenge);
@@ -106,6 +107,7 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
       await _auth.tryGetAuthUser();
       successful = true;
     } on HttpResponseException catch (error) {
+      if (!mounted) return;
       await showErrorDialog(
         context,
         message: error.response.statusCode == 401
@@ -113,12 +115,13 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
             : null,
       );
     } catch (error) {
+      if (!mounted) return;
       await showErrorDialog(context);
     } finally {
-      setState(() => _authenticating = false);
+      if (mounted) setState(() => _authenticating = false);
     }
 
-    if (successful) {
+    if (successful && mounted) {
       preferences.host = _host;
       preferences.userEmail = _email;
       redirectToDataLoadingScreen();
@@ -148,18 +151,20 @@ class _LoginScreenState extends State<LoginScreen> with StreamSubscriber {
       await _auth.tryGetAuthUser();
       successful = true;
     } on HttpResponseException catch (error) {
+      if (!mounted) return;
       await showErrorDialog(
         context,
         message:
             error.response.statusCode == 401 ? 'Invalid login token.' : null,
       );
     } catch (error) {
+      if (!mounted) return;
       await showErrorDialog(context);
     } finally {
-      setState(() => _authenticating = false);
+      if (mounted) setState(() => _authenticating = false);
     }
 
-    if (successful) {
+    if (successful && mounted) {
       preferences.host = host;
       redirectToDataLoadingScreen();
     }
