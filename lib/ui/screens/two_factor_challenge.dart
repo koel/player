@@ -5,8 +5,11 @@ import 'package:app/ui/screens/screens.dart';
 import 'package:app/ui/widgets/widgets.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
+
+enum _CodeMode { totp, recovery }
 
 class TwoFactorChallengeScreen extends StatefulWidget {
   static const routeName = '/two-factor-challenge';
@@ -28,15 +31,23 @@ class TwoFactorChallengeScreen extends StatefulWidget {
 }
 
 class _TwoFactorChallengeScreenState extends State<TwoFactorChallengeScreen> {
-  final formKey = GlobalKey<FormState>();
   late final AuthProvider _auth;
-  var _verifying = false;
+  var _mode = _CodeMode.totp;
   var _code = '';
+  var _verifying = false;
+  var _totpResetToken = 0;
 
   @override
   void initState() {
     super.initState();
     _auth = context.read();
+  }
+
+  void _switchMode(_CodeMode mode) {
+    setState(() {
+      _mode = mode;
+      _code = '';
+    });
   }
 
   Future<void> showErrorDialog(BuildContext context, {String? message}) async {
@@ -58,22 +69,21 @@ class _TwoFactorChallengeScreenState extends State<TwoFactorChallengeScreen> {
   }
 
   Future<void> verify() async {
-    final form = formKey.currentState!;
+    final code = _code.trim();
+    if (code.isEmpty || _verifying) return;
+
     var successful = false;
-
-    if (!form.validate()) return;
-
-    form.save();
     setState(() => _verifying = true);
 
     try {
       await _auth.completeTwoFactorChallenge(
         loginToken: widget.loginToken,
-        code: _code.trim(),
+        code: code,
       );
       await _auth.tryGetAuthUser();
       successful = true;
     } on HttpResponseException catch (error) {
+      _resetTotpInput();
       await showErrorDialog(
         context,
         message: error.response.statusCode == 401
@@ -81,6 +91,7 @@ class _TwoFactorChallengeScreenState extends State<TwoFactorChallengeScreen> {
             : null,
       );
     } catch (error) {
+      _resetTotpInput();
       await showErrorDialog(context);
     } finally {
       setState(() => _verifying = false);
@@ -94,46 +105,37 @@ class _TwoFactorChallengeScreenState extends State<TwoFactorChallengeScreen> {
     }
   }
 
+  void _resetTotpInput() {
+    setState(() {
+      _code = '';
+      _totpResetToken++;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: GradientDecoratedContainer(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppDimensions.hPadding,
-            ),
-            child: Form(
-              key: formKey,
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.hPadding,
+              ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   ...[
                     Text(
                       'Two-Factor Authentication',
+                      textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    const Text(
-                      'Enter the code from your authenticator app, or one of '
-                      'your recovery codes.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                    TextFormField(
-                      autofocus: true,
-                      autocorrect: false,
-                      keyboardType: TextInputType.text,
-                      textInputAction: TextInputAction.go,
-                      onChanged: (value) => _code = value,
-                      onSaved: (value) => _code = value ?? '',
-                      onFieldSubmitted: (_) => _verifying ? null : verify(),
-                      decoration: const InputDecoration(
-                        labelText: 'Authentication code',
-                      ),
-                      validator: (value) => value == null || value.isEmpty
-                          ? 'This field is required'
-                          : null,
-                    ),
+                    if (_mode == _CodeMode.totp)
+                      ..._buildTotpInput()
+                    else
+                      ..._buildRecoveryInput(),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -146,7 +148,37 @@ class _TwoFactorChallengeScreenState extends State<TwoFactorChallengeScreen> {
                         onPressed: _verifying ? null : verify,
                       ),
                     ),
-                  ].expand((widget) => [widget, const SizedBox(height: 12)]),
+                    IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: _GhostButton(
+                              label: _mode == _CodeMode.totp
+                                  ? 'Use a recovery code'
+                                  : 'Use authenticator code',
+                              onPressed: _verifying
+                                  ? null
+                                  : () => _switchMode(
+                                        _mode == _CodeMode.totp
+                                            ? _CodeMode.recovery
+                                            : _CodeMode.totp,
+                                      ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _GhostButton(
+                              label: 'Back to login',
+                              onPressed: _verifying
+                                  ? null
+                                  : () => Navigator.of(context).pop(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ].expand((widget) => [widget, const SizedBox(height: 16)]),
                 ],
               ),
             ),
@@ -154,5 +186,78 @@ class _TwoFactorChallengeScreenState extends State<TwoFactorChallengeScreen> {
         ),
       ),
     );
+  }
+
+  List<Widget> _buildTotpInput() {
+    return [
+      const Text(
+        'Enter the code from your authenticator app.',
+        textAlign: TextAlign.center,
+        style: TextStyle(color: Colors.white70),
+      ),
+      OneTimeCodeInput(
+        key: ValueKey(_totpResetToken),
+        onChanged: (value) => _code = value,
+        onCompleted: (value) {
+          _code = value;
+          verify();
+        },
+      ),
+    ];
+  }
+
+  List<Widget> _buildRecoveryInput() {
+    return [
+      const Text(
+        'Enter one of your recovery codes.',
+        textAlign: TextAlign.center,
+        style: TextStyle(color: Colors.white70),
+      ),
+      TextField(
+        autofocus: true,
+        autocorrect: false,
+        enableSuggestions: false,
+        textAlign: TextAlign.center,
+        textInputAction: TextInputAction.go,
+        style: const TextStyle(fontFamily: 'monospace', letterSpacing: 2),
+        inputFormatters: [_UpperCaseFormatter()],
+        onChanged: (value) => _code = value,
+        onSubmitted: (_) => verify(),
+        decoration: const InputDecoration(
+          hintText: 'Recovery code',
+        ),
+      ),
+    ];
+  }
+}
+
+class _GhostButton extends StatelessWidget {
+  final String label;
+  final VoidCallback? onPressed;
+
+  const _GhostButton({Key? key, required this.label, this.onPressed})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.white,
+        side: const BorderSide(color: Colors.white24),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      ),
+      child: Text(label, textAlign: TextAlign.center),
+    );
+  }
+}
+
+class _UpperCaseFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return newValue.copyWith(text: newValue.text.toUpperCase());
   }
 }

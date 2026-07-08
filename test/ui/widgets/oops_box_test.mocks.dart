@@ -51,7 +51,7 @@ class MockAuthProvider extends _i1.Mock implements _i3.AuthProvider {
       ) as _i2.User);
 
   @override
-  _i4.Future<void> login({
+  _i4.Future<_i3.TwoFactorChallenge?> login({
     required String? host,
     required String? email,
     required String? password,
@@ -64,6 +64,23 @@ class MockAuthProvider extends _i1.Mock implements _i3.AuthProvider {
             #host: host,
             #email: email,
             #password: password,
+          },
+        ),
+        returnValue: _i4.Future<_i3.TwoFactorChallenge?>.value(),
+      ) as _i4.Future<_i3.TwoFactorChallenge?>);
+
+  @override
+  _i4.Future<void> completeTwoFactorChallenge({
+    required String? loginToken,
+    required String? code,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #completeTwoFactorChallenge,
+          [],
+          {
+            #loginToken: loginToken,
+            #code: code,
           },
         ),
         returnValue: _i4.Future<void>.value(),
