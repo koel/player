@@ -46,6 +46,52 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Widget _songBlock(String heading, List<Playable> songs) {
+    return HorizontalCardScroller(
+      headingText: heading,
+      cards: <Widget>[
+        ...songs.map((playable) => SongCard(playable: playable)),
+        PlaceholderCard(
+          icon: CupertinoIcons.music_note,
+          onPressed: () => Navigator.of(context).push(
+            CupertinoPageRoute(builder: (_) => SongsScreen()),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _albumBlock(String heading, List<Album> albums) {
+    return HorizontalCardScroller(
+      headingText: heading,
+      cards: <Widget>[
+        ...albums.map((album) => AlbumCard(album: album)),
+        PlaceholderCard(
+          icon: CupertinoIcons.music_albums,
+          onPressed: () => Navigator.of(context).push(
+            CupertinoPageRoute(builder: (_) => AlbumsScreen()),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _artistBlock(String heading, List<Artist> artists) {
+    return HorizontalCardScroller(
+      headingText: heading,
+      cards: <Widget>[
+        ...artists.map((artist) => ArtistCard(artist: artist)),
+        PlaceholderCard(
+          icon: CupertinoIcons.music_mic,
+          circular: true,
+          onPressed: () => Navigator.of(context).push(
+            CupertinoPageRoute(builder: (_) => const ArtistsScreen()),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<OverviewProvider>(
@@ -53,55 +99,35 @@ class _HomeScreenState extends State<HomeScreen> {
         if (_loading) return const HomeScreenPlaceholder();
         if (_errored) return OopsBox(onRetry: fetchData);
 
+        final op = overviewProvider;
         final blocks = <Widget>[
-          if (overviewProvider.mostPlayedSongs.isNotEmpty)
-            HorizontalCardScroller(
-              headingText: 'Most played',
-              cards: <Widget>[
-                ...overviewProvider.mostPlayedSongs
-                    .map((playable) => SongCard(playable: playable)),
-                PlaceholderCard(
-                  icon: CupertinoIcons.music_note,
-                  onPressed: () => Navigator.of(context).push(
-                    CupertinoPageRoute(builder: (_) => SongsScreen()),
-                  ),
-                ),
-              ],
-            ),
-          if (overviewProvider.mostPlayedAlbums.isNotEmpty)
-            HorizontalCardScroller(
-              headingText: 'Top albums',
-              cards: <Widget>[
-                ...overviewProvider.mostPlayedAlbums
-                    .map((album) => AlbumCard(album: album)),
-                PlaceholderCard(
-                  icon: CupertinoIcons.music_albums,
-                  onPressed: () => Navigator.of(context).push(
-                    CupertinoPageRoute(builder: (_) => AlbumsScreen()),
-                  ),
-                ),
-              ],
-            ),
-          if (overviewProvider.mostPlayedArtists.isNotEmpty)
-            HorizontalCardScroller(
-              headingText: 'Top artists',
-              cards: <Widget>[
-                ...overviewProvider.mostPlayedArtists
-                    .map((artist) => ArtistCard(artist: artist)),
-                PlaceholderCard(
-                  icon: CupertinoIcons.music_mic,
-                  circular: true,
-                  onPressed: () => Navigator.of(context).push(
-                    CupertinoPageRoute(builder: (_) => const ArtistsScreen()),
-                  ),
-                ),
-              ],
-            ),
+          if (op.recentlyAddedAlbums.isNotEmpty)
+            _albumBlock('Latest Albums', op.recentlyAddedAlbums),
+          if (op.similarSongs.isNotEmpty)
+            _songBlock('You Might Also Like', op.similarSongs),
+          if (op.mostPlayedAlbums.isNotEmpty)
+            _albumBlock('Top Albums', op.mostPlayedAlbums),
+          if (op.mostPlayedSongs.isNotEmpty)
+            _songBlock('Most Played', op.mostPlayedSongs),
+          if (op.mostPlayedArtists.isNotEmpty)
+            _artistBlock('Top Artists', op.mostPlayedArtists),
+          if (op.recentlyAddedSongs.isNotEmpty)
+            _songBlock('New Songs', op.recentlyAddedSongs),
+          if (op.recentlyAddedArtists.isNotEmpty)
+            _artistBlock('New Artists', op.recentlyAddedArtists),
+          if (op.leastPlayedSongs.isNotEmpty)
+            _songBlock('Hidden Gems', op.leastPlayedSongs),
+          if (op.randomSongs.isNotEmpty)
+            _songBlock('Random Songs', op.randomSongs),
+          if (op.randomAlbums.isNotEmpty)
+            _albumBlock('Random Albums', op.randomAlbums),
+          if (op.randomArtists.isNotEmpty)
+            _artistBlock('Random Artists', op.randomArtists),
         ]
             .map(
-              (widget) => Padding(
+              (block) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                child: widget,
+                child: block,
               ),
             )
             .toList();
