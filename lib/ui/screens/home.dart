@@ -44,7 +44,7 @@ List<T> orderByHomeBlocksPreference<T>(
     return saved == -1 ? savedOrder.length + entry.key : saved;
   }
 
-  indexed.sort((a, b) => sortKey(a).compareTo(sortKey(b)));
+  indexed.sort((left, right) => sortKey(left).compareTo(sortKey(right)));
 
   return indexed.map((entry) => entry.value).toList();
 }

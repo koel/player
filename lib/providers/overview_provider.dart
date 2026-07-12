@@ -84,13 +84,13 @@ class OverviewProvider with ChangeNotifier, StreamSubscriber {
 
   List<Album> _parseAlbums(dynamic json) => _albumProvider.syncWithVault(
         ((json ?? const []) as List)
-            .map<Album>((j) => Album.fromJson(j))
+            .map<Album>((entry) => Album.fromJson(entry))
             .toList(),
       );
 
   List<Artist> _parseArtists(dynamic json) => _artistProvider.syncWithVault(
         ((json ?? const []) as List)
-            .map<Artist>((j) => Artist.fromJson(j))
+            .map<Artist>((entry) => Artist.fromJson(entry))
             .toList(),
       );
 
