@@ -23,6 +23,7 @@ class _DataLoadingScreen extends State<DataLoadingScreen> {
 
   var _hasError = false;
   var _stillLoading = false;
+  var _loadGeneration = 0;
   Timer? _stillLoadingTimer;
   Timer? _timeoutTimer;
 
@@ -44,6 +45,8 @@ class _DataLoadingScreen extends State<DataLoadingScreen> {
   }
 
   Future<void> _loadData() async {
+    final generation = ++_loadGeneration;
+
     _stillLoadingTimer = Timer(_stillLoadingAfter, () {
       if (mounted) setState(() => _stillLoading = true);
     });
@@ -53,10 +56,13 @@ class _DataLoadingScreen extends State<DataLoadingScreen> {
 
     try {
       await context.read<DataProvider>().init();
-      if (!mounted || _hasError) return;
+      // Ignore a superseded attempt (e.g. a stale future resolving after the
+      // timeout fired and the user hit Retry).
+      if (!mounted || _hasError || generation != _loadGeneration) return;
       _cancelTimers();
       Navigator.of(context).pushReplacementNamed(MainScreen.routeName);
-    } catch (e) {
+    } catch (_) {
+      if (generation != _loadGeneration) return;
       _cancelTimers();
       if (mounted) setState(() => _hasError = true);
     }
