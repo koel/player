@@ -10,10 +10,16 @@ class AlbumCard extends StatefulWidget {
   final Album album;
   final AppRouter router;
 
+  /// Whether the thumbnail animates to the details screen as a Hero. Set to
+  /// false when the same album may appear more than once in a route (e.g.
+  /// across Home blocks), so hero tags stay unique.
+  final bool asHero;
+
   AlbumCard({
     Key? key,
     required this.album,
     this.router = const AppRouter(),
+    this.asHero = true,
   }) : super(key: key);
 
   @override
@@ -42,7 +48,8 @@ class _AlbumCardState extends State<AlbumCard> {
           opacity: _opacity,
           child: Column(
             children: <Widget>[
-              AlbumArtistThumbnail.md(entity: widget.album, asHero: true),
+              AlbumArtistThumbnail.md(
+                  entity: widget.album, asHero: widget.asHero),
               const SizedBox(height: 12),
               SizedBox(
                 width: _cardWidth,

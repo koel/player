@@ -91,11 +91,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _albumBlock(String heading, List<Album> albums) {
+  Widget _albumBlock(String heading, List<Album> albums, Set seenAlbumIds) {
     return HorizontalCardScroller(
       headingText: heading,
       cards: <Widget>[
-        ...albums.map((album) => AlbumCard(album: album)),
+        ...albums.map((album) =>
+            AlbumCard(album: album, asHero: seenAlbumIds.add(album.id))),
         PlaceholderCard(
           icon: CupertinoIcons.music_albums,
           onPressed: () => Navigator.of(context).push(
@@ -106,11 +107,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _artistBlock(String heading, List<Artist> artists) {
+  Widget _artistBlock(String heading, List<Artist> artists, Set seenArtistIds) {
     return HorizontalCardScroller(
       headingText: heading,
       cards: <Widget>[
-        ...artists.map((artist) => ArtistCard(artist: artist)),
+        ...artists.map((artist) =>
+            ArtistCard(artist: artist, asHero: seenArtistIds.add(artist.id))),
         PlaceholderCard(
           icon: CupertinoIcons.music_mic,
           circular: true,
@@ -131,30 +133,38 @@ class _HomeScreenState extends State<HomeScreen> {
 
         final op = overviewProvider;
 
+        // Grant the hero animation to only the first card per entity, so the
+        // same album/artist appearing in several blocks doesn't produce
+        // duplicate hero tags within the route.
+        final seenAlbumIds = <dynamic>{};
+        final seenArtistIds = <dynamic>{};
+
         // Default order mirrors koel web's default home layout (minus the
         // recently-played section, which the mobile app pins to the top).
         final defaultBlocks = <_HomeBlock>[
           if (op.recentlyAddedAlbums.isNotEmpty)
             _HomeBlock('recently-added-albums',
-                _albumBlock('Latest Albums', op.recentlyAddedAlbums)),
+                _albumBlock('Latest Albums', op.recentlyAddedAlbums, seenAlbumIds)),
           if (op.similarSongs.isNotEmpty)
             _HomeBlock('similar-songs',
                 _songBlock('You Might Also Like', op.similarSongs)),
           if (op.mostPlayedAlbums.isNotEmpty)
             _HomeBlock('most-played-albums',
-                _albumBlock('Top Albums', op.mostPlayedAlbums)),
+                _albumBlock('Top Albums', op.mostPlayedAlbums, seenAlbumIds)),
           if (op.mostPlayedSongs.isNotEmpty)
             _HomeBlock('most-played-songs',
                 _songBlock('Most Played', op.mostPlayedSongs)),
           if (op.mostPlayedArtists.isNotEmpty)
             _HomeBlock('most-played-artists',
-                _artistBlock('Top Artists', op.mostPlayedArtists)),
+                _artistBlock('Top Artists', op.mostPlayedArtists, seenArtistIds)),
           if (op.recentlyAddedSongs.isNotEmpty)
             _HomeBlock('recently-added-songs',
                 _songBlock('New Songs', op.recentlyAddedSongs)),
           if (op.recentlyAddedArtists.isNotEmpty)
-            _HomeBlock('recently-added-artists',
-                _artistBlock('New Artists', op.recentlyAddedArtists)),
+            _HomeBlock(
+                'recently-added-artists',
+                _artistBlock(
+                    'New Artists', op.recentlyAddedArtists, seenArtistIds)),
           if (op.leastPlayedSongs.isNotEmpty)
             _HomeBlock('least-played-songs',
                 _songBlock('Hidden Gems', op.leastPlayedSongs)),
@@ -163,10 +173,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 'random-songs', _songBlock('Random Songs', op.randomSongs)),
           if (op.randomAlbums.isNotEmpty)
             _HomeBlock('random-albums',
-                _albumBlock('Random Albums', op.randomAlbums)),
+                _albumBlock('Random Albums', op.randomAlbums, seenAlbumIds)),
           if (op.randomArtists.isNotEmpty)
             _HomeBlock('random-artists',
-                _artistBlock('Random Artists', op.randomArtists)),
+                _artistBlock('Random Artists', op.randomArtists, seenArtistIds)),
         ];
 
         final savedOrder =
