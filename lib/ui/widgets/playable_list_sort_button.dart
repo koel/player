@@ -12,6 +12,7 @@ class SortButton extends StatelessWidget {
   SortOrder currentOrder;
 
   static const sortFields = {
+    'position': 'Custom order',
     'track': 'Track number',
     'disc': 'Disc number',
     'title': 'Title',

@@ -57,7 +57,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
     final playlist = ModalRoute.of(context)!.settings.arguments as Playlist;
     var sortConfig = AppState.get(
       'playlist.sort',
-      PlayableSortConfig(field: 'title', order: SortOrder.asc),
+      PlayableSortConfig(field: 'position', order: SortOrder.asc),
     )!;
 
     return Scaffold(
@@ -98,7 +98,7 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                     backgroundImage: _buildBackgroundImage(playlist, playables),
                     actions: [
                       SortButton(
-                        fields: ['title', 'artist_name', 'created_at'],
+                        fields: ['position', 'title', 'artist_name', 'created_at'],
                         currentField: sortConfig.field,
                         currentOrder: sortConfig.order,
                         onMenuItemSelected: (_sortConfig) {

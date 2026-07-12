@@ -14,7 +14,13 @@ extension PlayableListExtension on List<Playable> {
   }
 
   List<Playable> $sort(PlayableSortConfig config) {
-    return this
+    // 'position' keeps the order the server returned (e.g. a playlist's own
+    // order defined on the web), reversible via the sort direction.
+    if (config.field == 'position') {
+      return config.order == SortOrder.asc ? [...this] : reversed.toList();
+    }
+
+    return [...this]
       ..sort((a, b) => config.order == SortOrder.asc
           ? a.valueToCompare(config).compareTo(b.valueToCompare(config))
           : b.valueToCompare(config).compareTo(a.valueToCompare(config)));
