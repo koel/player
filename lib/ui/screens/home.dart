@@ -19,6 +19,36 @@ class HomeScreen extends StatefulWidget {
   State<StatefulWidget> createState() => _HomeScreenState();
 }
 
+class _HomeBlock {
+  final String id;
+  final Widget widget;
+
+  const _HomeBlock(this.id, this.widget);
+}
+
+/// Reorders [blocks] to honour the user's saved [savedOrder] (a list of block
+/// ids). Blocks named in [savedOrder] come first in that order; the rest keep
+/// their default relative order. Ids in [savedOrder] with no matching block are
+/// ignored. Returns [blocks] unchanged when no preference is saved.
+List<T> orderByHomeBlocksPreference<T>(
+  List<T> blocks,
+  String Function(T) idOf,
+  List<String> savedOrder,
+) {
+  if (savedOrder.isEmpty) return blocks;
+
+  final indexed = blocks.asMap().entries.toList();
+
+  int sortKey(MapEntry<int, T> entry) {
+    final saved = savedOrder.indexOf(idOf(entry.value));
+    return saved == -1 ? savedOrder.length + entry.key : saved;
+  }
+
+  indexed.sort((a, b) => sortKey(a).compareTo(sortKey(b)));
+
+  return indexed.map((entry) => entry.value).toList();
+}
+
 class _HomeScreenState extends State<HomeScreen> {
   var _loading = false;
   var _errored = false;
@@ -100,34 +130,58 @@ class _HomeScreenState extends State<HomeScreen> {
         if (_errored) return OopsBox(onRetry: fetchData);
 
         final op = overviewProvider;
-        final blocks = <Widget>[
+
+        // Default order mirrors koel web's default home layout (minus the
+        // recently-played section, which the mobile app pins to the top).
+        final defaultBlocks = <_HomeBlock>[
           if (op.recentlyAddedAlbums.isNotEmpty)
-            _albumBlock('Latest Albums', op.recentlyAddedAlbums),
+            _HomeBlock('recently-added-albums',
+                _albumBlock('Latest Albums', op.recentlyAddedAlbums)),
           if (op.similarSongs.isNotEmpty)
-            _songBlock('You Might Also Like', op.similarSongs),
+            _HomeBlock('similar-songs',
+                _songBlock('You Might Also Like', op.similarSongs)),
           if (op.mostPlayedAlbums.isNotEmpty)
-            _albumBlock('Top Albums', op.mostPlayedAlbums),
+            _HomeBlock('most-played-albums',
+                _albumBlock('Top Albums', op.mostPlayedAlbums)),
           if (op.mostPlayedSongs.isNotEmpty)
-            _songBlock('Most Played', op.mostPlayedSongs),
+            _HomeBlock('most-played-songs',
+                _songBlock('Most Played', op.mostPlayedSongs)),
           if (op.mostPlayedArtists.isNotEmpty)
-            _artistBlock('Top Artists', op.mostPlayedArtists),
+            _HomeBlock('most-played-artists',
+                _artistBlock('Top Artists', op.mostPlayedArtists)),
           if (op.recentlyAddedSongs.isNotEmpty)
-            _songBlock('New Songs', op.recentlyAddedSongs),
+            _HomeBlock('recently-added-songs',
+                _songBlock('New Songs', op.recentlyAddedSongs)),
           if (op.recentlyAddedArtists.isNotEmpty)
-            _artistBlock('New Artists', op.recentlyAddedArtists),
+            _HomeBlock('recently-added-artists',
+                _artistBlock('New Artists', op.recentlyAddedArtists)),
           if (op.leastPlayedSongs.isNotEmpty)
-            _songBlock('Hidden Gems', op.leastPlayedSongs),
+            _HomeBlock('least-played-songs',
+                _songBlock('Hidden Gems', op.leastPlayedSongs)),
           if (op.randomSongs.isNotEmpty)
-            _songBlock('Random Songs', op.randomSongs),
+            _HomeBlock(
+                'random-songs', _songBlock('Random Songs', op.randomSongs)),
           if (op.randomAlbums.isNotEmpty)
-            _albumBlock('Random Albums', op.randomAlbums),
+            _HomeBlock('random-albums',
+                _albumBlock('Random Albums', op.randomAlbums)),
           if (op.randomArtists.isNotEmpty)
-            _artistBlock('Random Artists', op.randomArtists),
-        ]
+            _HomeBlock('random-artists',
+                _artistBlock('Random Artists', op.randomArtists)),
+        ];
+
+        final savedOrder =
+            context.read<AuthProvider>().maybeAuthUser?.homeBlocksOrder ??
+                const <String>[];
+
+        final blocks = orderByHomeBlocksPreference<_HomeBlock>(
+          defaultBlocks,
+          (block) => block.id,
+          savedOrder,
+        )
             .map(
               (block) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                child: block,
+                child: block.widget,
               ),
             )
             .toList();
