@@ -143,15 +143,19 @@ class _MainScreenState extends State<MainScreen> with StreamSubscriber {
   }
 
   Future<void> _resumeQueue() async {
-    // On a cold launch the persisted queue is restored asynchronously, so wait
-    // briefly for it before resuming.
-    if (audioHandler.queue.value.isEmpty) {
-      await audioHandler.queue
-          .firstWhere((items) => items.isNotEmpty)
-          .timeout(const Duration(seconds: 5), onTimeout: () => <MediaItem>[]);
-    }
+    try {
+      // On a cold launch the persisted queue is restored asynchronously, so
+      // wait briefly for it before resuming.
+      if (audioHandler.queue.value.isEmpty) {
+        await audioHandler.queue
+            .firstWhere((items) => items.isNotEmpty)
+            .timeout(const Duration(seconds: 5), onTimeout: () => <MediaItem>[]);
+      }
 
-    if (audioHandler.queue.value.isNotEmpty) await audioHandler.play();
+      if (audioHandler.queue.value.isNotEmpty) await audioHandler.play();
+    } catch (_) {
+      // A quick action fails quietly.
+    }
   }
 
   void _restoreRoutes() {

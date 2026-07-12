@@ -58,6 +58,8 @@ class _SearchScreenState extends State<SearchScreen> with StreamSubscriber {
   @override
   void dispose() {
     unsubscribeAll();
+    _focusNode.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
