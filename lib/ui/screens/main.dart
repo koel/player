@@ -5,10 +5,13 @@ import 'package:app/constants/constants.dart';
 import 'package:app/enums.dart';
 import 'package:app/main.dart';
 import 'package:app/mixins/stream_subscriber.dart';
+import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/screens.dart';
 import 'package:app/ui/widgets/widgets.dart';
+import 'package:app/utils/quick_actions.dart';
 import 'package:app/utils/route_state.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -23,8 +26,9 @@ class MainScreen extends StatefulWidget {
   _MainScreenState createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen> with StreamSubscriber {
   static const tabBarHeight = 60.0;
+  static const _searchTabIndex = 1;
   late int _selectedIndex;
   var _isOffline = AppState.get('mode', AppMode.online) == AppMode.offline;
 
@@ -68,7 +72,90 @@ class _MainScreenState extends State<MainScreen> {
 
     context.read<DownloadSyncProvider>().scheduleSync();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => _restoreRoutes());
+    _setUpQuickActions();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _restoreRoutes();
+
+      final pendingAction = quickActions.consumePendingAction();
+      if (pendingAction != null) _handleQuickAction(pendingAction);
+    });
+  }
+
+  @override
+  void dispose() {
+    unsubscribeAll();
+    super.dispose();
+  }
+
+  void _setUpQuickActions() {
+    void refreshShortcuts(MediaItem? item) {
+      quickActions.setShortcuts(
+        recentSubtitle: KoelQuickActions.recentSubtitle(
+          artist: item?.artist,
+          title: item?.title,
+        ),
+      );
+    }
+
+    refreshShortcuts(audioHandler.mediaItem.value);
+    subscribe(audioHandler.mediaItem.listen(refreshShortcuts));
+    subscribe(quickActions.actions.listen(_handleQuickAction));
+  }
+
+  Future<void> _handleQuickAction(String type) async {
+    switch (type) {
+      case KoelQuickActions.search:
+        _gotoSearchAndFocus();
+        break;
+      case KoelQuickActions.playFavorites:
+        final favoriteProvider = context.read<FavoriteProvider>();
+        await _shufflePlay(() => favoriteProvider.fetch());
+        break;
+      case KoelQuickActions.playDownloaded:
+        final downloadProvider = context.read<DownloadProvider>();
+        await _shufflePlay(() async => downloadProvider.playables);
+        break;
+      case KoelQuickActions.playRecent:
+        await _resumeQueue();
+        break;
+    }
+  }
+
+  void _gotoSearchAndFocus() {
+    if (_selectedIndex != _searchTabIndex) {
+      setState(() => _selectedIndex = _searchTabIndex);
+      RouteState.setTabIndex(_searchTabIndex);
+    }
+    quickActions.requestSearchFocus();
+  }
+
+  Future<void> _shufflePlay(
+      Future<List<Playable>> Function() loadPlayables) async {
+    try {
+      final playables = await loadPlayables();
+      if (playables.isNotEmpty) {
+        await audioHandler.replaceQueue(playables, shuffle: true);
+      }
+    } catch (_) {
+      // A quick action fails quietly (e.g. a favourites fetch while offline).
+    }
+  }
+
+  Future<void> _resumeQueue() async {
+    try {
+      // On a cold launch the persisted queue is restored asynchronously, so
+      // wait briefly for it before resuming.
+      if (audioHandler.queue.value.isEmpty) {
+        await audioHandler.queue
+            .firstWhere((items) => items.isNotEmpty)
+            .timeout(const Duration(seconds: 5), onTimeout: () => <MediaItem>[]);
+      }
+
+      if (audioHandler.queue.value.isNotEmpty) await audioHandler.play();
+    } catch (_) {
+      // A quick action fails quietly.
+    }
   }
 
   void _restoreRoutes() {
