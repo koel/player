@@ -5,6 +5,7 @@ import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/widgets.dart';
+import 'package:app/utils/features.dart';
 import 'package:app/values/values.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -55,9 +56,13 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final playlist = ModalRoute.of(context)!.settings.arguments as Playlist;
+    final supportsCustomOrder = Feature.customPlaylistOrder.isSupported();
     var sortConfig = AppState.get(
       'playlist.sort',
-      PlayableSortConfig(field: 'title', order: SortOrder.asc),
+      PlayableSortConfig(
+        field: supportsCustomOrder ? 'position' : 'title',
+        order: SortOrder.asc,
+      ),
     )!;
 
     return Scaffold(
@@ -98,7 +103,12 @@ class _PlaylistDetailsScreen extends State<PlaylistDetailsScreen> {
                     backgroundImage: _buildBackgroundImage(playlist, playables),
                     actions: [
                       SortButton(
-                        fields: ['title', 'artist_name', 'created_at'],
+                        fields: [
+                          if (supportsCustomOrder) 'position',
+                          'title',
+                          'artist_name',
+                          'created_at'
+                        ],
                         currentField: sortConfig.field,
                         currentOrder: sortConfig.order,
                         onMenuItemSelected: (_sortConfig) {
