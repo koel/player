@@ -5,6 +5,7 @@ import 'package:app/extensions/extensions.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/placeholders/placeholders.dart';
 import 'package:app/ui/widgets/widgets.dart';
+import 'package:app/utils/features.dart';
 import 'package:app/values/values.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide AppBar;
@@ -50,9 +51,13 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final supportsCustomOrder = Feature.customFavoritesOrder.isSupported();
     var sortConfig = AppState.get(
       'favorites.sort',
-      PlayableSortConfig(field: 'position', order: SortOrder.asc),
+      PlayableSortConfig(
+        field: supportsCustomOrder ? 'position' : 'title',
+        order: SortOrder.asc,
+      ),
     )!;
 
     final emptyWidget = SliverFillRemaining(
@@ -139,7 +144,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                             actions: [
                               SortButton(
                                 fields: [
-                                  'position',
+                                  if (supportsCustomOrder) 'position',
                                   'title',
                                   'artist_name',
                                   'created_at'
