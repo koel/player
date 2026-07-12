@@ -64,20 +64,27 @@ class KoelQuickActions {
   /// there is a recent track to describe.
   static List<ShortcutItem> shortcutItems({String? recentSubtitle}) {
     return [
-      const ShortcutItem(type: search, localizedTitle: 'Search'),
+      const ShortcutItem(
+        type: search,
+        localizedTitle: 'Search',
+        icon: 'quick_action_search',
+      ),
       const ShortcutItem(
         type: playFavorites,
         localizedTitle: 'Play Favorite Songs',
+        icon: 'quick_action_favorites',
       ),
       const ShortcutItem(
         type: playDownloaded,
         localizedTitle: 'Play Downloaded',
+        icon: 'quick_action_download',
       ),
       if (recentSubtitle != null && recentSubtitle.isNotEmpty)
         ShortcutItem(
           type: playRecent,
           localizedTitle: 'Play Most Recent',
           localizedSubtitle: recentSubtitle,
+          icon: 'quick_action_recent',
         ),
     ];
   }

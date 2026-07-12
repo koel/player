@@ -48,6 +48,14 @@ void main() {
           KoelQuickActions.playDownloaded,
         ],
       );
+      expect(
+        items.map((item) => item.icon),
+        [
+          'quick_action_search',
+          'quick_action_favorites',
+          'quick_action_download',
+        ],
+      );
     });
 
     test('adds Play Most Recent with a subtitle when a track is known', () {
