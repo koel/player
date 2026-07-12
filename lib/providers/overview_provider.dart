@@ -13,9 +13,30 @@ class OverviewProvider with ChangeNotifier, StreamSubscriber {
   final mostPlayedSongs = <Playable>[];
   final recentlyAddedSongs = <Playable>[];
   final recentlyPlayedSongs = <Playable>[];
-  final recentlyAddedAlbums = <Album>[];
+  final leastPlayedSongs = <Playable>[];
+  final randomSongs = <Playable>[];
+  final similarSongs = <Playable>[];
   final mostPlayedAlbums = <Album>[];
+  final recentlyAddedAlbums = <Album>[];
+  final randomAlbums = <Album>[];
   final mostPlayedArtists = <Artist>[];
+  final recentlyAddedArtists = <Artist>[];
+  final randomArtists = <Artist>[];
+
+  late final List<List<dynamic>> _allSections = [
+    mostPlayedSongs,
+    recentlyAddedSongs,
+    recentlyPlayedSongs,
+    leastPlayedSongs,
+    randomSongs,
+    similarSongs,
+    mostPlayedAlbums,
+    recentlyAddedAlbums,
+    randomAlbums,
+    mostPlayedArtists,
+    recentlyAddedArtists,
+    randomArtists,
+  ];
 
   OverviewProvider({
     required playableProvider,
@@ -27,58 +48,55 @@ class OverviewProvider with ChangeNotifier, StreamSubscriber {
         _artistProvider = artistProvider,
         _recentlyPlayedProvider = recentlyPlayedProvider {
     subscribe(AuthProvider.userLoggedOutStream.listen((_) {
-      mostPlayedSongs.clear();
-      recentlyAddedSongs.clear();
-      recentlyPlayedSongs.clear();
-      mostPlayedAlbums.clear();
-      mostPlayedArtists.clear();
-
+      for (final section in _allSections) section.clear();
       notifyListeners();
     }));
   }
 
-  bool get isEmpty =>
-      mostPlayedSongs.isEmpty &&
-      recentlyAddedSongs.isEmpty &&
-      recentlyPlayedSongs.isEmpty &&
-      mostPlayedAlbums.isEmpty &&
-      mostPlayedArtists.isEmpty;
+  bool get isEmpty => _allSections.every((section) => section.isEmpty);
 
   Future<void> refresh() async {
     final Map<String, dynamic> response = await get('overview');
 
-    mostPlayedSongs
-      ..clear()
-      ..addAll(_playableProvider.parseFromJson(response['most_played_songs']));
+    _fill(mostPlayedSongs, _parseSongs(response['most_played_songs']));
+    _fill(recentlyAddedSongs, _parseSongs(response['recently_added_songs']));
+    _fill(recentlyPlayedSongs, _parseSongs(response['recently_played_songs']));
+    _fill(leastPlayedSongs, _parseSongs(response['least_played_songs']));
+    _fill(randomSongs, _parseSongs(response['random_songs']));
+    _fill(similarSongs, _parseSongs(response['similar_songs']));
 
-    recentlyAddedSongs
-      ..clear()
-      ..addAll(
-          _playableProvider.parseFromJson(response['recently_added_songs']));
+    _fill(mostPlayedAlbums, _parseAlbums(response['most_played_albums']));
+    _fill(recentlyAddedAlbums, _parseAlbums(response['recently_added_albums']));
+    _fill(randomAlbums, _parseAlbums(response['random_albums']));
 
-    recentlyPlayedSongs
-      ..clear()
-      ..addAll(
-          _playableProvider.parseFromJson(response['recently_played_songs']));
+    _fill(mostPlayedArtists, _parseArtists(response['most_played_artists']));
+    _fill(recentlyAddedArtists,
+        _parseArtists(response['recently_added_artists']));
+    _fill(randomArtists, _parseArtists(response['random_artists']));
 
     _recentlyPlayedProvider.seed(recentlyPlayedSongs);
 
-    final _mostPlayedAlbums = response['most_played_albums']
-        .map<Album>((j) => Album.fromJson(j))
-        .toList();
-
-    mostPlayedAlbums
-      ..clear()
-      ..addAll(_albumProvider.syncWithVault(_mostPlayedAlbums));
-
-    final _mostPlayedArtist = response['most_played_artists']
-        .map<Artist>((j) => Artist.fromJson(j))
-        .toList();
-
-    mostPlayedArtists
-      ..clear()
-      ..addAll(_artistProvider.syncWithVault(_mostPlayedArtist));
-
     notifyListeners();
+  }
+
+  List<Playable> _parseSongs(dynamic json) =>
+      _playableProvider.parseFromJson(json ?? const []);
+
+  List<Album> _parseAlbums(dynamic json) => _albumProvider.syncWithVault(
+        ((json ?? const []) as List)
+            .map<Album>((entry) => Album.fromJson(entry))
+            .toList(),
+      );
+
+  List<Artist> _parseArtists(dynamic json) => _artistProvider.syncWithVault(
+        ((json ?? const []) as List)
+            .map<Artist>((entry) => Artist.fromJson(entry))
+            .toList(),
+      );
+
+  void _fill<T>(List<T> target, List<T> source) {
+    target
+      ..clear()
+      ..addAll(source);
   }
 }

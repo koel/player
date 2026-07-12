@@ -7,9 +7,11 @@ import 'package:app/utils/api_request.dart';
 import 'package:app/utils/preferences.dart' as preferences;
 
 class AuthProvider with StreamSubscriber {
-  late User _authUser;
+  User? _authUser;
 
-  User get authUser => _authUser;
+  User get authUser => _authUser!;
+
+  User? get maybeAuthUser => _authUser;
 
   static final _userLoggedIn = StreamController<User>.broadcast();
   static final userLoggedInStream = _userLoggedIn.stream;
