@@ -5,16 +5,16 @@ import 'package:app/values/values.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  late Song a, b, c;
+  late Song songA, songB, songC;
 
   setUp(() {
-    a = Song.fake(title: 'A');
-    b = Song.fake(title: 'B');
-    c = Song.fake(title: 'C');
+    songA = Song.fake(title: 'A');
+    songB = Song.fake(title: 'B');
+    songC = Song.fake(title: 'C');
   });
 
   // Deliberately not alphabetical — mimics a playlist's custom order.
-  List<Playable> customOrder() => <Playable>[c, a, b];
+  List<Playable> customOrder() => <Playable>[songC, songA, songB];
 
   PlayableSortConfig config(String field, SortOrder order) =>
       PlayableSortConfig(field: field, order: order);
@@ -22,12 +22,12 @@ void main() {
   group('\$sort', () {
     test('position keeps the server-provided order', () {
       final sorted = customOrder().$sort(config('position', SortOrder.asc));
-      expect(sorted, [c, a, b]);
+      expect(sorted, [songC, songA, songB]);
     });
 
     test('position descending reverses the server-provided order', () {
       final sorted = customOrder().$sort(config('position', SortOrder.desc));
-      expect(sorted, [b, a, c]);
+      expect(sorted, [songB, songA, songC]);
     });
 
     test('other fields still sort', () {
@@ -38,7 +38,9 @@ void main() {
     test('does not mutate the original list', () {
       final original = customOrder();
       original.$sort(config('title', SortOrder.asc));
-      expect(original, [c, a, b]);
+      original.$sort(config('position', SortOrder.asc));
+      original.$sort(config('position', SortOrder.desc));
+      expect(original, [songC, songA, songB]);
     });
   });
 }
