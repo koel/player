@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:app/app_state.dart';
+import 'package:app/enums.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/screens.dart';
 import 'package:app/ui/widgets/widgets.dart';
@@ -14,7 +18,13 @@ class DataLoadingScreen extends StatefulWidget {
 }
 
 class _DataLoadingScreen extends State<DataLoadingScreen> {
+  static const _stillLoadingAfter = Duration(seconds: 6);
+  static const _loadTimeout = Duration(seconds: 30);
+
   var _hasError = false;
+  var _stillLoading = false;
+  Timer? _stillLoadingTimer;
+  Timer? _timeoutTimer;
 
   @override
   void initState() {
@@ -22,14 +32,52 @@ class _DataLoadingScreen extends State<DataLoadingScreen> {
     _loadData();
   }
 
+  @override
+  void dispose() {
+    _cancelTimers();
+    super.dispose();
+  }
+
+  void _cancelTimers() {
+    _stillLoadingTimer?.cancel();
+    _timeoutTimer?.cancel();
+  }
+
   Future<void> _loadData() async {
+    _stillLoadingTimer = Timer(_stillLoadingAfter, () {
+      if (mounted) setState(() => _stillLoading = true);
+    });
+    _timeoutTimer = Timer(_loadTimeout, () {
+      if (mounted) setState(() => _hasError = true);
+    });
+
     try {
       await context.read<DataProvider>().init();
-      await Navigator.of(context).pushReplacementNamed(MainScreen.routeName);
+      if (!mounted || _hasError) return;
+      _cancelTimers();
+      Navigator.of(context).pushReplacementNamed(MainScreen.routeName);
     } catch (e) {
-      print(e);
-      setState(() => _hasError = true);
+      _cancelTimers();
+      if (mounted) setState(() => _hasError = true);
     }
+  }
+
+  void _retry() {
+    _cancelTimers();
+    setState(() {
+      _hasError = false;
+      _stillLoading = false;
+    });
+    _loadData();
+  }
+
+  bool get _hasDownloads =>
+      context.read<DownloadProvider>().playables.isNotEmpty;
+
+  void _viewDownloads() {
+    _cancelTimers();
+    AppState.set('mode', AppMode.offline);
+    Navigator.of(context).pushReplacementNamed(MainScreen.routeName);
   }
 
   @override
@@ -37,14 +85,37 @@ class _DataLoadingScreen extends State<DataLoadingScreen> {
     return Scaffold(
       body: GradientDecoratedContainer(
         child: _hasError
-            ? OopsBox(
-                showLogOutButton: true,
-                onRetry: () {
-                  setState(() => _hasError = false);
-                  _loadData();
-                },
-              )
-            : const ContainerWithSpinner(),
+            ? OopsBox(showLogOutButton: true, onRetry: _retry)
+            : _buildLoading(),
+      ),
+    );
+  }
+
+  Widget _buildLoading() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const Spinner(),
+          if (_stillLoading) ...[
+            const SizedBox(height: 28),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 40),
+              child: Text(
+                'This is taking longer than usual…',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white70, fontSize: 15),
+              ),
+            ),
+            if (_hasDownloads) ...[
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _viewDownloads,
+                child: const Text('View Downloads'),
+              ),
+            ],
+          ],
+        ],
       ),
     );
   }
