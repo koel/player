@@ -52,7 +52,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   Widget build(BuildContext context) {
     var sortConfig = AppState.get(
       'favorites.sort',
-      PlayableSortConfig(field: 'title', order: SortOrder.asc),
+      PlayableSortConfig(field: 'position', order: SortOrder.asc),
     )!;
 
     final emptyWidget = SliverFillRemaining(
@@ -138,7 +138,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                 provider.playables),
                             actions: [
                               SortButton(
-                                fields: ['title', 'artist_name', 'created_at'],
+                                fields: [
+                                  'position',
+                                  'title',
+                                  'artist_name',
+                                  'created_at'
+                                ],
                                 currentField: sortConfig.field,
                                 currentOrder: sortConfig.order,
                                 onMenuItemSelected: (_sortConfig) {
