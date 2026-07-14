@@ -23,6 +23,8 @@ Koel Player is built on Flutter and Dart. If you're new to Flutter, here are a f
 For more help, visit the [online documentation](https://flutter.dev/docs), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
+Koel uses flutter version 3.7.12, which can be obtained by cloning the [Flutter GitHub](https://github.com/flutter/flutter) and using `git checkout 3.7.12`. The flutter/bin folder will have the flutter binaries available. 
+
 ## License
 
 MIT.
