@@ -11,6 +11,7 @@ import 'package:app/models/models.dart' as _i4;
 import 'package:app/providers/providers.dart' as _i3;
 import 'package:app/values/values.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:mockito/src/dummies.dart' as _i8;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -276,6 +277,136 @@ class MockPlayableProvider extends _i1.Mock implements _i3.PlayableProvider {
         ),
         returnValueForMissingStub: null,
       );
+
+  @override
+  void unsubscribeAll() => super.noSuchMethod(
+        Invocation.method(
+          #unsubscribeAll,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void subscribe(_i5.StreamSubscription<dynamic>? sub) => super.noSuchMethod(
+        Invocation.method(
+          #subscribe,
+          [sub],
+        ),
+        returnValueForMissingStub: null,
+      );
+}
+
+/// A class which mocks [DownloadProvider].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockDownloadProvider extends _i1.Mock implements _i3.DownloadProvider {
+  MockDownloadProvider() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  List<_i4.Playable<dynamic>> get playables => (super.noSuchMethod(
+        Invocation.getter(#playables),
+        returnValue: <_i4.Playable<dynamic>>[],
+      ) as List<_i4.Playable<dynamic>>);
+
+  @override
+  _i5.Stream<bool> get downloadsClearedStream => (super.noSuchMethod(
+        Invocation.getter(#downloadsClearedStream),
+        returnValue: _i5.Stream<bool>.empty(),
+      ) as _i5.Stream<bool>);
+
+  @override
+  _i5.Stream<_i4.Playable<dynamic>> get downloadRemovedStream =>
+      (super.noSuchMethod(
+        Invocation.getter(#downloadRemovedStream),
+        returnValue: _i5.Stream<_i4.Playable<dynamic>>.empty(),
+      ) as _i5.Stream<_i4.Playable<dynamic>>);
+
+  @override
+  _i5.Stream<_i3.Download> get playableDownloadedStream => (super.noSuchMethod(
+        Invocation.getter(#playableDownloadedStream),
+        returnValue: _i5.Stream<_i3.Download>.empty(),
+      ) as _i5.Stream<_i3.Download>);
+
+  @override
+  _i5.Future<String> get downloadsDir => (super.noSuchMethod(
+        Invocation.getter(#downloadsDir),
+        returnValue: _i5.Future<String>.value(_i8.dummyValue<String>(
+          this,
+          Invocation.getter(#downloadsDir),
+        )),
+      ) as _i5.Future<String>);
+
+  @override
+  _i5.Future<void> download({required _i4.Playable<dynamic>? playable}) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #download,
+          [],
+          {#playable: playable},
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i3.Download? getForPlayable(_i4.Playable<dynamic>? playable) =>
+      (super.noSuchMethod(Invocation.method(
+        #getForPlayable,
+        [playable],
+      )) as _i3.Download?);
+
+  @override
+  bool has({required _i4.Playable<dynamic>? playable}) => (super.noSuchMethod(
+        Invocation.method(
+          #has,
+          [],
+          {#playable: playable},
+        ),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  void persistMetadata() => super.noSuchMethod(
+        Invocation.method(
+          #persistMetadata,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void persistMetadataIfNeeded(_i4.Playable<dynamic>? playable) =>
+      super.noSuchMethod(
+        Invocation.method(
+          #persistMetadataIfNeeded,
+          [playable],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  _i5.Future<void> removeForPlayable(_i4.Playable<dynamic>? playable) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #removeForPlayable,
+          [playable],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> clear() => (super.noSuchMethod(
+        Invocation.method(
+          #clear,
+          [],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 
   @override
   void unsubscribeAll() => super.noSuchMethod(

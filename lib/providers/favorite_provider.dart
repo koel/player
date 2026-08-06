@@ -8,9 +8,13 @@ import 'package:flutter/foundation.dart';
 class FavoriteProvider with ChangeNotifier, StreamSubscriber {
   var playables = <Playable>[];
   late final PlayableProvider _playableProvider;
+  late final DownloadProvider _downloadProvider;
 
-  FavoriteProvider({required PlayableProvider playableProvider})
-      : _playableProvider = playableProvider {
+  FavoriteProvider({
+    required PlayableProvider playableProvider,
+    required DownloadProvider downloadProvider,
+  })  : _playableProvider = playableProvider,
+        _downloadProvider = downloadProvider {
     subscribe(AuthProvider.userLoggedOutStream.listen((_) {
       playables.clear();
       notifyListeners();
@@ -54,6 +58,7 @@ class FavoriteProvider with ChangeNotifier, StreamSubscriber {
       await post('interaction/batch/unlike', data: {
         'songs': [playable.id],
       });
+      _downloadProvider.persistMetadataIfNeeded(playable);
     } catch (e) {
       _setLiked(playable, true);
       rethrow;
@@ -66,6 +71,7 @@ class FavoriteProvider with ChangeNotifier, StreamSubscriber {
 
     try {
       await post('interaction/like', data: {'song': playable.id});
+      _downloadProvider.persistMetadataIfNeeded(playable);
     } catch (e) {
       _setLiked(playable, !liked);
       rethrow;

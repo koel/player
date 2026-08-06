@@ -29,6 +29,7 @@ List<SingleChildWidget> _providers = [
   ChangeNotifierProvider(
     create: (context) => FavoriteProvider(
       playableProvider: context.read<PlayableProvider>(),
+      downloadProvider: context.read<DownloadProvider>(),
     ),
   ),
   ChangeNotifierProvider(

@@ -1,4 +1,5 @@
 import 'package:app/models/song.dart';
+import 'package:app/providers/download_provider.dart';
 import 'package:app/providers/favorite_provider.dart';
 import 'package:app/providers/interaction_provider.dart';
 import 'package:app/providers/playable_provider.dart';
@@ -14,22 +15,29 @@ import '../../../extensions/widget_tester_extension.dart';
 import '../../../helpers/api_test_setup.dart';
 import 'favorite_button_test.mocks.dart';
 
-@GenerateMocks([InteractionProvider, PlayableProvider])
+@GenerateMocks([InteractionProvider, PlayableProvider, DownloadProvider])
 void main() {
   late MockInteractionProvider interactionProviderMock;
   late MockPlayableProvider playableProviderMock;
+  late MockDownloadProvider downloadProviderMock;
 
   setUpAll(() async => await initApiTestEnvironment());
 
   setUp(() {
     interactionProviderMock = MockInteractionProvider();
     playableProviderMock = MockPlayableProvider();
+    downloadProviderMock = MockDownloadProvider();
     when(playableProviderMock.syncWithVault(any))
         .thenAnswer((invocation) => invocation.positionalArguments.first);
     setUpApiTest();
   });
 
   tearDown(tearDownApiTest);
+
+  FavoriteProvider _favoriteProvider() => FavoriteProvider(
+        playableProvider: playableProviderMock,
+        downloadProvider: downloadProviderMock,
+      );
 
   Widget _button(Song song, FavoriteProvider favoriteProvider) => MultiProvider(
         providers: [
@@ -47,7 +55,7 @@ void main() {
       (tester) async {
     final song = Song.fake(liked: false);
     await tester.pumpAppWidget(
-      _button(song, FavoriteProvider(playableProvider: playableProviderMock)),
+      _button(song, _favoriteProvider()),
     );
 
     expect(find.byIcon(CupertinoIcons.star), findsOneWidget);
@@ -57,7 +65,7 @@ void main() {
   testWidgets('shows a filled star when the song is liked', (tester) async {
     final song = Song.fake(liked: true);
     await tester.pumpAppWidget(
-      _button(song, FavoriteProvider(playableProvider: playableProviderMock)),
+      _button(song, _favoriteProvider()),
     );
 
     expect(find.byIcon(CupertinoIcons.star_fill), findsOneWidget);
@@ -71,7 +79,7 @@ void main() {
         .thenAnswer((_) async {});
 
     await tester.pumpAppWidget(
-      _button(song, FavoriteProvider(playableProvider: playableProviderMock)),
+      _button(song, _favoriteProvider()),
     );
     await tester.tap(find.byType(IconButton));
     await tester.pump();
@@ -83,8 +91,7 @@ void main() {
     'reacts to a like toggled elsewhere via FavoriteProvider',
     (tester) async {
       final song = Song.fake(liked: false);
-      final favoriteProvider =
-          FavoriteProvider(playableProvider: playableProviderMock);
+      final favoriteProvider = _favoriteProvider();
       final capturingClient = CapturingClient()..willReturn(json: {});
       capturingClient.install();
 
