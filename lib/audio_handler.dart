@@ -19,13 +19,25 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   late final PlayableProvider playableProvider;
   late AudioServiceRepeatMode repeatMode;
 
+  /// How long a source is given to become playable before we give up on it.
+  /// Without this, a stalled connection leaves the player in `loading`
+  /// indefinitely: neither just_audio nor the platform player time out on
+  /// their own, so the future never completes and never throws.
+  final Duration sourceLoadTimeout;
+
   var _errorCount = 0;
   var _initialized = false;
   var _currentMediaItem = MediaItem(id: '', title: '');
   var _isRadioMode = false;
+  var _playbackFailed = false;
   AudioPlayer? _radioPlayer;
 
-  final _player = AudioPlayer();
+  final AudioPlayer _player;
+
+  KoelAudioHandler({
+    AudioPlayer? player,
+    this.sourceLoadTimeout = const Duration(seconds: 30),
+  }) : _player = player ?? AudioPlayer();
 
   AudioPlayer get player => _player;
 
@@ -88,58 +100,78 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   }
 
   void _subscribeToPlayerPlaybackEvents() {
-    _player.playbackEventStream.listen((PlaybackEvent event) {
-      if (_isRadioMode) return;
-      final playing = _player.playing;
-      playbackState.add(playbackState.value.copyWith(
-        controls: [
-          MediaControl.skipToPrevious,
-          if (playing) MediaControl.pause else MediaControl.play,
-          MediaControl.stop,
-          MediaControl.skipToNext,
-        ],
-        systemActions: const {
-          MediaAction.seek,
-        },
-        androidCompactActionIndices: const [0, 1, 3],
-        processingState: {
-          // iOS 16+ seems to treat "idle" as "stopped" and close the audio
-          // session, so we use "ready" to keep it alive.
-          // @see https://stackoverflow.com/a/75236414
-          ProcessingState.idle: Platform.isIOS
-              ? AudioProcessingState.ready
-              : AudioProcessingState.idle,
-          ProcessingState.loading: AudioProcessingState.loading,
-          ProcessingState.buffering: AudioProcessingState.buffering,
-          ProcessingState.ready: AudioProcessingState.ready,
-          ProcessingState.completed: AudioProcessingState.completed,
-        }[_player.processingState]!,
-        repeatMode: repeatMode,
-        shuffleMode: _player.shuffleModeEnabled
-            ? AudioServiceShuffleMode.all
-            : AudioServiceShuffleMode.none,
-        playing: playing,
-        updatePosition: _player.position,
-        bufferedPosition: _player.bufferedPosition,
-        speed: _player.speed,
-        queueIndex: currentQueueIndex,
-      ));
-    });
+    _player.playbackEventStream.listen(
+      (_) => _emitPlaybackState(),
+      onError: (_, __) {
+        _playbackFailed = true;
+        _emitPlaybackState();
+      },
+    );
+  }
+
+  AudioProcessingState get _processingState {
+    if (_playbackFailed) return AudioProcessingState.error;
+
+    return {
+      // iOS 16+ seems to treat "idle" as "stopped" and close the audio
+      // session, so we use "ready" to keep it alive.
+      // @see https://stackoverflow.com/a/75236414
+      ProcessingState.idle: Platform.isIOS
+          ? AudioProcessingState.ready
+          : AudioProcessingState.idle,
+      ProcessingState.loading: AudioProcessingState.loading,
+      ProcessingState.buffering: AudioProcessingState.buffering,
+      ProcessingState.ready: AudioProcessingState.ready,
+      ProcessingState.completed: AudioProcessingState.completed,
+    }[_player.processingState]!;
+  }
+
+  void _emitPlaybackState() {
+    if (_isRadioMode) return;
+    final playing = _player.playing;
+
+    playbackState.add(playbackState.value.copyWith(
+      controls: [
+        MediaControl.skipToPrevious,
+        if (playing) MediaControl.pause else MediaControl.play,
+        MediaControl.stop,
+        MediaControl.skipToNext,
+      ],
+      systemActions: const {
+        MediaAction.seek,
+      },
+      androidCompactActionIndices: const [0, 1, 3],
+      processingState: _processingState,
+      repeatMode: repeatMode,
+      shuffleMode: _player.shuffleModeEnabled
+          ? AudioServiceShuffleMode.all
+          : AudioServiceShuffleMode.none,
+      playing: playing,
+      updatePosition: _player.position,
+      bufferedPosition: _player.bufferedPosition,
+      speed: _player.speed,
+      queueIndex: currentQueueIndex,
+    ));
   }
 
   void _subscribeToPlayerProcessingStateEvents() {
-    _player.processingStateStream.listen((state) async {
-      if (_isRadioMode) return;
-      if (state == ProcessingState.completed) {
-        if (repeatMode == AudioServiceRepeatMode.one) {
-          await _player.seek(Duration.zero);
-          await _player.play();
-          return;
-        }
+    _player.processingStateStream.listen(
+      (state) async {
+        if (_isRadioMode) return;
+        if (state == ProcessingState.completed) {
+          if (repeatMode == AudioServiceRepeatMode.one) {
+            await _player.seek(Duration.zero);
+            await _player.play();
+            return;
+          }
 
-        await skipToNext();
-      }
-    });
+          await skipToNext();
+        }
+      },
+      // This stream is derived from the playback event stream, so it relays the
+      // same errors. They are already turned into an error state there.
+      onError: (_, __) {},
+    );
   }
 
   void _trySetUpQueue() async {
@@ -160,8 +192,12 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
         );
 
         if (queuedMediaItem != null) {
-          _setPlayerSource(queuedMediaItem);
-          player.seek(Duration(seconds: state.playbackPosition));
+          try {
+            await _setPlayerSource(queuedMediaItem).timeout(sourceLoadTimeout);
+            await player.seek(Duration(seconds: state.playbackPosition));
+          } catch (e) {
+            await _abandonSource();
+          }
         }
       }
 
@@ -202,6 +238,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   }
 
   _setPlayerSource(MediaItem mediaItem) async {
+    _playbackFailed = false;
     _currentMediaItem = mediaItem;
     this.mediaItem.add(_currentMediaItem);
 
@@ -209,11 +246,18 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     final download = downloadProvider.getForPlayable(playable);
 
     if (download == null) {
-      final uri = Uri.parse(mediaItem.extras?['sourceUrl'] as String);
-      await _player.setAudioSource(LockCachingAudioSource(uri));
+      await _player.setUrl(mediaItem.extras?['sourceUrl'] as String);
     } else {
       await _player.setFilePath(download.path);
     }
+  }
+
+  /// Tear down a source that stalled or errored, so the player is left in a
+  /// state the user can retry or skip out of instead of a permanent spinner.
+  Future<void> _abandonSource() async {
+    _playbackFailed = true;
+    await _player.stop();
+    _emitPlaybackState();
   }
 
   @override
@@ -222,6 +266,13 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       await _radioPlayer!.play();
       return;
     }
+
+    // The player holds no usable source after a failed load, so pressing play
+    // has to start the current item over rather than resume it.
+    if (_playbackFailed && currentQueueIndex > -1) {
+      return _playAtIndex(currentQueueIndex);
+    }
+
     playbackState.add(playbackState.value.copyWith(playing: true));
     await _player.play();
   }
@@ -302,10 +353,11 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     final position = getPlaybackPositionFromState(mediaItem.id) ?? 0;
 
     try {
-      await _setPlayerSource(mediaItem);
+      await _setPlayerSource(mediaItem).timeout(sourceLoadTimeout);
       exitRadioMode();
       _player.seek(Duration(seconds: position.toInt()));
       await play();
+      _emitPlaybackState();
 
       put('queue/playback-status', data: {
         'song': mediaItem.id,
@@ -316,6 +368,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       _errorCount = 0;
     } catch (e) {
       _errorCount++;
+      await _abandonSource();
     }
   }
 

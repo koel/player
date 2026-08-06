@@ -51,8 +51,8 @@ class _FakePlayableProvider_1 extends _i1.SmartFake
         );
 }
 
-class _FakeAudioPlayer_2 extends _i1.SmartFake implements _i3.AudioPlayer {
-  _FakeAudioPlayer_2(
+class _FakeDuration_2 extends _i1.SmartFake implements Duration {
+  _FakeDuration_2(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -61,9 +61,19 @@ class _FakeAudioPlayer_2 extends _i1.SmartFake implements _i3.AudioPlayer {
         );
 }
 
-class _FakeBehaviorSubject_3<T> extends _i1.SmartFake
+class _FakeAudioPlayer_3 extends _i1.SmartFake implements _i3.AudioPlayer {
+  _FakeAudioPlayer_3(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakeBehaviorSubject_4<T> extends _i1.SmartFake
     implements _i4.BehaviorSubject<T> {
-  _FakeBehaviorSubject_3(
+  _FakeBehaviorSubject_4(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -72,9 +82,9 @@ class _FakeBehaviorSubject_3<T> extends _i1.SmartFake
         );
 }
 
-class _FakePublishSubject_4<T> extends _i1.SmartFake
+class _FakePublishSubject_5<T> extends _i1.SmartFake
     implements _i4.PublishSubject<T> {
-  _FakePublishSubject_4(
+  _FakePublishSubject_5(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -83,9 +93,9 @@ class _FakePublishSubject_4<T> extends _i1.SmartFake
         );
 }
 
-class _FakeValueStream_5<T> extends _i1.SmartFake
+class _FakeValueStream_6<T> extends _i1.SmartFake
     implements _i4.ValueStream<T> {
-  _FakeValueStream_5(
+  _FakeValueStream_6(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -127,9 +137,18 @@ class MockKoelAudioHandler extends _i1.Mock implements _i5.KoelAudioHandler {
       ) as _i6.AudioServiceRepeatMode);
 
   @override
+  Duration get sourceLoadTimeout => (super.noSuchMethod(
+        Invocation.getter(#sourceLoadTimeout),
+        returnValue: _FakeDuration_2(
+          this,
+          Invocation.getter(#sourceLoadTimeout),
+        ),
+      ) as Duration);
+
+  @override
   _i3.AudioPlayer get player => (super.noSuchMethod(
         Invocation.getter(#player),
-        returnValue: _FakeAudioPlayer_2(
+        returnValue: _FakeAudioPlayer_3(
           this,
           Invocation.getter(#player),
         ),
@@ -180,7 +199,7 @@ class MockKoelAudioHandler extends _i1.Mock implements _i5.KoelAudioHandler {
   _i4.BehaviorSubject<_i6.PlaybackState> get playbackState =>
       (super.noSuchMethod(
         Invocation.getter(#playbackState),
-        returnValue: _FakeBehaviorSubject_3<_i6.PlaybackState>(
+        returnValue: _FakeBehaviorSubject_4<_i6.PlaybackState>(
           this,
           Invocation.getter(#playbackState),
         ),
@@ -189,7 +208,7 @@ class MockKoelAudioHandler extends _i1.Mock implements _i5.KoelAudioHandler {
   @override
   _i4.BehaviorSubject<List<_i6.MediaItem>> get queue => (super.noSuchMethod(
         Invocation.getter(#queue),
-        returnValue: _FakeBehaviorSubject_3<List<_i6.MediaItem>>(
+        returnValue: _FakeBehaviorSubject_4<List<_i6.MediaItem>>(
           this,
           Invocation.getter(#queue),
         ),
@@ -198,7 +217,7 @@ class MockKoelAudioHandler extends _i1.Mock implements _i5.KoelAudioHandler {
   @override
   _i4.BehaviorSubject<String> get queueTitle => (super.noSuchMethod(
         Invocation.getter(#queueTitle),
-        returnValue: _FakeBehaviorSubject_3<String>(
+        returnValue: _FakeBehaviorSubject_4<String>(
           this,
           Invocation.getter(#queueTitle),
         ),
@@ -207,7 +226,7 @@ class MockKoelAudioHandler extends _i1.Mock implements _i5.KoelAudioHandler {
   @override
   _i4.BehaviorSubject<_i6.MediaItem?> get mediaItem => (super.noSuchMethod(
         Invocation.getter(#mediaItem),
-        returnValue: _FakeBehaviorSubject_3<_i6.MediaItem?>(
+        returnValue: _FakeBehaviorSubject_4<_i6.MediaItem?>(
           this,
           Invocation.getter(#mediaItem),
         ),
@@ -217,7 +236,7 @@ class MockKoelAudioHandler extends _i1.Mock implements _i5.KoelAudioHandler {
   _i4.BehaviorSubject<_i6.AndroidPlaybackInfo> get androidPlaybackInfo =>
       (super.noSuchMethod(
         Invocation.getter(#androidPlaybackInfo),
-        returnValue: _FakeBehaviorSubject_3<_i6.AndroidPlaybackInfo>(
+        returnValue: _FakeBehaviorSubject_4<_i6.AndroidPlaybackInfo>(
           this,
           Invocation.getter(#androidPlaybackInfo),
         ),
@@ -226,7 +245,7 @@ class MockKoelAudioHandler extends _i1.Mock implements _i5.KoelAudioHandler {
   @override
   _i4.BehaviorSubject<_i6.RatingStyle> get ratingStyle => (super.noSuchMethod(
         Invocation.getter(#ratingStyle),
-        returnValue: _FakeBehaviorSubject_3<_i6.RatingStyle>(
+        returnValue: _FakeBehaviorSubject_4<_i6.RatingStyle>(
           this,
           Invocation.getter(#ratingStyle),
         ),
@@ -235,7 +254,7 @@ class MockKoelAudioHandler extends _i1.Mock implements _i5.KoelAudioHandler {
   @override
   _i4.PublishSubject<dynamic> get customEvent => (super.noSuchMethod(
         Invocation.getter(#customEvent),
-        returnValue: _FakePublishSubject_4<dynamic>(
+        returnValue: _FakePublishSubject_5<dynamic>(
           this,
           Invocation.getter(#customEvent),
         ),
@@ -244,7 +263,7 @@ class MockKoelAudioHandler extends _i1.Mock implements _i5.KoelAudioHandler {
   @override
   _i4.BehaviorSubject<dynamic> get customState => (super.noSuchMethod(
         Invocation.getter(#customState),
-        returnValue: _FakeBehaviorSubject_3<dynamic>(
+        returnValue: _FakeBehaviorSubject_4<dynamic>(
           this,
           Invocation.getter(#customState),
         ),
@@ -922,7 +941,7 @@ class MockKoelAudioHandler extends _i1.Mock implements _i5.KoelAudioHandler {
           #subscribeToChildren,
           [parentMediaId],
         ),
-        returnValue: _FakeValueStream_5<Map<String, dynamic>>(
+        returnValue: _FakeValueStream_6<Map<String, dynamic>>(
           this,
           Invocation.method(
             #subscribeToChildren,
