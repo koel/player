@@ -254,6 +254,7 @@ class _MiniPlayerState extends State<MiniPlayer> with StreamSubscriber {
                         child: Icon(
                           CupertinoIcons.exclamationmark_triangle_fill,
                           key: MiniPlayer.playbackErrorIconKey,
+                          semanticLabel: "Couldn't play this song",
                           color: AppColors.white,
                           size: 16,
                         ),

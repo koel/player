@@ -120,6 +120,71 @@ void main() {
     expect(currentProcessingState(), AudioProcessingState.error);
   });
 
+  test('skips past a song the server refuses to serve', () async {
+    final broken = registerSong();
+    final next = registerSong();
+    when(player.setUrl(broken.sourceUrl)).thenThrow(Exception('404'));
+
+    await handler.replaceQueue([broken, next]);
+
+    verify(player.setUrl(next.sourceUrl)).called(1);
+    expect(handler.mediaItem.value?.id, next.id);
+    expect(currentProcessingState(), isNot(AudioProcessingState.error));
+  });
+
+  test('stays put when the load stalls instead of skipping', () async {
+    final stalled = registerSong();
+    final next = registerSong();
+    when(player.setUrl(stalled.sourceUrl))
+        .thenAnswer((_) => Completer<Duration?>().future);
+
+    await handler.replaceQueue([stalled, next]);
+
+    verifyNever(player.setUrl(next.sourceUrl));
+    expect(handler.mediaItem.value?.id, stalled.id);
+    expect(currentProcessingState(), AudioProcessingState.error);
+  });
+
+  test('gives up once too many songs fail in a row', () async {
+    final songs = List.generate(
+      KoelAudioHandler.MAX_ERROR_COUNT + 3,
+      (_) => registerSong(),
+    );
+    when(player.setUrl(any)).thenThrow(Exception('404'));
+
+    await handler.replaceQueue(songs);
+
+    verify(player.setUrl(any)).called(KoelAudioHandler.MAX_ERROR_COUNT);
+    expect(currentProcessingState(), AudioProcessingState.error);
+  });
+
+  test('stops skipping at the end of the queue', () async {
+    final broken = registerSong();
+    when(player.setUrl(any)).thenThrow(Exception('404'));
+
+    await handler.replaceQueue([broken]);
+
+    expect(currentProcessingState(), AudioProcessingState.error);
+  });
+
+  test('a song that plays clears the run of failures', () async {
+    final songs = List.generate(6, (_) => registerSong());
+    when(player.setUrl(any)).thenThrow(Exception('404'));
+    when(player.setUrl(songs[1].sourceUrl))
+        .thenAnswer((_) async => Duration.zero);
+
+    // Fails on the first song, skips onto the second, which plays.
+    await handler.replaceQueue(songs);
+    expect(handler.mediaItem.value?.id, songs[1].id);
+
+    // The three that follow get a full budget of their own, rather than
+    // inheriting the failure that came before the song that played.
+    await handler.skipToNext();
+
+    verify(player.setUrl(songs[4].sourceUrl)).called(1);
+    verifyNever(player.setUrl(songs[5].sourceUrl));
+  });
+
   test('can still skip to the next song after a stalled load', () async {
     final stalled = registerSong();
     final next = registerSong();
@@ -160,5 +225,6 @@ void main() {
     await pumpEventQueue();
 
     expect(currentProcessingState(), AudioProcessingState.error);
+    verify(player.stop()).called(1);
   });
 }

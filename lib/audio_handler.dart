@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:app/app_state.dart';
@@ -13,7 +14,10 @@ import 'package:collection/collection.dart';
 import 'package:just_audio/just_audio.dart';
 
 class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
-  static const MAX_ERROR_COUNT = 10;
+  /// How many songs in a row may fail before playback gives up rather than
+  /// keep skipping. Low, because the common cause of a run of failures is a
+  /// dead connection, and each skip costs the user their place in the queue.
+  static const MAX_ERROR_COUNT = 3;
 
   late final DownloadProvider downloadProvider;
   late final PlayableProvider playableProvider;
@@ -102,10 +106,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   void _subscribeToPlayerPlaybackEvents() {
     _player.playbackEventStream.listen(
       (_) => _emitPlaybackState(),
-      onError: (_, __) {
-        _playbackFailed = true;
-        _emitPlaybackState();
-      },
+      onError: (_, __) => _abandonSource(),
     );
   }
 
@@ -195,7 +196,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
           try {
             await _setPlayerSource(queuedMediaItem).timeout(sourceLoadTimeout);
             await player.seek(Duration(seconds: state.playbackPosition));
-          } catch (e) {
+          } catch (_) {
             await _abandonSource();
           }
         }
@@ -354,8 +355,9 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
     try {
       await _setPlayerSource(mediaItem).timeout(sourceLoadTimeout);
+      _errorCount = 0;
       exitRadioMode();
-      _player.seek(Duration(seconds: position.toInt()));
+      await _player.seek(Duration(seconds: position.toInt()));
       await play();
       _emitPlaybackState();
 
@@ -363,14 +365,20 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
         'song': mediaItem.id,
         'position': _player.position.inSeconds,
       });
-
-      // Reset the error count if the song is successfully loaded.
-      _errorCount = 0;
-    } catch (e) {
+    } catch (error) {
       _errorCount++;
       await _abandonSource();
+
+      if (_shouldSkipPast(error)) await skipToNext();
     }
   }
+
+  /// A stalled load means the connection is at fault, not the song, and the
+  /// next one would stall just the same. Every other failure belongs to this
+  /// song alone, so move past it — but a run of them is something systematic
+  /// that churning through the queue would only hide.
+  bool _shouldSkipPast(Object error) =>
+      error is! TimeoutException && _errorCount < MAX_ERROR_COUNT;
 
   @override
   Future<void> seek(Duration position) => _player.seek(position);
