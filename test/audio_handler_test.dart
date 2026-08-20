@@ -109,6 +109,74 @@ void main() {
     expect(handler.mediaItem.value?.id, second.id);
   });
 
+  test('keeps Now Playing state while manually switching tracks', () async {
+    final first = registerSong();
+    final second = registerSong();
+    final sourceReady = Completer<Duration?>();
+
+    when(player.playing).thenReturn(true);
+    when(player.setUrl(second.sourceUrl)).thenAnswer((_) => sourceReady.future);
+    await handler.replaceQueue([first, second]);
+
+    final switchFuture = handler.skipToNext();
+    await Future<void>.delayed(Duration.zero);
+    when(player.processingState).thenReturn(ProcessingState.idle);
+    playbackEvents.add(PlaybackEvent());
+    await Future<void>.delayed(Duration.zero);
+
+    expect(handler.mediaItem.value?.id, second.id);
+    expect(handler.playbackState.value.queueIndex, 1);
+    expect(handler.playbackState.value.processingState,
+        AudioProcessingState.loading);
+    expect(handler.playbackState.value.playing, isTrue);
+
+    when(player.processingState).thenReturn(ProcessingState.ready);
+    sourceReady.complete(Duration.zero);
+    await switchFuture;
+    expect(handler.playbackState.value.processingState,
+        AudioProcessingState.ready);
+    expect(handler.playbackState.value.playing, isTrue);
+  });
+
+  test('does not expose completed during automatic advance', () async {
+    final first = registerSong();
+    final second = registerSong();
+
+    when(player.playing).thenReturn(true);
+    await handler.replaceQueue([first, second]);
+    when(player.processingState).thenReturn(ProcessingState.completed);
+    when(player.playing).thenReturn(false);
+    playbackEvents.add(PlaybackEvent());
+    await Future<void>.delayed(Duration.zero);
+
+    expect(handler.playbackState.value.processingState,
+        AudioProcessingState.loading);
+    expect(handler.playbackState.value.playing, isTrue);
+    when(player.processingState).thenReturn(ProcessingState.ready);
+    when(player.playing).thenReturn(true);
+    processingStates.add(ProcessingState.completed);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(handler.mediaItem.value?.id, second.id);
+    expect(handler.playbackState.value.queueIndex, 1);
+    expect(handler.playbackState.value.processingState,
+        AudioProcessingState.ready);
+    expect(handler.playbackState.value.playing, isTrue);
+  });
+
+  test('exposes completed at the end of the queue', () async {
+    final song = registerSong();
+
+    when(player.playing).thenReturn(true);
+    await handler.replaceQueue([song]);
+    when(player.processingState).thenReturn(ProcessingState.completed);
+    playbackEvents.add(PlaybackEvent());
+    await Future<void>.delayed(Duration.zero);
+
+    expect(handler.playbackState.value.processingState,
+        AudioProcessingState.completed);
+  });
+
   test('streams a song that has not been downloaded', () async {
     final song = registerSong();
 

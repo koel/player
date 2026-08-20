@@ -38,6 +38,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   var _errorCount = 0;
   var _initialized = false;
+  var _switchingSource = false;
   var _currentMediaItem = MediaItem(id: '', title: '');
   var _isRadioMode = false;
   var _playbackFailed = false;
@@ -119,6 +120,9 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   AudioProcessingState get _processingState {
     if (_playbackFailed) return AudioProcessingState.error;
+    if (_isTransitioningPlayback) {
+      return AudioProcessingState.loading;
+    }
 
     return {
       // iOS 16+ seems to treat "idle" as "stopped" and close the audio
@@ -134,9 +138,28 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     }[_player.processingState]!;
   }
 
+  bool get _hasContinuousPlayback {
+    final index = currentQueueIndex;
+    return index > -1 &&
+        (index + 1 < queue.value.length ||
+            repeatMode == AudioServiceRepeatMode.one ||
+            repeatMode == AudioServiceRepeatMode.all);
+  }
+
+  bool get _isCompletingWithContinuation =>
+      _hasContinuousPlayback &&
+      _player.processingState == ProcessingState.completed;
+
+  bool get _isTransitioningPlayback =>
+      _switchingSource || _isCompletingWithContinuation;
+
   void _emitPlaybackState() {
     if (_isRadioMode) return;
-    final playing = _player.playing;
+    final playing = _isCompletingWithContinuation
+        ? true
+        : _switchingSource
+            ? playbackState.value.playing
+            : _player.playing;
 
     playbackState.add(playbackState.value.copyWith(
       controls: [
@@ -248,22 +271,32 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   _setPlayerSource(MediaItem mediaItem) async {
     _playbackFailed = false;
+    _switchingSource = true;
     _currentMediaItem = mediaItem;
     this.mediaItem.add(_currentMediaItem);
+    _emitPlaybackState();
 
-    final playable = playableProvider.byId(mediaItem.id)!;
-    final download = downloadProvider.getForPlayable(playable);
+    try {
+      final playable = playableProvider.byId(mediaItem.id)!;
+      final download = downloadProvider.getForPlayable(playable);
 
-    if (download == null) {
-      await _player.setUrl(playable.sourceUrl);
-    } else {
-      await _player.setFilePath(download.path);
+      if (download == null) {
+        await _player.setUrl(playable.sourceUrl);
+      } else {
+        await _player.setFilePath(download.path);
+      }
+      _switchingSource = false;
+      _emitPlaybackState();
+    } catch (error) {
+      _switchingSource = false;
+      rethrow;
     }
   }
 
   /// Tear down a source that stalled or errored, so the player is left in a
   /// state the user can retry or skip out of instead of a permanent spinner.
   Future<void> _abandonSource() async {
+    _switchingSource = false;
     _playbackFailed = true;
     await _player.stop();
     _emitPlaybackState();
