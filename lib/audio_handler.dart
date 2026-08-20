@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:app/app_state.dart';
 import 'package:app/extensions/extensions.dart';
@@ -18,14 +19,6 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   /// keep skipping. Low, because the common cause of a run of failures is a
   /// dead connection, and each skip costs the user their place in the queue.
   static const MAX_ERROR_COUNT = 3;
-  static const _currentQueueMediaId = 'current-queue';
-
-  static const _currentQueueMediaItem = MediaItem(
-    id: _currentQueueMediaId,
-    title: 'Current queue',
-    playable: false,
-  );
-
   late final DownloadProvider downloadProvider;
   late final PlayableProvider playableProvider;
   late AudioServiceRepeatMode repeatMode;
@@ -45,11 +38,18 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   AudioPlayer? _radioPlayer;
 
   final AudioPlayer _player;
+  final Random _random;
+  final _overviewAlbums = <String, MediaItem>{};
+  final _albumItems = <String, List<MediaItem>>{};
+  List<MediaItem>? _shuffleSnapshot;
+  var _shuffleMode = AudioServiceShuffleMode.none;
 
   KoelAudioHandler({
     AudioPlayer? player,
+    Random? random,
     this.sourceLoadTimeout = const Duration(seconds: 30),
-  }) : _player = player ?? AudioPlayer();
+  })  : _player = player ?? AudioPlayer(),
+        _random = random ?? Random();
 
   AudioPlayer get player => _player;
 
@@ -171,13 +171,13 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       systemActions: const {
         MediaAction.seek,
         MediaAction.playFromMediaId,
+        MediaAction.skipToQueueItem,
+        MediaAction.setShuffleMode,
       },
       androidCompactActionIndices: const [0, 1, 3],
       processingState: _processingState,
       repeatMode: repeatMode,
-      shuffleMode: _player.shuffleModeEnabled
-          ? AudioServiceShuffleMode.all
-          : AudioServiceShuffleMode.none,
+      shuffleMode: _shuffleMode,
       playing: playing,
       updatePosition: _player.position,
       bufferedPosition: _player.bufferedPosition,
@@ -308,18 +308,59 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     Map<String, dynamic>? options,
   ]) async {
     if (parentMediaId == AudioService.browsableRootId) {
-      return [_currentQueueMediaItem];
+      try {
+        final response = await get('overview');
+        final albums = ((response['recently_added_albums'] ?? const []) as List)
+            .map((entry) => Album.fromJson(entry as Map<String, dynamic>));
+        final items = albums.map(_albumMediaItem).toList();
+        _overviewAlbums
+          ..clear()
+          ..addEntries(items.map((item) => MapEntry(item.id, item)));
+        return items;
+      } catch (_) {
+        return List.unmodifiable(_overviewAlbums.values);
+      }
     }
-    if (parentMediaId == _currentQueueMediaId) {
-      return List.unmodifiable(queue.value);
+
+    if (parentMediaId.startsWith('album:')) {
+      final albumId = parentMediaId.substring('album:'.length);
+      try {
+        final playables = await playableProvider.fetchForAlbum(albumId);
+        final items = await Future.wait(playables.map((p) => p.asMediaItem()));
+        _albumItems[albumId] = List.unmodifiable(items);
+        return items;
+      } catch (_) {
+        return _albumItems[albumId] ?? const [];
+      }
     }
     return const [];
   }
 
+  MediaItem _albumMediaItem(Album album) {
+    final artUri = album.cover == null ? null : Uri.tryParse(album.cover!);
+    final hasRemoteArtwork =
+        artUri?.scheme == 'http' || artUri?.scheme == 'https';
+
+    return MediaItem(
+      id: 'album:${album.id}',
+      title: album.name,
+      artist: album.artistName,
+      artUri: hasRemoteArtwork ? artUri : null,
+      playable: false,
+      extras: {
+        'type': 'album',
+        'albumId': album.id.toString(),
+      },
+    );
+  }
+
   @override
   Future<MediaItem?> getMediaItem(String mediaId) async {
-    if (mediaId == _currentQueueMediaId) return _currentQueueMediaItem;
-    return queue.value.firstWhereOrNull((item) => item.id == mediaId);
+    return _overviewAlbums[mediaId] ??
+        queue.value.firstWhereOrNull((item) => item.id == mediaId) ??
+        _albumItems.values
+            .expand((items) => items)
+            .firstWhereOrNull((item) => item.id == mediaId);
   }
 
   @override
@@ -328,9 +369,28 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     Map<String, dynamic>? extras,
   ]) async {
     final index = queue.value.indexWhere((item) => item.id == mediaId);
-    if (index == -1) return;
-    await _playAtIndex(index);
+    if (index != -1) {
+      await _playAtIndex(index);
+      return;
+    }
+
+    final albumItems = _albumItems.values.firstWhereOrNull(
+      (items) => items.any((item) => item.id == mediaId),
+    );
+    if (albumItems == null) return;
+
+    await replaceQueue(
+      albumItems
+          .map((item) => playableProvider.byId(item.id)!)
+          .toList(growable: false),
+      shuffle: false,
+      autoPlay: false,
+    );
+    await _playAtIndex(queue.value.indexWhere((item) => item.id == mediaId));
   }
+
+  @override
+  Future<void> skipToQueueItem(int index) => _playAtIndex(index);
 
   @override
   Future<void> play() async {
@@ -384,6 +444,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   }
 
   Future<void> queueAfterCurrent(Playable playable) async {
+    _invalidateShuffleSnapshot();
     final mediaItem = await playable.asMediaItem();
 
     if (await queued(playable)) {
@@ -419,7 +480,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   }
 
   Future<void> _playAtIndex(int index) async {
-    if (queue.value.length <= index) return;
+    if (index < 0 || queue.value.length <= index) return;
 
     final mediaItem = queue.value[index];
     final position = getPlaybackPositionFromState(mediaItem.id) ?? 0;
@@ -479,6 +540,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   @override
   Future<void> removeQueueItemAt(int index) async {
+    _invalidateShuffleSnapshot();
     if (index == currentQueueIndex) await skipToNext();
 
     if (index >= queue.value.length) return;
@@ -488,6 +550,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   }
 
   void moveQueueItem(int oldIndex, int newIndex) {
+    _invalidateShuffleSnapshot();
     if (oldIndex < newIndex) newIndex -= 1;
 
     final item = queue.value.removeAt(oldIndex);
@@ -496,7 +559,20 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   }
 
   Future<void> clearQueue() async {
+    _invalidateShuffleSnapshot();
     await updateQueue([]);
+    _emitPlaybackState();
+  }
+
+  void _invalidateShuffleSnapshot() {
+    if (_shuffleSnapshot == null &&
+        _shuffleMode == AudioServiceShuffleMode.none) {
+      return;
+    }
+
+    _shuffleSnapshot = null;
+    _shuffleMode = AudioServiceShuffleMode.none;
+    _emitPlaybackState();
   }
 
   Future<void> setVolume(double value) async {
@@ -510,13 +586,49 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     bool autoPlay = true,
   }) async {
     final items = await Future.wait(playables.map((p) => p.asMediaItem()));
-    if (shuffle) items.shuffle();
+    _shuffleSnapshot = shuffle ? List.unmodifiable(items) : null;
+    _shuffleMode =
+        shuffle ? AudioServiceShuffleMode.all : AudioServiceShuffleMode.none;
+    final orderedItems = List<MediaItem>.from(items);
+    if (shuffle) _shuffleItems(orderedItems);
 
-    await updateQueue(items);
+    await updateQueue(orderedItems);
+    _emitPlaybackState();
 
     if (autoPlay) {
       await _playAtIndex(0);
     }
+  }
+
+  void _shuffleItems(List<MediaItem> items) {
+    final currentId = _currentMediaItem.id;
+    final currentIndex = items.indexWhere((item) => item.id == currentId);
+    if (currentIndex > -1) {
+      final current = items.removeAt(currentIndex);
+      items.shuffle(_random);
+      items.insert(0, current);
+    } else {
+      items.shuffle(_random);
+    }
+  }
+
+  @override
+  Future<void> setShuffleMode(AudioServiceShuffleMode mode) async {
+    if (mode == AudioServiceShuffleMode.all) {
+      _shuffleSnapshot ??= List.unmodifiable(queue.value);
+      final shuffled = List<MediaItem>.from(_shuffleSnapshot!);
+      _shuffleItems(shuffled);
+      _shuffleMode = AudioServiceShuffleMode.all;
+      await updateQueue(shuffled);
+    } else {
+      final snapshot = _shuffleSnapshot;
+      if (snapshot != null) {
+        await updateQueue(List<MediaItem>.from(snapshot));
+      }
+      _shuffleSnapshot = null;
+      _shuffleMode = AudioServiceShuffleMode.none;
+    }
+    _emitPlaybackState();
   }
 
   Future<AudioServiceRepeatMode> rotateRepeatMode() async {
@@ -554,6 +666,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   }
 
   Future<void> queueToBottom(Playable playable) async {
+    _invalidateShuffleSnapshot();
     final mediaItem = await playable.asMediaItem();
 
     if (await queued(playable)) {
@@ -564,6 +677,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   }
 
   Future<void> removeFromQueue(Playable playable) async {
+    _invalidateShuffleSnapshot();
     if (await queued(playable)) {
       await removeQueueItem(await playable.asMediaItem());
     }
