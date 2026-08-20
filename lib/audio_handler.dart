@@ -18,6 +18,13 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   /// keep skipping. Low, because the common cause of a run of failures is a
   /// dead connection, and each skip costs the user their place in the queue.
   static const MAX_ERROR_COUNT = 3;
+  static const _currentQueueMediaId = 'current-queue';
+
+  static const _currentQueueMediaItem = MediaItem(
+    id: _currentQueueMediaId,
+    title: 'Current queue',
+    playable: false,
+  );
 
   late final DownloadProvider downloadProvider;
   late final PlayableProvider playableProvider;
@@ -140,6 +147,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       ],
       systemActions: const {
         MediaAction.seek,
+        MediaAction.playFromMediaId,
       },
       androidCompactActionIndices: const [0, 1, 3],
       processingState: _processingState,
@@ -247,7 +255,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     final download = downloadProvider.getForPlayable(playable);
 
     if (download == null) {
-      await _player.setUrl(mediaItem.extras?['sourceUrl'] as String);
+      await _player.setUrl(playable.sourceUrl);
     } else {
       await _player.setFilePath(download.path);
     }
@@ -259,6 +267,36 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     _playbackFailed = true;
     await _player.stop();
     _emitPlaybackState();
+  }
+
+  @override
+  Future<List<MediaItem>> getChildren(
+    String parentMediaId, [
+    Map<String, dynamic>? options,
+  ]) async {
+    if (parentMediaId == AudioService.browsableRootId) {
+      return [_currentQueueMediaItem];
+    }
+    if (parentMediaId == _currentQueueMediaId) {
+      return List.unmodifiable(queue.value);
+    }
+    return const [];
+  }
+
+  @override
+  Future<MediaItem?> getMediaItem(String mediaId) async {
+    if (mediaId == _currentQueueMediaId) return _currentQueueMediaItem;
+    return queue.value.firstWhereOrNull((item) => item.id == mediaId);
+  }
+
+  @override
+  Future<void> playFromMediaId(
+    String mediaId, [
+    Map<String, dynamic>? extras,
+  ]) async {
+    final index = queue.value.indexWhere((item) => item.id == mediaId);
+    if (index == -1) return;
+    await _playAtIndex(index);
   }
 
   @override

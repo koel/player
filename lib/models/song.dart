@@ -84,7 +84,6 @@ class Song extends Playable<Song> {
           : Uri.parse(albumCoverUrl),
       genre: genre,
       extras: {
-        'sourceUrl': sourceUrl,
         'type': 'song',
       },
     );

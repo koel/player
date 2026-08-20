@@ -6,6 +6,12 @@ import 'package:app/values/playable_sort_config.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('exposes only its type in media item extras', () async {
+    final mediaItem = await Song.fake().asMediaItem();
+
+    expect(mediaItem.extras, {'type': 'song'});
+  });
+
   group('Song.fromJson', () {
     test('parses all fields from JSON', () {
       final json = {

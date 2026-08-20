@@ -80,6 +80,35 @@ void main() {
   AudioProcessingState currentProcessingState() =>
       handler.playbackState.value.processingState;
 
+  test('browses the current queue', () async {
+    final first = registerSong();
+    final second = registerSong();
+
+    await handler.replaceQueue([first, second], autoPlay: false);
+
+    final root = await handler.getChildren(AudioService.browsableRootId);
+    expect(root, hasLength(1));
+    expect(root.single.title, 'Current queue');
+    expect(root.single.playable, isFalse);
+
+    final children = await handler.getChildren(root.single.id);
+    expect(children.map((item) => item.id), [first.id, second.id]);
+    expect(await handler.getMediaItem(root.single.id), root.single);
+    expect(await handler.getMediaItem(second.id), children[1]);
+    expect(await handler.getChildren('unknown'), isEmpty);
+  });
+
+  test('plays a queue item selected by media id', () async {
+    final first = registerSong();
+    final second = registerSong();
+
+    await handler.replaceQueue([first, second], autoPlay: false);
+    await handler.playFromMediaId(second.id);
+
+    verify(player.setUrl(second.sourceUrl)).called(1);
+    expect(handler.mediaItem.value?.id, second.id);
+  });
+
   test('streams a song that has not been downloaded', () async {
     final song = registerSong();
 
