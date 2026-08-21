@@ -82,7 +82,8 @@ void main() {
   AudioProcessingState currentProcessingState() =>
       handler.playbackState.value.processingState;
 
-  test('browses latest albums and falls back to its cache', () async {
+  test('browses a home grid of latest albums and falls back to its cache',
+      () async {
     client.willReturn(json: {
       'recently_added_albums': [
         {
@@ -95,20 +96,35 @@ void main() {
       ],
     });
 
-    final root = await handler.getChildren(AudioService.browsableRootId);
+    expect(KoelAudioHandler.androidBrowsableRootExtras, {
+      AndroidContentStyle.supportedKey: true,
+    });
 
-    expect(client.requests.single.url, contains('/overview'));
+    final root = await handler.getChildren(AudioService.browsableRootId);
     expect(root, hasLength(1));
-    expect(root.single.id, 'album:album-1');
-    expect(root.single.title, 'Latest album');
-    expect(root.single.artist, 'Artist');
+    expect(root.single.title, 'Home');
     expect(root.single.playable, isFalse);
-    expect(root.single.artUri.toString(), 'http://example.com/cover.jpg');
+    expect(root.single.extras, {
+      AndroidContentStyle.browsableHintKey:
+          AndroidContentStyle.gridItemHintValue,
+    });
     expect(await handler.getMediaItem(root.single.id), root.single);
+
+    final albums = await handler.getChildren(root.single.id);
+    expect(client.requests.single.url, contains('/overview'));
+    expect(albums, hasLength(1));
+    expect(albums.single.id, 'album:album-1');
+    expect(albums.single.title, 'Latest album');
+    expect(albums.single.artist, 'Artist');
+    expect(albums.single.playable, isFalse);
+    expect(albums.single.extras?[AndroidContentStyle.playableHintKey],
+        AndroidContentStyle.listItemHintValue);
+    expect(albums.single.artUri.toString(), 'http://example.com/cover.jpg');
+    expect(await handler.getMediaItem(albums.single.id), albums.single);
     expect(await handler.getChildren('unknown'), isEmpty);
 
     client.willReturn(status: 500, json: {});
-    expect(await handler.getChildren(AudioService.browsableRootId), root);
+    expect(await handler.getChildren(root.single.id), albums);
   });
 
   List<String> queueIds(Iterable<MediaItem> items) =>
@@ -146,15 +162,30 @@ void main() {
     await handler.skipToQueueItem(1);
     expect(handler.mediaItem.value?.id, songs[1].id);
 
-    await handler.setShuffleMode(AudioServiceShuffleMode.all);
+    expect(
+      handler.playbackState.value.controls.map((control) => control.action),
+      isNot(contains(MediaAction.stop)),
+    );
+    final shuffleControl = handler.playbackState.value.controls.singleWhere(
+      (control) => control.customAction?.name == 'shuffle',
+    );
+    expect(shuffleControl.label, 'Turn shuffle on');
+    expect(shuffleControl.androidIcon, 'drawable/audio_service_shuffle');
+
+    await handler.customAction('shuffle');
     final shuffledIds = queueIds(handler.queue.value);
     expect(
         handler.playbackState.value.shuffleMode, AudioServiceShuffleMode.all);
     expect(shuffledIds.first, songs[1].id);
     expect(shuffledIds, unorderedEquals(originalIds));
     expect(shuffledIds, isNot(originalIds));
+    final activeShuffleControl = handler.playbackState.value.controls
+        .singleWhere((control) => control.customAction?.name == 'shuffle');
+    expect(activeShuffleControl.label, 'Turn shuffle off');
+    expect(activeShuffleControl.androidIcon,
+        'drawable/audio_service_shuffle_on');
 
-    await handler.setShuffleMode(AudioServiceShuffleMode.none);
+    await handler.customAction('shuffle');
     expect(
         handler.playbackState.value.shuffleMode, AudioServiceShuffleMode.none);
     expect(queueIds(handler.queue.value), originalIds);

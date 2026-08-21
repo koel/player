@@ -19,6 +19,21 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   /// keep skipping. Low, because the common cause of a run of failures is a
   /// dead connection, and each skip costs the user their place in the queue.
   static const MAX_ERROR_COUNT = 3;
+  static const androidBrowsableRootExtras = {
+    AndroidContentStyle.supportedKey: true,
+  };
+  static const _homeMediaId = 'home';
+  static const _shuffleAction = 'shuffle';
+  static const _homeMediaItem = MediaItem(
+    id: _homeMediaId,
+    title: 'Home',
+    playable: false,
+    extras: {
+      AndroidContentStyle.browsableHintKey:
+          AndroidContentStyle.gridItemHintValue,
+    },
+  );
+
   late final DownloadProvider downloadProvider;
   late final PlayableProvider playableProvider;
   late AudioServiceRepeatMode repeatMode;
@@ -165,8 +180,16 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       controls: [
         MediaControl.skipToPrevious,
         if (playing) MediaControl.pause else MediaControl.play,
-        MediaControl.stop,
         MediaControl.skipToNext,
+        MediaControl.custom(
+          androidIcon: _shuffleMode == AudioServiceShuffleMode.all
+              ? 'drawable/audio_service_shuffle_on'
+              : 'drawable/audio_service_shuffle',
+          label: _shuffleMode == AudioServiceShuffleMode.all
+              ? 'Turn shuffle off'
+              : 'Turn shuffle on',
+          name: _shuffleAction,
+        ),
       ],
       systemActions: const {
         MediaAction.seek,
@@ -174,7 +197,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
         MediaAction.skipToQueueItem,
         MediaAction.setShuffleMode,
       },
-      androidCompactActionIndices: const [0, 1, 3],
+      androidCompactActionIndices: const [0, 1, 2],
       processingState: _processingState,
       repeatMode: repeatMode,
       shuffleMode: _shuffleMode,
@@ -308,6 +331,10 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     Map<String, dynamic>? options,
   ]) async {
     if (parentMediaId == AudioService.browsableRootId) {
+      return const [_homeMediaItem];
+    }
+
+    if (parentMediaId == _homeMediaId) {
       try {
         final response = await get('overview');
         final albums = ((response['recently_added_albums'] ?? const []) as List)
@@ -350,17 +377,21 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       extras: {
         'type': 'album',
         'albumId': album.id.toString(),
+        AndroidContentStyle.playableHintKey:
+            AndroidContentStyle.listItemHintValue,
       },
     );
   }
 
   @override
   Future<MediaItem?> getMediaItem(String mediaId) async {
-    return _overviewAlbums[mediaId] ??
-        queue.value.firstWhereOrNull((item) => item.id == mediaId) ??
-        _albumItems.values
-            .expand((items) => items)
-            .firstWhereOrNull((item) => item.id == mediaId);
+    return mediaId == _homeMediaId
+        ? _homeMediaItem
+        : _overviewAlbums[mediaId] ??
+            queue.value.firstWhereOrNull((item) => item.id == mediaId) ??
+            _albumItems.values
+                .expand((items) => items)
+                .firstWhereOrNull((item) => item.id == mediaId);
   }
 
   @override
@@ -391,6 +422,18 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   @override
   Future<void> skipToQueueItem(int index) => _playAtIndex(index);
+
+  @override
+  Future<dynamic> customAction(String name,
+      [Map<String, dynamic>? extras]) async {
+    if (name != _shuffleAction) return super.customAction(name, extras);
+
+    await setShuffleMode(
+      _shuffleMode == AudioServiceShuffleMode.all
+          ? AudioServiceShuffleMode.none
+          : AudioServiceShuffleMode.all,
+    );
+  }
 
   @override
   Future<void> play() async {

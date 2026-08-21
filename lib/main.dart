@@ -101,6 +101,7 @@ Future<void> main() async {
       androidNotificationChannelId: 'dev.koel.app.channel.audio',
       androidNotificationChannelName: 'Koel audio playback',
       androidNotificationOngoing: true,
+      androidBrowsableRootExtras: KoelAudioHandler.androidBrowsableRootExtras,
     ),
   );
 
