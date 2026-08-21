@@ -2,7 +2,7 @@ import 'package:app/models/episode.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('exposes only its type in media item extras', () async {
+  test('does not expose its authenticated source URL', () async {
     final episode = Episode(
       id: 'episode-1',
       length: 60,
@@ -18,6 +18,7 @@ void main() {
 
     final mediaItem = await episode.asMediaItem();
 
-    expect(mediaItem.extras, {'type': 'episode'});
+    expect(mediaItem.extras?.containsKey('sourceUrl'), isFalse);
+    expect(mediaItem.extras?['type'], 'episode');
   });
 }

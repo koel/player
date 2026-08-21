@@ -43,19 +43,25 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   /// indefinitely: neither just_audio nor the platform player time out on
   /// their own, so the future never completes and never throws.
   final Duration sourceLoadTimeout;
+  final Duration browseLoadTimeout;
 
+  var _browseGeneration = 0;
   var _errorCount = 0;
   var _initialized = false;
+  var _queueRestored = false;
   var _switchingSource = false;
   var _currentMediaItem = MediaItem(id: '', title: '');
   var _isRadioMode = false;
   var _playbackFailed = false;
   AudioPlayer? _radioPlayer;
+  StreamSubscription<List<MediaItem>>? _queueStateSubscription;
+  StreamSubscription<Duration>? _playbackPositionSubscription;
 
   final AudioPlayer _player;
   final Random _random;
   final _overviewAlbums = <String, MediaItem>{};
   final _albumItems = <String, List<MediaItem>>{};
+  final _albumPlayables = <String, List<Playable>>{};
   List<MediaItem>? _shuffleSnapshot;
   var _shuffleMode = AudioServiceShuffleMode.none;
 
@@ -63,6 +69,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     AudioPlayer? player,
     Random? random,
     this.sourceLoadTimeout = const Duration(seconds: 30),
+    this.browseLoadTimeout = const Duration(seconds: 8),
   })  : _player = player ?? AudioPlayer(),
         _random = random ?? Random();
 
@@ -89,11 +96,8 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       ..playableProvider = playableProvider
       ..repeatMode = preferences.repeatMode;
 
+    _emitPlaybackState();
     await this.setVolume(preferences.volume);
-
-    if (Feature.queueStateSync.isSupported()) {
-      _trySetUpQueue();
-    }
 
     _initialized = true;
   }
@@ -180,6 +184,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       controls: [
         MediaControl.skipToPrevious,
         if (playing) MediaControl.pause else MediaControl.play,
+        MediaControl.stop,
         MediaControl.skipToNext,
         MediaControl.custom(
           androidIcon: _shuffleMode == AudioServiceShuffleMode.all
@@ -197,7 +202,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
         MediaAction.skipToQueueItem,
         MediaAction.setShuffleMode,
       },
-      androidCompactActionIndices: const [0, 1, 2],
+      androidCompactActionIndices: const [0, 1, 3],
       processingState: _processingState,
       repeatMode: repeatMode,
       shuffleMode: _shuffleMode,
@@ -229,7 +234,14 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     );
   }
 
-  void _trySetUpQueue() async {
+  Future<void> restoreQueue() async {
+    if (_queueRestored || !Feature.queueStateSync.isSupported()) return;
+
+    _queueRestored = true;
+    await _trySetUpQueue();
+  }
+
+  Future<void> _trySetUpQueue() async {
     final state = AppState.get<QueueState>(['app', 'queueState'])!;
 
     if (state.playables.isEmpty) return;
@@ -256,7 +268,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
         }
       }
 
-      queue.stream.listen((mediaItems) {
+      _queueStateSubscription = queue.stream.listen((mediaItems) {
         var playableIds = mediaItems.map((item) => item.id).toList();
 
         put('queue/state', data: {
@@ -265,7 +277,9 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
         });
       });
 
-      _player.positionStream.throttle(Duration(seconds: 1)).listen((position) {
+      _playbackPositionSubscription = _player.positionStream
+          .throttle(Duration(seconds: 1))
+          .listen((position) {
         if (mediaItem.value == null || position.inSeconds % 5 != 0) return;
 
         put('queue/playback-status', data: {
@@ -325,6 +339,14 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     _emitPlaybackState();
   }
 
+  void _clearCurrentMediaItem() {
+    _errorCount = 0;
+    _switchingSource = false;
+    _playbackFailed = false;
+    _currentMediaItem = const MediaItem(id: '', title: '');
+    mediaItem.add(null);
+  }
+
   @override
   Future<List<MediaItem>> getChildren(
     String parentMediaId, [
@@ -335,8 +357,10 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     }
 
     if (parentMediaId == _homeMediaId) {
+      final browseGeneration = _browseGeneration;
       try {
-        final response = await get('overview');
+        final response = await get('overview').timeout(browseLoadTimeout);
+        if (browseGeneration != _browseGeneration) return const [];
         final albums = ((response['recently_added_albums'] ?? const []) as List)
             .map((entry) => Album.fromJson(entry as Map<String, dynamic>));
         final items = albums.map(_albumMediaItem).toList();
@@ -351,10 +375,20 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
     if (parentMediaId.startsWith('album:')) {
       final albumId = parentMediaId.substring('album:'.length);
+      final browseGeneration = _browseGeneration;
       try {
-        final playables = await playableProvider.fetchForAlbum(albumId);
-        final items = await Future.wait(playables.map((p) => p.asMediaItem()));
+        final playables = await playableProvider
+            .fetchForAlbum(albumId)
+            .timeout(browseLoadTimeout);
+        final items = await Future.wait(playables.map((playable) async {
+          final item = await playable.asMediaItem();
+          return item.copyWith(
+            id: _albumPlayableMediaId(albumId, playable.id),
+          );
+        }));
+        if (browseGeneration != _browseGeneration) return const [];
         _albumItems[albumId] = List.unmodifiable(items);
+        _albumPlayables[albumId] = List.unmodifiable(playables);
         return items;
       } catch (_) {
         return _albumItems[albumId] ?? const [];
@@ -362,6 +396,9 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     }
     return const [];
   }
+
+  String _albumPlayableMediaId(String albumId, String playableId) =>
+      Uri(pathSegments: ['album', albumId, 'playable', playableId]).toString();
 
   MediaItem _albumMediaItem(Album album) {
     final artUri = album.cover == null ? null : Uri.tryParse(album.cover!);
@@ -405,19 +442,23 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       return;
     }
 
-    final albumItems = _albumItems.values.firstWhereOrNull(
-      (items) => items.any((item) => item.id == mediaId),
+    final albumEntry = _albumItems.entries.firstWhereOrNull(
+      (entry) => entry.value.any((item) => item.id == mediaId),
     );
-    if (albumItems == null) return;
+    if (albumEntry == null) return;
+
+    final selectedIndex =
+        albumEntry.value.indexWhere((item) => item.id == mediaId);
+    final albumPlayables = _albumPlayables[albumEntry.key];
+    if (albumPlayables == null || selectedIndex >= albumPlayables.length)
+      return;
 
     await replaceQueue(
-      albumItems
-          .map((item) => playableProvider.byId(item.id)!)
-          .toList(growable: false),
+      albumPlayables,
       shuffle: false,
       autoPlay: false,
     );
-    await _playAtIndex(queue.value.indexWhere((item) => item.id == mediaId));
+    await _playAtIndex(selectedIndex);
   }
 
   @override
@@ -495,6 +536,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     }
 
     await this.insertQueueItem(currentQueueIndex + 1, mediaItem);
+    _emitPlaybackState();
   }
 
   Future<void> playOrPause() async {
@@ -583,22 +625,41 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   @override
   Future<void> removeQueueItemAt(int index) async {
-    _invalidateShuffleSnapshot();
-    if (index == currentQueueIndex) await skipToNext();
+    if (index < 0 || index >= queue.value.length) return;
 
-    if (index >= queue.value.length) return;
+    _invalidateShuffleSnapshot();
+    if (index == currentQueueIndex) {
+      final hasNextItem = index + 1 < queue.value.length;
+      final wrapsToStart =
+          repeatMode == AudioServiceRepeatMode.all && queue.value.length > 1;
+      if (hasNextItem || wrapsToStart) {
+        await skipToNext();
+      } else {
+        await _player.stop();
+        _clearCurrentMediaItem();
+      }
+    }
 
     queue.value.removeAt(index);
     queue.add(queue.value);
+    _emitPlaybackState();
   }
 
   void moveQueueItem(int oldIndex, int newIndex) {
+    if (oldIndex < 0 ||
+        oldIndex >= queue.value.length ||
+        newIndex < 0 ||
+        newIndex > queue.value.length) {
+      return;
+    }
+
     _invalidateShuffleSnapshot();
     if (oldIndex < newIndex) newIndex -= 1;
 
     final item = queue.value.removeAt(oldIndex);
     queue.value.insert(newIndex, item);
     queue.add(queue.value);
+    _emitPlaybackState();
   }
 
   Future<void> clearQueue() async {
@@ -633,7 +694,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     _shuffleMode =
         shuffle ? AudioServiceShuffleMode.all : AudioServiceShuffleMode.none;
     final orderedItems = List<MediaItem>.from(items);
-    if (shuffle) _shuffleItems(orderedItems);
+    if (shuffle) orderedItems.shuffle(_random);
 
     await updateQueue(orderedItems);
     _emitPlaybackState();
@@ -704,7 +765,17 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   }
 
   Future<void> cleanUpUponLogout() async {
-    await _player.stop();
+    _browseGeneration++;
+    await _queueStateSubscription?.cancel();
+    await _playbackPositionSubscription?.cancel();
+    _queueStateSubscription = null;
+    _playbackPositionSubscription = null;
+    await stop();
+    _queueRestored = false;
+    _overviewAlbums.clear();
+    _albumItems.clear();
+    _albumPlayables.clear();
+    _clearCurrentMediaItem();
     await clearQueue();
   }
 
@@ -717,12 +788,11 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     }
 
     await addQueueItem(mediaItem);
+    _emitPlaybackState();
   }
 
   Future<void> removeFromQueue(Playable playable) async {
-    _invalidateShuffleSnapshot();
-    if (await queued(playable)) {
-      await removeQueueItem(await playable.asMediaItem());
-    }
+    final index = queue.value.indexOf(await playable.asMediaItem());
+    if (index != -1) await removeQueueItemAt(index);
   }
 }

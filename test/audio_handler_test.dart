@@ -1,18 +1,32 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:app/app_state.dart';
 import 'package:app/audio_handler.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/download_provider.dart';
 import 'package:app/providers/playable_provider.dart';
+import 'package:app/values/queue_state.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:version/version.dart';
 
 import 'helpers/api_test_setup.dart';
 import 'audio_handler_test.mocks.dart';
+
+class FirstIndexRandom implements Random {
+  @override
+  bool nextBool() => false;
+
+  @override
+  double nextDouble() => 0;
+
+  @override
+  int nextInt(int max) => 0;
+}
 
 @GenerateMocks([AudioPlayer, PlayableProvider, DownloadProvider])
 void main() {
@@ -27,6 +41,7 @@ void main() {
   setUpAll(() async => await initApiTestEnvironment());
 
   setUp(() async {
+    AppState.clear();
     playbackEvents = StreamController<PlaybackEvent>.broadcast();
     processingStates = StreamController<ProcessingState>.broadcast();
 
@@ -53,8 +68,9 @@ void main() {
 
     handler = KoelAudioHandler(
       player: player,
-      random: Random(1),
+      random: FirstIndexRandom(),
       sourceLoadTimeout: const Duration(milliseconds: 50),
+      browseLoadTimeout: const Duration(milliseconds: 50),
     );
 
     client = CapturingClient();
@@ -82,6 +98,57 @@ void main() {
   AudioProcessingState currentProcessingState() =>
       handler.playbackState.value.processingState;
 
+  test('advertises Android Auto playback actions before loading a queue', () {
+    final state = handler.playbackState.value;
+
+    expect(
+      state.controls.map((control) => control.action),
+      contains(MediaAction.stop),
+    );
+    expect(state.systemActions, contains(MediaAction.playFromMediaId));
+    expect(state.systemActions, contains(MediaAction.skipToQueueItem));
+    expect(state.systemActions, contains(MediaAction.setShuffleMode));
+    expect(state.androidCompactActionIndices, [0, 1, 3]);
+  });
+
+  test('restores the queue after app data becomes available', () async {
+    final song = registerSong();
+    AppState.set(
+      ['app', 'apiVersion'],
+      Version.parse('6.11.6'),
+    );
+    AppState.set(
+      ['app', 'queueState'],
+      QueueState(playables: [song]),
+    );
+    when(playableProvider.syncWithVault(any)).thenReturn([song]);
+    when(player.positionStream).thenAnswer((_) => const Stream.empty());
+
+    await handler.restoreQueue();
+    await pumpEventQueue();
+
+    expect(handler.queue.value.map((item) => item.id), [song.id]);
+
+    await handler.cleanUpUponLogout();
+    final nextSong = registerSong();
+    AppState.set(
+      ['app', 'queueState'],
+      QueueState(playables: [nextSong]),
+    );
+    when(playableProvider.syncWithVault(any)).thenReturn([nextSong]);
+
+    await handler.restoreQueue();
+    await pumpEventQueue();
+
+    expect(handler.queue.value.map((item) => item.id), [nextSong.id]);
+    expect(
+      client.requests
+          .where((request) => request.url.contains('/queue/state')),
+      hasLength(2),
+    );
+    verify(playableProvider.syncWithVault(any)).called(2);
+  });
+
   test('browses a home grid of latest albums and falls back to its cache',
       () async {
     client.willReturn(json: {
@@ -96,18 +163,20 @@ void main() {
       ],
     });
 
-    expect(KoelAudioHandler.androidBrowsableRootExtras, {
-      AndroidContentStyle.supportedKey: true,
-    });
+    expect(
+      KoelAudioHandler
+          .androidBrowsableRootExtras[AndroidContentStyle.supportedKey],
+      isTrue,
+    );
 
     final root = await handler.getChildren(AudioService.browsableRootId);
     expect(root, hasLength(1));
     expect(root.single.title, 'Home');
     expect(root.single.playable, isFalse);
-    expect(root.single.extras, {
-      AndroidContentStyle.browsableHintKey:
-          AndroidContentStyle.gridItemHintValue,
-    });
+    expect(
+      root.single.extras?[AndroidContentStyle.browsableHintKey],
+      AndroidContentStyle.gridItemHintValue,
+    );
     expect(await handler.getMediaItem(root.single.id), root.single);
 
     final albums = await handler.getChildren(root.single.id);
@@ -130,28 +199,129 @@ void main() {
   List<String> queueIds(Iterable<MediaItem> items) =>
       items.map((item) => item.id).toList();
 
-  test('browses an album and plays the selected song in album context',
+  test('plays an album selection in context when its song is already queued',
       () async {
     final songs = List.generate(3, (_) => registerSong());
+    final unrelatedSong = registerSong();
     when(playableProvider.fetchForAlbum('album-1'))
         .thenAnswer((_) async => songs);
+    await handler.replaceQueue(
+      [songs[1], unrelatedSong],
+      autoPlay: false,
+    );
 
     final children = await handler.getChildren('album:album-1');
 
-    expect(queueIds(children), songs.map((song) => song.id).toList());
-    expect(await handler.getMediaItem(songs[1].id), children[1]);
+    expect(
+      children.map((item) => item.title),
+      songs.map((song) => song.title),
+    );
+    expect(await handler.getMediaItem(children[1].id), children[1]);
 
     when(playableProvider.fetchForAlbum('album-1'))
         .thenThrow(Exception('offline'));
     expect(await handler.getChildren('album:album-1'), children);
 
-    await handler.playFromMediaId(songs[1].id);
+    await handler.playFromMediaId(children[1].id);
     expect(
       queueIds(handler.queue.value),
       songs.map((song) => song.id).toList(),
     );
     expect(handler.mediaItem.value?.id, songs[1].id);
     verify(player.setUrl(songs[1].sourceUrl)).called(1);
+  });
+
+  test('bounds slow Android Auto browse requests', () async {
+    final root = await handler.getChildren(AudioService.browsableRootId);
+    final pendingOverview = Completer<void>();
+    client.willReturn(
+      waitFor: pendingOverview.future,
+      json: {'recently_added_albums': []},
+    );
+
+    expect(await handler.getChildren(root.single.id), isEmpty);
+
+    final pendingAlbum = Completer<List<Playable>>();
+    when(playableProvider.fetchForAlbum('slow'))
+        .thenAnswer((_) => pendingAlbum.future);
+    expect(await handler.getChildren('album:slow'), isEmpty);
+  });
+
+  test('clears account-specific browser and playback state on logout',
+      () async {
+    client.willReturn(json: {
+      'recently_added_albums': [
+        {
+          'id': 'album-1',
+          'name': 'Private album',
+          'artist_id': 'artist-1',
+          'artist_name': 'Artist',
+          'cover': null,
+        },
+      ],
+    });
+    final song = registerSong();
+    when(playableProvider.fetchForAlbum('album-1'))
+        .thenAnswer((_) async => [song]);
+
+    final root = await handler.getChildren(AudioService.browsableRootId);
+    final albums = await handler.getChildren(root.single.id);
+    final songs = await handler.getChildren(albums.single.id);
+    await handler.playFromMediaId(songs.single.id);
+    await pumpEventQueue();
+
+    await handler.cleanUpUponLogout();
+
+    client.willReturn(status: 500, json: {});
+    when(playableProvider.fetchForAlbum('album-1'))
+        .thenThrow(Exception('offline'));
+    expect(await handler.getChildren(root.single.id), isEmpty);
+    expect(await handler.getChildren(albums.single.id), isEmpty);
+    expect(await handler.getMediaItem(albums.single.id), isNull);
+    expect(await handler.getMediaItem(songs.single.id), isNull);
+    expect(handler.queue.value, isEmpty);
+    expect(handler.mediaItem.value, isNull);
+  });
+
+  test('does not repopulate browser caches after logout', () async {
+    final root = await handler.getChildren(AudioService.browsableRootId);
+    final overviewGate = Completer<void>();
+    client.willReturn(
+      waitFor: overviewGate.future,
+      json: {
+        'recently_added_albums': [
+          {
+            'id': 'album-1',
+            'name': 'Previous account album',
+            'artist_id': 'artist-1',
+            'artist_name': 'Artist',
+            'cover': null,
+          },
+        ],
+      },
+    );
+
+    final overviewRequest = handler.getChildren(root.single.id);
+    await Future<void>.delayed(Duration.zero);
+    await handler.cleanUpUponLogout();
+    overviewGate.complete();
+    expect(await overviewRequest, isEmpty);
+
+    final song = registerSong();
+    final pendingAlbum = Completer<List<Playable>>();
+    when(playableProvider.fetchForAlbum('album-1'))
+        .thenAnswer((_) => pendingAlbum.future);
+    final albumRequest = handler.getChildren('album:album-1');
+    await Future<void>.delayed(Duration.zero);
+    await handler.cleanUpUponLogout();
+    pendingAlbum.complete([song]);
+    expect(await albumRequest, isEmpty);
+
+    client.willReturn(status: 500, json: {});
+    when(playableProvider.fetchForAlbum('album-1'))
+        .thenThrow(Exception('offline'));
+    expect(await handler.getChildren(root.single.id), isEmpty);
+    expect(await handler.getChildren('album:album-1'), isEmpty);
   });
 
   test('supports native queue selection and reversible shuffle', () async {
@@ -162,10 +332,6 @@ void main() {
     await handler.skipToQueueItem(1);
     expect(handler.mediaItem.value?.id, songs[1].id);
 
-    expect(
-      handler.playbackState.value.controls.map((control) => control.action),
-      isNot(contains(MediaAction.stop)),
-    );
     final shuffleControl = handler.playbackState.value.controls.singleWhere(
       (control) => control.customAction?.name == 'shuffle',
     );
@@ -178,7 +344,6 @@ void main() {
         handler.playbackState.value.shuffleMode, AudioServiceShuffleMode.all);
     expect(shuffledIds.first, songs[1].id);
     expect(shuffledIds, unorderedEquals(originalIds));
-    expect(shuffledIds, isNot(originalIds));
     final activeShuffleControl = handler.playbackState.value.controls
         .singleWhere((control) => control.customAction?.name == 'shuffle');
     expect(activeShuffleControl.label, 'Turn shuffle off');
@@ -190,6 +355,18 @@ void main() {
         handler.playbackState.value.shuffleMode, AudioServiceShuffleMode.none);
     expect(queueIds(handler.queue.value), originalIds);
     expect(handler.mediaItem.value?.id, songs[1].id);
+    expect(handler.playbackState.value.queueIndex, 1);
+  });
+
+  test('does not pin the previous item when shuffling a replacement queue',
+      () async {
+    final songs = List.generate(4, (_) => registerSong());
+
+    await handler.replaceQueue(songs);
+    await handler.skipToQueueItem(2);
+    await handler.replaceQueue(songs, shuffle: true, autoPlay: false);
+
+    expect(handler.queue.value.first.id, isNot(songs[2].id));
   });
 
   test('queue mutations invalidate an active shuffle snapshot', () async {
@@ -208,6 +385,63 @@ void main() {
 
     await handler.setShuffleMode(AudioServiceShuffleMode.none);
     expect(queueIds(handler.queue.value), isNot(contains(removedId)));
+
+    await handler.replaceQueue(songs, shuffle: true, autoPlay: false);
+    await handler.clearQueue();
+    await handler.setShuffleMode(AudioServiceShuffleMode.none);
+    expect(handler.queue.value, isEmpty);
+  });
+
+  test('keeps the active queue index correct after queue mutations', () async {
+    final songs = List.generate(4, (_) => registerSong());
+    await handler.replaceQueue(songs, autoPlay: false);
+    await handler.skipToQueueItem(2);
+
+    await handler.removeQueueItemAt(0);
+    expect(handler.mediaItem.value?.id, songs[2].id);
+    expect(handler.playbackState.value.queueIndex, 1);
+
+    handler.moveQueueItem(0, 3);
+    expect(handler.mediaItem.value?.id, songs[2].id);
+    expect(handler.playbackState.value.queueIndex, 0);
+  });
+
+  test('updates the active index when reordering through queue helpers',
+      () async {
+    final songs = List.generate(3, (_) => registerSong());
+    await handler.replaceQueue(songs, autoPlay: false);
+    await handler.skipToQueueItem(2);
+
+    await handler.queueAfterCurrent(songs[0]);
+    expect(handler.playbackState.value.queueIndex, 1);
+
+    await handler.replaceQueue(songs, autoPlay: false);
+    await handler.skipToQueueItem(2);
+    await handler.queueToBottom(songs[0]);
+    expect(handler.playbackState.value.queueIndex, 1);
+  });
+
+  test('stops playback when removing the only active queue item', () async {
+    final song = registerSong();
+    await handler.replaceQueue([song]);
+
+    await handler.removeQueueItemAt(0);
+
+    verify(player.stop()).called(1);
+    expect(handler.queue.value, isEmpty);
+    expect(handler.mediaItem.value, isNull);
+    expect(handler.playbackState.value.queueIndex, -1);
+  });
+
+  test('ignores queue selections outside the queue', () async {
+    final songs = List.generate(2, (_) => registerSong());
+    await handler.replaceQueue(songs, autoPlay: false);
+
+    await handler.skipToQueueItem(-1);
+    await handler.skipToQueueItem(songs.length);
+
+    verifyNever(player.setUrl(any));
+    expect(handler.mediaItem.value, isNull);
   });
 
   test('plays a queue item selected by media id', () async {

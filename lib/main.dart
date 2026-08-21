@@ -11,20 +11,18 @@ import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 late KoelAudioHandler audioHandler;
+late final PlayableProvider _playableProvider;
+late final DownloadProvider _downloadProvider;
 final quickActions = KoelQuickActions();
 
 List<SingleChildWidget> _providers = [
   Provider(create: (_) => AuthProvider()),
   ChangeNotifierProvider(create: (_) => ArtistProvider()),
-  ChangeNotifierProvider(create: (context) => PlayableProvider()),
+  ChangeNotifierProvider(create: (_) => _playableProvider),
   Provider(create: (_) => MediaInfoProvider()),
   // Download files should always be available to adapt to login/logout and
   // offline mode.
-  Provider(
-      create: (context) => DownloadProvider(
-            playableProvider: context.read<PlayableProvider>(),
-          ),
-      lazy: false),
+  Provider(create: (_) => _downloadProvider, lazy: false),
   ChangeNotifierProvider(create: (context) => AlbumProvider()),
   ChangeNotifierProvider(
     create: (context) => FavoriteProvider(
@@ -95,8 +93,19 @@ List<SingleChildWidget> _providers = [
 ];
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await GetStorage.init('Preferences');
+  await GetStorage.init(DownloadProvider.serializedPlayableContainer);
+
+  _playableProvider = PlayableProvider();
+  _downloadProvider = DownloadProvider(playableProvider: _playableProvider);
+  final handler = KoelAudioHandler();
+  await handler.init(
+    playableProvider: _playableProvider,
+    downloadProvider: _downloadProvider,
+  );
   audioHandler = await AudioService.init(
-    builder: () => KoelAudioHandler(),
+    builder: () => handler,
     config: AudioServiceConfig(
       androidNotificationChannelId: 'dev.koel.app.channel.audio',
       androidNotificationChannelName: 'Koel audio playback',
@@ -104,9 +113,9 @@ Future<void> main() async {
       androidBrowsableRootExtras: KoelAudioHandler.androidBrowsableRootExtras,
     ),
   );
-
-  await GetStorage.init('Preferences');
-  await GetStorage.init(DownloadProvider.serializedPlayableContainer);
+  AuthProvider.userLoggedOutStream.listen(
+    (_) => unawaited(audioHandler.cleanUpUponLogout()),
+  );
 
   // Register early so a cold launch via a shortcut is captured and buffered
   // until the main screen is ready to act on it.
