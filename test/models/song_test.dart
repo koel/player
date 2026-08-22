@@ -83,11 +83,16 @@ void main() {
         'album_artist_name': 'Artist',
       };
 
-      final withoutLegacyKey = Map<String, dynamic>.from(json);
-      final withBothKeys = Map<String, dynamic>.from(json)..['liked'] = true;
+      final favoriteOnly = Map<String, dynamic>.from(json);
+      final favoriteBeatsLegacyFalse = Map<String, dynamic>.from(json)
+        ..['liked'] = false;
+      final favoriteBeatsLegacyTrue = Map<String, dynamic>.from(json)
+        ..['favorite'] = false
+        ..['liked'] = true;
 
-      expect(Song.fromJson(withoutLegacyKey).liked, isTrue);
-      expect(Song.fromJson(withBothKeys).liked, isTrue);
+      expect(Song.fromJson(favoriteOnly).liked, isTrue);
+      expect(Song.fromJson(favoriteBeatsLegacyFalse).liked, isTrue);
+      expect(Song.fromJson(favoriteBeatsLegacyTrue).liked, isFalse);
     });
 
     test('handles null optional fields', () {
