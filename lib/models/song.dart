@@ -131,6 +131,9 @@ class Song extends Playable<Song> {
   }
 
   factory Song.fromJson(Map<String, dynamic> json) {
+    // `liked` is the legacy name for `favorite`, and older servers send it as 0/1.
+    final favorite = json['favorite'] ?? json['liked'];
+
     return Song(
       id: json['id'],
       title: json['title'],
@@ -148,7 +151,7 @@ class Song extends Playable<Song> {
       disc: json['disc'] ?? 1,
       year: json['year'] == null ? null : int.parse(json['year'].toString()),
       genre: json['genre'] ?? '',
-      liked: json['liked'] is bool ? json['liked'] : (json['liked'] ?? 0) != 0,
+      liked: favorite is bool ? favorite : (favorite ?? 0) != 0,
     );
   }
 

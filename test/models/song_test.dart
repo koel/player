@@ -67,6 +67,29 @@ void main() {
       expect(Song.fromJson(jsonNotLiked).liked, isFalse);
     });
 
+    test('prefers favorite over the legacy liked key', () {
+      final json = {
+        'id': 'abc-123',
+        'title': 'Test Song',
+        'length': 240,
+        'favorite': true,
+        'created_at': '2023-06-15T10:30:00.000Z',
+        'artist_id': 'a1',
+        'artist_name': 'Artist',
+        'album_id': 'b1',
+        'album_name': 'Album',
+        'album_cover': null,
+        'album_artist_id': 'a1',
+        'album_artist_name': 'Artist',
+      };
+
+      final withoutLegacyKey = Map<String, dynamic>.from(json);
+      final withBothKeys = Map<String, dynamic>.from(json)..['liked'] = true;
+
+      expect(Song.fromJson(withoutLegacyKey).liked, isTrue);
+      expect(Song.fromJson(withBothKeys).liked, isTrue);
+    });
+
     test('handles null optional fields', () {
       final json = {
         'id': 'abc-123',
