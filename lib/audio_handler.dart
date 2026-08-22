@@ -23,7 +23,8 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     AndroidContentStyle.supportedKey: true,
   };
   static const _homeMediaId = 'home';
-  static const _shuffleAction = 'shuffle';
+  static const _enableShuffleAction = 'enableShuffle';
+  static const _disableShuffleAction = 'disableShuffle';
   static const _homeMediaItem = MediaItem(
     id: _homeMediaId,
     title: 'Home',
@@ -184,7 +185,6 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       controls: [
         MediaControl.skipToPrevious,
         if (playing) MediaControl.pause else MediaControl.play,
-        MediaControl.stop,
         MediaControl.skipToNext,
         MediaControl.custom(
           androidIcon: _shuffleMode == AudioServiceShuffleMode.all
@@ -193,7 +193,9 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
           label: _shuffleMode == AudioServiceShuffleMode.all
               ? 'Turn shuffle off'
               : 'Turn shuffle on',
-          name: _shuffleAction,
+          name: _shuffleMode == AudioServiceShuffleMode.all
+              ? _disableShuffleAction
+              : _enableShuffleAction,
         ),
       ],
       systemActions: const {
@@ -202,7 +204,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
         MediaAction.skipToQueueItem,
         MediaAction.setShuffleMode,
       },
-      androidCompactActionIndices: const [0, 1, 3],
+      androidCompactActionIndices: const [0, 1, 2],
       processingState: _processingState,
       repeatMode: repeatMode,
       shuffleMode: _shuffleMode,
@@ -467,13 +469,14 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   @override
   Future<dynamic> customAction(String name,
       [Map<String, dynamic>? extras]) async {
-    if (name != _shuffleAction) return super.customAction(name, extras);
+    if (name == _enableShuffleAction) {
+      return setShuffleMode(AudioServiceShuffleMode.all);
+    }
+    if (name == _disableShuffleAction) {
+      return setShuffleMode(AudioServiceShuffleMode.none);
+    }
 
-    await setShuffleMode(
-      _shuffleMode == AudioServiceShuffleMode.all
-          ? AudioServiceShuffleMode.none
-          : AudioServiceShuffleMode.all,
-    );
+    return super.customAction(name, extras);
   }
 
   @override

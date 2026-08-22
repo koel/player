@@ -103,12 +103,12 @@ void main() {
 
     expect(
       state.controls.map((control) => control.action),
-      contains(MediaAction.stop),
+      isNot(contains(MediaAction.stop)),
     );
     expect(state.systemActions, contains(MediaAction.playFromMediaId));
     expect(state.systemActions, contains(MediaAction.skipToQueueItem));
     expect(state.systemActions, contains(MediaAction.setShuffleMode));
-    expect(state.androidCompactActionIndices, [0, 1, 3]);
+    expect(state.androidCompactActionIndices, [0, 1, 2]);
   });
 
   test('restores the queue after app data becomes available', () async {
@@ -333,24 +333,24 @@ void main() {
     expect(handler.mediaItem.value?.id, songs[1].id);
 
     final shuffleControl = handler.playbackState.value.controls.singleWhere(
-      (control) => control.customAction?.name == 'shuffle',
+      (control) => control.label == 'Turn shuffle on',
     );
-    expect(shuffleControl.label, 'Turn shuffle on');
+    expect(shuffleControl.customAction?.name, 'enableShuffle');
     expect(shuffleControl.androidIcon, 'drawable/audio_service_shuffle');
 
-    await handler.customAction('shuffle');
+    await handler.customAction(shuffleControl.customAction!.name);
     final shuffledIds = queueIds(handler.queue.value);
     expect(
         handler.playbackState.value.shuffleMode, AudioServiceShuffleMode.all);
     expect(shuffledIds.first, songs[1].id);
     expect(shuffledIds, unorderedEquals(originalIds));
     final activeShuffleControl = handler.playbackState.value.controls
-        .singleWhere((control) => control.customAction?.name == 'shuffle');
-    expect(activeShuffleControl.label, 'Turn shuffle off');
-    expect(activeShuffleControl.androidIcon,
-        'drawable/audio_service_shuffle_on');
+        .singleWhere((control) => control.label == 'Turn shuffle off');
+    expect(activeShuffleControl.customAction?.name, 'disableShuffle');
+    expect(
+        activeShuffleControl.androidIcon, 'drawable/audio_service_shuffle_on');
 
-    await handler.customAction('shuffle');
+    await handler.customAction(activeShuffleControl.customAction!.name);
     expect(
         handler.playbackState.value.shuffleMode, AudioServiceShuffleMode.none);
     expect(queueIds(handler.queue.value), originalIds);
