@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:app/app_state.dart';
+
 import 'package:app/providers/playable_provider.dart';
+import 'package:app/utils/preferences.dart' as preferences;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/api_test_setup.dart';
@@ -25,6 +29,27 @@ void main() {
     AppState.clear();
   });
   tearDown(tearDownApiTest);
+
+  test('ignores a playlist response from a previous account', () async {
+    final gate = Completer<void>();
+    CapturingClient()
+      ..willReturn(
+        json: [_episodeJson('old-song')],
+        waitFor: gate.future,
+      )
+      ..install();
+    final provider = PlayableProvider();
+    final request = provider.fetchForPlaylist('playlist-1');
+
+    preferences.host = 'https://other.koel.test';
+    preferences.apiToken = 'new-token';
+    gate.complete();
+    final result = await request;
+
+    expect(result, isEmpty);
+    expect(AppState.has(['playlist.playables', 'playlist-1']), isFalse);
+    expect(provider.byId('old-song'), isNull);
+  });
 
   group('PlayableProvider.fetchForPodcast', () {
     test(

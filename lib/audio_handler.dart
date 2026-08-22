@@ -23,14 +23,34 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     AndroidContentStyle.supportedKey: true,
   };
   static const _homeMediaId = 'home';
+  static const _playlistsMediaId = 'playlists';
+  static const _recentlyPlayedLimit = 12;
+  static const _groupTitleKey =
+      'android.media.browse.CONTENT_STYLE_GROUP_TITLE_HINT';
+  static const _productionApplicationId = String.fromEnvironment(
+    'KOEL_ANDROID_APPLICATION_ID',
+    defaultValue: 'phanan.koel.app',
+  );
   static const _enableShuffleAction = 'enableShuffle';
   static const _disableShuffleAction = 'disableShuffle';
+  static const _playlistsMediaItem = MediaItem(
+    id: _playlistsMediaId,
+    title: 'Playlists',
+    playable: false,
+    extras: {
+      AndroidContentStyle.browsableHintKey:
+          AndroidContentStyle.gridItemHintValue,
+      _groupTitleKey: 'Your library',
+    },
+  );
   static const _homeMediaItem = MediaItem(
     id: _homeMediaId,
     title: 'Home',
     playable: false,
     extras: {
       AndroidContentStyle.browsableHintKey:
+          AndroidContentStyle.gridItemHintValue,
+      AndroidContentStyle.playableHintKey:
           AndroidContentStyle.gridItemHintValue,
     },
   );
@@ -45,6 +65,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   /// their own, so the future never completes and never throws.
   final Duration sourceLoadTimeout;
   final Duration browseLoadTimeout;
+  final String applicationId;
 
   var _browseGeneration = 0;
   var _errorCount = 0;
@@ -61,6 +82,11 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   final AudioPlayer _player;
   final Random _random;
   final _overviewAlbums = <String, MediaItem>{};
+  final _recentlyPlayedItems = <String, MediaItem>{};
+  final _recentlyPlayedPlayables = <Playable>[];
+  final _playlistItems = <String, MediaItem>{};
+  final _playlistSongs = <String, List<MediaItem>>{};
+  final _playlistPlayables = <String, List<Playable>>{};
   final _albumItems = <String, List<MediaItem>>{};
   final _albumPlayables = <String, List<Playable>>{};
   List<MediaItem>? _shuffleSnapshot;
@@ -71,6 +97,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     Random? random,
     this.sourceLoadTimeout = const Duration(seconds: 30),
     this.browseLoadTimeout = const Duration(seconds: 8),
+    this.applicationId = _productionApplicationId,
   })  : _player = player ?? AudioPlayer(),
         _random = random ?? Random();
 
@@ -363,15 +390,91 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       try {
         final response = await get('overview').timeout(browseLoadTimeout);
         if (browseGeneration != _browseGeneration) return const [];
-        final albums = ((response['recently_added_albums'] ?? const []) as List)
-            .map((entry) => Album.fromJson(entry as Map<String, dynamic>));
-        final items = albums.map(_albumMediaItem).toList();
+        final recent = response['recently_played_songs'] is List
+            ? playableProvider
+                .parseFromJson(response['recently_played_songs'])
+                .take(_recentlyPlayedLimit)
+                .toList()
+            : <Playable>[];
+        final recentItems = await _contextualItems(recent, 'recently-played');
+        if (browseGeneration != _browseGeneration) return const [];
+        final groupedRecentItems = recentItems
+            .map((item) => item.copyWith(
+                  extras: {
+                    ...?item.extras,
+                    _groupTitleKey: 'Recently played',
+                  },
+                ))
+            .toList();
+        if (browseGeneration != _browseGeneration) return const [];
+        _recentlyPlayedPlayables
+          ..clear()
+          ..addAll(recent);
+        _recentlyPlayedItems
+          ..clear()
+          ..addEntries(
+              groupedRecentItems.map((item) => MapEntry(item.id, item)));
+        final albums = recent.isEmpty
+            ? ((response['recently_added_albums'] ?? const []) as List)
+                .map((entry) => Album.fromJson(entry as Map<String, dynamic>))
+                .map(_albumMediaItem)
+                .toList()
+            : <MediaItem>[];
+        if (browseGeneration != _browseGeneration) return const [];
         _overviewAlbums
+          ..clear()
+          ..addEntries(albums.map((item) => MapEntry(item.id, item)));
+        return [
+          ...(recent.isEmpty ? albums : groupedRecentItems),
+          _playlistsMediaItem
+        ];
+      } catch (_) {
+        return [
+          ...(_recentlyPlayedItems.isEmpty
+              ? _overviewAlbums.values
+              : _recentlyPlayedItems.values),
+          _playlistsMediaItem
+        ];
+      }
+    }
+
+    if (parentMediaId == _playlistsMediaId) {
+      try {
+        final browseGeneration = _browseGeneration;
+        final response = await get('playlists').timeout(browseLoadTimeout);
+        if (browseGeneration != _browseGeneration) return const [];
+        final entries =
+            (response is Map ? response['data'] : response) as List? ??
+                const [];
+        final items = entries
+            .map((entry) => Playlist.fromJson(entry as Map<String, dynamic>))
+            .map(_playlistMediaItem)
+            .toList();
+        _playlistItems
           ..clear()
           ..addEntries(items.map((item) => MapEntry(item.id, item)));
         return items;
       } catch (_) {
-        return List.unmodifiable(_overviewAlbums.values);
+        return List.unmodifiable(_playlistItems.values);
+      }
+    }
+
+    if (parentMediaId.startsWith('playlist:')) {
+      final playlistId = parentMediaId.substring('playlist:'.length);
+      try {
+        final browseGeneration = _browseGeneration;
+        final playables = await playableProvider
+            .fetchForPlaylist(playlistId)
+            .timeout(browseLoadTimeout);
+        if (browseGeneration != _browseGeneration) return const [];
+        final items = await _contextualItems(playables, 'playlist/$playlistId');
+        if (browseGeneration != _browseGeneration) return const [];
+        _playlistSongs[playlistId] = List.unmodifiable(items);
+        _playlistPlayables[playlistId] = List.unmodifiable(playables);
+        return [..._shuffleItem('playlist', playlistId, items), ...items];
+      } catch (_) {
+        final cached = _playlistSongs[playlistId] ?? const <MediaItem>[];
+        return [..._shuffleItem('playlist', playlistId, cached), ...cached];
       }
     }
 
@@ -382,25 +485,69 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
         final playables = await playableProvider
             .fetchForAlbum(albumId)
             .timeout(browseLoadTimeout);
-        final items = await Future.wait(playables.map((playable) async {
-          final item = await playable.asMediaItem();
-          return item.copyWith(
-            id: _albumPlayableMediaId(albumId, playable.id),
-          );
-        }));
+        final items = await _contextualItems(playables, 'album/$albumId');
         if (browseGeneration != _browseGeneration) return const [];
         _albumItems[albumId] = List.unmodifiable(items);
         _albumPlayables[albumId] = List.unmodifiable(playables);
-        return items;
+        return [..._shuffleItem('album', albumId, items), ...items];
       } catch (_) {
-        return _albumItems[albumId] ?? const [];
+        final cached = _albumItems[albumId] ?? const <MediaItem>[];
+        return [..._shuffleItem('album', albumId, cached), ...cached];
       }
     }
     return const [];
   }
 
-  String _albumPlayableMediaId(String albumId, String playableId) =>
-      Uri(pathSegments: ['album', albumId, 'playable', playableId]).toString();
+  Future<List<MediaItem>> _contextualItems(
+      List<Playable> playables, String context) async {
+    return Future.wait(playables.map((playable) async {
+      final item = await playable.asMediaItem();
+      return item.copyWith(
+        id: Uri(pathSegments: [...context.split('/'), 'playable', playable.id])
+            .toString(),
+      );
+    }));
+  }
+
+  MediaItem? _shuffleMediaItem(String mediaId) {
+    final match =
+        RegExp(r'^shuffle/(album|playlist)/(.+)$').firstMatch(mediaId);
+    if (match == null) return null;
+    final items = match.group(1) == 'album'
+        ? _albumItems[match.group(2)]
+        : _playlistSongs[match.group(2)];
+    final shuffle =
+        _shuffleItem(match.group(1)!, match.group(2)!, items ?? const []);
+    return shuffle.isEmpty ? null : shuffle.first;
+  }
+
+  MediaItem _playlistMediaItem(Playlist playlist) => MediaItem(
+        id: 'playlist:${playlist.id}',
+        title: playlist.name,
+        artUri: playlist.hasCover &&
+                (Uri.tryParse(playlist.cover!)?.scheme == 'http' ||
+                    Uri.tryParse(playlist.cover!)?.scheme == 'https')
+            ? Uri.tryParse(playlist.cover!)
+            : null,
+        playable: false,
+        extras: {
+          AndroidContentStyle.playableHintKey:
+              AndroidContentStyle.listItemHintValue
+        },
+      );
+
+  List<MediaItem> _shuffleItem(String type, String id, List<MediaItem> items) =>
+      items.isEmpty
+          ? const []
+          : [
+              MediaItem(
+                id: 'shuffle/$type/$id',
+                title: 'Shuffle Play',
+                playable: true,
+                artUri: Uri.parse(
+                    'android.resource://$applicationId/drawable/audio_service_shuffle'),
+              )
+            ];
 
   MediaItem _albumMediaItem(Album album) {
     final artUri = album.cover == null ? null : Uri.tryParse(album.cover!);
@@ -416,6 +563,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       extras: {
         'type': 'album',
         'albumId': album.id.toString(),
+        _groupTitleKey: 'Recently added',
         AndroidContentStyle.playableHintKey:
             AndroidContentStyle.listItemHintValue,
       },
@@ -426,11 +574,19 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   Future<MediaItem?> getMediaItem(String mediaId) async {
     return mediaId == _homeMediaId
         ? _homeMediaItem
-        : _overviewAlbums[mediaId] ??
-            queue.value.firstWhereOrNull((item) => item.id == mediaId) ??
-            _albumItems.values
-                .expand((items) => items)
-                .firstWhereOrNull((item) => item.id == mediaId);
+        : mediaId == _playlistsMediaId
+            ? _playlistsMediaItem
+            : _overviewAlbums[mediaId] ??
+                _playlistItems[mediaId] ??
+                _recentlyPlayedItems[mediaId] ??
+                _playlistSongs.values
+                    .expand((items) => items)
+                    .firstWhereOrNull((item) => item.id == mediaId) ??
+                _shuffleMediaItem(mediaId) ??
+                queue.value.firstWhereOrNull((item) => item.id == mediaId) ??
+                _albumItems.values
+                    .expand((items) => items)
+                    .firstWhereOrNull((item) => item.id == mediaId);
   }
 
   @override
@@ -441,6 +597,31 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     final index = queue.value.indexWhere((item) => item.id == mediaId);
     if (index != -1) {
       await _playAtIndex(index);
+      return;
+    }
+
+    final shuffleMatch =
+        RegExp(r'^shuffle/(album|playlist)/(.+)$').firstMatch(mediaId);
+    if (shuffleMatch != null) {
+      final playables = shuffleMatch.group(1) == 'album'
+          ? _albumPlayables[shuffleMatch.group(2)]
+          : _playlistPlayables[shuffleMatch.group(2)];
+      if (playables != null && playables.isNotEmpty)
+        await replaceQueue(playables, shuffle: true);
+      return;
+    }
+    if (_recentlyPlayedItems.containsKey(mediaId)) {
+      await replaceQueue(_recentlyPlayedPlayables, autoPlay: false);
+      await _playAtIndex(_recentlyPlayedItems.keys.toList().indexOf(mediaId));
+      return;
+    }
+    final playlistEntry = _playlistSongs.entries.firstWhereOrNull(
+        (entry) => entry.value.any((item) => item.id == mediaId));
+    if (playlistEntry != null) {
+      await replaceQueue(_playlistPlayables[playlistEntry.key]!,
+          autoPlay: false);
+      await _playAtIndex(
+          playlistEntry.value.indexWhere((item) => item.id == mediaId));
       return;
     }
 
@@ -776,6 +957,11 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     await stop();
     _queueRestored = false;
     _overviewAlbums.clear();
+    _recentlyPlayedItems.clear();
+    _recentlyPlayedPlayables.clear();
+    _playlistItems.clear();
+    _playlistSongs.clear();
+    _playlistPlayables.clear();
     _albumItems.clear();
     _albumPlayables.clear();
     _clearCurrentMediaItem();

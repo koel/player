@@ -4,6 +4,7 @@ import 'package:app/mixins/stream_subscriber.dart';
 import 'package:app/models/models.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/utils/api_request.dart';
+import 'package:app/utils/preferences.dart' as preferences;
 import 'package:app/values/values.dart';
 import 'package:flutter/foundation.dart';
 
@@ -179,7 +180,12 @@ class PlayableProvider with ChangeNotifier, StreamSubscriber {
 
   Future<List<Playable>> _stateAwareFetch(String url, Object cacheKey) async {
     if (AppState.has(cacheKey)) return AppState.get(cacheKey);
-    return AppState.set(cacheKey, parseFromJson(await get(url)));
+    final account = '${preferences.host}::${preferences.apiToken}';
+    final response = await get(url);
+    if (account != '${preferences.host}::${preferences.apiToken}') return [];
+    final parsed = parseFromJson(response);
+    if (account != '${preferences.host}::${preferences.apiToken}') return [];
+    return AppState.set(cacheKey, parsed);
   }
 
   Future<List<Playable>> fetchRandom({int limit = 500}) async {
