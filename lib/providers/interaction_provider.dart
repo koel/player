@@ -86,10 +86,7 @@ class InteractionProvider with ChangeNotifier, StreamSubscriber {
     final json = await post('interaction/play', data: {'song': playable.id});
 
     // Use the data from the server to make sure we don't miss a play from another device.
-    final interaction = Interaction.fromJson(json);
-    playable
-      ..playCount = interaction.playCount
-      ..liked = interaction.liked;
+    playable.playCount = Interaction.fromJson(json).playCount;
     _downloadProvider.persistMetadataIfNeeded(playable);
   }
 

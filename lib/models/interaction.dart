@@ -1,11 +1,9 @@
 class Interaction {
   String songId;
   int playCount;
-  bool liked;
 
   Interaction({
     required this.songId,
-    required this.liked,
     required this.playCount,
   });
 
@@ -13,7 +11,6 @@ class Interaction {
     return Interaction(
       songId: json['song_id'],
       playCount: json['play_count'],
-      liked: json['liked'] is bool ? json['liked'] : (json['liked'] ?? 0) != 0,
     );
   }
 }
