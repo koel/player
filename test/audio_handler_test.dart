@@ -71,7 +71,7 @@ void main() {
       random: FirstIndexRandom(),
       sourceLoadTimeout: const Duration(milliseconds: 50),
       browseLoadTimeout: const Duration(milliseconds: 50),
-      applicationId: 'phanan.koel.app.debug',
+      applicationId: 'test.koel.sentinel',
     );
 
     client = CapturingClient();
@@ -149,18 +149,12 @@ void main() {
     verify(playableProvider.syncWithVault(any)).called(2);
   });
 
-  test('browses a home grid of latest albums and falls back to its cache',
+  test('browses navigation cards before recent songs and caches the Home',
       () async {
+    final recent = registerSong();
+    when(playableProvider.parseFromJson(any)).thenReturn([recent]);
     client.willReturn(json: {
-      'recently_added_albums': [
-        {
-          'id': 'album-1',
-          'name': 'Latest album',
-          'artist_id': 'artist-1',
-          'artist_name': 'Artist',
-          'cover': 'http://example.com/cover.jpg',
-        },
-      ],
+      'recently_played_songs': [<String, dynamic>{}],
     });
 
     expect(
@@ -179,26 +173,183 @@ void main() {
     );
     expect(
       root.single.extras?[AndroidContentStyle.playableHintKey],
-      AndroidContentStyle.gridItemHintValue,
+      AndroidContentStyle.listItemHintValue,
     );
     expect(await handler.getMediaItem(root.single.id), root.single);
 
-    final albums = await handler.getChildren(root.single.id);
+    final children = await handler.getChildren(root.single.id);
     expect(client.requests.single.url, contains('/overview'));
-    expect(albums, hasLength(2));
-    expect(albums.first.id, 'album:album-1');
-    expect(albums.last.id, 'playlists');
-    expect(albums.first.title, 'Latest album');
-    expect(albums.first.artist, 'Artist');
-    expect(albums.first.playable, isFalse);
-    expect(albums.first.extras?[AndroidContentStyle.playableHintKey],
-        AndroidContentStyle.listItemHintValue);
-    expect(albums.first.artUri.toString(), 'http://example.com/cover.jpg');
-    expect(await handler.getMediaItem(albums.first.id), albums.first);
+    expect(children.map((item) => item.id), [
+      'playlists',
+      'albums',
+      'artists',
+      'recently-played/playable/${recent.id}',
+    ]);
+    expect(children.take(3).map((item) => item.title),
+        ['Playlists', 'Albums', 'Artists']);
+    expect(children.take(3).every((item) => item.playable == false), isTrue);
+    expect(
+      children.take(3).every((item) =>
+          item.extras?[AndroidContentStyle.browsableHintKey] ==
+          AndroidContentStyle.gridItemHintValue),
+      isTrue,
+    );
+    expect(
+      children.take(3).every((item) =>
+          item.extras?['android.media.browse.CONTENT_STYLE_GROUP_TITLE_HINT'] ==
+          'Browse'),
+      isTrue,
+    );
+    expect(
+      children
+          .skip(3)
+          .single
+          .extras?['android.media.browse.CONTENT_STYLE_GROUP_TITLE_HINT'],
+      'Recently played',
+    );
+    expect(
+      children.take(3).map((item) => item.artUri.toString()),
+      [
+        'android.resource://test.koel.sentinel/drawable/android_auto_playlists',
+        'android.resource://test.koel.sentinel/drawable/android_auto_albums',
+        'android.resource://test.koel.sentinel/drawable/android_auto_artists',
+      ],
+    );
+    for (final item in children) {
+      expect(await handler.getMediaItem(item.id), item);
+    }
     expect(await handler.getChildren('unknown'), isEmpty);
 
     client.willReturn(status: 500, json: {});
-    expect(await handler.getChildren(root.single.id), albums);
+    expect(await handler.getChildren(root.single.id), children);
+  });
+
+  test('shares an overlapping Home load across browse subscriptions', () async {
+    final recentSong = registerSong();
+    when(playableProvider.parseFromJson(any)).thenReturn([recentSong]);
+    final responseGate = Completer<void>();
+    client.willReturn(
+      waitFor: responseGate.future,
+      json: {
+        'recently_played_songs': [
+          {'id': recentSong.id}
+        ],
+      },
+    );
+
+    final firstRequest = handler.getChildren('home');
+    await Future<void>.delayed(Duration.zero);
+    final secondRequest = handler.getChildren('home');
+    await Future<void>.delayed(Duration.zero);
+    responseGate.complete();
+
+    final results = await Future.wait([firstRequest, secondRequest]);
+    expect(client.requests, hasLength(1));
+    expect(results[0], results[1]);
+    expect(results[0].last.id, 'recently-played/playable/${recentSong.id}');
+    expect(await handler.getMediaItem(results[0].last.id), results[0].last);
+  });
+
+  test('browses and caches album and artist catalogs', () async {
+    client.willReturn(json: {
+      'data': [
+        {
+          'id': 'album-1',
+          'name': 'Album One',
+          'artist_id': 'artist-1',
+          'artist_name': 'Artist One',
+          'cover': 'https://example.com/album.jpg',
+        },
+        {
+          'id': 'album-2',
+          'name': 'Album Two',
+          'artist_id': 'artist-2',
+          'artist_name': 'Artist Two',
+          'cover': 'file:///private/cover.jpg',
+        },
+      ],
+    });
+    final albums = await handler.getChildren('albums');
+    expect(client.requests.last.url,
+        contains('/albums?page=1&sort=name&order=asc'));
+    expect(albums.map((item) => item.id), ['album:album-1', 'album:album-2']);
+    expect(albums.map((item) => item.title), ['Album One', 'Album Two']);
+    expect(albums.map((item) => item.artist), ['Artist One', 'Artist Two']);
+    expect(albums.first.artUri.toString(), 'https://example.com/album.jpg');
+    expect(albums.last.artUri, isNull);
+    expect(
+        albums.every((item) =>
+            item.extras?[AndroidContentStyle.playableHintKey] ==
+            AndroidContentStyle.listItemHintValue),
+        isTrue);
+    expect(await handler.getMediaItem(albums.first.id), albums.first);
+    final stalledCatalog = Completer<void>();
+    client.willReturn(waitFor: stalledCatalog.future, json: {'data': []});
+    expect(await handler.getChildren('albums'), albums);
+
+    client.willReturn(json: {
+      'data': [
+        {
+          'id': 'artist-1',
+          'name': 'Artist One',
+          'image': 'https://example.com/artist.jpg',
+        },
+        {
+          'id': 'artist-2',
+          'name': 'Artist Two',
+          'image': 'content://private/artist.jpg',
+        },
+      ],
+    });
+    final artists = await handler.getChildren('artists');
+    expect(client.requests.last.url,
+        contains('/artists?page=1&sort=name&order=asc'));
+    expect(
+        artists.map((item) => item.id), ['artist:artist-1', 'artist:artist-2']);
+    expect(artists.map((item) => item.title), ['Artist One', 'Artist Two']);
+    expect(artists.first.artUri.toString(), 'https://example.com/artist.jpg');
+    expect(artists.last.artUri, isNull);
+    expect(
+        artists.every((item) =>
+            item.extras?[AndroidContentStyle.playableHintKey] ==
+            AndroidContentStyle.listItemHintValue),
+        isTrue);
+    expect(await handler.getMediaItem(artists.first.id), artists.first);
+    final stalledArtists = Completer<void>();
+    client.willReturn(waitFor: stalledArtists.future, json: {'data': []});
+    expect(await handler.getChildren('artists'), artists);
+  });
+
+  test('shares initial collection loads across browse subscriptions', () async {
+    final songs = List.generate(2, (_) => registerSong());
+    final albumGate = Completer<List<Playable>>();
+    when(playableProvider.fetchForAlbum('album-1'))
+        .thenAnswer((_) => albumGate.future);
+
+    final firstAlbumRequest = handler.getChildren('album:album-1');
+    await Future<void>.delayed(Duration.zero);
+    final secondAlbumRequest = handler.getChildren('album:album-1');
+    albumGate.complete(songs);
+
+    final albumResults =
+        await Future.wait([firstAlbumRequest, secondAlbumRequest]);
+    expect(albumResults[0], albumResults[1]);
+    expect(albumResults[0], hasLength(3));
+    verify(playableProvider.fetchForAlbum('album-1')).called(1);
+
+    final artistGate = Completer<List<Playable>>();
+    when(playableProvider.fetchForArtist('artist-1'))
+        .thenAnswer((_) => artistGate.future);
+    final firstArtistRequest = handler.getChildren('artist:artist-1');
+    await Future<void>.delayed(Duration.zero);
+    final secondArtistRequest = handler.getChildren('artist:artist-1');
+    artistGate.complete(songs);
+
+    final artistResults =
+        await Future.wait([firstArtistRequest, secondArtistRequest]);
+    expect(artistResults[0], artistResults[1]);
+    expect(artistResults[0], hasLength(3));
+    verify(playableProvider.fetchForArtist('artist-1')).called(1);
   });
 
   List<String> queueIds(Iterable<MediaItem> items) =>
@@ -237,17 +388,51 @@ void main() {
     verify(player.setUrl(songs[1].sourceUrl)).called(1);
   });
 
+  test('plays an artist selection in its song context', () async {
+    final songs = List.generate(3, (_) => registerSong());
+    final unrelatedSong = registerSong();
+    when(playableProvider.fetchForArtist('artist-1'))
+        .thenAnswer((_) async => songs);
+    await handler.replaceQueue(
+      [songs[1], unrelatedSong],
+      autoPlay: false,
+    );
+
+    final children = await handler.getChildren('artist:artist-1');
+
+    expect(children.first.id, 'shuffle/artist/artist-1');
+    expect(children.first.title, 'Shuffle Play');
+    expect(
+      children.skip(1).map((item) => item.id),
+      songs.map((song) => 'artist/artist-1/playable/${song.id}'),
+    );
+    expect(await handler.getMediaItem(children.first.id), children.first);
+    expect(await handler.getMediaItem(children[2].id), children[2]);
+    final stalledDetails = Completer<List<Playable>>();
+    when(playableProvider.fetchForArtist('artist-1'))
+        .thenAnswer((_) => stalledDetails.future);
+    expect(await handler.getChildren('artist:artist-1'), children);
+
+    await handler.playFromMediaId(children[2].id);
+    expect(handler.queue.value.map((item) => item.id),
+        songs.map((song) => song.id));
+    expect(handler.mediaItem.value?.id, songs[1].id);
+    verify(player.setUrl(songs[1].sourceUrl)).called(1);
+    verify(player.play()).called(1);
+  });
+
   test('bounds slow Android Auto browse requests', () async {
     final root = await handler.getChildren(AudioService.browsableRootId);
     final pendingOverview = Completer<void>();
     client.willReturn(
       waitFor: pendingOverview.future,
-      json: {'recently_added_albums': []},
+      json: {'recently_played_songs': []},
     );
 
-    expect(await handler.getChildren(root.single.id), [
-      const MediaItem(id: 'playlists', title: 'Playlists', playable: false),
-    ]);
+    expect(
+      (await handler.getChildren(root.single.id)).map((item) => item.id),
+      ['playlists', 'albums', 'artists'],
+    );
 
     final pendingAlbum = Completer<List<Playable>>();
     when(playableProvider.fetchForAlbum('slow'))
@@ -257,8 +442,11 @@ void main() {
 
   test('clears account-specific browser and playback state on logout',
       () async {
+    final root = await handler.getChildren(AudioService.browsableRootId);
+    client.willReturn(json: {});
+    await handler.getChildren(root.single.id);
     client.willReturn(json: {
-      'recently_added_albums': [
+      'data': [
         {
           'id': 'album-1',
           'name': 'Private album',
@@ -268,38 +456,59 @@ void main() {
         },
       ],
     });
+    final albums = await handler.getChildren('albums');
     final song = registerSong();
     when(playableProvider.fetchForAlbum('album-1'))
         .thenAnswer((_) async => [song]);
-
-    final root = await handler.getChildren(AudioService.browsableRootId);
-    final albums = await handler.getChildren(root.single.id);
     final songs = await handler.getChildren(albums.first.id);
     await handler.playFromMediaId(songs.last.id);
     await pumpEventQueue();
 
+    client.willReturn(json: {
+      'data': [
+        {
+          'id': 'artist-1',
+          'name': 'Private artist',
+          'image': null,
+        },
+      ],
+    });
+    final artists = await handler.getChildren('artists');
+    final artistSong = registerSong();
+    when(playableProvider.fetchForArtist('artist-1'))
+        .thenAnswer((_) async => [artistSong]);
+    final artistSongs = await handler.getChildren(artists.first.id);
+
     await handler.cleanUpUponLogout();
 
-    client.willReturn(status: 500, json: {});
-    when(playableProvider.fetchForAlbum('album-1'))
-        .thenThrow(Exception('offline'));
-    expect(await handler.getChildren(root.single.id), [
-      const MediaItem(id: 'playlists', title: 'Playlists', playable: false),
-    ]);
+    expect(await handler.getChildren(root.single.id), isEmpty);
+    expect(await handler.getChildren('albums'), isEmpty);
+    expect(await handler.getChildren('artists'), isEmpty);
     expect(await handler.getChildren(albums.first.id), isEmpty);
+    expect(await handler.getChildren(artists.first.id), isEmpty);
     expect(await handler.getMediaItem(albums.first.id), isNull);
+    expect(await handler.getMediaItem(artists.first.id), isNull);
     expect(await handler.getMediaItem(songs.last.id), isNull);
+    expect(await handler.getMediaItem(artistSongs.last.id), isNull);
     expect(handler.queue.value, isEmpty);
     expect(handler.mediaItem.value, isNull);
   });
 
   test('does not repopulate browser caches after logout', () async {
-    final root = await handler.getChildren(AudioService.browsableRootId);
     final overviewGate = Completer<void>();
     client.willReturn(
+      status: 500,
       waitFor: overviewGate.future,
+      json: {},
+    );
+    final overviewRequest = handler.getChildren('home');
+    await Future<void>.delayed(Duration.zero);
+
+    final albumCatalogGate = Completer<void>();
+    client.willReturn(
+      waitFor: albumCatalogGate.future,
       json: {
-        'recently_added_albums': [
+        'data': [
           {
             'id': 'album-1',
             'name': 'Previous account album',
@@ -310,30 +519,94 @@ void main() {
         ],
       },
     );
-
-    final overviewRequest = handler.getChildren(root.single.id);
+    final albumCatalogRequest = handler.getChildren('albums');
     await Future<void>.delayed(Duration.zero);
-    await handler.cleanUpUponLogout();
-    overviewGate.complete();
-    expect(await overviewRequest, isEmpty);
 
-    final song = registerSong();
+    final artistCatalogGate = Completer<void>();
+    client.willReturn(
+      waitFor: artistCatalogGate.future,
+      json: {
+        'data': [
+          {
+            'id': 'artist-1',
+            'name': 'Previous account artist',
+            'image': null,
+          },
+        ],
+      },
+    );
+    final artistCatalogRequest = handler.getChildren('artists');
+    await Future<void>.delayed(Duration.zero);
+
+    final albumSong = registerSong();
     final pendingAlbum = Completer<List<Playable>>();
     when(playableProvider.fetchForAlbum('album-1'))
         .thenAnswer((_) => pendingAlbum.future);
     final albumRequest = handler.getChildren('album:album-1');
+    final artistSong = registerSong();
+    final pendingArtist = Completer<List<Playable>>();
+    when(playableProvider.fetchForArtist('artist-1'))
+        .thenAnswer((_) => pendingArtist.future);
+    final artistRequest = handler.getChildren('artist:artist-1');
     await Future<void>.delayed(Duration.zero);
-    await handler.cleanUpUponLogout();
-    pendingAlbum.complete([song]);
-    expect(await albumRequest, isEmpty);
 
-    client.willReturn(status: 500, json: {});
-    when(playableProvider.fetchForAlbum('album-1'))
-        .thenThrow(Exception('offline'));
-    expect(await handler.getChildren(root.single.id), [
-      const MediaItem(id: 'playlists', title: 'Playlists', playable: false),
-    ]);
-    expect(await handler.getChildren('album:album-1'), isEmpty);
+    await handler.cleanUpUponLogout();
+    overviewGate.complete();
+    albumCatalogGate.complete();
+    artistCatalogGate.complete();
+    pendingAlbum.complete([albumSong]);
+    pendingArtist.complete([artistSong]);
+
+    expect(await overviewRequest, isEmpty);
+    expect(await albumCatalogRequest, isEmpty);
+    expect(await artistCatalogRequest, isEmpty);
+    expect(await albumRequest, isEmpty);
+    expect(await artistRequest, isEmpty);
+    expect(await handler.getMediaItem('album:album-1'), isNull);
+    expect(await handler.getMediaItem('artist:artist-1'), isNull);
+    expect(await handler.getChildren('home'), isEmpty);
+    expect(await handler.getChildren('albums'), isEmpty);
+    expect(await handler.getChildren('artists'), isEmpty);
+  });
+
+  test('blocks browsing while logout cleanup is in progress', () async {
+    client.willReturn(json: {});
+    final home = await handler.getChildren('home');
+    expect(home, isNotEmpty);
+    final stopGate = Completer<void>();
+    when(player.stop()).thenAnswer((_) => stopGate.future);
+
+    final cleanup = handler.cleanUpUponLogout();
+    await Future<void>.delayed(Duration.zero);
+
+    expect(await handler.getChildren(AudioService.browsableRootId), isEmpty);
+    expect(await handler.getMediaItem('home'), isNull);
+    stopGate.complete();
+    await cleanup;
+
+    await handler.restoreQueue();
+    expect(await handler.getChildren(AudioService.browsableRootId),
+        [isA<MediaItem>().having((item) => item.id, 'id', 'home')]);
+  });
+
+  test('does not resume an Android Auto selection after logout', () async {
+    final songs = List.generate(2, (_) => registerSong());
+    when(playableProvider.fetchForArtist('artist-1'))
+        .thenAnswer((_) async => songs);
+    final children = await handler.getChildren('artist:artist-1');
+    final sourceGate = Completer<Duration?>();
+    when(player.setUrl(songs.first.sourceUrl))
+        .thenAnswer((_) => sourceGate.future);
+
+    final playback = handler.playFromMediaId(children[1].id);
+    await untilCalled(player.setUrl(songs.first.sourceUrl));
+    await handler.cleanUpUponLogout();
+    sourceGate.complete(Duration.zero);
+    await playback;
+
+    expect(handler.queue.value, isEmpty);
+    expect(handler.mediaItem.value, isNull);
+    verifyNever(player.play());
   });
 
   test('supports native queue selection and reversible shuffle', () async {
@@ -682,31 +955,36 @@ void main() {
     verify(player.stop()).called(1);
   });
 
-  test('regression Home caps recent songs and exposes grouped navigation',
-      () async {
+  test('regression Home caps recent songs below grouped navigation', () async {
     final recent = List.generate(13, (_) => registerSong());
     when(playableProvider.parseFromJson(any)).thenReturn(recent);
     client.willReturn(
         json: {'recently_played_songs': List.filled(13, <String, dynamic>{})});
     final children = await handler.getChildren('home');
-    expect(children, hasLength(13));
-    expect(children.take(12).map((item) => item.id),
+    final navigation = children.take(3);
+    final recentItems = children.skip(3);
+    expect(children, hasLength(15));
+    expect(
+        navigation.map((item) => item.id), ['playlists', 'albums', 'artists']);
+    expect(recentItems.map((item) => item.id),
         recent.take(12).map((song) => 'recently-played/playable/${song.id}'));
     expect(
-        children.take(12).every((item) =>
+        navigation.every((item) =>
+            item.extras?[
+                'android.media.browse.CONTENT_STYLE_GROUP_TITLE_HINT'] ==
+            'Browse'),
+        isTrue);
+    expect(
+        recentItems.every((item) =>
             item.extras?[
                 'android.media.browse.CONTENT_STYLE_GROUP_TITLE_HINT'] ==
             'Recently played'),
         isTrue);
-    expect(children.last.id, 'playlists');
-    expect(
-        children.last
-            .extras?['android.media.browse.CONTENT_STYLE_GROUP_TITLE_HINT'],
-        'Your library');
-    expect(await handler.getMediaItem('playlists'), children.last);
-    expect(await handler.getMediaItem(children[5].id), children[5]);
+    expect(await handler.getMediaItem('playlists'), children.first);
+    final selected = children[8];
+    expect(await handler.getMediaItem(selected.id), selected);
     await handler.replaceQueue([registerSong()], autoPlay: false);
-    await handler.playFromMediaId(children[5].id);
+    await handler.playFromMediaId(selected.id);
     expect(handler.queue.value.map((item) => item.id),
         recent.take(12).map((song) => song.id));
     expect(handler.mediaItem.value?.id, recent[5].id);
@@ -808,7 +1086,7 @@ void main() {
     expect(children.first.id, 'shuffle/album/end-to-end');
     expect(children.first.playable, isTrue);
     expect(children.first.artUri.toString(),
-        'android.resource://phanan.koel.app.debug/drawable/audio_service_shuffle');
+        'android.resource://test.koel.sentinel/drawable/audio_service_shuffle');
     await handler.playFromMediaId(children.first.id);
     expect(
         handler.playbackState.value.shuffleMode, AudioServiceShuffleMode.all);
@@ -824,6 +1102,27 @@ void main() {
     expect(await handler.getChildren('album:empty'), isEmpty);
   });
 
+  test('shuffle plays an artist end to end', () async {
+    final songs = [registerSong(), registerSong()];
+    when(playableProvider.fetchForArtist('end-to-end'))
+        .thenAnswer((_) async => songs);
+    final children = await handler.getChildren('artist:end-to-end');
+    expect(children.first.id, 'shuffle/artist/end-to-end');
+    expect(children.first.playable, isTrue);
+    expect(children.first.artUri.toString(),
+        'android.resource://test.koel.sentinel/drawable/audio_service_shuffle');
+    expect(await handler.getMediaItem(children.first.id), children.first);
+    await handler.playFromMediaId(children.first.id);
+    expect(
+        handler.playbackState.value.shuffleMode, AudioServiceShuffleMode.all);
+    expect(queueIds(handler.queue.value),
+        unorderedEquals(songs.map((song) => song.id)));
+    verify(player.play()).called(1);
+    when(playableProvider.fetchForArtist('empty'))
+        .thenAnswer((_) async => const []);
+    expect(await handler.getChildren('artist:empty'), isEmpty);
+  });
+
   test(
       'regression playlist shuffle play is reversible and empty collections omit it',
       () async {
@@ -834,7 +1133,7 @@ void main() {
     expect(details.first.id, 'shuffle/playlist/p1');
     expect(details.first.playable, isTrue);
     expect(details.first.artUri.toString(),
-        'android.resource://phanan.koel.app.debug/drawable/audio_service_shuffle');
+        'android.resource://test.koel.sentinel/drawable/audio_service_shuffle');
     await handler.playFromMediaId(details.first.id);
     expect(
         handler.playbackState.value.shuffleMode, AudioServiceShuffleMode.all);

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:app/app_state.dart';
 import 'package:app/enums.dart';
 import 'package:app/mixins/stream_subscriber.dart';
@@ -11,11 +13,14 @@ import 'package:flutter/foundation.dart';
 class PlayableProvider with ChangeNotifier, StreamSubscriber {
   var playables = <Playable>[];
   final _vault = <String, Playable>{};
+  final _stateFetchRequestIds = <String, int>{};
+  var _nextStateFetchRequestId = 0;
 
   PlayableProvider() {
     subscribe(AuthProvider.userLoggedOutStream.listen((_) {
       playables.clear();
       _vault.clear();
+      _stateFetchRequestIds.clear();
       notifyListeners();
     }));
 
@@ -181,10 +186,15 @@ class PlayableProvider with ChangeNotifier, StreamSubscriber {
   Future<List<Playable>> _stateAwareFetch(String url, Object cacheKey) async {
     if (AppState.has(cacheKey)) return AppState.get(cacheKey);
     final account = '${preferences.host}::${preferences.apiToken}';
+    final requestKey = jsonEncode(cacheKey);
+    final requestId = ++_nextStateFetchRequestId;
+    _stateFetchRequestIds[requestKey] = requestId;
     final response = await get(url);
-    if (account != '${preferences.host}::${preferences.apiToken}') return [];
+    if (account != '${preferences.host}::${preferences.apiToken}' ||
+        _stateFetchRequestIds[requestKey] != requestId) return [];
     final parsed = parseFromJson(response);
-    if (account != '${preferences.host}::${preferences.apiToken}') return [];
+    if (account != '${preferences.host}::${preferences.apiToken}' ||
+        _stateFetchRequestIds[requestKey] != requestId) return [];
     return AppState.set(cacheKey, parsed);
   }
 

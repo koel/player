@@ -51,6 +51,32 @@ void main() {
     expect(provider.byId('old-song'), isNull);
   });
 
+  test('an older overlapping response cannot replace the latest cache',
+      () async {
+    final oldGate = Completer<void>();
+    final http = CapturingClient()
+      ..willReturn(
+        json: [_episodeJson('old-song')],
+        waitFor: oldGate.future,
+      )
+      ..install();
+    final provider = PlayableProvider();
+    final oldRequest = provider.fetchForPlaylist('playlist-1');
+    await Future<void>.delayed(Duration.zero);
+
+    http.willReturn(json: [_episodeJson('new-song')]);
+    final latest = await provider.fetchForPlaylist('playlist-1');
+    oldGate.complete();
+
+    expect(await oldRequest, isEmpty);
+    expect(latest.single.id, 'new-song');
+    expect(
+        (await provider.fetchForPlaylist('playlist-1')).single.id, 'new-song');
+    expect(http.requests, hasLength(2));
+    expect(provider.byId('old-song'), isNull);
+    expect(provider.byId('new-song'), isNotNull);
+  });
+
   group('PlayableProvider.fetchForPodcast', () {
     test(
       'GETs /podcasts/<id>/episodes and caches the result on first call',
