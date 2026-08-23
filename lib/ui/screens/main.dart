@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:app/app_state.dart';
@@ -65,11 +66,7 @@ class _MainScreenState extends State<MainScreen> with StreamSubscriber {
       (i) => RouteStateObserver(tabIndex: i),
     );
 
-    audioHandler.init(
-      playableProvider: context.read<PlayableProvider>(),
-      downloadProvider: context.read<DownloadProvider>(),
-    );
-
+    unawaited(audioHandler.restoreQueue());
     context.read<DownloadSyncProvider>().scheduleSync();
 
     _setUpQuickActions();

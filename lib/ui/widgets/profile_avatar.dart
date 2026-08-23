@@ -1,4 +1,3 @@
-import 'package:app/main.dart';
 import 'package:app/providers/providers.dart';
 import 'package:app/ui/screens/screens.dart';
 import 'package:app/ui/widgets/widgets.dart';
@@ -31,7 +30,6 @@ class ProfileAvatar extends StatelessWidget {
               isDestructiveAction: true,
               onPressed: () async {
                 await context.read<AuthProvider>().logout();
-                await audioHandler.cleanUpUponLogout();
                 RouteState.clear();
                 Navigator.of(
                   context,

@@ -6,6 +6,13 @@ import 'package:app/values/playable_sort_config.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('does not expose its authenticated source URL', () async {
+    final mediaItem = await Song.fake().asMediaItem();
+
+    expect(mediaItem.extras?.containsKey('sourceUrl'), isFalse);
+    expect(mediaItem.extras?['type'], 'song');
+  });
+
   group('Song.fromJson', () {
     test('parses all fields from JSON', () {
       final json = {

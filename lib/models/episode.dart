@@ -44,7 +44,6 @@ class Episode extends Playable<Episode> {
       artUri: Uri.parse(imageUrl),
       genre: 'Podcast',
       extras: {
-        'sourceUrl': sourceUrl,
         'type': 'episode',
       },
     );

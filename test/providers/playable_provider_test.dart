@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:app/app_state.dart';
+
 import 'package:app/providers/playable_provider.dart';
+import 'package:app/utils/preferences.dart' as preferences;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/api_test_setup.dart';
@@ -25,6 +29,53 @@ void main() {
     AppState.clear();
   });
   tearDown(tearDownApiTest);
+
+  test('ignores a playlist response from a previous account', () async {
+    final gate = Completer<void>();
+    CapturingClient()
+      ..willReturn(
+        json: [_episodeJson('old-song')],
+        waitFor: gate.future,
+      )
+      ..install();
+    final provider = PlayableProvider();
+    final request = provider.fetchForPlaylist('playlist-1');
+
+    preferences.host = 'https://other.koel.test';
+    preferences.apiToken = 'new-token';
+    gate.complete();
+    final result = await request;
+
+    expect(result, isEmpty);
+    expect(AppState.has(['playlist.playables', 'playlist-1']), isFalse);
+    expect(provider.byId('old-song'), isNull);
+  });
+
+  test('an older overlapping response cannot replace the latest cache',
+      () async {
+    final oldGate = Completer<void>();
+    final http = CapturingClient()
+      ..willReturn(
+        json: [_episodeJson('old-song')],
+        waitFor: oldGate.future,
+      )
+      ..install();
+    final provider = PlayableProvider();
+    final oldRequest = provider.fetchForPlaylist('playlist-1');
+    await Future<void>.delayed(Duration.zero);
+
+    http.willReturn(json: [_episodeJson('new-song')]);
+    final latest = await provider.fetchForPlaylist('playlist-1');
+    oldGate.complete();
+
+    expect(await oldRequest, isEmpty);
+    expect(latest.single.id, 'new-song');
+    expect(
+        (await provider.fetchForPlaylist('playlist-1')).single.id, 'new-song');
+    expect(http.requests, hasLength(2));
+    expect(provider.byId('old-song'), isNull);
+    expect(provider.byId('new-song'), isNotNull);
+  });
 
   group('PlayableProvider.fetchForPodcast', () {
     test(

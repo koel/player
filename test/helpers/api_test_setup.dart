@@ -51,6 +51,7 @@ class CapturingClient {
   final List<CapturedRequest> requests = [];
   int _status = 200;
   String _body = '{}';
+  Future<void>? _responseGate;
 
   late final MockClient client = MockClient((request) async {
     final raw = request.body;
@@ -67,13 +68,22 @@ class CapturingClient {
       },
       rawBody: raw,
     ));
-    return Http.Response(_body, _status);
+    final responseBody = _body;
+    final responseStatus = _status;
+    final responseGate = _responseGate;
+    if (responseGate != null) await responseGate;
+    return Http.Response(responseBody, responseStatus);
   });
 
   /// Sets the response the next (and subsequent) requests will see.
-  void willReturn({int status = 200, Object? json}) {
+  void willReturn({
+    int status = 200,
+    Object? json,
+    Future<void>? waitFor,
+  }) {
     _status = status;
     _body = json == null ? '' : jsonEncode(json);
+    _responseGate = waitFor;
   }
 
   /// Sets a status with a literal text body (use for non-JSON / 4xx /
@@ -81,6 +91,7 @@ class CapturingClient {
   void willReturnRaw({int status = 200, String body = ''}) {
     _status = status;
     _body = body;
+    _responseGate = null;
   }
 
   /// Installs this client as the api_request module's active client.
