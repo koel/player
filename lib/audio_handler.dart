@@ -62,6 +62,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   var _browseGeneration = 0;
   var _browsingEnabled = true;
   var _nextBrowseRequestId = 0;
+  var _playbackRequestId = 0;
   var _errorCount = 0;
   var _initialized = false;
   var _queueRestored = false;
@@ -338,13 +339,18 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
         );
 
         if (queuedMediaItem != null) {
+          final playbackRequestId = _beginPlaybackRequest();
           try {
-            await _setPlayerSource(queuedMediaItem).timeout(sourceLoadTimeout);
-            if (!_isBrowseGenerationActive(browseGeneration)) return;
+            await _setPlayerSource(queuedMediaItem, playbackRequestId)
+                .timeout(sourceLoadTimeout);
+            if (!_isCurrentPlaybackRequest(playbackRequestId, browseGeneration))
+              return;
             await player.seek(Duration(seconds: state.playbackPosition));
-            if (!_isBrowseGenerationActive(browseGeneration)) return;
+            if (!_isCurrentPlaybackRequest(playbackRequestId, browseGeneration))
+              return;
           } catch (_) {
-            if (!_isBrowseGenerationActive(browseGeneration)) return;
+            if (!_isCurrentPlaybackRequest(playbackRequestId, browseGeneration))
+              return;
             await _abandonSource();
           }
         }
@@ -389,7 +395,19 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     AppState.set(['playbackPosition', playableId], position);
   }
 
-  _setPlayerSource(MediaItem mediaItem) async {
+  int _beginPlaybackRequest() => ++_playbackRequestId;
+
+  bool _isCurrentPlaybackRequest(
+    int playbackRequestId, [
+    int? browseGeneration,
+  ]) =>
+      playbackRequestId == _playbackRequestId &&
+      _isBrowseGenerationActive(browseGeneration);
+
+  _setPlayerSource(
+    MediaItem mediaItem,
+    int playbackRequestId,
+  ) async {
     _playbackFailed = false;
     _switchingSource = true;
     _currentMediaItem = mediaItem;
@@ -405,10 +423,13 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       } else {
         await _player.setFilePath(download.path);
       }
+      if (!_isCurrentPlaybackRequest(playbackRequestId)) return;
       _switchingSource = false;
       _emitPlaybackState();
     } catch (error) {
-      _switchingSource = false;
+      if (_isCurrentPlaybackRequest(playbackRequestId)) {
+        _switchingSource = false;
+      }
       rethrow;
     }
   }
@@ -423,6 +444,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
   }
 
   void _clearCurrentMediaItem() {
+    _playbackRequestId++;
     _errorCount = 0;
     _switchingSource = false;
     _playbackFailed = false;
@@ -1047,18 +1069,23 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     if (!_isBrowseGenerationActive(browseGeneration)) return;
     if (index < 0 || queue.value.length <= index) return;
 
+    final playbackRequestId = _beginPlaybackRequest();
     final mediaItem = queue.value[index];
     final position = getPlaybackPositionFromState(mediaItem.id) ?? 0;
 
     try {
-      await _setPlayerSource(mediaItem).timeout(sourceLoadTimeout);
-      if (!_isBrowseGenerationActive(browseGeneration)) return;
+      await _setPlayerSource(mediaItem, playbackRequestId)
+          .timeout(sourceLoadTimeout);
+      if (!_isCurrentPlaybackRequest(playbackRequestId, browseGeneration))
+        return;
       _errorCount = 0;
       exitRadioMode();
       await _player.seek(Duration(seconds: position.toInt()));
-      if (!_isBrowseGenerationActive(browseGeneration)) return;
+      if (!_isCurrentPlaybackRequest(playbackRequestId, browseGeneration))
+        return;
       await play();
-      if (!_isBrowseGenerationActive(browseGeneration)) return;
+      if (!_isCurrentPlaybackRequest(playbackRequestId, browseGeneration))
+        return;
       _emitPlaybackState();
 
       put('queue/playback-status', data: {
@@ -1066,9 +1093,12 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
         'position': _player.position.inSeconds,
       });
     } catch (error) {
-      if (!_isBrowseGenerationActive(browseGeneration)) return;
+      if (!_isCurrentPlaybackRequest(playbackRequestId, browseGeneration))
+        return;
       _errorCount++;
       await _abandonSource();
+      if (!_isCurrentPlaybackRequest(playbackRequestId, browseGeneration))
+        return;
 
       if (_shouldSkipPast(error)) await skipToNext();
     }

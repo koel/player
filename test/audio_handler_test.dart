@@ -884,6 +884,27 @@ void main() {
     expect(handler.playbackState.value.playing, isTrue);
   });
 
+  test('does not let a superseded load stop the newer selection', () async {
+    final first = registerSong();
+    final second = registerSong();
+    final firstSource = Completer<Duration?>();
+
+    when(player.setUrl(first.sourceUrl)).thenAnswer((_) => firstSource.future);
+    await handler.replaceQueue([first, second], autoPlay: false);
+    clearInteractions(player);
+
+    final firstPlayback = handler.skipToQueueItem(0);
+    await untilCalled(player.setUrl(first.sourceUrl));
+    await handler.skipToQueueItem(1);
+
+    firstSource.completeError(Exception('superseded'));
+    await firstPlayback;
+
+    expect(handler.mediaItem.value?.id, second.id);
+    verify(player.play()).called(1);
+    verifyNever(player.stop());
+  });
+
   test('does not expose completed during automatic advance', () async {
     final first = registerSong();
     final second = registerSong();
