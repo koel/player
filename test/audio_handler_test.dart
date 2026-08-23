@@ -320,6 +320,93 @@ void main() {
     expect(await handler.getChildren('artists'), artists);
   });
 
+  test('loads every album and artist catalog page', () async {
+    final albumFirstPage = Completer<void>();
+    client.willReturn(
+      waitFor: albumFirstPage.future,
+      json: {
+        'data': [
+          {
+            'id': 'album-1',
+            'name': 'Album One',
+            'artist_id': 'artist-1',
+            'artist_name': 'Artist One',
+            'cover': null,
+          },
+        ],
+        'links': {'next': 'https://koel.test/api/albums?page=2'},
+      },
+    );
+    final albumRequest = handler.getChildren('albums');
+    await Future<void>.delayed(Duration.zero);
+
+    client.willReturn(
+      json: {
+        'data': [
+          {
+            'id': 'album-2',
+            'name': 'Album Two',
+            'artist_id': 'artist-2',
+            'artist_name': 'Artist Two',
+            'cover': null,
+          },
+        ],
+        'links': {'next': null},
+      },
+    );
+    albumFirstPage.complete();
+
+    final albums = await albumRequest;
+    expect(albums.map((item) => item.id), ['album:album-1', 'album:album-2']);
+    expect(client.requests.map((request) => request.url), [
+      contains('/albums?page=1&sort=name&order=asc'),
+      contains('/albums?page=2&sort=name&order=asc'),
+    ]);
+
+    final artistFirstPage = Completer<void>();
+    client.willReturn(
+      waitFor: artistFirstPage.future,
+      json: {
+        'data': [
+          {
+            'id': 'artist-1',
+            'name': 'Artist One',
+            'image': null,
+          },
+        ],
+        'links': {'next': 'https://koel.test/api/artists?page=2'},
+      },
+    );
+    final artistRequest = handler.getChildren('artists');
+    await Future<void>.delayed(Duration.zero);
+
+    client.willReturn(
+      json: {
+        'data': [
+          {
+            'id': 'artist-2',
+            'name': 'Artist Two',
+            'image': null,
+          },
+        ],
+        'links': {'next': null},
+      },
+    );
+    artistFirstPage.complete();
+
+    final artists = await artistRequest;
+    expect(
+      artists.map((item) => item.id),
+      ['artist:artist-1', 'artist:artist-2'],
+    );
+    expect(client.requests.map((request) => request.url), [
+      contains('/albums?page=1&sort=name&order=asc'),
+      contains('/albums?page=2&sort=name&order=asc'),
+      contains('/artists?page=1&sort=name&order=asc'),
+      contains('/artists?page=2&sort=name&order=asc'),
+    ]);
+  });
+
   test('shares initial collection loads across browse subscriptions', () async {
     final songs = List.generate(2, (_) => registerSong());
     final albumGate = Completer<List<Playable>>();
@@ -587,6 +674,34 @@ void main() {
     await handler.restoreQueue();
     expect(await handler.getChildren(AudioService.browsableRootId),
         [isA<MediaItem>().having((item) => item.id, 'id', 'home')]);
+  });
+
+  test('rejects stale playback commands while logout cleanup is in progress',
+      () async {
+    final songs = List.generate(2, (_) => registerSong());
+    await handler.replaceQueue(songs, autoPlay: false);
+    await handler.skipToQueueItem(1);
+    clearInteractions(player);
+
+    final stopGate = Completer<void>();
+    when(player.stop()).thenAnswer((_) => stopGate.future);
+    final cleanup = handler.cleanUpUponLogout();
+    await Future<void>.delayed(Duration.zero);
+
+    expect(handler.queue.value, isNotEmpty);
+    when(player.position).thenReturn(const Duration(seconds: 10));
+    await handler.skipToQueueItem(0);
+    await handler.skipToNext();
+    await handler.skipToPrevious();
+    await handler.play();
+    await handler.seek(const Duration(seconds: 10));
+
+    verifyNever(player.setUrl(any));
+    verifyNever(player.play());
+    verifyNever(player.seek(any));
+
+    stopGate.complete();
+    await cleanup;
   });
 
   test('does not resume an Android Auto selection after logout', () async {

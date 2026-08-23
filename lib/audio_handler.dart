@@ -436,8 +436,9 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     return requestId;
   }
 
-  bool _isBrowseGenerationActive(int browseGeneration) =>
-      _browsingEnabled && browseGeneration == _browseGeneration;
+  bool _isBrowseGenerationActive([int? browseGeneration]) =>
+      _browsingEnabled &&
+      (browseGeneration == null || browseGeneration == _browseGeneration);
 
   bool _isCurrentBrowseRequest(
     String parentMediaId,
@@ -484,6 +485,40 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     });
     _inFlightBrowseRequests[parentMediaId] = request;
     return request;
+  }
+
+  Future<List<dynamic>> _fetchAllCatalogPages({
+    required String resource,
+    required String parentMediaId,
+    required int requestId,
+    required int browseGeneration,
+  }) async {
+    final entries = <dynamic>[];
+    var page = 1;
+
+    while (
+        _isCurrentBrowseRequest(parentMediaId, requestId, browseGeneration)) {
+      final response = await get(
+        '$resource?page=$page&sort=name&order=asc',
+      ).timeout(browseLoadTimeout);
+      if (!_isCurrentBrowseRequest(parentMediaId, requestId, browseGeneration))
+        return const [];
+
+      if (response is List) {
+        entries.addAll(response);
+        return entries;
+      }
+      if (response is! Map) return entries;
+
+      final pageEntries = response['data'];
+      if (pageEntries is List) entries.addAll(pageEntries);
+
+      final links = response['links'];
+      if (links is! Map || links['next'] == null) return entries;
+      page++;
+    }
+
+    return const [];
   }
 
   Future<List<MediaItem>> _loadChildren(String parentMediaId) async {
@@ -557,13 +592,14 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       final browseGeneration = _browseGeneration;
       final requestId = _beginBrowseRequest(parentMediaId);
       try {
-        final response = await get('albums?page=1&sort=name&order=asc')
-            .timeout(browseLoadTimeout);
+        final entries = await _fetchAllCatalogPages(
+          resource: 'albums',
+          parentMediaId: parentMediaId,
+          requestId: requestId,
+          browseGeneration: browseGeneration,
+        );
         if (!_isCurrentBrowseRequest(
             parentMediaId, requestId, browseGeneration)) return const [];
-        final entries =
-            (response is Map ? response['data'] : response) as List? ??
-                const [];
         final items = entries
             .map((entry) => Album.fromJson(entry as Map<String, dynamic>))
             .map(_albumMediaItem)
@@ -584,13 +620,14 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       final browseGeneration = _browseGeneration;
       final requestId = _beginBrowseRequest(parentMediaId);
       try {
-        final response = await get('artists?page=1&sort=name&order=asc')
-            .timeout(browseLoadTimeout);
+        final entries = await _fetchAllCatalogPages(
+          resource: 'artists',
+          parentMediaId: parentMediaId,
+          requestId: requestId,
+          browseGeneration: browseGeneration,
+        );
         if (!_isCurrentBrowseRequest(
             parentMediaId, requestId, browseGeneration)) return const [];
-        final entries =
-            (response is Map ? response['data'] : response) as List? ??
-                const [];
         final items = entries
             .map((entry) => Artist.fromJson(entry as Map<String, dynamic>))
             .map(_artistMediaItem)
@@ -914,6 +951,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   @override
   Future<void> play() async {
+    if (!_browsingEnabled) return;
     if (_isRadioMode && _radioPlayer != null) {
       await _radioPlayer!.play();
       return;
@@ -931,6 +969,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   @override
   Future<void> pause() async {
+    if (!_browsingEnabled) return;
     if (_isRadioMode && _radioPlayer != null) {
       await _radioPlayer!.pause();
       return;
@@ -985,6 +1024,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   @override
   Future<void> skipToNext() async {
+    if (!_browsingEnabled) return;
     if (currentQueueIndex == -1) return;
 
     var nextIndex = currentQueueIndex + 1;
@@ -1004,8 +1044,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
     int index, {
     int? browseGeneration,
   }) async {
-    if (browseGeneration != null &&
-        !_isBrowseGenerationActive(browseGeneration)) return;
+    if (!_isBrowseGenerationActive(browseGeneration)) return;
     if (index < 0 || queue.value.length <= index) return;
 
     final mediaItem = queue.value[index];
@@ -1013,16 +1052,13 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
     try {
       await _setPlayerSource(mediaItem).timeout(sourceLoadTimeout);
-      if (browseGeneration != null &&
-          !_isBrowseGenerationActive(browseGeneration)) return;
+      if (!_isBrowseGenerationActive(browseGeneration)) return;
       _errorCount = 0;
       exitRadioMode();
       await _player.seek(Duration(seconds: position.toInt()));
-      if (browseGeneration != null &&
-          !_isBrowseGenerationActive(browseGeneration)) return;
+      if (!_isBrowseGenerationActive(browseGeneration)) return;
       await play();
-      if (browseGeneration != null &&
-          !_isBrowseGenerationActive(browseGeneration)) return;
+      if (!_isBrowseGenerationActive(browseGeneration)) return;
       _emitPlaybackState();
 
       put('queue/playback-status', data: {
@@ -1030,8 +1066,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
         'position': _player.position.inSeconds,
       });
     } catch (error) {
-      if (browseGeneration != null &&
-          !_isBrowseGenerationActive(browseGeneration)) return;
+      if (!_isBrowseGenerationActive(browseGeneration)) return;
       _errorCount++;
       await _abandonSource();
 
@@ -1047,10 +1082,14 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
       error is! TimeoutException && _errorCount < MAX_ERROR_COUNT;
 
   @override
-  Future<void> seek(Duration position) => _player.seek(position);
+  Future<void> seek(Duration position) async {
+    if (!_browsingEnabled) return;
+    await _player.seek(position);
+  }
 
   @override
   Future<void> skipToPrevious() async {
+    if (!_browsingEnabled) return;
     if (_player.position > Duration(seconds: 5))
       return _player.seek(Duration.zero);
 
@@ -1184,6 +1223,7 @@ class KoelAudioHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
 
   @override
   Future<void> setShuffleMode(AudioServiceShuffleMode mode) async {
+    if (!_browsingEnabled) return;
     if (mode == AudioServiceShuffleMode.all) {
       _shuffleSnapshot ??= List.unmodifiable(queue.value);
       final shuffled = List<MediaItem>.from(_shuffleSnapshot!);
