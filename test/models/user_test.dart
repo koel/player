@@ -1,4 +1,6 @@
+import 'package:app/constants/constants.dart';
 import 'package:app/models/user.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -32,5 +34,19 @@ void main() {
     }));
 
     expect(user.homeBlocksOrder, ['random-songs', 'top-albums']);
+  });
+
+  test('uses the avatar URL provided by the server', () {
+    final user = User.fromJson({
+      ...baseJson(),
+      'avatar': 'https://koel.test/img/avatars/jane.webp',
+    });
+
+    final avatar = user.avatar as CachedNetworkImageProvider;
+    expect(avatar.url, 'https://koel.test/img/avatars/jane.webp');
+  });
+
+  test('falls back to the default image when the server sends no avatar', () {
+    expect(User.fromJson(baseJson()).avatar, AppImages.defaultImage.image);
   });
 }

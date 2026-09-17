@@ -317,6 +317,21 @@ class MockAuthProvider extends _i1.Mock implements _i3.AuthProvider {
       ) as _i4.Future<_i2.User?>);
 
   @override
+  _i4.Future<_i2.User> refreshAuthUser() => (super.noSuchMethod(
+        Invocation.method(
+          #refreshAuthUser,
+          [],
+        ),
+        returnValue: _i4.Future<_i2.User>.value(_FakeUser_0(
+          this,
+          Invocation.method(
+            #refreshAuthUser,
+            [],
+          ),
+        )),
+      ) as _i4.Future<_i2.User>);
+
+  @override
   _i4.Future<void> logout() => (super.noSuchMethod(
         Invocation.method(
           #logout,

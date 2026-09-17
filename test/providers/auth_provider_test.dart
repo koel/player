@@ -90,4 +90,72 @@ void main() {
       expect(preferences.apiToken, isNull);
     });
   });
+
+  group('tryGetAuthUser', () {
+    test('stores the signed-in user and announces the login', () async {
+      preferences.apiToken = 'tok';
+      client.willReturn(json: {
+        'id': 'user-1',
+        'name': 'Jane',
+        'email': 'jane@koel.test',
+      });
+      final announcedUsers = <String>[];
+      final subscription = AuthProvider.userLoggedInStream
+          .listen((user) => announcedUsers.add(user.name));
+      addTearDown(subscription.cancel);
+
+      final user = await auth.tryGetAuthUser();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(user!.name, 'Jane');
+      expect(auth.authUser.name, 'Jane');
+      expect(announcedUsers, ['Jane']);
+    });
+
+    test('returns null without a request when there is no token', () async {
+      expect(await auth.tryGetAuthUser(), isNull);
+      expect(client.requests, isEmpty);
+    });
+  });
+
+  group('refreshAuthUser', () {
+    test('replaces the signed-in user with the latest one from the server',
+        () async {
+      client.willReturn(json: {
+        'id': 'user-1',
+        'name': 'Jane',
+        'email': 'jane@koel.test',
+      });
+      await auth.refreshAuthUser();
+
+      client.willReturn(json: {
+        'id': 'user-1',
+        'name': 'Jane Doe',
+        'email': 'jane@koel.test',
+      });
+      final user = await auth.refreshAuthUser();
+
+      expect(user.name, 'Jane Doe');
+      expect(auth.authUser.name, 'Jane Doe');
+      expect(client.requests.last.url, 'https://koel.test/api/me');
+      expect(client.requests.last.method, 'GET');
+    });
+
+    test('does not announce a login', () async {
+      client.willReturn(json: {
+        'id': 'user-1',
+        'name': 'Jane',
+        'email': 'jane@koel.test',
+      });
+      var loginAnnouncements = 0;
+      final subscription =
+          AuthProvider.userLoggedInStream.listen((_) => loginAnnouncements++);
+      addTearDown(subscription.cancel);
+
+      await auth.refreshAuthUser();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(loginAnnouncements, 0);
+    });
+  });
 }

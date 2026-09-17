@@ -76,6 +76,19 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _refresh() async {
+    final overviewProvider = context.read<OverviewProvider>();
+
+    // Reload the user first, so the rebuild triggered by the overview refresh
+    // also picks up the user's latest Home block order.
+    try {
+      await context.read<AuthProvider>().refreshAuthUser();
+    } catch (_) {
+      // A stale user shouldn't stop the overview from refreshing.
+    }
+    await overviewProvider.refresh();
+  }
+
   Widget _songBlock(String heading, List<Playable> songs) {
     return HorizontalCardScroller(
       headingText: heading,
@@ -203,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
               barBackgroundColor: AppColors.staticScreenHeaderBackground,
             ),
             child: PullToRefresh(
-              onRefresh: () => context.read<OverviewProvider>().refresh(),
+              onRefresh: _refresh,
               child: CustomScrollView(
                 slivers: overviewProvider.isEmpty
                     ? [SliverToBoxAdapter(child: const EmptyHomeScreen())]

@@ -87,10 +87,18 @@ class AuthProvider with StreamSubscriber {
       return null;
     }
 
-    var user = User.fromJson(await get('me'));
-
-    this.setAuthUser(user);
+    final user = await refreshAuthUser();
     _userLoggedIn.add(user);
+
+    return user;
+  }
+
+  /// Reloads the signed-in user from the server.
+  ///
+  /// Unlike [tryGetAuthUser], this doesn't announce a login, so listeners such
+  /// as the download provider don't re-collect their data.
+  Future<User> refreshAuthUser() async {
+    setAuthUser(User.fromJson(await get('me')));
 
     return authUser;
   }
