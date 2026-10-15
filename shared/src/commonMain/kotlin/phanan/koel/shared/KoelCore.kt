@@ -15,7 +15,7 @@ import phanan.koel.shared.models.Playlist
 import phanan.koel.shared.models.PlaylistFolder
 import phanan.koel.shared.player.AudioEngine
 import phanan.koel.shared.player.PlayerController
-import phanan.koel.shared.player.QueueState
+import phanan.koel.shared.models.QueueState
 import phanan.koel.shared.session.Feature
 import phanan.koel.shared.session.SemanticVersion
 import phanan.koel.shared.session.ServerInfo
