@@ -97,7 +97,7 @@ struct LoginView: View {
 
     private var credentials: some View {
         VStack(spacing: 0) {
-            CredentialField(systemImage: "server.rack") {
+            CredentialField {
                 TextField("Server URL", text: $host)
                     .keyboardType(.URL)
                     .textContentType(.URL)
@@ -106,8 +106,8 @@ struct LoginView: View {
                     .submitLabel(.next)
                     .onSubmit { focusedField = .email }
             }
-            Divider().padding(.leading, 52)
-            CredentialField(systemImage: "envelope") {
+            Divider().padding(.leading, 20)
+            CredentialField {
                 TextField("Email", text: $email)
                     .keyboardType(.emailAddress)
                     .textContentType(.username)
@@ -116,8 +116,8 @@ struct LoginView: View {
                     .submitLabel(.next)
                     .onSubmit { focusedField = .password }
             }
-            Divider().padding(.leading, 52)
-            CredentialField(systemImage: "lock") {
+            Divider().padding(.leading, 20)
+            CredentialField {
                 SecureField("Password", text: $password)
                     .textContentType(.password)
                     .accessibilityLabel("Password")
@@ -209,17 +209,11 @@ extension Optional {
 }
 
 private struct CredentialField<Field: View>: View {
-    let systemImage: String
     @ViewBuilder let field: () -> Field
 
     var body: some View {
-        HStack(spacing: 14) {
-            Image(systemName: systemImage)
-                .foregroundStyle(.secondary)
-                .frame(width: 22)
-            field()
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 16)
+        field()
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
     }
 }
