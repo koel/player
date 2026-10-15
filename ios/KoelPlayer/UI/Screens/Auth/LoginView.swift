@@ -21,11 +21,18 @@ struct LoginView: View {
         NavigationStack {
             GeometryReader { proxy in
                 ScrollView {
-                    VStack(spacing: 24) {
-                        Image("logo")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 120, height: 120)
+                    VStack(spacing: 32) {
+                        VStack(spacing: 12) {
+                            Image("logo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 88, height: 88)
+                            Text("Koel")
+                                .font(.largeTitle.bold())
+                            Text("Log in to your Koel server")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
 
                         credentials
 
@@ -35,30 +42,42 @@ struct LoginView: View {
                                     if isAuthenticating {
                                         ProgressView()
                                     } else {
-                                        Text("Log In")
+                                        Text("Log In").fontWeight(.semibold)
                                     }
                                 }
                                 .frame(maxWidth: .infinity)
                             }
                             .buttonStyle(.glassProminent)
-                            .controlSize(.large)
+                            .tint(.highlight)
+                            .controlSize(.extraLarge)
                             .disabled(!canSubmit)
 
-                            Button("Log In with QR Code", systemImage: "qrcode.viewfinder") {
+                            Button {
                                 if DataScannerViewController.isSupported {
                                     isScanning = true
                                 } else {
                                     errorMessage = "This device can't scan QR codes. Log in with your email and password instead."
                                 }
+                            } label: {
+                                Label("Log In with QR Code", systemImage: "qrcode.viewfinder")
+                                    .frame(maxWidth: .infinity)
                             }
+                            .buttonStyle(.glass)
+                            .controlSize(.extraLarge)
                             .disabled(isAuthenticating)
                         }
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, 24)
                     .frame(maxWidth: 480)
                     .frame(maxWidth: .infinity, minHeight: proxy.size.height)
                 }
                 .scrollDismissesKeyboard(.interactively)
+            }
+            .background {
+                Image("background")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
             }
             .navigationDestination(item: $challenge) { challenge in
                 TwoFactorView(challenge: challenge)
@@ -83,28 +102,30 @@ struct LoginView: View {
 
     private var credentials: some View {
         VStack(spacing: 0) {
-            TextField("Host", text: $host, prompt: Text(verbatim: "https://koel.example.com"))
-                .keyboardType(.URL)
-                .textContentType(.URL)
-                .accessibilityLabel("Host")
-                .padding(.vertical, 14)
-            Divider()
-            TextField("Email", text: $email, prompt: Text(verbatim: "you@example.com"))
-                .keyboardType(.emailAddress)
-                .textContentType(.username)
-                .accessibilityLabel("Email")
-                .padding(.vertical, 14)
-            Divider()
-            SecureField("Password", text: $password)
-                .textContentType(.password)
-                .accessibilityLabel("Password")
-                .onSubmit(logIn)
-                .padding(.vertical, 14)
+            CredentialField(systemImage: "server.rack") {
+                TextField("Server URL", text: $host)
+                    .keyboardType(.URL)
+                    .textContentType(.URL)
+                    .accessibilityLabel("Host")
+            }
+            Divider().padding(.leading, 52)
+            CredentialField(systemImage: "envelope") {
+                TextField("Email", text: $email)
+                    .keyboardType(.emailAddress)
+                    .textContentType(.username)
+                    .accessibilityLabel("Email")
+            }
+            Divider().padding(.leading, 52)
+            CredentialField(systemImage: "lock") {
+                SecureField("Password", text: $password)
+                    .textContentType(.password)
+                    .accessibilityLabel("Password")
+                    .onSubmit(logIn)
+            }
         }
         .textInputAutocapitalization(.never)
         .autocorrectionDisabled()
-        .padding(.horizontal, 16)
-        .background(.fill.tertiary, in: .rect(cornerRadius: 24, style: .continuous))
+        .glassEffect(.regular, in: .rect(cornerRadius: 28, style: .continuous))
     }
 
     private func logIn() {
@@ -169,5 +190,21 @@ extension Optional {
     var isPresent: Bool {
         get { self != nil }
         set { if !newValue { self = nil } }
+    }
+}
+
+private struct CredentialField<Field: View>: View {
+    let systemImage: String
+    @ViewBuilder let field: () -> Field
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Image(systemName: systemImage)
+                .foregroundStyle(.secondary)
+                .frame(width: 22)
+            field()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 16)
     }
 }
