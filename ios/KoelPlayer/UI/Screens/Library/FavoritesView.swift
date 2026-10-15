@@ -7,6 +7,7 @@ struct FavoritesView: View {
     @State private var sort: SortSetting?
     @State private var query = ""
     @State private var isLoading = false
+    @State private var hasLoaded = false
     @State private var hasFailed = false
 
     private static let sortKey = "favorites.sort"
@@ -31,6 +32,10 @@ struct FavoritesView: View {
 
     var body: some View {
         List {
+            if favorites.isEmpty, !hasLoaded, !hasFailed {
+                LoadingRows()
+            }
+
             if !favorites.isEmpty {
                 PlayShuffleButtons(playables: displayedSongs)
                     .listRowInsets(EdgeInsets())
@@ -61,7 +66,7 @@ struct FavoritesView: View {
             }
         }
         .overlay {
-            ListStateOverlay(isEmpty: favorites.isEmpty, isLoading: isLoading, hasFailed: hasFailed, retry: { Task { await fetch() } }) {
+            ListStateOverlay(isEmpty: favorites.isEmpty, isLoading: isLoading || !hasLoaded, hasFailed: hasFailed, retry: { Task { await fetch() } }, showsSpinner: false) {
                 ContentUnavailableView(
                     "No Favorites",
                     systemImage: "star",
@@ -93,6 +98,7 @@ struct FavoritesView: View {
         do {
             _ = try await app.core.favorites.fetch(forceRefresh: forceRefresh)
             hasFailed = false
+            hasLoaded = true
         } catch {
             hasFailed = true
         }

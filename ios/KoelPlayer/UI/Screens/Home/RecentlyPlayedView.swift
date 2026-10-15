@@ -26,6 +26,10 @@ private struct RecentlyPlayedList: View {
         let displayed = SortingKt.filtered(playables.value, keywords: filter)
 
         List {
+            if displayed.isEmpty, !store.loaded.value.boolValue, !hasFailed {
+                LoadingRows()
+            }
+
             if !displayed.isEmpty {
                 PlayShuffleButtons(playables: displayed)
                     .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
@@ -53,8 +57,8 @@ private struct RecentlyPlayedList: View {
 
     @ViewBuilder
     private var emptyState: some View {
-        if isLoading {
-            ProgressView()
+        if isLoading || !store.loaded.value.boolValue {
+            EmptyView()
         } else if hasFailed {
             ContentUnavailableView {
                 Label("Couldn't Load Recently Played", systemImage: "exclamationmark.triangle")

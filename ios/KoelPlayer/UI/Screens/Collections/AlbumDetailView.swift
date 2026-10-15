@@ -23,6 +23,10 @@ struct AlbumDetailView: View {
 
     var body: some View {
         List {
+            if album == nil, !hasFailed {
+                LoadingRows()
+            }
+
             if let album {
                 AlbumHeader(album: album, songs: displayedSongs, tint: coverColor)
                     .listRowSeparator(.hidden)
@@ -65,8 +69,6 @@ struct AlbumDetailView: View {
             if album == nil {
                 if hasFailed {
                     LoadFailedView { Task { await load() } }
-                } else {
-                    ProgressView()
                 }
             }
         }

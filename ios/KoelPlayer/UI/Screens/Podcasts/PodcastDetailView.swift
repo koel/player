@@ -30,6 +30,9 @@ struct PodcastDetailView: View {
         let displayedEpisodes = displayedEpisodes
 
         List {
+            if episodes.isEmpty, isLoading {
+                LoadingRows()
+            }
             if let podcast {
                 CollectionHeader(
                     artworkUrl: podcast.imageUrl,
@@ -69,7 +72,7 @@ struct PodcastDetailView: View {
     private var placeholder: some View {
         if episodes.isEmpty {
             if isLoading {
-                ProgressView()
+                EmptyView()
             } else if loadFailed {
                 ContentUnavailableView {
                     Label("Couldn't Load Podcast", systemImage: "exclamationmark.triangle")

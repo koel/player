@@ -27,6 +27,10 @@ struct GenreDetailView: View {
 
     var body: some View {
         List {
+            if loadedSongs.isEmpty, nextPage != nil, !hasFailed {
+                LoadingRows()
+            }
+
             if !loadedSongs.isEmpty {
                 CollectionHeader(
                     artworkUrl: loadedSongs.first?.artworkUrl,
@@ -58,7 +62,7 @@ struct GenreDetailView: View {
             }
         }
         .overlay {
-            ListStateOverlay(isEmpty: loadedSongs.isEmpty, isLoading: isLoading, hasFailed: hasFailed, retry: retry) {
+            ListStateOverlay(isEmpty: loadedSongs.isEmpty, isLoading: isLoading || nextPage != nil, hasFailed: hasFailed, retry: retry, showsSpinner: false) {
                 ContentUnavailableView("No Songs", systemImage: "music.note")
             }
         }

@@ -35,6 +35,8 @@ struct ListStateOverlay<Empty: View>: View {
     let isLoading: Bool
     let hasFailed: Bool
     let retry: () -> Void
+    /// Off for lists that show `LoadingRows` instead.
+    var showsSpinner = true
     @ViewBuilder var empty: () -> Empty
 
     var body: some View {
@@ -42,7 +44,7 @@ struct ListStateOverlay<Empty: View>: View {
             if hasFailed {
                 LoadFailedView(retry: retry)
             } else if isLoading {
-                ProgressView()
+                if showsSpinner { ProgressView() }
             } else {
                 empty()
             }

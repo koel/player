@@ -1,9 +1,9 @@
 import SwiftUI
 
 extension View {
-    /// A filter field for a list. Pinned open: with the automatic display mode, iOS shows the
-    /// field while the list is still loading and then hides it once rows arrive, which flickers.
+    /// A filter field for a list, tucked away until the user pulls down, as in Apple Music.
+    /// The list must have rows from its first layout (see `LoadingRows`) or the field flickers.
     func filterable(text: Binding<String>, prompt: String = "Filter") -> some View {
-        searchable(text: text, placement: .navigationBarDrawer(displayMode: .always), prompt: Text(prompt))
+        searchable(text: text, placement: .navigationBarDrawer(displayMode: .automatic), prompt: Text(prompt))
     }
 }

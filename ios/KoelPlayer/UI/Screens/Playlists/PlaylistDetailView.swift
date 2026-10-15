@@ -35,6 +35,9 @@ struct PlaylistDetailView: View {
         let displayedSongs = displayedSongs
 
         List {
+            if songs.isEmpty, isLoading {
+                LoadingRows()
+            }
             if let playlist {
                 PlaylistHeader(playlist: playlist, songs: displayedSongs)
                     .asListHeaderRow()
@@ -65,7 +68,7 @@ struct PlaylistDetailView: View {
     private var placeholder: some View {
         if songs.isEmpty {
             if isLoading {
-                ProgressView()
+                EmptyView()
             } else if loadFailed {
                 ContentUnavailableView {
                     Label("Couldn't Load Playlist", systemImage: "exclamationmark.triangle")
