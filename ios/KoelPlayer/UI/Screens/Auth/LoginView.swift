@@ -50,8 +50,7 @@ struct LoginView: View {
                                 }
                                 .frame(maxWidth: .infinity)
                             }
-                            .buttonStyle(.glassProminent)
-                            .tint(.highlight)
+                            .buttonStyle(.glass)
 
                             Button(action: scanQRCode) {
                                 Image(systemName: "qrcode.viewfinder")
