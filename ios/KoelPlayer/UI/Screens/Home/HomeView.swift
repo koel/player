@@ -85,10 +85,10 @@ private struct HomeScreen: View {
         do {
             try await feed.refresh()
             hasFailed = false
-        } catch {
+        } catch where !error.isCancellation {
             hasFailed = true
             if !feed.isEmpty { app.toasts.showError() }
-        }
+        } catch {}
     }
 }
 
