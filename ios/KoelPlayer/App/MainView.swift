@@ -20,9 +20,11 @@ struct MainView: View {
                 stack(for: .search) { SearchView() }
             }
         }
+        .tint(.highlight)
         .tabBarMinimizeBehavior(.onScrollDown)
         .tabViewBottomAccessory(isEnabled: app.player.hasSomethingToShow) {
             MiniPlayer()
+                .tint(.primary)
                 .matchedTransitionSource(id: "now-playing", in: nowPlayingTransition)
         }
         .fullScreenCover(isPresented: $app.isNowPlayingPresented) {
@@ -45,6 +47,7 @@ struct MainView: View {
         NavigationStack(path: app.navigator.path(for: tab)) {
             root().routeDestinations()
         }
+        .tint(.primary)
     }
 }
 
