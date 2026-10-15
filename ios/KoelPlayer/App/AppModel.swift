@@ -1,6 +1,6 @@
 import Foundation
 import Observation
-import Shared
+@preconcurrency import Shared
 
 @Observable
 final class AppModel {
@@ -17,8 +17,15 @@ final class AppModel {
     private(set) var phase = Phase.launching
 
     let core: KoelCore
+    let player: PlayerModel
+    let navigator = Navigator()
+    let toasts = Toasts()
     let connectivity = Connectivity()
-    let mediaControls: SystemMediaControls
+    let downloadedIds: Live<Set<String>>
+    let downloadingIds: Live<Set<String>>
+    var sheet: AppSheet?
+    var isNowPlayingPresented = false
+    @ObservationIgnored private let mediaControls: SystemMediaControls
 
     init() {
         AudioSession.configure()
@@ -29,10 +36,21 @@ final class AppModel {
             documentsPath: documents.path(percentEncoded: false),
             audioEngine: AVPlayerEngine()
         )
+        player = PlayerModel(controller: core.player, podcasts: core.podcasts)
         mediaControls = SystemMediaControls(player: core.player)
+        downloadedIds = Live(core.downloads.downloadedIds)
+        downloadingIds = Live(core.downloads.downloading)
     }
 
     var isOffline: Bool { phase == .offline }
+
+    func isDownloaded(_ playable: any Playable) -> Bool {
+        downloadedIds.value.contains(playable.id)
+    }
+
+    func isDownloading(_ playable: any Playable) -> Bool {
+        downloadingIds.value.contains(playable.id)
+    }
 
     func launch() async {
         core.migrateFlutterData()
@@ -69,6 +87,7 @@ final class AppModel {
 
     func logOut() async {
         try? await core.logout()
+        navigator.reset()
         phase = .login
     }
 }

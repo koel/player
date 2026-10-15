@@ -1,5 +1,5 @@
 import Observation
-import Shared
+@preconcurrency import Shared
 import SwiftUI
 
 /// Mirrors a Kotlin `StateFlow` into SwiftUI observation, for state many views share.

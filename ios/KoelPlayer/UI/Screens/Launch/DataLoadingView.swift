@@ -1,3 +1,4 @@
+@preconcurrency import Shared
 import SwiftUI
 
 struct DataLoadingView: View {
@@ -60,23 +61,23 @@ struct DataLoadingView: View {
         }
         defer { slowNotice.cancel() }
 
+        let loading = Task { try await app.core.loadData() }
+        let timeout = Task {
+            try await Task.sleep(for: Self.timeout)
+            loading.cancel()
+        }
+        defer { timeout.cancel() }
+
         do {
-            try await withThrowingTaskGroup(of: Void.self) { [app] group in
-                group.addTask { @MainActor in try await app.core.loadData() }
-                group.addTask {
-                    try await Task.sleep(for: Self.timeout)
-                    throw TimeoutError()
-                }
-                defer { group.cancelAll() }
-                try await group.next()
+            try await withTaskCancellationHandler {
+                try await loading.value
+            } onCancel: {
+                loading.cancel()
             }
             app.didLoadData()
-        } catch is CancellationError {
-            return
         } catch {
-            hasFailed = true
+            if !Task.isCancelled { hasFailed = true }
         }
     }
 }
 
-private struct TimeoutError: Error {}

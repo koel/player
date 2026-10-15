@@ -1,6 +1,6 @@
 import Foundation
 import Security
-import Shared
+@preconcurrency import Shared
 
 /// Backs the shared `Preferences`: tokens go to the Keychain, everything else to UserDefaults.
 final class NativeKeyValueStore: NSObject, KeyValueStore {

@@ -1,4 +1,4 @@
-import Shared
+@preconcurrency import Shared
 import SwiftUI
 import VisionKit
 

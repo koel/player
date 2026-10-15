@@ -1,5 +1,5 @@
 import AVFoundation
-import Shared
+@preconcurrency import Shared
 
 /// The native side of the shared `AudioEngine` contract. The shared `PlayerController` owns the
 /// queue and decides what to play; this class only plays one source at a time.
