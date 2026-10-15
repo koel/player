@@ -15,7 +15,13 @@ You can, of course, build the project and install the app on your own.
 
 ## Contribution
 
-Koel Player is built on Flutter and Dart. If you're new to Flutter, here are a few resources to get you started:
+This repo is moving from Flutter to native apps:
+
+- `flutter/` – the current Flutter app for iOS and Android. Run `flutter` commands from this directory.
+- `shared/` – Kotlin Multiplatform code (models, API, state) for the native apps. Test with `./gradlew :shared:iosSimulatorArm64Test`.
+- `ios/` – the native SwiftUI app. Open `ios/KoelPlayer.xcodeproj` in Xcode 26+. Building it needs a JDK; set `JAVA_HOME` or install Android Studio.
+
+If you're new to Flutter, here are a few resources to get you started:
 
 - [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
 - [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)

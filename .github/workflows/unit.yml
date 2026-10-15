@@ -6,8 +6,11 @@ on:
   pull_request:
   workflow_dispatch:
 jobs:
-  run:
+  flutter:
     runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: flutter
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -16,3 +19,18 @@ jobs:
           flutter-version: 3.41.6
       - run: flutter pub get
       - run: flutter test
+  native-ios:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - run: ./gradlew :shared:iosSimulatorArm64Test
+      - name: Swift tests
+        run: |
+          SIMULATOR_ID=$(xcrun simctl list devices available -j | jq -r '[.devices[][] | select(.name | startswith("iPhone"))][0].udid')
+          xcodebuild test -project ios/KoelPlayer.xcodeproj -scheme KoelPlayer \
+            -destination "id=$SIMULATOR_ID" CODE_SIGNING_ALLOWED=NO
