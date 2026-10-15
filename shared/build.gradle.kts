@@ -28,3 +28,11 @@ kotlin {
         }
     }
 }
+
+skie {
+    features {
+        group {
+            co.touchlab.skie.configuration.DefaultArgumentInterop.Enabled(true)
+        }
+    }
+}
