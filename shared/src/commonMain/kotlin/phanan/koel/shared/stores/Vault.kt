@@ -75,6 +75,11 @@ internal class LiveList<T : Any>(private val vault: Vault<T>) {
         ids = ids - id
     }
 
+    fun insert(index: Int, id: String) {
+        val others = ids - id
+        ids = others.take(index) + id + others.drop(index)
+    }
+
     internal fun refresh() {
         val resolved = ids.mapNotNull(vault::get)
         if (resolved != itemsState.value) itemsState.value = resolved
