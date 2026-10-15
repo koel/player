@@ -97,9 +97,7 @@ private struct SongResults: View {
             HStack(alignment: .firstTextBaseline) {
                 Text(SearchSection.songs.title).font(.title3.bold())
                 Spacer()
-                NavigationLink("See All") {
-                    SearchSongsView(keywords: keywords)
-                }
+                NavigationLink("See All", value: Route.searchSongs(keywords: keywords))
             }
             .padding(.horizontal)
             .padding(.bottom, 4)

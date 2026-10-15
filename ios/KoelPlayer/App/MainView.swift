@@ -67,6 +67,7 @@ extension View {
             case .playlist(let id): PlaylistDetailView(playlistId: id)
             case .podcast(let id): PodcastDetailView(podcastId: id)
             case .genre(let id, let name): GenreDetailView(genreId: id, name: name)
+            case .searchSongs(let keywords): SearchSongsView(keywords: keywords)
             }
         }
     }

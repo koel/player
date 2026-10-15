@@ -24,6 +24,7 @@ enum Route: Codable, Hashable {
     case playlist(id: String)
     case podcast(id: String)
     case genre(id: String, name: String)
+    case searchSongs(keywords: String)
 }
 
 /// Owns the selected tab and each tab's navigation stack, and persists them like Flutter's RouteState.
