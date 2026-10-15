@@ -13,6 +13,8 @@ struct PlayableRow: View {
 
     let playable: any Playable
     var style = Style.standard
+    /// Replaces the trailing "Play Last" swipe, as Flutter's dismissible lists did.
+    var onRemove: (() -> Void)?
 
     @Environment(AppModel.self) private var app
 
@@ -62,10 +64,14 @@ struct PlayableRow: View {
             .tint(.orange)
         }
         .swipeActions(edge: .trailing) {
-            Button("Play Last", systemImage: "text.line.last.and.arrowtriangle.forward") {
-                PlayableActions(app: app).playLast(playable)
+            if let onRemove {
+                Button("Remove", systemImage: "minus.circle", role: .destructive, action: onRemove)
+            } else {
+                Button("Play Last", systemImage: "text.line.last.and.arrowtriangle.forward") {
+                    PlayableActions(app: app).playLast(playable)
+                }
+                .tint(.purple)
             }
-            .tint(.purple)
         }
     }
 
