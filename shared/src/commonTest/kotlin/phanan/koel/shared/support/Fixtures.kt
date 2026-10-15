@@ -124,11 +124,16 @@ object Fixtures {
         }
     }
 
-    fun radioStation(id: String, name: String = "Station $id", favorite: Boolean = false) = buildJsonObject {
+    fun radioStation(
+        id: String,
+        name: String = "Station $id",
+        url: String = "https://stream.example.com/$id",
+        favorite: Boolean = false,
+    ) = buildJsonObject {
         put("type", "radio-stations")
         put("id", id)
         put("name", name)
-        put("url", "https://stream.example.com/$id")
+        put("url", url)
         put("logo", "https://koel.test/img/$id.png")
         put("description", "")
         put("is_public", false)

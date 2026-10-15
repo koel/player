@@ -1,6 +1,8 @@
 package phanan.koel.shared.support
 
 import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.MockEngineConfig
+import kotlinx.coroutines.Dispatchers
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.request.HttpRequestData
 import io.ktor.http.HttpHeaders
@@ -47,18 +49,24 @@ class Harness {
 
     private val routes = mutableMapOf<Pair<HttpMethod, String>, (RecordedRequest) -> Reply>()
 
-    val engine = MockEngine { request ->
-        val recorded = record(request)
-        val route = routes[request.method to recorded.path]
-            ?: routes[request.method to recorded.path.substringBefore('?')]
-            ?: error("No fake route for ${request.method.value} ${recorded.path}")
-        val reply = route(recorded)
-        respond(
-            content = reply.body,
-            status = HttpStatusCode.fromValue(reply.status),
-            headers = headersOf(HttpHeaders.ContentType, "application/json"),
-        )
-    }
+    /** Unconfined so a request fired and forgotten has been answered by the time the call returns. */
+    val engine = MockEngine(
+        MockEngineConfig().apply {
+            dispatcher = Dispatchers.Unconfined
+            addHandler { request ->
+                val recorded = record(request)
+                val route = routes[request.method to recorded.path]
+                    ?: routes[request.method to recorded.path.substringBefore('?')]
+                    ?: error("No fake route for ${request.method.value} ${recorded.path}")
+                val reply = route(recorded)
+                respond(
+                    content = reply.body,
+                    status = HttpStatusCode.fromValue(reply.status),
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
+            }
+        },
+    )
 
     val api = ApiClient(engine, preferences)
 
