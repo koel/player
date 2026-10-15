@@ -11,6 +11,7 @@ struct ArtistDetailView: View {
     @State private var sort = SortSetting.remembered(for: Self.sortKey, default: SortSetting(field: PlayableSortField.shared.TITLE, order: .asc))
     @State private var query = ""
     @State private var hasFailed = false
+    @State private var hasLoadedSongs = false
     @State private var editingArtist: Artist?
     @State private var coverColor: Color?
     @State private var isBannerScrolledAway = false
@@ -36,6 +37,12 @@ struct ArtistDetailView: View {
                     }
 
                     LazyVStack(spacing: 0) {
+                        if songs.isEmpty, !hasLoadedSongs, !hasFailed {
+                            LoadingRows(count: 6)
+                                .padding(.horizontal)
+                                .padding(.vertical, 6)
+                        }
+
                         ForEach(displayedSongs, id: \.id) { playable in
                             PlayableRow(playable: playable, style: .artist)
                                 .padding(.horizontal)
@@ -101,6 +108,7 @@ struct ArtistDetailView: View {
             async let fetchedSongs = app.core.playables.fetchForArtist(artistId: artistId, forceRefresh: forceRefresh)
             _ = try await (resolvedArtist, fetchedSongs)
             hasFailed = false
+            hasLoadedSongs = true
         } catch {
             hasFailed = true
         }

@@ -44,12 +44,14 @@ struct LoginView: View {
                             .controlSize(.large)
                             .disabled(!canSubmit)
 
-                            if DataScannerViewController.isSupported {
-                                Button("Log In with QR Code", systemImage: "qrcode.viewfinder") {
+                            Button("Log In with QR Code", systemImage: "qrcode.viewfinder") {
+                                if DataScannerViewController.isSupported {
                                     isScanning = true
+                                } else {
+                                    errorMessage = "This device can't scan QR codes. Log in with your email and password instead."
                                 }
-                                .disabled(isAuthenticating)
                             }
+                            .disabled(isAuthenticating)
                         }
                     }
                     .padding(.horizontal, 20)

@@ -11,6 +11,7 @@ struct AlbumDetailView: View {
     @State private var sort = SortSetting.remembered(for: Self.sortKey, default: SortSetting(field: PlayableSortField.shared.TRACK, order: .asc))
     @State private var query = ""
     @State private var hasFailed = false
+    @State private var hasLoadedSongs = false
     @State private var editingAlbum: Album?
     @State private var coverColor: Color?
     @State private var isHeaderScrolledAway = false
@@ -31,6 +32,11 @@ struct AlbumDetailView: View {
                 AlbumHeader(album: album, songs: displayedSongs, tint: coverColor)
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
+
+                if songs.isEmpty, !hasLoadedSongs, !hasFailed {
+                    LoadingRows(count: 6)
+                        .listRowBackground(Color.clear)
+                }
 
                 PlayableListContent(playables: displayedSongs, style: .album)
                     .listRowBackground(Color.clear)
@@ -86,6 +92,7 @@ struct AlbumDetailView: View {
             async let fetchedSongs = app.core.playables.fetchForAlbum(albumId: albumId, forceRefresh: forceRefresh)
             _ = try await (resolvedAlbum, fetchedSongs)
             hasFailed = false
+            hasLoadedSongs = true
         } catch {
             hasFailed = true
         }
