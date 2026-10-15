@@ -2,7 +2,130 @@
 import SwiftUI
 
 struct PlaylistsView: View {
+    private enum Sheet: Identifiable {
+        case newPlaylist
+        case newFolder
+        case edit(Playlist)
+
+        var id: String {
+            switch self {
+            case .newPlaylist: "new-playlist"
+            case .newFolder: "new-folder"
+            case .edit(let playlist): "edit:\(playlist.id)"
+            }
+        }
+    }
+
+    @Environment(AppModel.self) private var app
+    @State private var playlists: [Playlist] = []
+    @State private var folders: [PlaylistFolder] = []
+    @State private var expandedFolderIds: Set<String> = []
+    @State private var sheet: Sheet?
+    @State private var playlistPendingDeletion: Playlist?
+
     var body: some View {
-        Text("PlaylistsView")
+        let library = PlaylistLibrary(playlists: playlists, folders: folders)
+
+        List {
+            ForEach(library.folderGroups) { group in
+                DisclosureGroup(isExpanded: expansion(of: group.folder)) {
+                    ForEach(group.playlists, id: \.id, content: playlistLink)
+                } label: {
+                    PlaylistFolderLabel(folder: group.folder, playlistCount: group.playlists.count)
+                }
+                .swipeActions(edge: .leading) {
+                    queueButton(for: group.playlists)
+                }
+            }
+            ForEach(library.rootPlaylists, id: \.id, content: playlistLink)
+        }
+        .overlay {
+            if playlists.isEmpty {
+                ContentUnavailableView {
+                    Label("No Playlists", systemImage: "music.note.list")
+                } description: {
+                    Text("Create a playlist to organize your favorite songs.")
+                } actions: {
+                    Button("Create Playlist") { sheet = .newPlaylist }
+                        .buttonStyle(.glassProminent)
+                }
+            }
+        }
+        .navigationTitle("Playlists")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    Button("New Playlist", systemImage: "music.note.list") { sheet = .newPlaylist }
+                    Button("New Folder", systemImage: "folder.badge.plus") { sheet = .newFolder }
+                } label: {
+                    Label("Add", systemImage: "plus")
+                }
+            }
+        }
+        .refreshable { await refresh() }
+        .task {
+            for await value in app.core.playlists.playlists { playlists = value }
+        }
+        .task {
+            for await value in app.core.playlistFolders.folders { folders = value }
+        }
+        .task { await refresh() }
+        .sheet(item: $sheet) { sheet in
+            switch sheet {
+            case .newPlaylist: PlaylistFormSheet(mode: .create)
+            case .newFolder: PlaylistFolderFormSheet()
+            case .edit(let playlist): PlaylistFormSheet(mode: .edit(playlist))
+            }
+        }
+        .playlistDeletionConfirmation($playlistPendingDeletion) { playlist in
+            PlaylistActions(app: app).delete(playlist)
+        }
+    }
+
+    private func playlistLink(_ playlist: Playlist) -> some View {
+        NavigationLink(value: Route.playlist(id: playlist.id)) {
+            PlaylistRow(playlist: playlist)
+        }
+        .swipeActions(edge: .leading) {
+            queueButton(for: [playlist])
+        }
+        .swipeActions(edge: .trailing) {
+            if playlist.canDelete {
+                Button("Delete", systemImage: "trash") { playlistPendingDeletion = playlist }
+                    .tint(.red)
+            }
+        }
+        .contextMenu {
+            PlaylistMenu(
+                playlist: playlist,
+                onEdit: { sheet = .edit(playlist) },
+                onDelete: { playlistPendingDeletion = playlist }
+            )
+        }
+    }
+
+    private func queueButton(for playlists: [Playlist]) -> some View {
+        Button("Play Last", systemImage: "text.line.last.and.arrowtriangle.forward") {
+            PlaylistActions(app: app).queue(playlists)
+        }
+        .tint(.purple)
+    }
+
+    private func expansion(of folder: PlaylistFolder) -> Binding<Bool> {
+        Binding(
+            get: { expandedFolderIds.contains(folder.id) },
+            set: { isExpanded in
+                if isExpanded {
+                    expandedFolderIds.insert(folder.id)
+                } else {
+                    expandedFolderIds.remove(folder.id)
+                }
+            }
+        )
+    }
+
+    private func refresh() async {
+        try? await app.core.playlists.fetchAll()
+        try? await app.core.playlistFolders.fetchAll()
     }
 }

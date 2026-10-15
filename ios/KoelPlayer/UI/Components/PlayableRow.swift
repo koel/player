@@ -13,6 +13,8 @@ struct PlayableRow: View {
 
     let playable: any Playable
     var style = Style.standard
+    /// Adds a destructive Remove swipe, e.g. to take a song out of a playlist.
+    var onRemove: (() -> Void)?
 
     @Environment(AppModel.self) private var app
 
@@ -62,6 +64,9 @@ struct PlayableRow: View {
             .tint(.orange)
         }
         .swipeActions(edge: .trailing) {
+            if let onRemove {
+                Button("Remove", systemImage: "minus.circle", role: .destructive, action: onRemove)
+            }
             Button("Play Last", systemImage: "text.line.last.and.arrowtriangle.forward") {
                 PlayableActions(app: app).playLast(playable)
             }
