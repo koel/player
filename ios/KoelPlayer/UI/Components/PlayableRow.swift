@@ -5,14 +5,24 @@ struct PlayableRow: View {
     enum Style {
         /// Artwork, title, artist (or podcast).
         case standard
-        /// Track number instead of artwork, album name as the subtitle. For album and artist screens.
+        /// Track number instead of artwork, album name as the subtitle. For album screens.
         case album
+        /// Artwork, album name as the subtitle. For artist screens.
+        case artist
         /// No artwork; the episode's date as the subtitle.
         case podcast
     }
 
+    /// Swiping a row out of a list it belongs to, such as Undo Favorite on Favorites.
+    struct Removal {
+        let title: String
+        let systemImage: String
+        let action: () -> Void
+    }
+
     let playable: any Playable
     var style = Style.standard
+    var removal: Removal?
 
     @Environment(AppModel.self) private var app
 
@@ -62,6 +72,9 @@ struct PlayableRow: View {
             .tint(.orange)
         }
         .swipeActions(edge: .trailing) {
+            if let removal {
+                Button(removal.title, systemImage: removal.systemImage, role: .destructive, action: removal.action)
+            }
             Button("Play Last", systemImage: "text.line.last.and.arrowtriangle.forward") {
                 PlayableActions(app: app).playLast(playable)
             }
@@ -72,7 +85,7 @@ struct PlayableRow: View {
     @ViewBuilder
     private var leading: some View {
         switch style {
-        case .standard:
+        case .standard, .artist:
             Artwork(url: playable.artworkUrl, size: 44, cornerRadius: 6)
                 .overlay {
                     if app.player.isCurrent(playable) {
@@ -99,7 +112,7 @@ struct PlayableRow: View {
 
     private var subtitle: String {
         switch style {
-        case .album:
+        case .album, .artist:
             (playable as? Song)?.albumName ?? playable.subtitle
         case .podcast:
             playable.createdAt.iso8601Date?.episodeDateLabel ?? ""
