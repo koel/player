@@ -68,12 +68,7 @@ struct LoginView: View {
                 }
                 .scrollDismissesKeyboard(.interactively)
             }
-            .background {
-                Image("background")
-                    .resizable()
-                    .scaledToFill()
-                    .ignoresSafeArea()
-            }
+            .background { BrandMeshBackground() }
             .navigationDestination(item: $challenge) { challenge in
                 TwoFactorView(challenge: challenge)
             }
