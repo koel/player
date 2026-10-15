@@ -8,8 +8,10 @@ final class AVPlayerEngine: NSObject, AudioEngine {
 
     private let player = AVPlayer()
     private var timeObserver: Any?
-    private var playerTask: Task<Void, Never>?
-    private var itemTasks: [Task<Void, Never>] = []
+    private var timeControlObservation: NSKeyValueObservation?
+    private var itemStatusObservation: NSKeyValueObservation?
+    private var itemNotifications: [NSObjectProtocol] = []
+    private var pendingLoad: (onReady: () -> Void, onFailure: (String) -> Void)?
 
     override init() {
         super.init()
@@ -29,7 +31,8 @@ final class AVPlayerEngine: NSObject, AudioEngine {
 
         AudioSession.activate()
         let item = AVPlayerItem(url: sourceUrl)
-        observe(item, onReady: onReady, onFailure: onFailure)
+        observe(item)
+        pendingLoad = (onReady, onFailure)
         player.replaceCurrentItem(with: item)
     }
 
@@ -66,55 +69,64 @@ final class AVPlayerEngine: NSObject, AudioEngine {
             }
         }
 
-        playerTask = Task { [weak self, player] in
-            for await status in player.publisher(for: \.timeControlStatus).values {
-                self?.listener?.onPlayingChanged(playing: status != .paused)
-                self?.listener?.onBufferingChanged(buffering: status == .waitingToPlayAtSpecifiedRate)
-            }
+        timeControlObservation = player.observe(\.timeControlStatus, options: [.initial, .new]) { [weak self] player, _ in
+            let status = player.timeControlStatus
+            Task { @MainActor in self?.timeControlStatusChanged(status) }
         }
     }
 
-    private func observe(_ item: AVPlayerItem, onReady: @escaping () -> Void, onFailure: @escaping (String) -> Void) {
+    private func timeControlStatusChanged(_ status: AVPlayer.TimeControlStatus) {
+        listener?.onPlayingChanged(playing: status != .paused)
+        listener?.onBufferingChanged(buffering: status == .waitingToPlayAtSpecifiedRate)
+    }
+
+    private func observe(_ item: AVPlayerItem) {
         forgetCurrentItem()
 
-        itemTasks.append(Task { [weak self] in
-            var hasLoaded = false
-            for await status in item.publisher(for: \.status).values {
-                switch status {
-                case .readyToPlay where !hasLoaded:
-                    hasLoaded = true
-                    onReady()
-                case .failed:
-                    let message = item.error?.localizedDescription ?? "The source could not be played."
-                    if hasLoaded {
-                        self?.listener?.onFailed(message: message)
-                    } else {
-                        hasLoaded = true
-                        onFailure(message)
-                    }
-                default:
-                    break
+        itemStatusObservation = item.observe(\.status, options: [.initial, .new]) { [weak self] item, _ in
+            let status = item.status
+            let message = item.error?.localizedDescription ?? "The source could not be played."
+            Task { @MainActor in self?.itemStatusChanged(status, message: message) }
+        }
+
+        let center = NotificationCenter.default
+        itemNotifications = [
+            center.addObserver(forName: AVPlayerItem.didPlayToEndTimeNotification, object: item, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated { self?.listener?.onFinished() }
+            },
+            center.addObserver(forName: AVPlayerItem.failedToPlayToEndTimeNotification, object: item, queue: .main) { [weak self] notification in
+                let message = (notification.userInfo?[AVPlayerItemFailedToPlayToEndTimeErrorKey] as? Error)?.localizedDescription
+                MainActor.assumeIsolated {
+                    self?.listener?.onFailed(message: message ?? "Playback stopped unexpectedly.")
                 }
-            }
-        })
+            },
+        ]
+    }
 
-        itemTasks.append(Task { [weak self] in
-            for await _ in NotificationCenter.default.notifications(named: AVPlayerItem.didPlayToEndTimeNotification, object: item) {
-                self?.listener?.onFinished()
+    /// The load callbacks fire once; a failure after that is a mid-stream failure.
+    private func itemStatusChanged(_ status: AVPlayerItem.Status, message: String) {
+        switch status {
+        case .readyToPlay:
+            pendingLoad?.onReady()
+            pendingLoad = nil
+        case .failed:
+            if let pendingLoad {
+                pendingLoad.onFailure(message)
+                self.pendingLoad = nil
+            } else {
+                listener?.onFailed(message: message)
             }
-        })
-
-        itemTasks.append(Task { [weak self] in
-            for await notification in NotificationCenter.default.notifications(named: AVPlayerItem.failedToPlayToEndTimeNotification, object: item) {
-                let error = notification.userInfo?[AVPlayerItemFailedToPlayToEndTimeErrorKey] as? Error
-                self?.listener?.onFailed(message: error?.localizedDescription ?? "Playback stopped unexpectedly.")
-            }
-        })
+        default:
+            break
+        }
     }
 
     private func forgetCurrentItem() {
-        itemTasks.forEach { $0.cancel() }
-        itemTasks.removeAll()
+        itemStatusObservation?.invalidate()
+        itemStatusObservation = nil
+        itemNotifications.forEach(NotificationCenter.default.removeObserver)
+        itemNotifications.removeAll()
+        pendingLoad = nil
     }
 }
 

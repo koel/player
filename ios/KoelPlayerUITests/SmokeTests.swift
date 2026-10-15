@@ -14,18 +14,20 @@ final class SmokeTests: XCTestCase {
     func testLogInSearchPlayAndLogOut() throws {
         let server = try Server.fromEnvironment()
 
-        logOutIfNeeded()
-        logIn(to: server)
-
         let homeTab = app.tabBars.buttons["Home"]
+        if !homeTab.waitForExistence(timeout: 10) {
+            logIn(to: server)
+        }
         XCTAssertTrue(homeTab.waitForExistence(timeout: 30), "The main UI never appeared")
         attachScreenshot("Home")
 
-        app.tabBars.buttons["Search"].tap()
+        let searchTab = app.tabBars.buttons["Search"]
+        if !searchTab.exists { app.tabBars.buttons.firstMatch.tap() }
+        searchTab.tap()
         let searchField = app.searchFields.firstMatch
         XCTAssertTrue(searchField.waitForExistence(timeout: 5))
         searchField.tap()
-        searchField.typeText(server.searchTerm)
+        searchField.typeText(server.searchTerm + "\n")
 
         let firstSong = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] %@", server.searchTerm)).firstMatch
         XCTAssertTrue(firstSong.waitForExistence(timeout: 15), "No search results for \(server.searchTerm)")
@@ -35,17 +37,13 @@ final class SmokeTests: XCTestCase {
         let pause = app.buttons["Pause"].firstMatch
         XCTAssertTrue(pause.waitForExistence(timeout: 20), "Playback never started")
         attachScreenshot("Playing")
-
-    }
-
-    private func logOutIfNeeded() {
-        let homeTab = app.tabBars.buttons["Home"]
-        guard homeTab.waitForExistence(timeout: 10) else { return }
+        pause.tap()
 
         homeTab.tap()
         app.buttons["Profile"].firstMatch.tap()
         app.buttons["Log Out"].firstMatch.tap()
         app.alerts.buttons["Log Out"].firstMatch.tap()
+        XCTAssertTrue(app.textFields["Host"].waitForExistence(timeout: 15), "Logging out didn't return to the login screen")
     }
 
     private func logIn(to server: Server) {
