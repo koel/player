@@ -40,7 +40,7 @@ struct PlaylistDetailView: View {
                     .asListHeaderRow()
             }
             ForEach(displayedSongs, id: \.id) { song in
-                PlayableRow(playable: song, onRemove: canRemoveSongs ? { remove(song) } : nil)
+                PlayableRow(playable: song, removal: canRemoveSongs ? .init(title: "Remove", systemImage: "minus.circle") { remove(song) } : nil)
             }
         }
         .listStyle(.plain)

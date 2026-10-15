@@ -44,7 +44,7 @@ private struct DownloadsList: View {
             }
 
             ForEach(displayed, id: \.id) { playable in
-                PlayableRow(playable: playable, onRemove: { downloads.remove(playable: playable) })
+                PlayableRow(playable: playable, removal: .init(title: "Remove", systemImage: "minus.circle") { downloads.remove(playable: playable) })
             }
         }
         .listStyle(.plain)
