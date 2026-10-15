@@ -22,17 +22,11 @@ struct LoginView: View {
             GeometryReader { proxy in
                 ScrollView {
                     VStack(spacing: 32) {
-                        VStack(spacing: 12) {
-                            Image("logo")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 88, height: 88)
-                            Text("Koel")
-                                .font(.largeTitle.bold())
-                            Text("Log in to your Koel server")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
+                        Image("logo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 120, height: 120)
+                            .accessibilityLabel("Koel")
 
                         credentials
 
