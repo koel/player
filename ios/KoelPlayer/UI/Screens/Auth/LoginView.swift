@@ -13,8 +13,17 @@ struct LoginView: View {
     @State private var challenge: TwoFactorChallenge?
     @State private var isScanning = false
 
-    private var canSubmit: Bool {
-        !host.isBlank && !email.isBlank && !password.isEmpty && !isAuthenticating
+    private enum Field {
+        case host, email, password
+    }
+
+    @FocusState private var focusedField: Field?
+
+    private var firstMissingField: Field? {
+        if host.isBlank { return .host }
+        if email.isBlank { return .email }
+        if password.isEmpty { return .password }
+        return nil
     }
 
     var body: some View {
@@ -30,7 +39,7 @@ struct LoginView: View {
 
                         credentials
 
-                        VStack(spacing: 12) {
+                        HStack(spacing: 12) {
                             Button(action: logIn) {
                                 Group {
                                     if isAuthenticating {
@@ -43,23 +52,16 @@ struct LoginView: View {
                             }
                             .buttonStyle(.glassProminent)
                             .tint(.highlight)
-                            .controlSize(.extraLarge)
-                            .disabled(!canSubmit)
 
-                            Button {
-                                if DataScannerViewController.isSupported {
-                                    isScanning = true
-                                } else {
-                                    errorMessage = "This device can't scan QR codes. Log in with your email and password instead."
-                                }
-                            } label: {
-                                Label("Log In with QR Code", systemImage: "qrcode.viewfinder")
-                                    .frame(maxWidth: .infinity)
+                            Button(action: scanQRCode) {
+                                Image(systemName: "qrcode.viewfinder")
                             }
                             .buttonStyle(.glass)
-                            .controlSize(.extraLarge)
-                            .disabled(isAuthenticating)
+                            .buttonBorderShape(.circle)
+                            .accessibilityLabel("Log In with QR Code")
                         }
+                        .controlSize(.extraLarge)
+                        .disabled(isAuthenticating)
                     }
                     .padding(.horizontal, 24)
                     .frame(maxWidth: 480)
@@ -101,6 +103,9 @@ struct LoginView: View {
                     .keyboardType(.URL)
                     .textContentType(.URL)
                     .accessibilityLabel("Host")
+                    .focused($focusedField, equals: .host)
+                    .submitLabel(.next)
+                    .onSubmit { focusedField = .email }
             }
             Divider().padding(.leading, 52)
             CredentialField(systemImage: "envelope") {
@@ -108,12 +113,17 @@ struct LoginView: View {
                     .keyboardType(.emailAddress)
                     .textContentType(.username)
                     .accessibilityLabel("Email")
+                    .focused($focusedField, equals: .email)
+                    .submitLabel(.next)
+                    .onSubmit { focusedField = .password }
             }
             Divider().padding(.leading, 52)
             CredentialField(systemImage: "lock") {
                 SecureField("Password", text: $password)
                     .textContentType(.password)
                     .accessibilityLabel("Password")
+                    .focused($focusedField, equals: .password)
+                    .submitLabel(.go)
                     .onSubmit(logIn)
             }
         }
@@ -122,8 +132,20 @@ struct LoginView: View {
         .glassEffect(.regular, in: .rect(cornerRadius: 28, style: .continuous))
     }
 
+    private func scanQRCode() {
+        if DataScannerViewController.isSupported {
+            isScanning = true
+        } else {
+            errorMessage = "This device can't scan QR codes. Log in with your email and password instead."
+        }
+    }
+
     private func logIn() {
-        guard canSubmit else { return }
+        guard !isAuthenticating else { return }
+        if let missing = firstMissingField {
+            focusedField = missing
+            return
+        }
 
         Task {
             isAuthenticating = true
