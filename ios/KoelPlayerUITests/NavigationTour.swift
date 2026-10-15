@@ -27,6 +27,20 @@ final class NavigationTour: XCTestCase {
     }
 }
 
+extension NavigationTour {
+    func testOpenNowPlaying() throws {
+        guard ProcessInfo.processInfo.environment["KOEL_TOUR"] == "1" else { throw XCTSkip("Set KOEL_TOUR=1 to run.") }
+
+        let app = XCUIApplication()
+        app.launch()
+
+        let next = app.buttons["Next"].firstMatch
+        XCTAssertTrue(next.waitForExistence(timeout: 20))
+        next.coordinate(withNormalizedOffset: CGVector(dx: -4, dy: 0.5)).tap()
+        sleep(8)
+    }
+}
+
 private extension XCUIElement {
     func tapIfVisible() {
         if exists { tap() }

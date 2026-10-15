@@ -212,10 +212,7 @@ struct NowPlayingView: View {
     }
 
     private func blurredBackground(_ state: PlaybackState) -> some View {
-        Artwork(url: artworkUrl(state), size: 600, cornerRadius: 0)
-            .blur(radius: 80)
-            .overlay(.black.opacity(0.45))
-            .ignoresSafeArea()
+        CoverBackdrop(url: artworkUrl(state))
     }
 
     private func goToArtist(_ playable: any Playable) {
@@ -258,4 +255,34 @@ private struct AirPlayButton: UIViewRepresentable {
     }
 
     func updateUIView(_ view: AVRoutePickerView, context: Context) {}
+}
+
+/// The cover, blurred across the whole screen. Drawn larger than the screen so the blur's
+/// faded edges stay off screen.
+private struct CoverBackdrop: View {
+    let url: String?
+
+    @State private var image: UIImage?
+
+    var body: some View {
+        Color.black
+            .overlay {
+                if let image {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                        .scaleEffect(1.6)
+                        .blur(radius: 70)
+                        .transition(.opacity)
+                }
+            }
+            .overlay(.black.opacity(0.4))
+            .clipped()
+            .ignoresSafeArea()
+            .animation(.easeInOut(duration: 0.6), value: image)
+            .task(id: url) {
+                guard let remote = url.flatMap(URL.init(string:)) else { image = nil; return }
+                image = await ImagePipeline.shared.image(for: remote, pointSize: 200)
+            }
+    }
 }
