@@ -8,23 +8,24 @@ struct AboutSection: View {
     @State private var isExpanded = false
 
     var body: some View {
-        if !html.isBlank {
-            Section {
-                VStack(alignment: .leading, spacing: 8) {
-                    HTMLText(html: html)
-                        .lineLimit(isExpanded ? nil : 4)
-                    Button(isExpanded ? "Less" : "More") {
-                        withAnimation { isExpanded.toggle() }
-                    }
-                    .font(.subheadline.weight(.semibold))
-                    .buttonStyle(.borderless)
-                }
-                .padding(.vertical, 4)
-            } header: {
+        let text = html.plainText
+
+        if !text.isBlank {
+            VStack(alignment: .leading, spacing: 8) {
                 Text(title)
                     .font(.title3.bold())
-                    .foregroundStyle(.primary)
+                Text(text)
+                    .lineLimit(isExpanded ? nil : 4)
+                    .textSelection(.enabled)
+                Button(isExpanded ? "Less" : "More") {
+                    withAnimation { isExpanded.toggle() }
+                }
+                .font(.subheadline.weight(.semibold))
+                .buttonStyle(.borderless)
             }
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .listRowSeparator(.hidden)
         }
     }
 }

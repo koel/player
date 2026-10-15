@@ -9,37 +9,42 @@ struct AlbumDetailView: View {
     @State private var songs: [any Playable] = []
     @State private var info: AlbumInfo?
     @State private var sort = SortSetting.remembered(for: Self.sortKey, default: SortSetting(field: PlayableSortField.shared.TRACK, order: .asc))
-    @State private var query = ""
     @State private var hasFailed = false
     @State private var editingAlbum: Album?
+    @State private var coverColor: Color?
+    @State private var isHeaderScrolledAway = false
 
     private static let sortKey = "album.sort"
 
     private var displayedSongs: [any Playable] {
-        SortingKt.filtered(SortingKt.sorted(songs, field: sort.field, order: sort.order), keywords: query)
+        SortingKt.sorted(songs, field: sort.field, order: sort.order)
     }
 
     var body: some View {
         List {
             if let album {
-                CollectionHeader(
-                    artworkUrl: album.cover,
-                    title: album.name,
-                    subtitle: album.artistName,
-                    detail: CollectionSummary.detail(year: album.year?.int32Value, songs: songs),
-                    playables: displayedSongs
-                )
-                .listRowSeparator(.hidden)
+                AlbumHeader(album: album, songs: displayedSongs, tint: coverColor)
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
 
                 PlayableListContent(playables: displayedSongs, style: .album)
+                    .listRowBackground(Color.clear)
 
                 AboutSection(title: "About", html: info?.information ?? "")
+                    .listRowBackground(Color.clear)
             }
         }
         .listStyle(.plain)
-        .navigationTitle(album?.name ?? "")
+        .scrollContentBackground(.hidden)
+        .background { CoverBackground(color: coverColor) }
+        .tint(coverColor ?? .primary)
+        .navigationTitle(isHeaderScrolledAway ? album?.name ?? "" : "")
         .navigationBarTitleDisplayMode(.inline)
-        .searchable(text: $query, prompt: "Filter Songs")
+        .onScrollGeometryChange(for: Bool.self) { geometry in
+            geometry.contentOffset.y + geometry.contentInsets.top > AlbumHeader.height
+        } action: { _, scrolledAway in
+            isHeaderScrolledAway = scrolledAway
+        }
         .refreshable { await load(forceRefresh: true) }
         .toolbar {
             if let album {
@@ -68,6 +73,7 @@ struct AlbumDetailView: View {
         .collect(app.core.playables.albumSongs(albumId: albumId), id: albumId) { songs = $0 }
         .task(id: albumId) { await load() }
         .task(id: albumId) { info = try? await app.core.mediaInfo.fetchForAlbum(albumId: albumId) }
+        .task(id: album?.cover) { coverColor = await CoverColor.of(album?.cover) }
     }
 
     private func load(forceRefresh: Bool = false) async {
@@ -79,5 +85,46 @@ struct AlbumDetailView: View {
         } catch {
             hasFailed = true
         }
+    }
+}
+
+private struct AlbumHeader: View {
+    static let height: CGFloat = 360
+
+    let album: Album
+    let songs: [any Playable]
+    let tint: Color?
+
+    @Environment(AppModel.self) private var app
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Artwork(url: album.cover, size: 260, cornerRadius: 12)
+                .shadow(color: .black.opacity(0.4), radius: 20, y: 10)
+
+            VStack(spacing: 4) {
+                Text(album.name)
+                    .font(.title2.bold())
+                    .multilineTextAlignment(.center)
+
+                Button(album.artistName) {
+                    app.navigator.push(.artist(id: album.artistId))
+                }
+                .font(.title3)
+                .foregroundStyle(tint ?? .secondary)
+                .disabled(app.isOffline || !album.hasBrowsableArtist)
+
+                if let detail = CollectionSummary.detail(year: album.year?.int32Value, songs: songs) {
+                    Text(detail)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            PlayShuffleButtons(playables: songs)
+        }
+        .buttonStyle(.plain)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
     }
 }

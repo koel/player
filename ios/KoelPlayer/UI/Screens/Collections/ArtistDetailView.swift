@@ -9,41 +9,56 @@ struct ArtistDetailView: View {
     @State private var songs: [any Playable] = []
     @State private var biography = ""
     @State private var sort = SortSetting.remembered(for: Self.sortKey, default: SortSetting(field: PlayableSortField.shared.TITLE, order: .asc))
-    @State private var query = ""
     @State private var hasFailed = false
     @State private var editingArtist: Artist?
+    @State private var coverColor: Color?
+    @State private var isBannerScrolledAway = false
 
     private static let sortKey = "artist.sort"
 
     private var displayedSongs: [any Playable] {
-        SortingKt.filtered(SortingKt.sorted(songs, field: sort.field, order: sort.order), keywords: query)
+        SortingKt.sorted(songs, field: sort.field, order: sort.order)
     }
 
     var body: some View {
-        List {
+        ScrollView {
             if let artist {
-                CollectionHeader(
-                    artworkUrl: artist.imageUrl,
-                    title: artist.name,
-                    detail: CollectionSummary.detail(songs: songs),
-                    isCircular: true,
-                    playables: displayedSongs
-                )
-                .listRowSeparator(.hidden)
+                VStack(alignment: .leading, spacing: 0) {
+                    ArtistBanner(artist: artist, songs: displayedSongs)
 
-                PlayableListContent(
-                    playables: displayedSongs,
-                    style: .artist,
-                    isSortedByTitle: sort.field == PlayableSortField.shared.TITLE
-                )
+                    if let summary = CollectionSummary.detail(songs: songs) {
+                        Text(summary)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal)
+                            .padding(.bottom, 8)
+                    }
 
-                AboutSection(title: "About", html: biography)
+                    LazyVStack(spacing: 0) {
+                        ForEach(displayedSongs, id: \.id) { playable in
+                            PlayableRow(playable: playable, style: .artist)
+                                .padding(.horizontal)
+                                .padding(.vertical, 6)
+                            Divider().padding(.leading, 72)
+                        }
+                    }
+
+                    AboutSection(title: "About", html: biography)
+                        .padding()
+                }
             }
         }
-        .listStyle(.plain)
-        .navigationTitle(artist?.name ?? "")
+        .ignoresSafeArea(edges: .top)
+        .background { CoverBackground(color: coverColor) }
+        .tint(coverColor ?? .primary)
+        .navigationTitle(isBannerScrolledAway ? artist?.name ?? "" : "")
         .navigationBarTitleDisplayMode(.inline)
-        .searchable(text: $query, prompt: "Filter Songs")
+        .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
+        .onScrollGeometryChange(for: Bool.self) { geometry in
+            geometry.contentOffset.y > geometry.containerSize.width - 80
+        } action: { _, scrolledAway in
+            isBannerScrolledAway = scrolledAway
+        }
         .refreshable { await load(forceRefresh: true) }
         .toolbar {
             if let artist {
@@ -74,6 +89,7 @@ struct ArtistDetailView: View {
         .task(id: artistId) {
             biography = (try? await app.core.mediaInfo.fetchForArtist(artistId: artistId).biography) ?? ""
         }
+        .task(id: artist?.imageUrl) { coverColor = await CoverColor.of(artist?.imageUrl) }
     }
 
     private func load(forceRefresh: Bool = false) async {
@@ -84,6 +100,63 @@ struct ArtistDetailView: View {
             hasFailed = false
         } catch {
             hasFailed = true
+        }
+    }
+}
+
+/// The artist's photo across the full width, fading into the page, with the name on top.
+private struct ArtistBanner: View {
+    let artist: Artist
+    let songs: [any Playable]
+
+    @Environment(AppModel.self) private var app
+    @State private var image: UIImage?
+
+    var body: some View {
+        ZStack(alignment: .bottomLeading) {
+            photo
+                .containerRelativeFrame(.horizontal)
+                .aspectRatio(1, contentMode: .fit)
+                .clipped()
+                .mask {
+                    LinearGradient(stops: [.init(color: .black, location: 0.55), .init(color: .clear, location: 1)], startPoint: .top, endPoint: .bottom)
+                }
+
+            HStack(alignment: .bottom) {
+                Text(artist.name)
+                    .font(.largeTitle.bold())
+                    .lineLimit(2)
+                    .shadow(color: .black.opacity(0.5), radius: 8)
+
+                Spacer(minLength: 16)
+
+                Button {
+                    app.player.play(songs)
+                } label: {
+                    Image(systemName: "play.fill")
+                        .font(.title2)
+                        .frame(width: 52, height: 52)
+                }
+                .buttonStyle(.glassProminent)
+                .buttonBorderShape(.circle)
+                .disabled(songs.isEmpty)
+                .accessibilityLabel("Play")
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 8)
+        }
+        .task(id: artist.imageUrl) {
+            guard let url = artist.imageUrl.flatMap(URL.init(string:)) else { return }
+            image = await ImagePipeline.shared.image(for: url, pointSize: 430)
+        }
+    }
+
+    @ViewBuilder
+    private var photo: some View {
+        if let image {
+            Image(uiImage: image).resizable().scaledToFill()
+        } else {
+            Image("default-image").resizable().scaledToFill()
         }
     }
 }

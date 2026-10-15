@@ -37,6 +37,17 @@ struct HTMLText: View {
 }
 
 extension String {
+    /// Last.fm wikis and biographies: paragraphs and line breaks kept, markup and links dropped.
+    var plainText: String {
+        replacing(/<br\s*\/?>|<\/p>/.ignoresCase(), with: "\n")
+            .strippingTags
+            .replacingOccurrences(of: "&quot;", with: "\"")
+            .replacingOccurrences(of: "&#39;", with: "'")
+            .replacingOccurrences(of: "&nbsp;", with: " ")
+            .replacing(/\n{3,}/, with: "\n\n")
+            .trimmed
+    }
+
     var strippingTags: String {
         replacing(/<[^>]+>/, with: "").replacingOccurrences(of: "&amp;", with: "&")
     }
