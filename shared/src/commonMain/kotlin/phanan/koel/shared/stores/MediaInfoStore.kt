@@ -1,5 +1,6 @@
 package phanan.koel.shared.stores
 
+import phanan.koel.shared.onMain
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import phanan.koel.shared.api.ApiClient
@@ -21,20 +22,24 @@ class MediaInfoStore internal constructor(private val api: ApiClient) {
     private val artistInfos = mutableMapOf<String, ArtistInfo>()
 
     @Throws(Exception::class)
-    suspend fun fetchForAlbum(albumId: String): AlbumInfo = albumInfos.getOrPut(albumId) {
-        val json = api.get("albums/$albumId/information") as? JsonObject
-        val tracks = (json?.get("tracks") as? JsonArray)?.objects().orEmpty()
+    suspend fun fetchForAlbum(albumId: String): AlbumInfo = onMain {
+        albumInfos.getOrPut(albumId) {
+            val json = api.get("albums/$albumId/information") as? JsonObject
+            val tracks = (json?.get("tracks") as? JsonArray)?.objects().orEmpty()
 
-        AlbumInfo(
-            information = json?.obj("wiki")?.string("full").orEmpty(),
-            tracks = tracks.map { track -> AlbumTrack(track.string("title").orEmpty(), track.int("length") ?: 0) },
-        )
+            AlbumInfo(
+                information = json?.obj("wiki")?.string("full").orEmpty(),
+                tracks = tracks.map { track -> AlbumTrack(track.string("title").orEmpty(), track.int("length") ?: 0) },
+            )
+        }
     }
 
     @Throws(Exception::class)
-    suspend fun fetchForArtist(artistId: String): ArtistInfo = artistInfos.getOrPut(artistId) {
-        val json = api.get("artists/$artistId/information") as? JsonObject
-        ArtistInfo(biography = json?.obj("bio")?.string("full").orEmpty())
+    suspend fun fetchForArtist(artistId: String): ArtistInfo = onMain {
+        artistInfos.getOrPut(artistId) {
+            val json = api.get("artists/$artistId/information") as? JsonObject
+            ArtistInfo(biography = json?.obj("bio")?.string("full").orEmpty())
+        }
     }
 
     internal fun reset() {

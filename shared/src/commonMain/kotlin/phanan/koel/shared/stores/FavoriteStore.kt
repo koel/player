@@ -1,5 +1,6 @@
 package phanan.koel.shared.stores
 
+import phanan.koel.shared.onMain
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
@@ -23,26 +24,28 @@ class FavoriteStore internal constructor(
     private var loaded = false
 
     @Throws(Exception::class)
-    suspend fun fetch(forceRefresh: Boolean = false): List<Playable> {
-        if (loaded && !forceRefresh) return items.value
+    suspend fun fetch(forceRefresh: Boolean = false): List<Playable> = onMain {
+        if (loaded && !forceRefresh) return@onMain items.value
 
         list.ids = playables.sync(api.get("songs/favorite")).map(Playable::id)
         loaded = true
-        return items.value
+        items.value
     }
 
     @Throws(Exception::class)
-    suspend fun toggle(playable: Playable) {
+    suspend fun toggle(playable: Playable): Unit = onMain {
         saveOptimistically(playable, favorite = !current(playable).favorite) {
             api.post("interaction/like", buildJsonObject { put("song", playable.id) })
         }
     }
 
     @Throws(Exception::class)
-    suspend fun unlike(playable: Playable) = saveOptimistically(playable, favorite = false) {
-        api.post("interaction/batch/unlike", buildJsonObject {
-            putJsonArray("songs") { add(JsonPrimitive(playable.id)) }
-        })
+    suspend fun unlike(playable: Playable) = onMain {
+        saveOptimistically(playable, favorite = false) {
+            api.post("interaction/batch/unlike", buildJsonObject {
+                putJsonArray("songs") { add(JsonPrimitive(playable.id)) }
+            })
+        }
     }
 
     internal fun reset() {

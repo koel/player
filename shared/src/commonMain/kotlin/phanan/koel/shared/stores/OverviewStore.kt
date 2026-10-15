@@ -1,5 +1,6 @@
 package phanan.koel.shared.stores
 
+import phanan.koel.shared.onMain
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.json.jsonObject
 import phanan.koel.shared.api.ApiClient
@@ -68,7 +69,7 @@ class OverviewStore internal constructor(
 
     /** Sections an older server doesn't send come back empty. */
     @Throws(Exception::class)
-    suspend fun refresh() {
+    suspend fun refresh(): Unit = onMain {
         val response = api.get("overview").jsonObject
 
         playableSections.forEach { (key, list) ->

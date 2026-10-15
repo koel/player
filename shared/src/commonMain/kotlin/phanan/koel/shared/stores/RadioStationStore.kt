@@ -1,5 +1,6 @@
 package phanan.koel.shared.stores
 
+import phanan.koel.shared.onMain
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -19,12 +20,12 @@ class RadioStationStore internal constructor(private val api: ApiClient) {
     fun byId(id: String): RadioStation? = vault[id]
 
     @Throws(Exception::class)
-    suspend fun fetchAll() {
+    suspend fun fetchAll(): Unit = onMain {
         list.ids = vault.sync(api.getList("radio/stations", RadioStation.serializer())).map(RadioStation::id)
     }
 
     @Throws(Exception::class)
-    suspend fun create(name: String, url: String, description: String? = null, isPublic: Boolean = false): RadioStation {
+    suspend fun create(name: String, url: String, description: String? = null, isPublic: Boolean = false): RadioStation = onMain {
         val json = api.post("radio/stations", buildJsonObject {
             put("name", name)
             put("url", url)
@@ -34,7 +35,7 @@ class RadioStationStore internal constructor(private val api: ApiClient) {
 
         val station = vault.sync(KoelJson.decodeFromJsonElement(RadioStation.serializer(), json))
         list.append(listOf(station.id))
-        return station
+        station
     }
 
     @Throws(Exception::class)
@@ -44,7 +45,7 @@ class RadioStationStore internal constructor(private val api: ApiClient) {
         url: String,
         description: String? = null,
         isPublic: Boolean = false,
-    ) {
+    ): Unit = onMain {
         api.put("radio/stations/${station.id}", buildJsonObject {
             put("name", name)
             put("url", url)
@@ -57,7 +58,7 @@ class RadioStationStore internal constructor(private val api: ApiClient) {
 
     /** Removes the station right away, and puts it back if the server refuses. */
     @Throws(Exception::class)
-    suspend fun remove(station: RadioStation) {
+    suspend fun remove(station: RadioStation): Unit = onMain {
         val index = list.ids.indexOf(station.id).coerceAtLeast(0)
         list.remove(station.id)
 
@@ -72,7 +73,7 @@ class RadioStationStore internal constructor(private val api: ApiClient) {
     }
 
     @Throws(Exception::class)
-    suspend fun toggleFavorite(station: RadioStation) {
+    suspend fun toggleFavorite(station: RadioStation): Unit = onMain {
         val wasFavorite = vault[station.id]?.favorite ?: station.favorite
         vault.update(station.id) { it.copy(favorite = !wasFavorite) }
 
@@ -89,9 +90,9 @@ class RadioStationStore internal constructor(private val api: ApiClient) {
 
     /** The title the station is broadcasting right now, if it reports one. */
     @Throws(Exception::class)
-    suspend fun nowPlaying(station: RadioStation): String? {
+    suspend fun nowPlaying(station: RadioStation): String? = onMain {
         val response = api.get("radio/stations/${station.id}/now-playing") as? JsonObject
-        return response?.get("stream_title")?.jsonPrimitive?.contentOrNull
+        response?.get("stream_title")?.jsonPrimitive?.contentOrNull
     }
 
     internal fun reset() {

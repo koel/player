@@ -1,5 +1,6 @@
 package phanan.koel.shared.stores
 
+import phanan.koel.shared.onMain
 import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.client.statement.bodyAsText
@@ -81,8 +82,8 @@ class DownloadStore internal constructor(
     }
 
     @Throws(Exception::class)
-    suspend fun download(playable: Playable) {
-        val owner = owner ?: return
+    suspend fun download(playable: Playable): Unit = onMain {
+        val owner = owner ?: return@onMain
         val file = owner.fileFor(playable)
         val temporaryFile = Path("$file.part")
         downloadingState.update { it + playable.id }

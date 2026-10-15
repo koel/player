@@ -1,5 +1,6 @@
 package phanan.koel.shared.stores
 
+import phanan.koel.shared.onMain
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,10 +20,10 @@ class RecentlyPlayedStore internal constructor(
     val loaded: StateFlow<Boolean> = loadedState.asStateFlow()
 
     @Throws(Exception::class)
-    suspend fun fetch(): List<Playable> {
+    suspend fun fetch(): List<Playable> = onMain {
         list.ids = playables.sync(api.get("songs/recently-played")).map(Playable::id)
         loadedState.value = true
-        return items.value
+        items.value
     }
 
     fun add(playable: Playable) {

@@ -1,5 +1,6 @@
 package phanan.koel.shared.stores
 
+import phanan.koel.shared.onMain
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -45,9 +46,9 @@ class DownloadSyncStore internal constructor(
     }
 
     @Throws(Exception::class)
-    suspend fun sync() {
+    suspend fun sync(): Unit = onMain {
         val local = downloads.playables.value
-        if (local.isEmpty() || syncingState.value) return
+        if (local.isEmpty() || syncingState.value) return@onMain
 
         syncingState.value = true
         try {

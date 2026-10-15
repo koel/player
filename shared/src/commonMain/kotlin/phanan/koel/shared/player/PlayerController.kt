@@ -1,5 +1,6 @@
 package phanan.koel.shared.player
 
+import phanan.koel.shared.onMain
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -237,7 +238,7 @@ class PlayerController internal constructor(
     }
 
     @Throws(Exception::class)
-    suspend fun playRadio(station: RadioStation) {
+    suspend fun playRadio(station: RadioStation): Unit = onMain {
         if (!isRadioMode && currentId != null) detachedAt = positionFlow.value
 
         stopNowPlayingPolling()
@@ -250,7 +251,7 @@ class PlayerController internal constructor(
 
         val generation = ++loadGeneration
         val outcome = loadSource(session.radioStreamUrl(station))
-        if (generation != loadGeneration) return
+        if (generation != loadGeneration) return@onMain
 
         isBuffering = false
 

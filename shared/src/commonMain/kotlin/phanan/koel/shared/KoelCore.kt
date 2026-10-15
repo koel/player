@@ -88,7 +88,7 @@ class KoelCore internal constructor(
 
     /** `GET /data`: server facts, playlists, folders and the saved queue. */
     @Throws(Exception::class)
-    suspend fun loadData() {
+    suspend fun loadData(): Unit = onMain {
         val data = api.get("data").jsonObject
 
         session.update(serverInfo(data))
@@ -104,7 +104,7 @@ class KoelCore internal constructor(
     }
 
     @Throws(Exception::class)
-    suspend fun logout() {
+    suspend fun logout(): Unit = onMain {
         player.cleanUpUponLogout()
         auth.logout()
         session.update(null)

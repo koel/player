@@ -1,5 +1,6 @@
 package phanan.koel.shared.stores
 
+import phanan.koel.shared.onMain
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -37,26 +38,26 @@ class ArtistStore internal constructor(
     fun observe(id: String): Flow<Artist?> = vault.entities.map { it[id] }.distinctUntilChanged()
 
     @Throws(Exception::class)
-    suspend fun loadMore() = pager.loadMore()
+    suspend fun loadMore() = onMain { pager.loadMore() }
 
     /** Without a [sortOrder], keeps the current one, or goes back to ascending when [sortField] changes. */
     @Throws(Exception::class)
-    suspend fun refresh(sortField: String = this.sortField, sortOrder: SortOrder? = null) {
+    suspend fun refresh(sortField: String = this.sortField, sortOrder: SortOrder? = null): Unit = onMain {
         this.sortOrder = sortOrder ?: if (sortField == this.sortField) this.sortOrder else SortOrder.ASC
         this.sortField = sortField
         pager.refresh()
     }
 
     @Throws(Exception::class)
-    suspend fun resolve(id: String, forceRefresh: Boolean = false): Artist {
+    suspend fun resolve(id: String, forceRefresh: Boolean = false): Artist = onMain {
         val cached = vault[id]
-        if (cached != null && !forceRefresh) return cached
+        if (cached != null && !forceRefresh) return@onMain cached
 
-        return vault.sync(api.get("artists/$id", Artist.serializer()))
+        vault.sync(api.get("artists/$id", Artist.serializer()))
     }
 
     @Throws(Exception::class)
-    suspend fun toggleFavorite(artist: Artist) {
+    suspend fun toggleFavorite(artist: Artist): Unit = onMain {
         val wasFavorite = (vault[artist.id] ?: vault.sync(artist)).favorite
         vault.update(artist.id) { it.copy(favorite = !wasFavorite) }
 
@@ -72,7 +73,7 @@ class ArtistStore internal constructor(
     }
 
     @Throws(Exception::class)
-    suspend fun update(artist: Artist, name: String): Artist {
+    suspend fun update(artist: Artist, name: String): Artist = onMain {
         val response = api.put("artists/${artist.id}", buildJsonObject { put("name", name) }).jsonObject
 
         val savedName = response.string("name") ?: name
@@ -84,7 +85,7 @@ class ArtistStore internal constructor(
             albums.applyArtistRename(artist.id, savedName)
         }
 
-        return updated
+        updated
     }
 
     internal fun sync(artists: List<Artist>): List<Artist> = vault.sync(artists)

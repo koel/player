@@ -1,5 +1,6 @@
 package phanan.koel.shared.stores
 
+import phanan.koel.shared.onMain
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,27 +21,27 @@ class PlaylistFolderStore internal constructor(private val api: ApiClient) {
     }
 
     @Throws(Exception::class)
-    suspend fun fetchAll() {
+    suspend fun fetchAll(): Unit = onMain {
         foldersState.value = api.getList("playlist-folders", PlaylistFolder.serializer())
     }
 
     @Throws(Exception::class)
-    suspend fun create(name: String): PlaylistFolder {
+    suspend fun create(name: String): PlaylistFolder = onMain {
         val json = api.post("playlist-folders", buildJsonObject { put("name", name) })
         val folder = KoelJson.decodeFromJsonElement(PlaylistFolder.serializer(), json)
         foldersState.value += folder
-        return folder
+        folder
     }
 
     @Throws(Exception::class)
-    suspend fun rename(folder: PlaylistFolder, name: String) {
+    suspend fun rename(folder: PlaylistFolder, name: String): Unit = onMain {
         api.patch("playlist-folders/${folder.id}", buildJsonObject { put("name", name) })
         foldersState.value = foldersState.value.map { if (it.id == folder.id) it.copy(name = name) else it }
     }
 
     /** Removes the folder right away, and puts it back if the server refuses. */
     @Throws(Exception::class)
-    suspend fun remove(folder: PlaylistFolder) {
+    suspend fun remove(folder: PlaylistFolder): Unit = onMain {
         val index = foldersState.value.indexOfFirst { it.id == folder.id }.coerceAtLeast(0)
         foldersState.value = foldersState.value.filterNot { it.id == folder.id }
 

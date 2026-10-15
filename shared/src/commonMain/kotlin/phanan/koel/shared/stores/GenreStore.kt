@@ -1,5 +1,6 @@
 package phanan.koel.shared.stores
 
+import phanan.koel.shared.onMain
 import kotlinx.coroutines.flow.StateFlow
 import phanan.koel.shared.api.ApiClient
 import phanan.koel.shared.models.Genre
@@ -14,10 +15,10 @@ class GenreStore internal constructor(private val api: ApiClient) {
     fun byId(id: String): Genre? = vault[id]
 
     @Throws(Exception::class)
-    suspend fun fetch(): List<Genre> {
+    suspend fun fetch(): List<Genre> = onMain {
         val genres = vault.sync(api.getList("genres", Genre.serializer()))
         list.ids = genres.map(Genre::id)
-        return genres
+        genres
     }
 
     internal fun reset() {

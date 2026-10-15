@@ -1,5 +1,6 @@
 package phanan.koel.shared.stores
 
+import phanan.koel.shared.onMain
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -50,26 +51,29 @@ class PlayableStore internal constructor(private val api: ApiClient) {
     fun podcastEpisodes(podcastId: String): Flow<List<Playable>> = liveCollection(podcastKey(podcastId))
 
     @Throws(Exception::class)
-    suspend fun loadMoreSongs() = songPager.loadMore()
+    suspend fun loadMoreSongs() = onMain { songPager.loadMore() }
 
     @Throws(Exception::class)
-    suspend fun refreshSongs(sortField: String = songSortField, sortOrder: SortOrder = songSortOrder) {
+    suspend fun refreshSongs(sortField: String = songSortField, sortOrder: SortOrder = songSortOrder): Unit = onMain {
         songSortField = sortField
         songSortOrder = sortOrder
         songPager.refresh()
     }
 
     @Throws(Exception::class)
-    suspend fun fetchForAlbum(albumId: String, forceRefresh: Boolean = false): List<Playable> =
+    suspend fun fetchForAlbum(albumId: String, forceRefresh: Boolean = false): List<Playable> = onMain {
         fetchCollection(albumKey(albumId), "albums/$albumId/songs", forceRefresh)
+    }
 
     @Throws(Exception::class)
-    suspend fun fetchForArtist(artistId: String, forceRefresh: Boolean = false): List<Playable> =
+    suspend fun fetchForArtist(artistId: String, forceRefresh: Boolean = false): List<Playable> = onMain {
         fetchCollection(artistKey(artistId), "artists/$artistId/songs", forceRefresh)
+    }
 
     @Throws(Exception::class)
-    suspend fun fetchForPlaylist(playlistId: String, forceRefresh: Boolean = false): List<Playable> =
+    suspend fun fetchForPlaylist(playlistId: String, forceRefresh: Boolean = false): List<Playable> = onMain {
         fetchCollection(playlistKey(playlistId), "playlists/$playlistId/songs", forceRefresh)
+    }
 
     /** [checkForNewEpisodes] asks the server to re-read the feed first. */
     @Throws(Exception::class)
@@ -77,9 +81,9 @@ class PlayableStore internal constructor(private val api: ApiClient) {
         podcastId: String,
         forceRefresh: Boolean = false,
         checkForNewEpisodes: Boolean = false,
-    ): List<Playable> {
+    ): List<Playable> = onMain {
         val query = if (checkForNewEpisodes) "?refresh=1" else ""
-        return fetchCollection(podcastKey(podcastId), "podcasts/$podcastId/episodes$query", forceRefresh || checkForNewEpisodes)
+        fetchCollection(podcastKey(podcastId), "podcasts/$podcastId/episodes$query", forceRefresh || checkForNewEpisodes)
     }
 
     @Throws(Exception::class)
@@ -88,24 +92,25 @@ class PlayableStore internal constructor(private val api: ApiClient) {
         page: Int,
         sortField: String = PlayableSortField.TITLE,
         sortOrder: SortOrder = SortOrder.ASC,
-    ): Page<Playable> {
+    ): Page<Playable> = onMain {
         val result = api.getPage(
             "genres/$genreId/songs?page=$page&sort=$sortField&order=${sortOrder.value}",
             Playable.serializer(),
         )
-        return result.copy(items = vault.sync(result.items))
+        result.copy(items = vault.sync(result.items))
     }
 
     @Throws(Exception::class)
-    suspend fun fetchRandom(limit: Int = 500): List<Playable> =
+    suspend fun fetchRandom(limit: Int = 500): List<Playable> = onMain {
         sync(api.get("queue/fetch?order=rand&limit=$limit"))
+    }
 
     @Throws(Exception::class)
     suspend fun fetchInOrder(
         sortField: String = PlayableSortField.TITLE,
         sortOrder: SortOrder = SortOrder.ASC,
         limit: Int = 500,
-    ): List<Playable> = sync(api.get("queue/fetch?order=${sortOrder.value}&sort=$sortField&limit=$limit"))
+    ): List<Playable> = onMain { sync(api.get("queue/fetch?order=${sortOrder.value}&sort=$sortField&limit=$limit")) }
 
     internal fun sync(json: JsonElement): List<Playable> =
         vault.sync(KoelJson.decodeFromJsonElement(ListSerializer(Playable.serializer()), json))

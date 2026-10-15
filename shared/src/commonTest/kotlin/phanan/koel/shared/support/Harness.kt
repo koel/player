@@ -2,7 +2,6 @@ package phanan.koel.shared.support
 
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.MockEngineConfig
-import kotlinx.coroutines.Dispatchers
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.request.HttpRequestData
 import io.ktor.http.HttpHeaders
@@ -10,6 +9,10 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
@@ -33,7 +36,13 @@ data class RecordedRequest(
  * A fake Koel server. Routes match on method plus the path after `/api/`, query string
  * included; a route registered without a query string also matches any query.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class Harness {
+    init {
+        // The core hops to the main dispatcher; tests have no main run loop, so stand one in.
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+    }
+
     val keyValueStore = InMemoryKeyValueStore()
 
     val preferences = Preferences(keyValueStore).apply {

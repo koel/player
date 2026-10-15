@@ -3,7 +3,7 @@ import Security
 @preconcurrency import Shared
 
 /// Backs the shared `Preferences`: tokens go to the Keychain, everything else to UserDefaults.
-final class NativeKeyValueStore: NSObject, KeyValueStore {
+nonisolated final class NativeKeyValueStore: NSObject, KeyValueStore {
     private static let keychainKeys: Set = ["apiToken", "audioToken"]
 
     private let defaults: UserDefaults

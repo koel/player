@@ -1,5 +1,6 @@
 package phanan.koel.shared.stores
 
+import phanan.koel.shared.onMain
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,7 +32,7 @@ class AuthStore internal constructor(
 
     /** Returns a challenge when the server wants a second factor, or null when logged in. */
     @Throws(Exception::class)
-    suspend fun login(host: String, email: String, password: String): TwoFactorChallenge? {
+    suspend fun login(host: String, email: String, password: String): TwoFactorChallenge? = onMain {
         preferences.host = host
         preferences.userEmail = email
 
@@ -41,15 +42,15 @@ class AuthStore internal constructor(
         }).jsonObject
 
         if (response["two_factor"]?.jsonPrimitive?.booleanOrNull == true) {
-            return TwoFactorChallenge(response.getValue("login_token").jsonPrimitive.content)
+            return@onMain TwoFactorChallenge(response.getValue("login_token").jsonPrimitive.content)
         }
 
         storeTokens(response)
-        return null
+        null
     }
 
     @Throws(Exception::class)
-    suspend fun completeTwoFactorChallenge(challenge: TwoFactorChallenge, code: String) {
+    suspend fun completeTwoFactorChallenge(challenge: TwoFactorChallenge, code: String): Unit = onMain {
         storeTokens(api.post("me/two-factor-challenge", buildJsonObject {
             put("login_token", challenge.loginToken)
             put("code", code)
@@ -58,20 +59,20 @@ class AuthStore internal constructor(
 
     /** Logs in with the one-time token from the QR code shown in Koel's web UI. */
     @Throws(Exception::class)
-    suspend fun loginWithOneTimeToken(host: String, token: String) {
+    suspend fun loginWithOneTimeToken(host: String, token: String): Unit = onMain {
         preferences.host = host
         storeTokens(api.post("me/otp", buildJsonObject { put("token", token) }))
     }
 
     /** Null when there is no stored token; throws when the server rejects it or is unreachable. */
     @Throws(Exception::class)
-    suspend fun fetchCurrentUser(): User? {
-        if (preferences.apiToken == null) return null
+    suspend fun fetchCurrentUser(): User? = onMain {
+        if (preferences.apiToken == null) return@onMain null
 
         val user = api.get("me", User.serializer())
         preferences.userEmail = user.email
         userState.value = user
-        return user
+        user
     }
 
     internal suspend fun logout() {

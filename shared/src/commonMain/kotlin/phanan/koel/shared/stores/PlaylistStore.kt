@@ -1,5 +1,6 @@
 package phanan.koel.shared.stores
 
+import phanan.koel.shared.onMain
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,24 +30,24 @@ class PlaylistStore internal constructor(
     internal fun seed(playlists: List<Playlist>) = publish(playlists)
 
     @Throws(Exception::class)
-    suspend fun fetchAll() = publish(api.getList("playlists", Playlist.serializer()))
+    suspend fun fetchAll() = onMain { publish(api.getList("playlists", Playlist.serializer())) }
 
     @Throws(Exception::class)
-    suspend fun addToPlaylist(playables: List<Playable>, playlist: Playlist) {
+    suspend fun addToPlaylist(playables: List<Playable>, playlist: Playlist): Unit = onMain {
         requireStandard(playlist)
         api.post("playlists/${playlist.id}/songs", songsBody(playables))
         playableStore.addToPlaylistCollection(playlist.id, playables)
     }
 
     @Throws(Exception::class)
-    suspend fun removeFromPlaylist(playables: List<Playable>, playlist: Playlist) {
+    suspend fun removeFromPlaylist(playables: List<Playable>, playlist: Playlist): Unit = onMain {
         requireStandard(playlist)
         api.delete("playlists/${playlist.id}/songs", songsBody(playables))
         playableStore.removeFromPlaylistCollection(playlist.id, playables)
     }
 
     @Throws(Exception::class)
-    suspend fun addToFolder(playlist: Playlist, folderId: String) {
+    suspend fun addToFolder(playlist: Playlist, folderId: String): Unit = onMain {
         api.post("playlist-folders/$folderId/playlists", buildJsonObject {
             put("playlists", JsonArray(listOf(JsonPrimitive(playlist.id))))
         })
@@ -54,7 +55,7 @@ class PlaylistStore internal constructor(
     }
 
     @Throws(Exception::class)
-    suspend fun create(name: String, description: String? = null, folderId: String? = null): Playlist {
+    suspend fun create(name: String, description: String? = null, folderId: String? = null): Playlist = onMain {
         val json = api.post("playlists", buildJsonObject {
             put("name", name)
             if (!description.isNullOrEmpty()) put("description", description)
@@ -63,11 +64,11 @@ class PlaylistStore internal constructor(
 
         val playlist = KoelJson.decodeFromJsonElement(Playlist.serializer(), json)
         publish(playlistsState.value + playlist)
-        return playlist
+        playlist
     }
 
     @Throws(Exception::class)
-    suspend fun update(playlist: Playlist, name: String, description: String? = null, folderId: String? = null) {
+    suspend fun update(playlist: Playlist, name: String, description: String? = null, folderId: String? = null): Unit = onMain {
         api.put("playlists/${playlist.id}", buildJsonObject {
             put("name", name)
             put("description", description.orEmpty())
@@ -78,7 +79,7 @@ class PlaylistStore internal constructor(
 
     /** Removes the playlist right away, and puts it back if the server refuses. */
     @Throws(Exception::class)
-    suspend fun remove(playlist: Playlist) {
+    suspend fun remove(playlist: Playlist): Unit = onMain {
         val before = playlistsState.value
         publish(before.filterNot { it.id == playlist.id })
 

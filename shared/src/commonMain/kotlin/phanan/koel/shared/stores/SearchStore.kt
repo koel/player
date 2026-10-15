@@ -1,5 +1,6 @@
 package phanan.koel.shared.stores
 
+import phanan.koel.shared.onMain
 import io.ktor.http.encodeURLParameter
 import kotlinx.serialization.json.jsonObject
 import phanan.koel.shared.api.ApiClient
@@ -28,8 +29,8 @@ class SearchStore internal constructor(
     private val playableCache = mutableMapOf<String, List<Playable>>()
 
     @Throws(Exception::class)
-    suspend fun searchExcerpts(keywords: String): SearchResult {
-        excerptCache[keywords]?.let { return it.withCurrentEntities() }
+    suspend fun searchExcerpts(keywords: String): SearchResult = onMain {
+        excerptCache[keywords]?.let { return@onMain it.withCurrentEntities() }
 
         val response = api.get("search?q=${keywords.encodeURLParameter()}").jsonObject
         val result = SearchResult(
@@ -41,16 +42,16 @@ class SearchStore internal constructor(
         )
 
         excerptCache[keywords] = result
-        return result
+        result
     }
 
     @Throws(Exception::class)
-    suspend fun searchPlayables(keywords: String): List<Playable> {
-        playableCache[keywords]?.let { cached -> return cached.map { playableStore.byId(it.id) ?: it } }
+    suspend fun searchPlayables(keywords: String): List<Playable> = onMain {
+        playableCache[keywords]?.let { cached -> return@onMain cached.map { playableStore.byId(it.id) ?: it } }
 
         val result = playableStore.sync(api.get("search/songs?q=${keywords.encodeURLParameter()}"))
         playableCache[keywords] = result
-        return result
+        result
     }
 
     internal fun reset() {

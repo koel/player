@@ -1,5 +1,6 @@
 package phanan.koel.shared.stores
 
+import phanan.koel.shared.onMain
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -24,20 +25,20 @@ class PodcastStore internal constructor(private val api: ApiClient) {
     fun observe(id: String): Flow<Podcast?> = vault.entities.map { it[id] }.distinctUntilChanged()
 
     @Throws(Exception::class)
-    suspend fun fetchAll() {
+    suspend fun fetchAll(): Unit = onMain {
         list.ids = vault.sync(fetchSubscriptions()).map(Podcast::id)
     }
 
     /** Like [fetchAll], but also drops podcasts cached by [resolve] so their state is reloaded. */
     @Throws(Exception::class)
-    suspend fun refresh() {
+    suspend fun refresh(): Unit = onMain {
         val subscriptions = fetchSubscriptions()
         vault.clear()
         list.ids = vault.sync(subscriptions).map(Podcast::id)
     }
 
     @Throws(Exception::class)
-    suspend fun toggleFavorite(podcast: Podcast) {
+    suspend fun toggleFavorite(podcast: Podcast): Unit = onMain {
         val wasFavorite = vault[podcast.id]?.favorite ?: podcast.favorite
         vault.update(podcast.id) { it.copy(favorite = !wasFavorite) }
 
@@ -54,7 +55,7 @@ class PodcastStore internal constructor(private val api: ApiClient) {
 
     /** Removes the podcast right away, and puts it back if the server refuses. */
     @Throws(Exception::class)
-    suspend fun unsubscribe(podcast: Podcast) {
+    suspend fun unsubscribe(podcast: Podcast): Unit = onMain {
         val index = list.ids.indexOf(podcast.id).coerceAtLeast(0)
         list.remove(podcast.id)
 
@@ -69,23 +70,23 @@ class PodcastStore internal constructor(private val api: ApiClient) {
     }
 
     @Throws(Exception::class)
-    suspend fun add(url: String): Podcast {
+    suspend fun add(url: String): Podcast = onMain {
         val json = api.post("podcasts", buildJsonObject { put("url", url) })
         val podcast = vault.sync(KoelJson.decodeFromJsonElement(Podcast.serializer(), json))
         list.append(listOf(podcast.id))
-        return podcast
+        podcast
     }
 
     @Throws(Exception::class)
-    suspend fun resolve(id: String, forceRefresh: Boolean = false): Podcast {
+    suspend fun resolve(id: String, forceRefresh: Boolean = false): Podcast = onMain {
         val cached = vault[id]
-        if (cached != null && !forceRefresh) return cached
-        return vault.sync(api.get("podcasts/$id", Podcast.serializer()))
+        if (cached != null && !forceRefresh) return@onMain cached
+        vault.sync(api.get("podcasts/$id", Podcast.serializer()))
     }
 
     /** The saved playback position of the episode in seconds, or 0 when unknown. */
     @Throws(Exception::class)
-    suspend fun episodeProgress(episode: Episode): Double =
+    suspend fun episodeProgress(episode: Episode): Double = onMain {
         try {
             resolve(episode.podcastId).state.progresses[episode.id] ?: 0.0
         } catch (cancellation: CancellationException) {
@@ -93,6 +94,7 @@ class PodcastStore internal constructor(private val api: ApiClient) {
         } catch (error: Exception) {
             0.0
         }
+    }
 
     internal fun reset() {
         list.ids = emptyList()
