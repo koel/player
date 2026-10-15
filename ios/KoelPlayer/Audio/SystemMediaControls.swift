@@ -95,6 +95,11 @@ final class SystemMediaControls {
         ], playable.artworkUrl)
     }
 
+    /// MediaPlayer asks for the image on its own queue, so the closure must not be main-actor isolated.
+    nonisolated private static func artwork(_ image: UIImage) -> MPMediaItemArtwork {
+        MPMediaItemArtwork(boundsSize: image.size) { _ in image }
+    }
+
     /// The system extrapolates elapsed time from the rate, so only a seek needs reporting.
     private func syncElapsedTimeIfJumped(_ position: Double) {
         guard var info = center.nowPlayingInfo, !player.state.value.isRadioMode else { return }
@@ -119,7 +124,7 @@ final class SystemMediaControls {
                 UIImage(named: "default-image")
             }
             guard let self, !Task.isCancelled, let image, var info = center.nowPlayingInfo else { return }
-            info[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
+            info[MPMediaItemPropertyArtwork] = Self.artwork(image)
             center.nowPlayingInfo = info
         }
     }

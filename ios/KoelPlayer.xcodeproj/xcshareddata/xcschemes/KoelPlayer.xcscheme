@@ -38,6 +38,16 @@
                ReferencedContainer = "container:KoelPlayer.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "A10000000000000000000701"
+               BuildableName = "KoelPlayerUITests.xctest"
+               BlueprintName = "KoelPlayerUITests"
+               ReferencedContainer = "container:KoelPlayer.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
