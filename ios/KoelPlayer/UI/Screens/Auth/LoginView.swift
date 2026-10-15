@@ -19,59 +19,45 @@ struct LoginView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section {
-                    TextField("Host", text: $host, prompt: Text(verbatim: "https://koel.example.com"))
-                        .keyboardType(.URL)
-                        .textContentType(.URL)
-                        .accessibilityLabel("Host")
-                    TextField("Email", text: $email, prompt: Text(verbatim: "you@example.com"))
-                        .keyboardType(.emailAddress)
-                        .textContentType(.username)
-                        .accessibilityLabel("Email")
-                    SecureField("Password", text: $password)
-                        .textContentType(.password)
-                        .accessibilityLabel("Password")
-                        .onSubmit(logIn)
-                } header: {
-                    Image("logo")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 120, height: 120)
-                        .frame(maxWidth: .infinity)
-                        .padding(.bottom, 24)
-                }
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
+            GeometryReader { proxy in
+                ScrollView {
+                    VStack(spacing: 24) {
+                        Image("logo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 120, height: 120)
 
-                Section {
-                    Button(action: logIn) {
-                        Group {
-                            if isAuthenticating {
-                                ProgressView()
-                            } else {
-                                Text("Log In")
+                        credentials
+
+                        VStack(spacing: 12) {
+                            Button(action: logIn) {
+                                Group {
+                                    if isAuthenticating {
+                                        ProgressView()
+                                    } else {
+                                        Text("Log In")
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.glassProminent)
+                            .controlSize(.large)
+                            .disabled(!canSubmit)
+
+                            if DataScannerViewController.isSupported {
+                                Button("Log In with QR Code", systemImage: "qrcode.viewfinder") {
+                                    isScanning = true
+                                }
+                                .disabled(isAuthenticating)
                             }
                         }
-                        .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.glassProminent)
-                    .controlSize(.large)
-                    .disabled(!canSubmit)
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets())
-
-                    if DataScannerViewController.isSupported {
-                        Button("Log In with QR Code", systemImage: "qrcode.viewfinder") {
-                            isScanning = true
-                        }
-                        .frame(maxWidth: .infinity)
-                        .disabled(isAuthenticating)
-                        .listRowBackground(Color.clear)
-                    }
+                    .padding(.horizontal, 20)
+                    .frame(maxWidth: 480)
+                    .frame(maxWidth: .infinity, minHeight: proxy.size.height)
                 }
+                .scrollDismissesKeyboard(.interactively)
             }
-            .scrollDismissesKeyboard(.interactively)
             .navigationDestination(item: $challenge) { challenge in
                 TwoFactorView(challenge: challenge)
             }
@@ -91,6 +77,32 @@ struct LoginView: View {
             host = app.core.auth.host ?? ""
             email = app.core.auth.lastEmail ?? ""
         }
+    }
+
+    private var credentials: some View {
+        VStack(spacing: 0) {
+            TextField("Host", text: $host, prompt: Text(verbatim: "https://koel.example.com"))
+                .keyboardType(.URL)
+                .textContentType(.URL)
+                .accessibilityLabel("Host")
+                .padding(.vertical, 14)
+            Divider()
+            TextField("Email", text: $email, prompt: Text(verbatim: "you@example.com"))
+                .keyboardType(.emailAddress)
+                .textContentType(.username)
+                .accessibilityLabel("Email")
+                .padding(.vertical, 14)
+            Divider()
+            SecureField("Password", text: $password)
+                .textContentType(.password)
+                .accessibilityLabel("Password")
+                .onSubmit(logIn)
+                .padding(.vertical, 14)
+        }
+        .textInputAutocapitalization(.never)
+        .autocorrectionDisabled()
+        .padding(.horizontal, 16)
+        .background(.fill.tertiary, in: .rect(cornerRadius: 24, style: .continuous))
     }
 
     private func logIn() {

@@ -11,7 +11,7 @@ enum CoverColor {
               let image = await ImagePipeline.shared.image(for: remote, pointSize: 40),
               let average = averageColor(of: image)
         else { return nil }
-        return Color(uiColor: readable(average))
+        return legibleTint(from: average).map(Color.init(uiColor:))
     }
 
     private static func averageColor(of image: UIImage) -> UIColor? {
@@ -25,11 +25,38 @@ enum CoverColor {
         return UIColor(red: CGFloat(pixel[0]) / 255, green: CGFloat(pixel[1]) / 255, blue: CGFloat(pixel[2]) / 255, alpha: 1)
     }
 
-    /// Averages of real covers come out muddy and dark; lift them so text and icons stay legible on black.
-    private static func readable(_ color: UIColor) -> UIColor {
+    /// Luminance where the tint reads both as text on black and as a fill behind white glyphs
+    /// (roughly 4.5:1 against each).
+    private static let targetLuminance: CGFloat = 0.18
+
+    /// Nearly gray covers would only produce a gray tint; leave those neutral.
+    private static let minimumSaturation: CGFloat = 0.15
+
+    static func legibleTint(from color: UIColor) -> UIColor? {
         var hue: CGFloat = 0, saturation: CGFloat = 0, brightness: CGFloat = 0, alpha: CGFloat = 0
         color.getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha)
-        return UIColor(hue: hue, saturation: min(saturation * 1.3, 0.85), brightness: max(brightness, 0.7), alpha: 1)
+        guard saturation >= minimumSaturation else { return nil }
+
+        let boostedSaturation = min(max(saturation * 1.2, 0.45), 0.9)
+        var lower: CGFloat = 0, upper: CGFloat = 1
+        for _ in 0..<16 {
+            let middle = (lower + upper) / 2
+            if luminance(of: UIColor(hue: hue, saturation: boostedSaturation, brightness: middle, alpha: 1)) < targetLuminance {
+                lower = middle
+            } else {
+                upper = middle
+            }
+        }
+        return UIColor(hue: hue, saturation: boostedSaturation, brightness: lower, alpha: 1)
+    }
+
+    private static func luminance(of color: UIColor) -> CGFloat {
+        var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
+        color.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        func linear(_ channel: CGFloat) -> CGFloat {
+            channel <= 0.04045 ? channel / 12.92 : pow((channel + 0.055) / 1.055, 2.4)
+        }
+        return 0.2126 * linear(red) + 0.7152 * linear(green) + 0.0722 * linear(blue)
     }
 }
 

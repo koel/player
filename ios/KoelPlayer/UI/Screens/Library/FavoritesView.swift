@@ -45,7 +45,7 @@ struct FavoritesView: View {
         }
         .listStyle(.plain)
         .navigationTitle("Favorites")
-        .searchable(text: $query, prompt: "Filter Favorites")
+        .filterable(text: $query, prompt: "Filter Favorites")
         .refreshable { await fetch(forceRefresh: true) }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {

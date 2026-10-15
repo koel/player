@@ -46,7 +46,7 @@ struct GenreDetailView: View {
         .listStyle(.plain)
         .navigationTitle(name)
         .navigationBarTitleDisplayMode(.inline)
-        .searchable(text: $query, prompt: "Filter Songs")
+        .filterable(text: $query, prompt: "Filter Songs")
         .refreshable { await refresh() }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {

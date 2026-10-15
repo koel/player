@@ -45,7 +45,7 @@ struct SongsView: View {
         }
         .listStyle(.plain)
         .navigationTitle("Songs")
-        .searchable(text: $query, prompt: "Search Songs")
+        .filterable(text: $query, prompt: "Search Songs")
         .refreshable { await refresh() }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {

@@ -9,6 +9,7 @@ struct AlbumDetailView: View {
     @State private var songs: [any Playable] = []
     @State private var info: AlbumInfo?
     @State private var sort = SortSetting.remembered(for: Self.sortKey, default: SortSetting(field: PlayableSortField.shared.TRACK, order: .asc))
+    @State private var query = ""
     @State private var hasFailed = false
     @State private var editingAlbum: Album?
     @State private var coverColor: Color?
@@ -17,7 +18,7 @@ struct AlbumDetailView: View {
     private static let sortKey = "album.sort"
 
     private var displayedSongs: [any Playable] {
-        SortingKt.sorted(songs, field: sort.field, order: sort.order)
+        SortingKt.filtered(SortingKt.sorted(songs, field: sort.field, order: sort.order), keywords: query)
     }
 
     var body: some View {
@@ -45,6 +46,7 @@ struct AlbumDetailView: View {
         } action: { _, scrolledAway in
             isHeaderScrolledAway = scrolledAway
         }
+        .filterable(text: $query, prompt: "Filter Songs")
         .refreshable { await load(forceRefresh: true) }
         .toolbar {
             if let album {

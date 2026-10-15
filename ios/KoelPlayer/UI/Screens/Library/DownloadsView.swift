@@ -55,7 +55,7 @@ private struct DownloadsList: View {
                 ContentUnavailableView.search(text: filter)
             }
         }
-        .searchable(text: $filter, prompt: "Filter")
+        .filterable(text: $filter, prompt: "Filter")
         .navigationTitle("Downloaded")
         .toolbar {
             if !playables.value.isEmpty {

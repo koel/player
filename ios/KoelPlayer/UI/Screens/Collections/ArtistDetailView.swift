@@ -9,6 +9,7 @@ struct ArtistDetailView: View {
     @State private var songs: [any Playable] = []
     @State private var biography = ""
     @State private var sort = SortSetting.remembered(for: Self.sortKey, default: SortSetting(field: PlayableSortField.shared.TITLE, order: .asc))
+    @State private var query = ""
     @State private var hasFailed = false
     @State private var editingArtist: Artist?
     @State private var coverColor: Color?
@@ -17,14 +18,14 @@ struct ArtistDetailView: View {
     private static let sortKey = "artist.sort"
 
     private var displayedSongs: [any Playable] {
-        SortingKt.sorted(songs, field: sort.field, order: sort.order)
+        SortingKt.filtered(SortingKt.sorted(songs, field: sort.field, order: sort.order), keywords: query)
     }
 
     var body: some View {
         ScrollView {
             if let artist {
                 VStack(alignment: .leading, spacing: 0) {
-                    ArtistBanner(artist: artist, songs: displayedSongs)
+                    ArtistBanner(artist: artist, songs: displayedSongs, tint: coverColor)
 
                     if let summary = CollectionSummary.detail(songs: songs) {
                         Text(summary)
@@ -59,6 +60,8 @@ struct ArtistDetailView: View {
         } action: { _, scrolledAway in
             isBannerScrolledAway = scrolledAway
         }
+        .searchable(text: $query, placement: .toolbar, prompt: "Filter Songs")
+        .searchToolbarBehavior(.minimize)
         .refreshable { await load(forceRefresh: true) }
         .toolbar {
             if let artist {
@@ -108,6 +111,7 @@ struct ArtistDetailView: View {
 private struct ArtistBanner: View {
     let artist: Artist
     let songs: [any Playable]
+    let tint: Color?
 
     @Environment(AppModel.self) private var app
     @State private var image: UIImage?
@@ -130,15 +134,7 @@ private struct ArtistBanner: View {
 
                 Spacer(minLength: 16)
 
-                Button {
-                    app.player.play(songs)
-                } label: {
-                    Image(systemName: "play.fill")
-                        .font(.title2)
-                        .frame(width: 52, height: 52)
-                }
-                .buttonStyle(.glassProminent)
-                .buttonBorderShape(.circle)
+                playButton
                 .disabled(songs.isEmpty)
                 .accessibilityLabel("Play")
             }
@@ -148,6 +144,24 @@ private struct ArtistBanner: View {
         .task(id: artist.imageUrl) {
             guard let url = artist.imageUrl.flatMap(URL.init(string:)) else { return }
             image = await ImagePipeline.shared.image(for: url, pointSize: 430)
+        }
+    }
+
+    @ViewBuilder
+    private var playButton: some View {
+        let button = Button {
+            app.player.play(songs)
+        } label: {
+            Image(systemName: "play.fill")
+                .font(.title2)
+                .frame(width: 52, height: 52)
+        }
+        .buttonBorderShape(.circle)
+
+        if let tint {
+            button.buttonStyle(.glassProminent).tint(tint)
+        } else {
+            button.buttonStyle(.glass).tint(.primary)
         }
     }
 

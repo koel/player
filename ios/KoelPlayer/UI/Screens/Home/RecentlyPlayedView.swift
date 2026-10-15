@@ -44,7 +44,7 @@ private struct RecentlyPlayedList: View {
                 ContentUnavailableView.search(text: filter)
             }
         }
-        .searchable(text: $filter, prompt: "Filter")
+        .filterable(text: $filter, prompt: "Filter")
         .navigationTitle("Recently Played")
         .task {
             if !store.loaded.value.boolValue { await fetch() }

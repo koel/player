@@ -48,7 +48,7 @@ struct PodcastDetailView: View {
         }
         .listStyle(.plain)
         .overlay { placeholder }
-        .searchable(text: $searchText, prompt: "Filter")
+        .filterable(text: $searchText, prompt: "Filter")
         .navigationTitle(podcast?.title ?? "")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbarContent }

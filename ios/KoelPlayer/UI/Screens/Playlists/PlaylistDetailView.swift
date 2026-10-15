@@ -45,7 +45,7 @@ struct PlaylistDetailView: View {
         }
         .listStyle(.plain)
         .overlay { placeholder }
-        .searchable(text: $searchText, prompt: "Filter")
+        .filterable(text: $searchText, prompt: "Filter")
         .navigationTitle(playlist?.name ?? "")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbarContent }
