@@ -17,6 +17,8 @@ kotlin {
             implementation(libs.coroutines.core)
             implementation(libs.serialization.json)
             implementation(libs.ktor.client.core)
+            implementation(libs.kotlinx.io.core)
+            implementation(libs.kotlincrypto.sha2)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

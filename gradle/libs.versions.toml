@@ -4,6 +4,8 @@ coroutines = "1.11.0"
 serialization = "1.11.0"
 ktor = "3.6.0"
 skie = "0.10.15"
+kotlinx-io = "0.9.1"
+kotlincrypto-sha2 = "0.8.0"
 
 [libraries]
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -12,6 +14,8 @@ serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-jso
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+kotlinx-io-core = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx-io" }
+kotlincrypto-sha2 = { module = "org.kotlincrypto.hash:sha2", version.ref = "kotlincrypto-sha2" }
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
