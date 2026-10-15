@@ -25,6 +25,7 @@ struct PlayableRow: View {
     var removal: Removal?
 
     @Environment(AppModel.self) private var app
+    @Environment(\.brandColor) private var brandColor
 
     var body: some View {
         Button {
@@ -36,7 +37,7 @@ struct PlayableRow: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(playable.title)
                         .lineLimit(1)
-                        .foregroundStyle(app.player.isCurrent(playable) ? Color.highlight : .primary)
+                        .foregroundStyle(app.player.isCurrent(playable) ? brandColor : .primary)
                     Text(subtitle)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -126,10 +127,12 @@ struct PlayableRow: View {
 struct NowPlayingIndicator: View {
     let isPlaying: Bool
 
+    @Environment(\.brandColor) private var brandColor
+
     var body: some View {
         Image(systemName: "waveform")
             .symbolEffect(.variableColor.iterative, isActive: isPlaying)
-            .foregroundStyle(Color.highlight)
+            .foregroundStyle(brandColor)
             .accessibilityLabel(isPlaying ? "Now playing" : "Paused")
     }
 }

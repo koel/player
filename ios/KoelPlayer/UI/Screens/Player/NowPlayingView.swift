@@ -6,6 +6,7 @@ import SwiftUI
 struct NowPlayingView: View {
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.brandColor) private var brandColor
 
     @State private var isQueuePresented = false
     @State private var scrubPosition: Double?
@@ -95,7 +96,7 @@ struct NowPlayingView: View {
                     Image(systemName: current.favorite ? "star.fill" : "star")
                         .contentTransition(.symbolEffect(.replace))
                 }
-                .foregroundStyle(current.favorite ? Color.highlight : .primary)
+                .foregroundStyle(current.favorite ? brandColor : .primary)
                 .disabled(app.isOffline)
                 .accessibilityLabel(current.favorite ? "Undo Favorite" : "Favorite")
 
@@ -194,7 +195,7 @@ struct NowPlayingView: View {
             if !state.isRadioMode {
                 Button { app.player.rotateRepeatMode() } label: {
                     Image(systemName: state.repeatMode == .one ? "repeat.1" : "repeat")
-                        .foregroundStyle(state.repeatMode == .none ? Color.secondary : Color.highlight)
+                        .foregroundStyle(state.repeatMode == .none ? Color.secondary : brandColor)
                 }
                 .accessibilityLabel("Repeat: \(state.repeatMode.label)")
                 Spacer()

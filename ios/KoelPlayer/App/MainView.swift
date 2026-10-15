@@ -3,6 +3,7 @@ import SwiftUI
 
 struct MainView: View {
     @Environment(AppModel.self) private var app
+    @Environment(\.brandColor) private var brandColor
     @Namespace private var nowPlayingTransition
 
     var body: some View {
@@ -20,7 +21,7 @@ struct MainView: View {
                 stack(for: .search) { SearchView() }
             }
         }
-        .tint(.highlight)
+        .tint(brandColor)
         .tabBarMinimizeBehavior(.onScrollDown)
         .tabViewBottomAccessory(isEnabled: app.player.hasSomethingToShow) {
             MiniPlayer()

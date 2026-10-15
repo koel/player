@@ -23,5 +23,6 @@ struct RootView: View {
             }
         }
         .animation(.default, value: app.phase)
+        .modifier(NowPlayingBrandColor())
     }
 }

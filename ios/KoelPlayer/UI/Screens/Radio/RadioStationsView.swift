@@ -106,6 +106,7 @@ private struct RadioStationRow: View {
     let station: RadioStation
 
     @Environment(AppModel.self) private var app
+    @Environment(\.brandColor) private var brandColor
 
     var body: some View {
         let actions = RadioStationActions(app: app)
@@ -127,7 +128,7 @@ private struct RadioStationRow: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(station.name)
                         .lineLimit(1)
-                        .foregroundStyle(isCurrent ? Color.highlight : .primary)
+                        .foregroundStyle(isCurrent ? brandColor : .primary)
                     if let description = station.description_, !description.isEmpty {
                         Text(description)
                             .font(.subheadline)
