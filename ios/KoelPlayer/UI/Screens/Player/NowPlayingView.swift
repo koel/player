@@ -95,7 +95,7 @@ struct NowPlayingView: View {
                     Image(systemName: current.favorite ? "star.fill" : "star")
                         .contentTransition(.symbolEffect(.replace))
                 }
-                .foregroundStyle(current.favorite ? Color.accentColor : .primary)
+                .foregroundStyle(current.favorite ? Color.highlight : .primary)
                 .disabled(app.isOffline)
                 .accessibilityLabel(current.favorite ? "Undo Favorite" : "Favorite")
 
@@ -194,7 +194,7 @@ struct NowPlayingView: View {
             if !state.isRadioMode {
                 Button { app.player.rotateRepeatMode() } label: {
                     Image(systemName: state.repeatMode == .one ? "repeat.1" : "repeat")
-                        .foregroundStyle(state.repeatMode == .none ? Color.secondary : Color.accentColor)
+                        .foregroundStyle(state.repeatMode == .none ? Color.secondary : Color.highlight)
                 }
                 .accessibilityLabel("Repeat: \(state.repeatMode.label)")
                 Spacer()

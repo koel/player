@@ -36,7 +36,7 @@ struct PlayableRow: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(playable.title)
                         .lineLimit(1)
-                        .foregroundStyle(app.player.isCurrent(playable) ? Color.accentColor : .primary)
+                        .foregroundStyle(app.player.isCurrent(playable) ? Color.highlight : .primary)
                     Text(subtitle)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -129,7 +129,7 @@ struct NowPlayingIndicator: View {
     var body: some View {
         Image(systemName: "waveform")
             .symbolEffect(.variableColor.iterative, isActive: isPlaying)
-            .foregroundStyle(Color.accentColor)
+            .foregroundStyle(Color.highlight)
             .accessibilityLabel(isPlaying ? "Now playing" : "Paused")
     }
 }

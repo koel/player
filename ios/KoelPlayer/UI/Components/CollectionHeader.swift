@@ -25,7 +25,7 @@ struct CollectionHeader<Accessory: View>: View {
                 if let subtitle {
                     Text(subtitle)
                         .font(.title3)
-                        .foregroundStyle(Color.accentColor)
+                        .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                 }
                 if let detail {

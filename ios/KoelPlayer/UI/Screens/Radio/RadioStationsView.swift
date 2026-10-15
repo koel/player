@@ -127,7 +127,7 @@ private struct RadioStationRow: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(station.name)
                         .lineLimit(1)
-                        .foregroundStyle(isCurrent ? Color.accentColor : .primary)
+                        .foregroundStyle(isCurrent ? Color.highlight : .primary)
                     if let description = station.description_, !description.isEmpty {
                         Text(description)
                             .font(.subheadline)
