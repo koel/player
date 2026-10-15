@@ -20,6 +20,18 @@ object PlayableSortField {
     const val POSITION = "position"
 }
 
+object AlbumSortField {
+    const val NAME = "name"
+    const val ARTIST_NAME = "artist_name"
+    const val YEAR = "year"
+    const val CREATED_AT = "created_at"
+}
+
+object ArtistSortField {
+    const val NAME = "name"
+    const val CREATED_AT = "created_at"
+}
+
 fun List<Playable>.filtered(keywords: String): List<Playable> =
     if (keywords.isBlank()) this else filter { it.matches(keywords.trim()) }
 

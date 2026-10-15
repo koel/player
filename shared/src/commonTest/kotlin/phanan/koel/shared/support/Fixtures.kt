@@ -16,6 +16,8 @@ object Fixtures {
         albumName: String = "Album",
         artistId: String = "artist-1",
         artistName: String = "Artist",
+        albumArtistId: String = artistId,
+        albumArtistName: String = artistName,
         length: Double = 200.0,
         favorite: Boolean = false,
         playCount: Int = 0,
@@ -31,8 +33,8 @@ object Fixtures {
         put("album_name", albumName)
         put("artist_id", artistId)
         put("artist_name", artistName)
-        put("album_artist_id", artistId)
-        put("album_artist_name", artistName)
+        put("album_artist_id", albumArtistId)
+        put("album_artist_name", albumArtistName)
         put("album_cover", "https://koel.test/img/$albumId.jpg")
         put("length", length)
         put("favorite", favorite)
