@@ -31,9 +31,9 @@ struct BrandMeshBackground: View {
         }
 
         return [
-            [0, 0], [0.5 + drift(23, 0.15), 0], [1, 0],
-            [0, 0.5 + drift(29, 0.12, phase: 1)], [0.5 + drift(31, 0.12, phase: 2), 0.5 + drift(37, 0.12)], [1, 0.5 + drift(27, 0.15, phase: 3)],
-            [0, 1], [0.5 + drift(25, 0.15, phase: 4), 1], [1, 1],
+            [0, 0], [0.5 + drift(11, 0.3), 0], [1, 0],
+            [0, 0.5 + drift(13, 0.3, phase: 1)], [0.5 + drift(10, 0.28, phase: 2), 0.5 + drift(14, 0.28)], [1, 0.5 + drift(12, 0.3, phase: 3)],
+            [0, 1], [0.5 + drift(16, 0.3, phase: 4), 1], [1, 1],
         ]
     }
 }
