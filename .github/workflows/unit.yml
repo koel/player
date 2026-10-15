@@ -33,4 +33,4 @@ jobs:
         run: |
           SIMULATOR_ID=$(xcrun simctl list devices available -j | jq -r '[.devices[][] | select(.name | startswith("iPhone"))][0].udid')
           xcodebuild test -project ios/KoelPlayer.xcodeproj -scheme KoelPlayer \
-            -destination "id=$SIMULATOR_ID" CODE_SIGNING_ALLOWED=NO
+            -destination "id=$SIMULATOR_ID" CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=
