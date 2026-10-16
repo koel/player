@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// A knobless progress control like Apple Music's: a thin bar, or the song's waveform when there is one.
-/// Dragging moves the position by the distance moved rather than jumping to the touch.
+/// A tap jumps to the touched spot; dragging moves the position by the distance moved.
 struct PlaybackScrubber: View {
     let position: Double
     let length: Double
@@ -10,6 +10,8 @@ struct PlaybackScrubber: View {
     let onCommit: (Double) -> Void
 
     @State private var dragStartPosition: Double?
+
+    private static let tapTolerance: CGFloat = 4
 
     private var isDragging: Bool { dragStartPosition != nil }
     private var fraction: Double { length > 0 ? min(max(position / length, 0), 1) : 0 }
@@ -62,7 +64,11 @@ struct PlaybackScrubber: View {
             .onEnded { gesture in
                 let start = dragStartPosition ?? position
                 dragStartPosition = nil
-                onCommit(target(from: start, translation: gesture.translation.width, width: width))
+                if abs(gesture.translation.width) < Self.tapTolerance, width > 0 {
+                    onCommit(min(max(Double(gesture.location.x / width), 0), 1) * length)
+                } else {
+                    onCommit(target(from: start, translation: gesture.translation.width, width: width))
+                }
             }
     }
 
