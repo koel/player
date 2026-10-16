@@ -117,16 +117,12 @@ struct NowPlayingView: View {
         let length = max(current.length, 1)
 
         return VStack(spacing: 4) {
-            Slider(
-                value: Binding(get: { min(position, length) }, set: { scrubPosition = $0 }),
-                in: 0...length
-            ) { isEditing in
-                if !isEditing, let scrubPosition {
-                    app.player.seek(to: scrubPosition)
-                    self.scrubPosition = nil
-                }
+            PlaybackScrubber(position: min(position, length), length: length) { target in
+                scrubPosition = target
+            } onCommit: { target in
+                app.player.seek(to: target)
+                scrubPosition = nil
             }
-            .tint(.primary)
 
             HStack {
                 Text(position.playbackTime)
