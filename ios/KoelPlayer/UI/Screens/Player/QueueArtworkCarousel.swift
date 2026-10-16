@@ -25,7 +25,7 @@ struct QueueArtworkCarousel: View {
                         let isCurrent = playable.id == state.current?.id
                         Artwork(url: playable.artworkUrl, size: Self.artworkSize, cornerRadius: 14)
                             .shadow(color: .black.opacity(isCurrent ? 0.5 : 0.2), radius: 30, y: 16)
-                            .scaleEffect(isCurrent && !state.isPlaying ? 0.86 : 1)
+                            .scaleEffect(state.isPlaying ? 1 : 0.86)
                             .animation(.spring(duration: 0.45, bounce: 0.3), value: state.isPlaying)
                             .accessibilityHidden(!isCurrent)
                     }
