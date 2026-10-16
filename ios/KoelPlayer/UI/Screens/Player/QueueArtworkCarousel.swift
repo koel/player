@@ -9,7 +9,8 @@ struct QueueArtworkCarousel: View {
     @State private var scrolledId: String?
 
     private static let artworkSize: CGFloat = 320
-    private static let spacing: CGFloat = 20
+    private static let neighborScale: CGFloat = 0.8
+    private static let spacing: CGFloat = -12
 
     private var neighborhood: [any Playable] {
         let index = Int(state.currentIndex)
@@ -25,6 +26,11 @@ struct QueueArtworkCarousel: View {
                         let isCurrent = playable.id == state.current?.id
                         Artwork(url: playable.artworkUrl, size: Self.artworkSize, cornerRadius: 14)
                             .shadow(color: .black.opacity(isCurrent ? 0.5 : 0.2), radius: 30, y: 16)
+                            .scrollTransition(.interactive, axis: .horizontal) { content, phase in
+                                content
+                                    .scaleEffect(phase.isIdentity ? 1 : Self.neighborScale)
+                                    .brightness(phase.isIdentity ? 0 : -0.4)
+                            }
                             .scaleEffect(state.isPlaying ? 1 : 0.86)
                             .animation(.spring(duration: 0.45, bounce: 0.3), value: state.isPlaying)
                             .accessibilityHidden(!isCurrent)
