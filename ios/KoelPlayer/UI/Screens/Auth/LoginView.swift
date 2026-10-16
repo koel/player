@@ -12,6 +12,7 @@ struct LoginView: View {
     @State private var errorMessage: String?
     @State private var challenge: TwoFactorChallenge?
     @State private var isScanning = false
+    @State private var isPasswordRevealed = false
 
     private enum Field {
         case host, email, password
@@ -113,17 +114,41 @@ struct LoginView: View {
             }
             Divider().padding(.leading, 20)
             CredentialField {
-                SecureField("Password", text: $password)
+                HStack {
+                    Group {
+                        if isPasswordRevealed {
+                            TextField("Password", text: $password)
+                        } else {
+                            SecureField("Password", text: $password)
+                        }
+                    }
                     .textContentType(.password)
                     .accessibilityLabel("Password")
                     .focused($focusedField, equals: .password)
                     .submitLabel(.go)
                     .onSubmit(logIn)
+
+                    Button(action: togglePasswordReveal) {
+                        Image(systemName: isPasswordRevealed ? "eye.slash" : "eye")
+                            .foregroundStyle(.secondary)
+                            .contentTransition(.symbolEffect(.replace))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(isPasswordRevealed ? "Hide Password" : "Show Password")
+                }
             }
         }
         .textInputAutocapitalization(.never)
         .autocorrectionDisabled()
         .glassEffect(.regular, in: .rect(cornerRadius: 28, style: .continuous))
+    }
+
+    private func togglePasswordReveal() {
+        let wasEditingPassword = focusedField == .password
+        isPasswordRevealed.toggle()
+        if wasEditingPassword {
+            focusedField = .password
+        }
     }
 
     private func scanQRCode() {
