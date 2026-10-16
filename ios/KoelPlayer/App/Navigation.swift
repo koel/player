@@ -21,6 +21,7 @@ enum Route: Codable, Hashable {
     case radioStations
     case album(id: String)
     case artist(id: String)
+    case artistSongs(id: String)
     case playlist(id: String)
     case podcast(id: String)
     case genre(id: String, name: String)
