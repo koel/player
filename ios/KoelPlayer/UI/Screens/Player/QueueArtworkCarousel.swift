@@ -12,11 +12,11 @@ struct QueueArtworkCarousel: View {
 
     private static let artworkSize: CGFloat = 280
     /// How far the covers next to the current one sit, and how far a swipe travels to reach one.
-    private static let step: CGFloat = 160
+    private static let step: CGFloat = 150
     /// The outer covers tuck in closer behind the inner ones.
     private static let outerStep: CGFloat = 80
-    private static let sideScale: CGFloat = 0.85
-    private static let outerScale: CGFloat = 0.62
+    private static let sideScale: CGFloat = 0.7
+    private static let outerScale: CGFloat = 0.55
     private static let reach = 2
     private static let sideAngle: Double = 24
     private static let swipeThreshold: CGFloat = 50
