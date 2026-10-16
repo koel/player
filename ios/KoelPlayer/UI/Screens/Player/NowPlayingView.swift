@@ -24,10 +24,15 @@ struct NowPlayingView: View {
 
             Spacer(minLength: 16)
 
-            Artwork(url: artworkUrl(state), size: 320, cornerRadius: 14)
-                .shadow(color: .black.opacity(0.5), radius: 30, y: 16)
-                .scaleEffect(state.isPlaying ? 1 : 0.86)
-                .animation(.spring(duration: 0.45, bounce: 0.3), value: state.isPlaying)
+            if state.isRadioMode {
+                Artwork(url: artworkUrl(state), size: 320, cornerRadius: 14)
+                    .shadow(color: .black.opacity(0.5), radius: 30, y: 16)
+                    .scaleEffect(state.isPlaying ? 1 : 0.86)
+                    .animation(.spring(duration: 0.45, bounce: 0.3), value: state.isPlaying)
+            } else {
+                QueueArtworkCarousel(state: state)
+                    .padding(.horizontal, -28)
+            }
 
             Spacer(minLength: 24)
 
