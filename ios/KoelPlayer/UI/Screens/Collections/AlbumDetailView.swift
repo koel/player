@@ -65,7 +65,8 @@ struct AlbumDetailView: View {
                     toggleFavorite: { try await app.core.albums.toggleFavorite(album: album) },
                     sortOptions: SortOptions.albumSongs,
                     sort: $sort,
-                    sortKey: Self.sortKey
+                    sortKey: Self.sortKey,
+                    showsFavorite: false
                 ) {
                     AlbumMenu(album: album) { editingAlbum = album }
                 }
@@ -132,10 +133,81 @@ private struct AlbumHeader: View {
                 }
             }
 
-            PlayShuffleButtons(playables: songs)
+            AlbumActions(album: album, songs: songs, tint: tint)
         }
         .buttonStyle(.plain)
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
+    }
+}
+
+/// Favorite and Shuffle as round icon buttons flanking a prominent Play.
+private struct AlbumActions: View {
+    let album: Album
+    let songs: [any Playable]
+    let tint: Color?
+
+    @Environment(AppModel.self) private var app
+
+    var body: some View {
+        HStack(spacing: 16) {
+            if app.core.session.supports(feature: .favoriteEntities) {
+                RoundIconButton(title: album.favorite ? "Undo Favorite" : "Favorite", systemImage: album.favorite ? "star.fill" : "star", action: toggleFavorite)
+            }
+
+            playButton
+
+            RoundIconButton(title: "Shuffle", systemImage: "shuffle") {
+                app.player.play(songs, shuffled: true)
+            }
+            .disabled(songs.isEmpty)
+        }
+        .controlSize(.large)
+        .padding(.horizontal)
+    }
+
+    @ViewBuilder
+    private var playButton: some View {
+        let button = Button {
+            app.player.play(songs)
+        } label: {
+            Label("Play", systemImage: "play.fill")
+                .frame(maxWidth: .infinity)
+        }
+        .disabled(songs.isEmpty)
+
+        if let tint {
+            button.buttonStyle(.glassProminent).tint(tint)
+        } else {
+            button.buttonStyle(.glass).tint(.primary)
+        }
+    }
+
+    private func toggleFavorite() {
+        Task {
+            do {
+                try await app.core.albums.toggleFavorite(album: album)
+            } catch {
+                app.toasts.showError()
+            }
+        }
+    }
+}
+
+private struct RoundIconButton: View {
+    let title: String
+    let systemImage: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: systemImage)
+                .contentTransition(.symbolEffect(.replace))
+                .frame(width: 24, height: 24)
+        }
+        .accessibilityLabel(title)
+        .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .tint(.primary)
     }
 }

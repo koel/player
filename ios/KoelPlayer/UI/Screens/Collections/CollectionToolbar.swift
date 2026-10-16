@@ -8,12 +8,13 @@ struct CollectionToolbar<MenuContent: View>: ToolbarContent {
     let sortOptions: [SortOption]
     @Binding var sort: SortSetting
     let sortKey: String
+    var showsFavorite = true
     @ViewBuilder let menu: () -> MenuContent
 
     @Environment(AppModel.self) private var app
 
     var body: some ToolbarContent {
-        if app.core.session.supports(feature: .favoriteEntities) {
+        if showsFavorite, app.core.session.supports(feature: .favoriteEntities) {
             ToolbarItem(placement: .primaryAction) {
                 Button(isFavorite ? "Undo Favorite" : "Favorite", systemImage: isFavorite ? "star.fill" : "star") {
                     Task {
