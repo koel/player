@@ -3,9 +3,11 @@ package phanan.koel.shared.stores
 import io.ktor.http.HttpMethod
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import phanan.koel.shared.api.HttpResponseException
 import phanan.koel.shared.support.Harness
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class MediaInfoStoreTest {
     private val h = Harness()
@@ -70,5 +72,30 @@ class MediaInfoStoreTest {
             listOf("albums/a1/information", "albums/a2/information", "artists/ar1/information", "albums/a1/information"),
             h.requests.map { it.path },
         )
+    }
+
+    @Test
+    fun fetchesAndCachesSongWaveform() = runTest(UnconfinedTestDispatcher()) {
+        h.on(HttpMethod.Get, "songs/s1/waveform") { """{"waveform": [0, 0.5, 1]}""" }
+
+        assertEquals(listOf(0.0, 0.5, 1.0), store.fetchWaveform("s1"))
+        store.fetchWaveform("s1")
+        assertEquals(1, h.requestsTo(HttpMethod.Get, "songs/s1/waveform").size)
+    }
+
+    @Test
+    fun treatsUnanalyzedSongsAsHavingNoWaveform() = runTest(UnconfinedTestDispatcher()) {
+        h.on(HttpMethod.Get, "songs/s1/waveform", status = 404) { "" }
+
+        assertEquals(emptyList(), store.fetchWaveform("s1"))
+    }
+
+    @Test
+    fun rethrowsServerErrorsWithoutCaching() = runTest(UnconfinedTestDispatcher()) {
+        h.on(HttpMethod.Get, "songs/s1/waveform", status = 500) { "" }
+        assertFailsWith<HttpResponseException> { store.fetchWaveform("s1") }
+
+        h.on(HttpMethod.Get, "songs/s1/waveform") { """{"waveform": [0.2]}""" }
+        assertEquals(listOf(0.2), store.fetchWaveform("s1"))
     }
 }

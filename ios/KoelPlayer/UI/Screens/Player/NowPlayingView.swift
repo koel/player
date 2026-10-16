@@ -10,6 +10,7 @@ struct NowPlayingView: View {
 
     @State private var isQueuePresented = false
     @State private var scrubPosition: Double?
+    @State private var waveform: [Double] = []
 
     var body: some View {
         let state = app.player.state
@@ -41,6 +42,7 @@ struct NowPlayingView: View {
             } else if let current = state.current {
                 progress(for: current)
                     .padding(.bottom, 16)
+                    .task(id: current.id) { await loadWaveform(for: current) }
             }
 
             transportControls(state)
@@ -62,6 +64,12 @@ struct NowPlayingView: View {
         .onChange(of: app.player.hasSomethingToShow) { _, hasSomething in
             if !hasSomething { dismiss() }
         }
+    }
+
+    private func loadWaveform(for current: any Playable) async {
+        waveform = []
+        guard current is Song else { return }
+        waveform = ((try? await app.core.mediaInfo.fetchWaveform(songId: current.id)) ?? []).map(\.doubleValue)
     }
 
     private func artworkUrl(_ state: PlaybackState) -> String? {
@@ -117,7 +125,7 @@ struct NowPlayingView: View {
         let length = max(current.length, 1)
 
         return VStack(spacing: 4) {
-            PlaybackScrubber(position: min(position, length), length: length) { target in
+            PlaybackScrubber(position: min(position, length), length: length, waveform: waveform) { target in
                 scrubPosition = target
             } onCommit: { target in
                 app.player.seek(to: target)
