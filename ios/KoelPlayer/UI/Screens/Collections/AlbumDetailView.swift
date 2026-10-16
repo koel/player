@@ -155,7 +155,7 @@ private struct AlbumActions: View {
                 RoundIconButton(title: album.favorite ? "Undo Favorite" : "Favorite", systemImage: album.favorite ? "star.fill" : "star", action: toggleFavorite)
             }
 
-            playButton
+            PlayButton(playables: songs, tint: tint)
 
             RoundIconButton(title: "Shuffle", systemImage: "shuffle") {
                 app.player.play(songs, shuffled: true)
@@ -164,23 +164,6 @@ private struct AlbumActions: View {
         }
         .controlSize(.large)
         .padding(.horizontal)
-    }
-
-    @ViewBuilder
-    private var playButton: some View {
-        let button = Button {
-            app.player.play(songs)
-        } label: {
-            Label("Play", systemImage: "play.fill")
-                .frame(maxWidth: .infinity)
-        }
-        .disabled(songs.isEmpty)
-
-        if let tint {
-            button.buttonStyle(.glassProminent).tint(tint)
-        } else {
-            button.buttonStyle(.glass).tint(.primary)
-        }
     }
 
     private func toggleFavorite() {

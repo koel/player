@@ -25,7 +25,7 @@ struct ArtistDetailView: View {
         ScrollView {
             if let artist {
                 VStack(alignment: .leading, spacing: 28) {
-                    ArtistHero(artist: artist, songs: songs, hasBiography: !biography.plainText.isBlank) {
+                    ArtistHero(artist: artist, songs: songs, tint: coverColor, hasBiography: !biography.plainText.isBlank) {
                         isShowingBiography = true
                     }
 
@@ -131,6 +131,7 @@ struct ArtistDetailView: View {
 private struct ArtistHero: View {
     let artist: Artist
     let songs: [any Playable]
+    let tint: Color?
     let hasBiography: Bool
     let showBiography: () -> Void
 
@@ -157,29 +158,18 @@ private struct ArtistHero: View {
                 .shadow(color: .black.opacity(0.5), radius: 8)
                 .padding(.horizontal)
 
-            HStack(spacing: 28) {
+            HStack(spacing: 16) {
                 RoundIconButton(title: "About", systemImage: "info", action: showBiography)
                     .disabled(!hasBiography)
 
-                Button {
-                    app.player.play(songs)
-                } label: {
-                    Image(systemName: "play.fill")
-                        .font(.title)
-                        .foregroundStyle(.black)
-                        .frame(width: 64, height: 64)
-                }
-                .buttonStyle(.glassProminent)
-                .buttonBorderShape(.circle)
-                .tint(.white)
-                .disabled(songs.isEmpty)
-                .accessibilityLabel("Play")
+                PlayButton(playables: songs, tint: tint)
 
                 if app.core.session.supports(feature: .favoriteEntities) {
                     RoundIconButton(title: artist.favorite ? "Undo Favorite" : "Favorite", systemImage: artist.favorite ? "star.fill" : "star", action: toggleFavorite)
                 }
             }
             .controlSize(.large)
+            .padding(.horizontal)
         }
         .frame(maxWidth: .infinity)
         .task(id: artist.imageUrl) {

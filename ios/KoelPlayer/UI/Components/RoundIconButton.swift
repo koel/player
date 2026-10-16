@@ -1,3 +1,4 @@
+@preconcurrency import Shared
 import SwiftUI
 
 /// A neutral glass circle holding one symbol, for the secondary actions around a Play button.
@@ -16,5 +17,29 @@ struct RoundIconButton: View {
         .buttonStyle(.glass)
         .buttonBorderShape(.circle)
         .tint(.primary)
+    }
+}
+
+/// The wide main Play button between round icon buttons, in the cover color when there is one.
+struct PlayButton: View {
+    let playables: [any Playable]
+    let tint: Color?
+
+    @Environment(AppModel.self) private var app
+
+    var body: some View {
+        let button = Button {
+            app.player.play(playables)
+        } label: {
+            Label("Play", systemImage: "play.fill")
+                .frame(maxWidth: .infinity)
+        }
+        .disabled(playables.isEmpty)
+
+        if let tint {
+            button.buttonStyle(.glassProminent).tint(tint)
+        } else {
+            button.buttonStyle(.glass).tint(.primary)
+        }
     }
 }
