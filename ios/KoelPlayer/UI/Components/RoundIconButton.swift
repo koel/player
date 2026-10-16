@@ -32,7 +32,7 @@ struct PlayButton: View {
             app.player.play(playables)
         } label: {
             Label("Play", systemImage: "play.fill")
-                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 36)
         }
         .disabled(playables.isEmpty)
 
