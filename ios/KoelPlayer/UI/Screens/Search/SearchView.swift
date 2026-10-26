@@ -51,12 +51,15 @@ private struct SearchResults: View {
     let keywords: String
     let sections: [SearchSection]
 
+    @Environment(AppModel.self) private var app
+    @State private var livePlayables: [any Playable]?
+
     var body: some View {
         LazyVStack(alignment: .leading, spacing: SectionHeader.sectionGap) {
             ForEach(sections, id: \.self) { section in
                 switch section {
                 case .songs:
-                    PlayableSection(title: section.title, destination: .searchSongs(keywords: keywords), playables: result.playables)
+                    PlayableSection(title: section.title, destination: .searchSongs(keywords: keywords), playables: livePlayables ?? result.playables)
                 case .albums:
                     CardCarousel(title: section.title) {
                         ForEach(result.albums, id: \.id) { CarouselAlbumCard(album: $0) }
@@ -77,5 +80,6 @@ private struct SearchResults: View {
             }
         }
         .padding(.vertical)
+        .collect(app.core.playables.live(playables: result.playables), id: result.playables.map(\.id)) { livePlayables = $0 }
     }
 }

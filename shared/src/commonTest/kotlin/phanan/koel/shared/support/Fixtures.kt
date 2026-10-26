@@ -131,6 +131,7 @@ object Fixtures {
         name: String = "Station $id",
         url: String = "https://stream.example.com/$id",
         favorite: Boolean = false,
+        homepageUrl: String? = null,
     ) = buildJsonObject {
         put("type", "radio-stations")
         put("id", id)
@@ -138,6 +139,7 @@ object Fixtures {
         put("url", url)
         put("logo", "https://koel.test/img/$id.png")
         put("description", "")
+        put("homepage_url", homepageUrl)
         put("is_public", false)
         put("favorite", favorite)
         putJsonObject("permissions") {

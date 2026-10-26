@@ -42,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.retain.retainRetainedValuesStoreRegistry
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import phanan.koel.app.AppModel
@@ -92,6 +94,7 @@ fun MainScreen() {
     val phase by app.phase.collectAsStateWithLifecycle()
     val isOffline = phase == AppModel.Phase.Offline
     val tabStates = rememberSaveableStateHolder()
+    val tabRetainedValues = retainRetainedValuesStoreRegistry()
     val density = LocalDensity.current
     var bottomBarHeight by remember { mutableStateOf(0.dp) }
 
@@ -119,13 +122,15 @@ fun MainScreen() {
         }
         val tab = navigator.selectedTab
         tabStates.SaveableStateProvider(tab) {
-            NavDisplay(
-                backStack = navigator.stack(tab),
-                onBack = { navigator.pop() },
-                entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator()),
-                modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
-                entryProvider = { route -> NavEntry(route) { Destination(route) } },
-            )
+            tabRetainedValues.LocalRetainedValuesStoreProvider(tab) {
+                NavDisplay(
+                    backStack = navigator.stack(tab),
+                    onBack = { navigator.pop() },
+                    entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator(), rememberRetainedValuesNavEntryDecorator()),
+                    modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
+                    entryProvider = { route -> NavEntry(route) { Destination(route) } },
+                )
+            }
         }
     }
 
@@ -179,6 +184,17 @@ private fun androidx.compose.foundation.layout.RowScope.TabItem(tab: AppTab, lab
             unselectedTextColor = Color.White.copy(alpha = 0.54f),
         ),
     )
+}
+
+/** Keeps what a screen loaded while another screen covers it, its tab is hidden, or the activity is recreated, until it is popped. */
+@Composable
+private fun <T : Any> rememberRetainedValuesNavEntryDecorator(): NavEntryDecorator<T> {
+    val registry = retainRetainedValuesStoreRegistry()
+    return remember(registry) {
+        NavEntryDecorator(onPop = registry::clearChild) { entry ->
+            registry.LocalRetainedValuesStoreProvider(entry.contentKey) { entry.Content() }
+        }
+    }
 }
 
 @Composable

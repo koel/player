@@ -18,7 +18,10 @@ struct SearchSectionTests {
                 subscribedAt: "", lastPlayedAt: "", state: PodcastState(currentEpisodeId: nil, progresses: [:]), favorite: false
             ),
         ],
-        radioStations: [RadioStation(id: "r1", name: "Station", url: "https://radio.test")]
+        radioStations: [RadioStation(
+            id: "r1", name: "Station", url: "https://radio.test", logo: nil, description: nil, homepageUrl: nil,
+            isPublic: false, favorite: false, permissions: Permissions(edit: false, delete: false)
+        )]
     )
 
     @Test func listsOnlySectionsWithResultsInFlutterOrder() {

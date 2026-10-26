@@ -295,7 +295,8 @@ fun ConfirmDialog(title: String, message: String? = null, confirmLabel: String, 
 
 /**
  * One item in a menu. Destructive items are red; an item that [startsSection] gets a divider above
- * it, grouping items the way iOS menus do.
+ * it, grouping items the way iOS menus do. An item that [opensFollowUp] replaces its action sheet
+ * with another sheet or dialog, which closes the menu itself.
  */
 class MenuAction(
     val label: String,
@@ -303,6 +304,7 @@ class MenuAction(
     val isDestructive: Boolean = false,
     val isEnabled: Boolean = true,
     val startsSection: Boolean = false,
+    val opensFollowUp: Boolean = false,
     val onClick: () -> Unit,
 )
 

@@ -26,4 +26,28 @@ struct CarPlayLibraryTests {
         #expect(CarPlayLibrary.root(for: .loading, replacing: .downloads) == .downloads)
         #expect(CarPlayLibrary.root(for: .main, replacing: .downloads) == .library)
     }
+
+    @Test func loadsPagesUntilTheListIsFull() async throws {
+        var loaded = 0
+
+        try await CarPlayLibrary.loadPages(upTo: 100, loadedCount: { loaded }, hasMore: { true }) { loaded += 30 }
+
+        #expect(loaded == 120)
+    }
+
+    @Test func stopsLoadingPagesWhenTheListEnds() async throws {
+        var loaded = 0
+
+        try await CarPlayLibrary.loadPages(upTo: 100, loadedCount: { loaded }, hasMore: { loaded < 45 }) { loaded += 30 }
+
+        #expect(loaded == 60)
+    }
+
+    @Test func stopsLoadingPagesThatAddNothing() async throws {
+        var requests = 0
+
+        try await CarPlayLibrary.loadPages(upTo: 100, loadedCount: { 10 }, hasMore: { true }) { requests += 1 }
+
+        #expect(requests == 1)
+    }
 }

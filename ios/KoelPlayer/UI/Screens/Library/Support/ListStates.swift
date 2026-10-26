@@ -1,7 +1,26 @@
 import SwiftUI
 
-/// The last row of a paginated list: loads the next page whenever it scrolls into view.
-struct LoadMoreRow: View {
+/// The last row of a paginated list: loads the next page as it scrolls into view, or offers to retry one that failed.
+struct NextPageRow: View {
+    let hasMore: Bool
+    let loadedCount: Int
+    let loadState: LoadState
+    let load: () async -> Void
+
+    var body: some View {
+        switch loadState.nextPage(hasMore: hasMore, loadedCount: loadedCount) {
+        case .none:
+            EmptyView()
+        case .loadable:
+            LoadMoreRow(loadedCount: loadedCount, load: load)
+        case .failed:
+            LoadFailedView { Task { await load() } }
+                .listRowSeparator(.hidden)
+        }
+    }
+}
+
+private struct LoadMoreRow: View {
     /// Changes after each page, so the row loads again if it is still visible.
     let loadedCount: Int
     let load: () async -> Void

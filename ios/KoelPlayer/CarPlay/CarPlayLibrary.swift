@@ -140,7 +140,12 @@ final class CarPlayLibrary: NSObject, CPInterfaceControllerDelegate {
     private func showAlbums() {
         let template = CPListTemplate(title: "Albums", sections: [])
         fill(template) { [weak self, app] in
-            if app.core.albums.items.value.isEmpty { try await app.core.albums.loadMore() }
+            try await Self.loadPages(
+                upTo: CPListTemplate.maximumItemCount,
+                loadedCount: { app.core.albums.items.value.count },
+                hasMore: { app.core.albums.hasMore.value.boolValue },
+                loadMore: { try await app.core.albums.loadMore() }
+            )
             return app.core.albums.items.value.compactMap { album in
                 self?.item(text: album.name, detail: album.artistName, artworkUrl: album.cover, fallbackSymbol: "square.stack") {
                     self?.showPlayables(title: album.name) { try await app.core.playables.fetchForAlbum(albumId: album.id, forceRefresh: false) }
@@ -153,7 +158,12 @@ final class CarPlayLibrary: NSObject, CPInterfaceControllerDelegate {
     private func showArtists() {
         let template = CPListTemplate(title: "Artists", sections: [])
         fill(template) { [weak self, app] in
-            if app.core.artists.items.value.isEmpty { try await app.core.artists.loadMore() }
+            try await Self.loadPages(
+                upTo: CPListTemplate.maximumItemCount,
+                loadedCount: { app.core.artists.items.value.count },
+                hasMore: { app.core.artists.hasMore.value.boolValue },
+                loadMore: { try await app.core.artists.loadMore() }
+            )
             return app.core.artists.items.value.compactMap { artist in
                 self?.item(text: artist.name, detail: nil, artworkUrl: artist.imageUrl, fallbackSymbol: "music.microphone") {
                     self?.showPlayables(title: artist.name) { try await app.core.playables.fetchForArtist(artistId: artist.id, forceRefresh: false) }
@@ -176,6 +186,20 @@ final class CarPlayLibrary: NSObject, CPInterfaceControllerDelegate {
             }
         }
         interfaceController.pushTemplate(template, animated: true, completion: nil)
+    }
+
+    /// CarPlay shows only so many rows, so paged lists load until they fill them or run out.
+    static func loadPages(
+        upTo limit: Int,
+        loadedCount: () -> Int,
+        hasMore: () -> Bool,
+        loadMore: () async throws -> Void
+    ) async throws {
+        while loadedCount() < limit, hasMore() {
+            let countBefore = loadedCount()
+            try await loadMore()
+            if loadedCount() == countBefore { return }
+        }
     }
 
     private func showPlayables(title: String, load: @escaping () async throws -> [any Playable]) {

@@ -1,6 +1,9 @@
 package phanan.koel.shared
 
 import io.ktor.http.HttpMethod
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -18,6 +21,7 @@ import phanan.koel.shared.session.Feature
 import phanan.koel.shared.storage.InMemoryKeyValueStore
 import phanan.koel.shared.support.Fixtures
 import phanan.koel.shared.support.Harness
+import phanan.koel.shared.support.RecordedRequest
 import phanan.koel.shared.support.exists
 import phanan.koel.shared.support.temporaryDirectory
 import phanan.koel.shared.support.writeText
@@ -164,6 +168,36 @@ class KoelCoreTest {
     }
 
     @Test
+    fun requestsInFlightWhileLoggingOutLeaveNoDataBehind() = runTest(UnconfinedTestDispatcher()) {
+        val serverAnswers = CompletableDeferred<Unit>()
+        fun answerAfterLogout(body: String): suspend (RecordedRequest) -> Harness.Reply = {
+            serverAnswers.await()
+            Harness.Reply(200, body)
+        }
+        h.onRequest(HttpMethod.Get, "songs/favorite", answerAfterLogout(Fixtures.list(Fixtures.song("s1", favorite = true))))
+        h.onRequest(HttpMethod.Get, "songs/recently-played", answerAfterLogout(Fixtures.list(Fixtures.song("s2"))))
+        h.onRequest(HttpMethod.Get, "albums", answerAfterLogout(Fixtures.page(listOf(Fixtures.album("a1")), currentPage = 1).toString()))
+        h.on(HttpMethod.Delete, "me") { "" }
+        val core = core()
+        val requests = listOf(
+            launch { runCatching { core.favorites.fetch() } },
+            launch { runCatching { core.recentlyPlayed.fetch() } },
+            launch { runCatching { core.albums.loadMore() } },
+        )
+
+        core.logout()
+        serverAnswers.complete(Unit)
+        requests.joinAll()
+
+        assertTrue(core.favorites.items.value.isEmpty())
+        assertTrue(core.recentlyPlayed.items.value.isEmpty())
+        assertFalse(core.recentlyPlayed.loaded.value)
+        assertTrue(core.albums.items.value.isEmpty())
+        assertTrue(core.albums.hasMore.value)
+        assertNull(core.playables.byId("s1"))
+    }
+
+    @Test
     fun aTokenRejectedAtLaunchLogsOutLocallyWithoutCallingTheServer() = runTest(UnconfinedTestDispatcher()) {
         val engine = FakeAudioEngine()
         h.on(HttpMethod.Get, "data") { dataResponse() }
@@ -196,6 +230,25 @@ class KoelCoreTest {
         core.migrateFlutterData()
         assertEquals(listOf("s1"), core.downloads.playables.value.map { it.id })
 
+        core.auth.fetchCurrentUser()
+        core.downloads.load()
+
+        assertEquals(listOf("s1"), core.downloads.playables.value.map { it.id })
+        assertTrue(Path(documents, "$CONFIRMED_USER_DIRECTORY/CACHE_s1.mp3").exists())
+    }
+
+    @Test
+    fun flutterQrLoginDownloadsSurviveTheMigratedTokenBeingRejected() = runTest(UnconfinedTestDispatcher()) {
+        val documents = flutterDocuments(email = null)
+        Path(documents, "75b71484992804d510c5975c1ab2ee61cd7bc6d2b8c17fcbb577fe3e72aea66b/CACHE_s1.mp3").writeText("one")
+        val core = KoelCore(InMemoryKeyValueStore(), documents.toString(), FakeAudioEngine(), h.engine, backgroundScope)
+        core.migrateFlutterData()
+        h.on(HttpMethod.Get, "me", status = 401) { """{"message":"Unauthenticated."}""" }
+        assertNull(core.auth.fetchCurrentUser())
+
+        h.on(HttpMethod.Post, "me/otp") { """{"token":"new-api","audio-token":"new-audio"}""" }
+        h.on(HttpMethod.Get, "me") { Fixtures.user(email = "me@koel.test").toString() }
+        core.auth.loginWithOneTimeToken("https://koel.test", "otp")
         core.auth.fetchCurrentUser()
         core.downloads.load()
 

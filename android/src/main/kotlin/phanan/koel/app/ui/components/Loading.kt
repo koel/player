@@ -2,17 +2,18 @@ package phanan.koel.app.ui.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /** Loads a screen when it first shows, and again on pull to refresh or Retry. */
-class Loading(private val scope: CoroutineScope, private val load: suspend (forceRefresh: Boolean) -> Unit) {
+class Loading(internal var scope: CoroutineScope, internal var load: suspend (forceRefresh: Boolean) -> Unit) {
     var hasLoaded by mutableStateOf(false)
         private set
     var isRefreshing by mutableStateOf(false)
@@ -34,11 +35,14 @@ class Loading(private val scope: CoroutineScope, private val load: suspend (forc
         try {
             work()
             hasFailed = false
+            hasLoaded = true
+        } catch (cancellation: CancellationException) {
+            throw cancellation
         } catch (error: Exception) {
             hasFailed = true
+            hasLoaded = true
         } finally {
             isRefreshing = false
-            hasLoaded = true
         }
     }
 
@@ -51,12 +55,18 @@ class Loading(private val scope: CoroutineScope, private val load: suspend (forc
     }
 }
 
-/** Starts [load] the first time the screen appears, and again whenever [key] changes. */
+/**
+ * Starts [load] the first time the screen appears, and again whenever [key] changes. Coming back
+ * to the screen or recreating the activity doesn't load it again.
+ */
 @Composable
 fun rememberLoading(key: Any = Unit, load: suspend (forceRefresh: Boolean) -> Unit): Loading {
     val scope = rememberCoroutineScope()
-    val currentLoad by rememberUpdatedState(load)
-    val loading = remember(key) { Loading(scope) { forceRefresh -> currentLoad(forceRefresh) } }
+    val loading = retain(key) { Loading(scope, load) }
+    SideEffect {
+        loading.scope = scope
+        loading.load = load
+    }
     LaunchedEffect(loading) {
         if (!loading.hasLoaded) loading.run()
     }

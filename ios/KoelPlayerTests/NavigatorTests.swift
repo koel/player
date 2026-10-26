@@ -49,4 +49,15 @@ struct NavigatorTests {
         #expect(navigator.selectedTab == .search)
         #expect(navigator.wantsSearchFocus)
     }
+
+    @Test func focusingSearchPopsTheSearchTabToItsRoot() {
+        let navigator = Navigator(defaults: defaults)
+        navigator.select(.search)
+        navigator.push(.searchSongs(keywords: "love"))
+        navigator.select(.home)
+
+        navigator.focusSearch()
+
+        #expect(navigator.paths[.search] == [])
+    }
 }

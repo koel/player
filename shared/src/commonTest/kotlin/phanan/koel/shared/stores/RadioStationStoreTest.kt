@@ -74,7 +74,7 @@ class RadioStationStoreTest {
         store.update(station, name = "New", url = "https://new/", description = "desc", isPublic = true)
 
         assertEquals(
-            KoelJson.parseToJsonElement("""{"name":"New","url":"https://new/","description":"desc","is_public":true}"""),
+            KoelJson.parseToJsonElement("""{"name":"New","url":"https://new/","description":"desc","homepage_url":null,"is_public":true}"""),
             h.requests.single().body,
         )
         val updated = store.stations.value.single()
@@ -82,6 +82,17 @@ class RadioStationStoreTest {
         assertEquals("https://new/", updated.url)
         assertEquals("desc", updated.description)
         assertTrue(updated.isPublic)
+    }
+
+    @Test
+    fun updatingKeepsTheHomepageUrl() = runTest(UnconfinedTestDispatcher()) {
+        val (station) = load(Fixtures.radioStation("s1", homepageUrl = "https://jazz.example.com"))
+        h.on(HttpMethod.Put, "radio/stations/s1") { "" }
+
+        store.update(station, name = "New", url = station.url)
+
+        assertEquals("\"https://jazz.example.com\"", h.requests.single().json.getValue("homepage_url").toString())
+        assertEquals("https://jazz.example.com", store.byId("s1")?.homepageUrl)
     }
 
     @Test

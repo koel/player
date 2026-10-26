@@ -104,16 +104,16 @@ class EntityActions(private val app: AppModel) {
             add(MenuAction("Go to Artist", Icons.Outlined.MicExternalOn, startsSection = true) { app.navigator.push(Route.Artist(album.artistId)) })
         }
         if (album.canEdit && onEdit != null && !app.isOffline) {
-            add(MenuAction("Edit…", Icons.Default.Edit, startsSection = !canGoToArtist, onClick = onEdit))
+            add(MenuAction("Edit…", Icons.Default.Edit, startsSection = !canGoToArtist, opensFollowUp = true, onClick = onEdit))
         }
     }
 
     /** [playables] are the artist's songs when the screen has them; otherwise the queue actions fetch them. */
     fun artistMenu(artist: Artist, onInfo: () -> Unit, onEdit: (() -> Unit)?, playables: List<Playable>? = null): List<MenuAction> = buildList {
         if (supportsFavorites) add(favoriteAction(artist.favorite) { app.core.artists.toggleFavorite(artist) })
-        add(MenuAction("Info", Icons.Outlined.Info, isEnabled = !app.isOffline, onClick = onInfo))
+        add(MenuAction("Info", Icons.Outlined.Info, isEnabled = !app.isOffline, opensFollowUp = true, onClick = onInfo))
         addAll(queueMenu(playables, artistSongs(artist), startsSection = true))
-        if (artist.canEdit && onEdit != null && !app.isOffline) add(MenuAction("Edit…", Icons.Default.Edit, startsSection = true, onClick = onEdit))
+        if (artist.canEdit && onEdit != null && !app.isOffline) add(MenuAction("Edit…", Icons.Default.Edit, startsSection = true, opensFollowUp = true, onClick = onEdit))
     }
 
     /** Queues every song of [playlists] at the end, as the Flutter swipe did. */
@@ -140,10 +140,10 @@ class EntityActions(private val app: AppModel) {
             },
         )
         if (playlist.canEdit && !app.isOffline) {
-            add(MenuAction("Edit…", Icons.Default.Edit, startsSection = true, onClick = onEdit))
-            if (app.core.playlistFolders.folders.value.isNotEmpty()) add(MenuAction("Move to Folder", Icons.Default.Folder, onClick = onMove))
+            add(MenuAction("Edit…", Icons.Default.Edit, startsSection = true, opensFollowUp = true, onClick = onEdit))
+            if (app.core.playlistFolders.folders.value.isNotEmpty()) add(MenuAction("Move to Folder", Icons.Default.Folder, opensFollowUp = true, onClick = onMove))
         }
-        if (playlist.canDelete && !app.isOffline) add(MenuAction("Delete", Icons.Default.Delete, isDestructive = true, startsSection = true, onClick = onDelete))
+        if (playlist.canDelete && !app.isOffline) add(MenuAction("Delete", Icons.Default.Delete, isDestructive = true, startsSection = true, opensFollowUp = true, onClick = onDelete))
     }
 
     /** Picks up the episode in progress if there is one, otherwise plays from the top. [episodes] skips fetching them. */
@@ -172,7 +172,7 @@ class EntityActions(private val app: AppModel) {
         add(MenuAction("Shuffle", Icons.Default.Shuffle, isEnabled = canPlay) { play(podcast, shuffled = true, episodes = episodes) })
         if (supportsFavorites) add(favoriteAction(podcast.favorite) { app.core.podcasts.toggleFavorite(podcast) }.withSectionStart())
         add(MenuAction("Refresh", Icons.Default.Refresh, isEnabled = !app.isOffline, startsSection = !supportsFavorites) { scope.launch { checkForNewEpisodes(podcast) } })
-        add(MenuAction("Unsubscribe", Icons.Default.RemoveCircleOutline, isDestructive = true, isEnabled = !app.isOffline, startsSection = true, onClick = onUnsubscribe))
+        add(MenuAction("Unsubscribe", Icons.Default.RemoveCircleOutline, isDestructive = true, isEnabled = !app.isOffline, startsSection = true, opensFollowUp = true, onClick = onUnsubscribe))
     }
 
     fun isCurrent(station: RadioStation) = player.state.value.radioStation?.id == station.id
@@ -193,12 +193,12 @@ class EntityActions(private val app: AppModel) {
             add(MenuAction("Play", Icons.Default.PlayArrow) { play(station) })
         }
         if (supportsFavorites) add(favoriteAction(station.favorite) { app.core.radioStations.toggleFavorite(station) })
-        if (station.canEdit && !app.isOffline) add(MenuAction("Edit…", Icons.Default.Edit, startsSection = true, onClick = onEdit))
-        if (station.canDelete && !app.isOffline) add(MenuAction("Delete", Icons.Default.Delete, isDestructive = true, startsSection = !station.canEdit, onClick = onDelete))
+        if (station.canEdit && !app.isOffline) add(MenuAction("Edit…", Icons.Default.Edit, startsSection = true, opensFollowUp = true, onClick = onEdit))
+        if (station.canDelete && !app.isOffline) add(MenuAction("Delete", Icons.Default.Delete, isDestructive = true, startsSection = !station.canEdit, opensFollowUp = true, onClick = onDelete))
     }
 }
 
-private fun MenuAction.withSectionStart() = MenuAction(label, icon, isDestructive, isEnabled, startsSection = true, onClick = onClick)
+private fun MenuAction.withSectionStart() = MenuAction(label, icon, isDestructive, isEnabled, startsSection = true, opensFollowUp = opensFollowUp, onClick = onClick)
 
 /** An album's long-press menu, with its Edit sheet. */
 @Composable

@@ -24,6 +24,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -95,9 +96,9 @@ fun GenresScreen() {
 @Composable
 fun GenreScreen(genreId: String, name: String) {
     val app = LocalAppModel.current
-    val songs = remember(genreId) { mutableStateListOf<Playable>() }
-    var nextPage by remember(genreId) { mutableStateOf<Int?>(1) }
-    var sortChanges by remember(genreId) { mutableIntStateOf(0) }
+    val songs = retain(genreId) { mutableStateListOf<Playable>() }
+    var nextPage by retain(genreId) { mutableStateOf<Int?>(1) }
+    var sortChanges by retain(genreId) { mutableIntStateOf(0) }
     var sort by rememberSortSetting("genre.sort", SortSetting(PlayableSortField.TITLE, SortOrder.ASC))
     var filter by rememberSaveable { mutableStateOf("") }
     val shown = songs.toList().filtered(filter)
@@ -317,7 +318,7 @@ fun ArtistSongsScreen(artistId: String) {
 @Composable
 fun SearchSongsScreen(keywords: String) {
     val app = LocalAppModel.current
-    var songs by remember(keywords) { mutableStateOf(emptyList<Playable>()) }
+    var songs by retain(keywords) { mutableStateOf(emptyList<Playable>()) }
 
     PlayableListScreen(
         title = keywords,

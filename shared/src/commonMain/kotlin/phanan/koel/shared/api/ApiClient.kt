@@ -36,6 +36,9 @@ class HttpResponseException(val statusCode: Int, val body: String) :
 
 class NoHostException : Exception("No Koel server is configured.")
 
+/** The user logged out or in while the request was in flight, so its response belongs to a session that is gone. */
+class SessionChangedException : Exception("The session changed while the request was in flight.")
+
 /** The server was reached but answered with an error or stopped answering, rather than not being reachable at all. */
 val Throwable.isServerFailure: Boolean
     get() = this is HttpResponseException || this is HttpRequestTimeoutException || this is SocketTimeoutException
@@ -115,6 +118,7 @@ class ApiClient(
         }
 
         val text = response.bodyAsText()
+        if (preferences.apiToken != apiToken) throw SessionChangedException()
         if (!response.status.isSuccess()) throw HttpResponseException(response.status.value, text)
 
         return runCatching { KoelJson.parseToJsonElement(text) }.getOrDefault(JsonNull)

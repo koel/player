@@ -50,6 +50,7 @@ class RadioStationStore internal constructor(private val api: ApiClient) {
             put("name", name)
             put("url", url)
             put("description", description.orEmpty())
+            put("homepage_url", station.homepageUrl)
             put("is_public", isPublic)
         })
 

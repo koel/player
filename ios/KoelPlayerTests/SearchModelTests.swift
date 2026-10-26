@@ -54,4 +54,20 @@ struct SearchModelTests {
         #expect(!model.isSearching)
         #expect(model.result == nil)
     }
+
+    @Test func searchingTheSameKeywordsAgainKeepsTheResults() async throws {
+        let model = SearchModel()
+        let firstResult = SearchResult()
+        try await model.search("love", debounce: .zero) { _ in firstResult }
+        var searchedAgain = false
+
+        try await model.search(" love ", debounce: .zero) { _ in
+            searchedAgain = true
+            return SearchResult()
+        }
+
+        #expect(!searchedAgain)
+        #expect(model.result === firstResult)
+        #expect(!model.isSearching)
+    }
 }

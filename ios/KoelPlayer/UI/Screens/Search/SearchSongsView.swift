@@ -26,6 +26,7 @@ struct SearchSongsView: View {
         .brandMeshBackground()
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
+        .collect(app.core.playables.live(playables: playables), id: playables.map(\.id)) { playables = $0 }
     }
 
     private var placeholder: some View {

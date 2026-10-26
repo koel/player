@@ -60,6 +60,9 @@ class MockKoelServer(private val audio: ByteArray) {
     @Volatile
     var hasPlaylistFolders = false
 
+    @Volatile
+    var extraPlaylistFolderCount = 0
+
     /** Title-sorted genre pages arrive late, so a sort change can overtake them. */
     @Volatile
     var slowsTitleSortedGenrePages = false
@@ -133,7 +136,7 @@ class MockKoelServer(private val audio: ByteArray) {
             "POST" to "/api/playlists" -> json(
                 JSONObject(playlist.toString()).put("id", "playlist-2").put("name", JSONObject(request.body?.utf8() ?: "{}").optString("name")),
             )
-            "GET" to "/api/playlist-folders" -> json(if (hasPlaylistFolders) JSONArray().put(playlistFolder) else JSONArray())
+            "GET" to "/api/playlist-folders" -> json(if (hasPlaylistFolders) playlistFolders() else JSONArray())
             "GET" to "/api/podcasts" -> json(JSONArray().put(podcast))
             "GET" to "/api/podcasts/podcast-1" -> json(podcast)
             "GET" to "/api/podcasts/podcast-1/episodes" -> json(episodes)
@@ -144,6 +147,7 @@ class MockKoelServer(private val audio: ByteArray) {
             "GET" to "/api/songs/recently-played" -> json(songs(4))
             "GET" to "/api/songs/favorite" -> json(songs(FAVORITE_COUNT))
             "GET" to "/api/search" -> json(JSONObject().put("songs", songs(SEARCH_RESULT_COUNT)), delaySeconds = SEARCH_DELAY_SECONDS)
+            "GET" to "/api/search/songs" -> json(songs())
             "PUT" to "/api/queue/state", "PUT" to "/api/queue/playback-status", "POST" to "/api/interaction/play" -> json(JSONObject())
             else -> MockResponse.Builder().code(404).body("{}").build()
         }
@@ -203,7 +207,11 @@ class MockKoelServer(private val audio: ByteArray) {
         .put("name", PLAYLIST_NAME)
         .put("permissions", JSONObject().put("edit", true).put("delete", true))
 
-    private val playlistFolder = JSONObject().put("type", "playlist-folders").put("id", "folder-1").put("name", PLAYLIST_FOLDER_NAME)
+    private fun playlistFolder(id: String, name: String) = JSONObject().put("type", "playlist-folders").put("id", id).put("name", name)
+
+    private fun playlistFolders() = JSONArray().put(playlistFolder("folder-1", PLAYLIST_FOLDER_NAME)).apply {
+        for (number in 1..extraPlaylistFolderCount) put(playlistFolder("extra-folder-$number", "Folder %02d".format(number)))
+    }
 
     private val podcast = JSONObject().put("type", "podcasts").put("id", "podcast-1").put("title", PODCAST_TITLE).put("author", "Test Host")
 

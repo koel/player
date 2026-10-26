@@ -6,6 +6,7 @@ import UIKit
 /// Lock screen, Control Center, Dynamic Island and headphone controls.
 final class SystemMediaControls {
     private let player: PlayerController
+    private let loadImage: (URL) async -> UIImage?
     private var stateTask: Task<Void, Never>?
     private var positionTask: Task<Void, Never>?
     private var artworkTask: Task<Void, Never>?
@@ -18,8 +19,12 @@ final class SystemMediaControls {
 
     private var center: MPNowPlayingInfoCenter { .default() }
 
-    init(player: PlayerController) {
+    init(
+        player: PlayerController,
+        loadImage: @escaping (URL) async -> UIImage? = SystemMediaControls.lockScreenImage
+    ) {
         self.player = player
+        self.loadImage = loadImage
         registerCommands()
 
         stateTask = Task { [weak self] in
@@ -33,6 +38,10 @@ final class SystemMediaControls {
                 self?.handleInterruption(notification)
             }
         }
+    }
+
+    private static func lockScreenImage(_ url: URL) async -> UIImage? {
+        await ImagePipeline.shared.image(for: url, pointSize: 300)
     }
 
     isolated deinit {
@@ -108,7 +117,11 @@ final class SystemMediaControls {
 
         center.nowPlayingInfo = nowPlaying
         center.playbackState = state.isPlaying ? .playing : .paused
-        if artwork == nil { loadArtwork(info.artworkUrl) }
+        if artwork == nil {
+            loadArtwork(info.artworkUrl)
+        } else {
+            cancelArtworkLoad()
+        }
     }
 
     private func nowPlayingInfo(for state: PlaybackState) -> (metadata: [String: Any], artworkUrl: String?)? {
@@ -156,8 +169,8 @@ final class SystemMediaControls {
         loadingArtworkUrl = url
         artworkTask?.cancel()
 
-        artworkTask = Task { [weak self] in
-            let image = await ImagePipeline.shared.image(for: remote, pointSize: 300)
+        artworkTask = Task { [weak self, loadImage] in
+            let image = await loadImage(remote)
             guard let self, !Task.isCancelled else { return }
             loadingArtworkUrl = nil
             show(image ?? Self.defaultArtwork, for: url)
@@ -173,9 +186,13 @@ final class SystemMediaControls {
     }
 
     private func forgetArtwork() {
+        cancelArtworkLoad()
+        shownArtwork = nil
+    }
+
+    private func cancelArtworkLoad() {
         artworkTask?.cancel()
         loadingArtworkUrl = nil
-        shownArtwork = nil
     }
 
     private static var defaultArtwork: UIImage? { UIImage(named: "default-image") }

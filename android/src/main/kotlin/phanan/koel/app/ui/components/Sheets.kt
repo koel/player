@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -30,7 +32,7 @@ import phanan.koel.app.ui.theme.KoelColors
 
 /**
  * A long-press menu: the compact preview card, then [accessory] if any, then the actions, grouped
- * into sections. Picking an action closes the sheet first.
+ * into sections. Picking an action closes the sheet first, unless the action opens a follow-up.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,14 +43,14 @@ fun ActionsSheet(
     preview: @Composable () -> Unit,
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = KoelColors.menu) {
-        Column(Modifier.navigationBarsPadding().padding(bottom = 8.dp)) {
+        Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(bottom = 8.dp)) {
             preview()
             accessory()
             actions.forEachIndexed { index, action ->
                 if (index == 0 || action.startsSection) HorizontalDivider(Modifier.padding(vertical = 4.dp), color = KoelColors.hairline)
                 SheetAction(
                     MenuAction(action.label, action.icon, action.isDestructive, action.isEnabled, action.startsSection) {
-                        onDismiss()
+                        if (!action.opensFollowUp) onDismiss()
                         action.onClick()
                     },
                 )

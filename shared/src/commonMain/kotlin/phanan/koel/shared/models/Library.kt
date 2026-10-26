@@ -97,6 +97,7 @@ data class RadioStation(
     val url: String,
     val logo: String? = null,
     val description: String? = null,
+    @SerialName("homepage_url") val homepageUrl: String? = null,
     @SerialName("is_public") val isPublic: Boolean = false,
     @Serializable(FlexibleBooleanSerializer::class) val favorite: Boolean = false,
     val permissions: Permissions = Permissions(),

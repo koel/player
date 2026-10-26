@@ -80,9 +80,15 @@ struct PodcastsView: View {
     }
 
     private func load() async {
-        async let episodes: Void? = try? app.core.overview.refresh()
+        async let episodes: Void = loadNewEpisodesIfMissing()
         await loadState.load { try await app.core.podcasts.fetchAll() }
-        _ = await episodes
+        await episodes
+    }
+
+    /// New Episodes come from Home's overview, so refreshing it here would reshuffle Home's random picks.
+    private func loadNewEpisodesIfMissing() async {
+        guard app.core.overview.isEmpty else { return }
+        try? await app.core.overview.refresh()
     }
 }
 

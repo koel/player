@@ -71,6 +71,55 @@ final class PlayerUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts[MockKoelServer.episodeTitle].exists, "The new episode isn't listed")
     }
 
+    func testOpeningPodcastsLeavesHomesSectionsAlone() {
+        selectRoot(ofTab: "Home", in: app)
+        XCTAssertTrue(app.staticTexts[MockKoelServer.songTitles[0]].firstMatch.waitForExistence(timeout: 15), "Home never loaded")
+        server.forgetRequests()
+
+        openLibraryList(app, named: "Podcasts")
+
+        XCTAssertNotNil(firstRequest(startingWith: "/api/podcasts"), "Podcasts never loaded")
+        XCTAssertTrue(app.staticTexts[MockKoelServer.episodeTitle].waitForExistence(timeout: 10), "The new episode isn't listed")
+        XCTAssertFalse(server.requestedPaths.contains { $0.hasPrefix("/api/overview") }, "Opening Podcasts reloaded Home's overview")
+    }
+
+    func testASongFavoritedFromSearchOffersToUndoIt() {
+        searchLibrary(for: "Album")
+        let song = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", MockKoelServer.songTitles[0])).firstMatch
+        XCTAssertTrue(song.waitForExistence(timeout: 15), "Search found no song")
+
+        assertFavoritingFlipsTheMenu(of: song)
+    }
+
+    func testAnAlbumFavoritedFromSearchOffersToUndoIt() {
+        searchLibrary(for: "Album")
+        let album = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Test Album")).firstMatch
+        XCTAssertTrue(album.waitForExistence(timeout: 15), "Search found no album")
+
+        assertFavoritingFlipsTheMenu(of: album)
+    }
+
+    private func searchLibrary(for keywords: String) {
+        let searchField = app.searchFields["Search your library"]
+        for _ in 0..<5 where !searchField.waitForExistence(timeout: 2) {
+            app.tabBars.buttons["Search"].tap()
+        }
+        searchField.tap()
+        searchField.typeText(keywords)
+    }
+
+    private func assertFavoritingFlipsTheMenu(of element: XCUIElement) {
+        element.press(forDuration: 1.2)
+        let favorite = app.buttons["Favorite"]
+        XCTAssertTrue(favorite.waitForExistence(timeout: 5), "The menu offered no Favorite")
+        favorite.tap()
+        XCTAssertTrue(favorite.waitForNonExistence(timeout: 5), "The menu never closed")
+
+        element.press(forDuration: 1.2)
+
+        XCTAssertTrue(app.buttons["Undo Favorite"].waitForExistence(timeout: 5), "The menu still offered Favorite after favoriting")
+    }
+
     func testAStationFoundBySearchOpensItsEditForm() {
         let searchField = app.searchFields["Search your library"]
         for _ in 0..<5 where !searchField.waitForExistence(timeout: 2) {
@@ -310,6 +359,16 @@ final class PlayerUITests: XCTestCase {
         sleep(1)
         XCTAssertGreaterThan(handle.frame.minY, app.buttons["Reorder Song 04"].frame.minY, "The player put the song back")
         XCTAssertLessThan(handle.frame.minY, app.buttons["Reorder Song 06"].frame.minY, "The player moved the song to the wrong place")
+    }
+
+    func testNowPlayingFitsItsControlsOnScreen() {
+        openNowPlaying()
+        attachScreenshot(of: app, named: "Now Playing")
+
+        let playerBottomPadding: CGFloat = 12
+        let player = app.cells.firstMatch.frame
+        let bottomBar = app.buttons["AirPlay"].frame
+        XCTAssertLessThanOrEqual(bottomBar.maxY, player.maxY - playerBottomPadding + 0.5, "The player's controls run past its bottom")
     }
 
     func testPickingAnEqualizerPresetInNowPlayingMovesTheBands() {

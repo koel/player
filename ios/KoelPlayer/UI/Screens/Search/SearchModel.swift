@@ -20,6 +20,8 @@ final class SearchModel {
             isSearching = false
         case .keepResults:
             isSearching = false
+        case .search(let keywords) where keywords == searchedKeywords && result != nil:
+            isSearching = false
         case .search(let keywords):
             result = nil
             isSearching = true

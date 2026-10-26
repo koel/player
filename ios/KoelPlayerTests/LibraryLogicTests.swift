@@ -255,17 +255,17 @@ struct LoadStateTests {
         #expect(state.hasFailed)
     }
 
-    @Test func aFailedPageStopsFurtherPagesUntilTheNextSuccess() async {
+    @Test func aFailedPageOffersARetryUntilTheNextSuccess() async {
         let state = LoadState()
         await state.load {}
-        #expect(state.canLoadMore(hasMore: true, loadedCount: 20))
+        #expect(state.nextPage(hasMore: true, loadedCount: 20) == .loadable)
 
         await state.load { throw Failure() }
-        #expect(!state.canLoadMore(hasMore: true, loadedCount: 20))
+        #expect(state.nextPage(hasMore: true, loadedCount: 20) == .failed)
 
         await state.load {}
-        #expect(state.canLoadMore(hasMore: true, loadedCount: 20))
-        #expect(!state.canLoadMore(hasMore: false, loadedCount: 20))
-        #expect(!state.canLoadMore(hasMore: true, loadedCount: 0))
+        #expect(state.nextPage(hasMore: true, loadedCount: 20) == .loadable)
+        #expect(state.nextPage(hasMore: false, loadedCount: 20) == .none)
+        #expect(state.nextPage(hasMore: true, loadedCount: 0) == .none)
     }
 }

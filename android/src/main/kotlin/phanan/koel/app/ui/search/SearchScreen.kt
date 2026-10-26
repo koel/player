@@ -23,6 +23,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -86,9 +87,9 @@ const val SEARCH_SKELETON_TAG = "search-skeleton"
 fun SearchScreen() {
     val app = LocalAppModel.current
     var query by rememberSaveable { mutableStateOf("") }
-    var result by remember { mutableStateOf<SearchResult?>(null) }
-    var searchedKeywords by remember { mutableStateOf("") }
-    var isSearching by remember { mutableStateOf(false) }
+    var result by retain { mutableStateOf<SearchResult?>(null) }
+    var searchedKeywords by retain { mutableStateOf("") }
+    var isSearching by retain { mutableStateOf(false) }
     var albumMenu by remember { mutableStateOf<Album?>(null) }
     var artistMenu by remember { mutableStateOf<Artist?>(null) }
     val keywords = query.trim()
@@ -100,6 +101,8 @@ fun SearchScreen() {
             isSearching = false
             return@LaunchedEffect
         }
+        val isAlreadyShown = keywords == searchedKeywords && result != null
+        if (isAlreadyShown) return@LaunchedEffect
         result = null
         isSearching = true
         delay(300)

@@ -9,6 +9,7 @@ import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import org.junit.Assert.assertEquals
@@ -25,7 +26,9 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.percentOffset
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -72,6 +75,7 @@ import phanan.koel.shared.models.SortOrder
 import phanan.koel.app.widgets.TogglePlaybackAction
 import phanan.koel.app.ui.search.SEARCH_SKELETON_TAG
 import phanan.koel.shared.models.RadioStation
+import phanan.koel.shared.player.RepeatMode
 import phanan.koel.shared.models.Song
 
 /** Logs in to [MockKoelServer] and drives the song menu and the queue. */
@@ -372,6 +376,26 @@ class PlayerUiTest {
 
         compose.waitUntilAtLeastOneExists(hasText("Equalizer"), 5_000)
         compose.onNodeWithText("Crossfade").assertExists()
+    }
+
+    @Test
+    fun aVerticalSwipeOnTheProgressBarDoesNotSeek() {
+        openQueue()
+        val positionBefore = app.core.player.position.value
+
+        compose.onNodeWithContentDescription("Position").performTouchInput { swipeDown(startY = centerY, endY = centerY + 600f) }
+        compose.waitForIdle()
+
+        assertEquals(positionBefore, app.core.player.position.value, 1.0)
+    }
+
+    @Test
+    fun tappingTheProgressBarSeeksToTheTappedSpot() {
+        openQueue()
+
+        compose.onNodeWithContentDescription("Position").performTouchInput { click(percentOffset(0.5f, 0.5f)) }
+
+        compose.waitUntil(5_000) { app.core.player.position.value in 10.0..20.0 }
     }
 
     @Test
@@ -763,6 +787,153 @@ class PlayerUiTest {
     }
 
     @Suppress("DEPRECATION")
+    @Test
+    fun editFromAnAlbumsLongPressMenuOpensTheEditSheet() {
+        compose.onNodeWithText("Library").performClick()
+        compose.waitUntilAtLeastOneExists(hasText("Recently added"), 10_000)
+        compose.onAllNodes(hasScrollToNodeAction).onLast().performScrollToNode(hasText(MockKoelServer.ALBUM_NAME))
+
+        pickFromLongPressMenu(MockKoelServer.ALBUM_NAME, "Edit…")
+
+        compose.waitUntilAtLeastOneExists(hasText("Edit Album"), 5_000)
+    }
+
+    @Test
+    fun deleteFromAPlaylistsLongPressMenuAsksToConfirm() {
+        openLibrary("Playlists")
+        compose.waitUntilAtLeastOneExists(hasText(MockKoelServer.PLAYLIST_NAME), 10_000)
+
+        pickFromLongPressMenu(MockKoelServer.PLAYLIST_NAME, "Delete")
+
+        compose.waitUntilAtLeastOneExists(hasText("Delete playlist?"), 5_000)
+    }
+
+    @Test
+    fun moveToFolderFromAPlaylistsLongPressMenuOffersTheFolders() {
+        server.hasPlaylistFolders = true
+        runBlocking(Dispatchers.Main) { app.core.playlistFolders.fetchAll() }
+        openLibrary("Playlists")
+        compose.waitUntilAtLeastOneExists(hasText(MockKoelServer.PLAYLIST_NAME), 10_000)
+
+        pickFromLongPressMenu(MockKoelServer.PLAYLIST_NAME, "Move to Folder")
+
+        compose.waitUntilAtLeastOneExists(hasText("No folder"), 5_000)
+    }
+
+    @Test
+    fun aLongMoveToFolderMenuScrollsToItsLastFolder() {
+        server.hasPlaylistFolders = true
+        server.extraPlaylistFolderCount = 40
+        runBlocking(Dispatchers.Main) { app.core.playlistFolders.fetchAll() }
+        openLibrary("Playlists")
+        compose.waitUntilAtLeastOneExists(hasText("Folder 01"), 10_000)
+        compose.onAllNodes(hasScrollToNodeAction).onLast().performScrollToNode(hasText(MockKoelServer.PLAYLIST_NAME))
+
+        pickFromLongPressMenu(MockKoelServer.PLAYLIST_NAME, "Move to Folder")
+        compose.waitUntilAtLeastOneExists(hasText("No folder"), 5_000)
+
+        compose.onAllNodesWithText(MockKoelServer.PLAYLIST_FOLDER_NAME).onLast().performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun unsubscribeFromAPodcastsLongPressMenuAsksToConfirm() {
+        openLibrary("Podcasts")
+        compose.waitUntilAtLeastOneExists(hasText(MockKoelServer.PODCAST_TITLE), 10_000)
+
+        pickFromLongPressMenu(MockKoelServer.PODCAST_TITLE, "Unsubscribe")
+
+        compose.waitUntilAtLeastOneExists(hasText("Unsubscribe?"), 5_000)
+    }
+
+    @Test
+    fun openingNowPlayingKeepsTheSongThatLeftTheQueue() {
+        playFavorites()
+        val player = app.core.player
+        val removed = player.state.value.queue.last()
+        runBlocking(Dispatchers.Main) {
+            var repeatMode = player.state.value.repeatMode
+            while (repeatMode != RepeatMode.NONE) repeatMode = player.rotateRepeatMode()
+            player.play(removed)
+        }
+        compose.waitUntil(10_000) { player.state.value.current?.id == removed.id }
+        runBlocking(Dispatchers.Main) {
+            player.pause()
+            player.removeFromQueue(removed)
+        }
+        compose.waitUntil(5_000) { player.state.value.currentIndex == -1 }
+
+        compose.onNode(hasClickLabel("Open Now Playing")).performClick()
+        compose.waitUntilAtLeastOneExists(hasContentDescription("Repeat", substring = true), 10_000)
+
+        runCatching { compose.waitUntil(2_000) { player.state.value.current?.id != removed.id } }
+        assertEquals(removed.id, player.state.value.current?.id)
+    }
+
+    @Test
+    fun homeLoadsTheOverviewOnce() {
+        compose.waitUntil(10_000) { server.requestCount(OVERVIEW_PATH) > 0 }
+        val requestsAtStart = server.requestCount(OVERVIEW_PATH)
+
+        openRecentlyPlayed()
+        goBack()
+        compose.onNodeWithText("Search").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Home").performClick()
+        compose.waitForIdle()
+        scenario.recreate()
+        compose.waitUntilAtLeastOneExists(hasContentDescription("Recently Played"), 10_000)
+
+        runCatching { compose.waitUntil(2_000) { server.requestCount(OVERVIEW_PATH) > requestsAtStart } }
+        assertEquals(requestsAtStart, server.requestCount(OVERVIEW_PATH))
+    }
+
+    @Test
+    fun searchResultsStayWhenComingBackToSearch() {
+        compose.onNodeWithText("Search").performClick()
+        compose.onNode(hasSetTextAction()).performTextInput("song")
+        compose.waitUntilAtLeastOneExists(hasText(MockKoelServer.SONG_TITLES[0]), 10_000)
+
+        compose.onNodeWithText("Home").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Search").performClick()
+        compose.waitForIdle()
+        assertSearchResultsShown()
+
+        scenario.recreate()
+        compose.waitForIdle()
+        assertSearchResultsShown()
+    }
+
+    @Test
+    fun aGenreKeepsItsSongsWhenComingBack() {
+        openGenre()
+        compose.waitForIdle()
+        val requestsBefore = server.requestCount(GENRE_SONGS_PATH)
+
+        goToAlbumFromLongPressMenu("Genre Song 001")
+        goBack()
+        compose.waitUntilAtLeastOneExists(hasText("Genre Song 001"), 5_000)
+
+        runCatching { compose.waitUntil(2_000) { server.requestCount(GENRE_SONGS_PATH) > requestsBefore } }
+        assertEquals(requestsBefore, server.requestCount(GENRE_SONGS_PATH))
+    }
+
+    @Test
+    fun allSongResultsKeepTheirPlaceWhenComingBack() {
+        compose.onNodeWithText("Search").performClick()
+        compose.onNode(hasSetTextAction()).performTextInput("song")
+        compose.waitUntilAtLeastOneExists(hasText(MockKoelServer.SONG_TITLES[0]), 10_000)
+        compose.onNode(hasClickLabel("Show All")).performClick()
+        val lastSong = MockKoelServer.SONG_TITLES.last()
+        val list = compose.onAllNodes(hasScrollToNodeAction).onLast()
+        compose.waitUntil(10_000) { runCatching { list.performScrollToNode(hasText(lastSong)) }.isSuccess }
+
+        goToAlbumFromLongPressMenu(lastSong)
+        goBack()
+
+        compose.onAllNodesWithText(lastSong).onFirst().assertIsDisplayed()
+    }
+
     private fun playbackServiceInfo(): ActivityManager.RunningServiceInfo? =
         context.getSystemService(ActivityManager::class.java).getRunningServices(Int.MAX_VALUE)
             .firstOrNull { it.service.className == PlaybackService::class.java.name }
@@ -891,6 +1062,22 @@ class PlayerUiTest {
         compose.onNodeWithText(destination).performClick()
     }
 
+    private fun pickFromLongPressMenu(title: String, action: String) {
+        compose.onAllNodesWithText(title).onFirst().performTouchInput { longClick() }
+        compose.waitUntilAtLeastOneExists(hasText(action), 5_000)
+        compose.onNodeWithText(action).performClick()
+    }
+
+    private fun goToAlbumFromLongPressMenu(songTitle: String) {
+        pickFromLongPressMenu(songTitle, "Go to Album")
+        compose.waitUntilAtLeastOneExists(hasText(MockKoelServer.ALBUM_NAME), 10_000)
+    }
+
+    private fun assertSearchResultsShown() {
+        compose.onNodeWithTag(SEARCH_SKELETON_TAG).assertDoesNotExist()
+        compose.onAllNodesWithText(MockKoelServer.SONG_TITLES[0]).onFirst().assertExists()
+    }
+
     private fun queuedRow(title: String) = hasText(title) and hasContentDescription("Reorder")
 
     private fun openQueue() {
@@ -921,5 +1108,7 @@ class PlayerUiTest {
         const val RECENTLY_PLAYED_PATH = "/api/songs/recently-played"
         const val FAVORITES_PATH = "/api/songs/favorite"
         const val RADIO_STATIONS_PATH = "/api/radio/stations"
+        const val OVERVIEW_PATH = "/api/overview"
+        const val GENRE_SONGS_PATH = "/api/genres/genre-1/songs"
     }
 }

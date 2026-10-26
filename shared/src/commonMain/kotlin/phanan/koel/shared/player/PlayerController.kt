@@ -1,8 +1,8 @@
 package phanan.koel.shared.player
 
-import phanan.koel.shared.onMain
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -99,6 +99,7 @@ class PlayerController internal constructor(
     private val currentIndex: Int get() = currentId?.let(queueIds::indexOf) ?: -1
     private val isRadioMode: Boolean get() = radioStation != null
     private val isLookingUpEpisode: Boolean get() = episodeLookup?.isActive == true
+    private val engineHoldsNoSource: Boolean get() = !isRadioMode && (detachedAt != null || hasFailed)
 
     init {
         engine.listener = EngineListener()
@@ -228,7 +229,9 @@ class PlayerController internal constructor(
 
     fun seek(seconds: Double) {
         callOffPendingCrossfade()
+        hasFinishedQueue = false
         positionFlow.value = seconds
+        if (engineHoldsNoSource) detachedAt = seconds
         engine.seek(seconds)
     }
 
@@ -313,8 +316,12 @@ class PlayerController internal constructor(
         }
     }
 
+    /** Tunes in on the player's own scope, so the caller going away (e.g. leaving the screen) doesn't abort it. */
     @Throws(Exception::class)
-    suspend fun playRadio(station: RadioStation): Unit = onMain {
+    suspend fun playRadio(station: RadioStation): Unit =
+        scope.async { runCatching { tuneIn(station) } }.await().getOrThrow()
+
+    private suspend fun tuneIn(station: RadioStation) {
         callOffEpisodeLookup()
         if (!isRadioMode && currentId != null) detachedAt = positionFlow.value
 
@@ -324,12 +331,13 @@ class PlayerController internal constructor(
         isPlaying = false
         isBuffering = true
         hasFailed = false
+        playsWhenLoaded = true
         publish()
 
         val generation = ++loadGeneration
         engine.setNormalizationGain(0.0)
         val outcome = loadSource(session.radioStreamUrl(station))
-        if (generation != loadGeneration) return@onMain
+        if (generation != loadGeneration) return
 
         isBuffering = false
 
@@ -339,10 +347,12 @@ class PlayerController internal constructor(
             throw SourceLoadException("Could not play ${station.name}.")
         }
 
+        startNowPlayingPolling(station)
+        if (!playsWhenLoaded) return publish()
+
         isPlaying = true
         publish()
         engine.play()
-        startNowPlayingPolling(station)
     }
 
     fun stopRadio() {
@@ -364,7 +374,7 @@ class PlayerController internal constructor(
         if (playing.id != station.id) return
 
         if (playing.url != station.url) {
-            scope.launch { runCatching { playRadio(station) } }
+            scope.launch { runCatching { tuneIn(station) } }
         } else {
             radioStation = station
             publish()
@@ -401,7 +411,7 @@ class PlayerController internal constructor(
         if (isRadioMode) {
             val station = radioStation!!
             if (hasFailed) {
-                runCatching { playRadio(station) }
+                runCatching { tuneIn(station) }
                 return
             }
 

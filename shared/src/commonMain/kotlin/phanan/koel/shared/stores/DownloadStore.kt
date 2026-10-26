@@ -126,10 +126,10 @@ class DownloadStore internal constructor(
      */
     internal fun adoptFlutterDownloads() {
         val flutterEmail = preferences.flutterDownloadsEmail ?: return
-        preferences.flutterDownloadsEmail = null
-
         val host = preferences.host ?: return
         val email = preferences.userEmail ?: return
+        preferences.flutterDownloadsEmail = null
+
         val flutterOwner = Owner.of(documents, host, flutterEmail)
         val owner = Owner.of(documents, host, email)
         if (flutterOwner == owner) return

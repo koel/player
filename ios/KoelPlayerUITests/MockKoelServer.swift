@@ -150,6 +150,8 @@ final class MockKoelServer: @unchecked Sendable {
             ])
         case ("GET", "/api/podcasts"):
             return json([["type": "podcasts", "id": "podcast-1", "title": Self.podcastTitle, "author": "Test Host"]])
+        case ("GET", "/api/search") where request.path.contains("q=Album"):
+            return json(["songs": Array(songs.prefix(3)), "albums": [album]])
         case ("GET", "/api/search"):
             return json([
                 "songs": [],
@@ -184,7 +186,7 @@ final class MockKoelServer: @unchecked Sendable {
             var preset = (try? JSONSerialization.jsonObject(with: request.body)) as? [String: Any] ?? [:]
             preset["id"] = "custom-preset-1"
             return json(preset)
-        case ("PUT", _), ("PATCH", "/api/me/preferences"), ("POST", "/api/interaction/play"):
+        case ("PUT", _), ("PATCH", "/api/me/preferences"), ("POST", "/api/interaction/play"), ("POST", "/api/interaction/like"), ("POST", "/api/favorites/toggle"):
             return json([:])
         case ("DELETE", _) where path.hasPrefix("/api/me/equalizer-presets/"):
             return json([:])

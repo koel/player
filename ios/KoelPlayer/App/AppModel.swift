@@ -51,6 +51,9 @@ final class AppModel {
         widgets = WidgetPublisher(player: core.player, recentlyPlayed: core.recentlyPlayed)
         downloadedIds = Live(core.downloads.downloadedIds)
         downloadingIds = Live(core.downloads.downloading)
+        Task { [downloads = core.downloads] in
+            for await _ in downloads.downloadedIds { DownloadsBackupExclusion.apply(in: documents) }
+        }
         Task { await reconnectWhenOnline() }
     }
 

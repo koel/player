@@ -2,6 +2,7 @@ package phanan.koel.shared.player
 
 import io.ktor.http.HttpMethod
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -351,6 +352,36 @@ class PlayerControllerTest {
     }
 
     @Test
+    fun seekingAfterAMidStreamFailureResumesFromTheSeekPosition() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        val song = songs("s1").single()
+        player.replaceQueue(listOf(song), shuffle = false, autoPlay = true)
+        engine.reachPosition(40.0)
+        engine.failMidStream()
+
+        player.seek(70.0)
+        player.play()
+
+        assertEquals(70.0, engine.seeks.last())
+        assertEquals(70.0, player.position.value)
+    }
+
+    @Test
+    fun seekingAfterStoppingResumesFromTheSeekPosition() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        val song = songs("s1").single()
+        player.replaceQueue(listOf(song), shuffle = false, autoPlay = true)
+        engine.reachPosition(40.0)
+        player.stop()
+
+        player.seek(10.0)
+        player.play()
+
+        assertEquals(2, engine.loadsOf(url(song)))
+        assertEquals(10.0, engine.seeks.last())
+    }
+
+    @Test
     fun stoppingWhileTheItemLoadsCallsOffTheLoad() = runTest(UnconfinedTestDispatcher()) {
         val player = player()
         val song = songs("s1").single()
@@ -650,6 +681,34 @@ class PlayerControllerTest {
         engine.finish()
         assertEquals("s2", player.state.value.current?.id)
         assertFalse(player.state.value.isPlaying)
+    }
+
+    @Test
+    fun playAfterTheQueueFinishedStartsTheLastItemOver() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        player.replaceQueue(songs("s1"), shuffle = false, autoPlay = true)
+        engine.reachPosition(100.0)
+        engine.finish()
+
+        player.play()
+
+        assertEquals(0.0, engine.seeks.last())
+        assertTrue(player.state.value.isPlaying)
+    }
+
+    @Test
+    fun playAfterSeekingAFinishedQueueContinuesFromTheSeekedSpot() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        player.replaceQueue(songs("s1"), shuffle = false, autoPlay = true)
+        engine.reachPosition(100.0)
+        engine.finish()
+
+        player.seek(30.0)
+        player.play()
+
+        assertEquals(30.0, engine.seeks.last())
+        assertEquals(30.0, engine.position)
+        assertTrue(player.state.value.isPlaying)
     }
 
     @Test
@@ -1620,6 +1679,41 @@ class PlayerControllerTest {
 
         assertFalse(player.state.value.isRadioMode)
         assertFalse(player.state.value.isBuffering)
+    }
+
+    @Test
+    fun pausingWhileTheStationConnectsKeepsItFromPlaying() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        h.on(HttpMethod.Get, "radio/stations/r1/now-playing") { """{"stream_title":null}""" }
+        val radio = station("r1")
+        engine.stallingUrls += h.session.radioStreamUrl(radio)
+
+        launch { player.playRadio(radio) }
+        player.pause()
+        engine.stalledLoad!!()
+
+        assertEquals(0, engine.playCount)
+        assertFalse(player.state.value.isPlaying)
+        assertTrue(player.state.value.isRadioMode)
+
+        player.play()
+        assertEquals(1, engine.playCount)
+        assertEquals(1, engine.loadedUrls.size)
+    }
+
+    @Test
+    fun theCallerGoingAwayWhileTheStationConnectsStillTunesIn() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        h.on(HttpMethod.Get, "radio/stations/r1/now-playing") { """{"stream_title":null}""" }
+        val radio = station("r1")
+        engine.stallingUrls += h.session.radioStreamUrl(radio)
+
+        launch { player.playRadio(radio) }.cancel()
+        engine.stalledLoad!!()
+
+        assertFalse(player.state.value.isBuffering)
+        assertTrue(player.state.value.isPlaying)
+        assertEquals(radio, player.state.value.radioStation)
     }
 
     @Test

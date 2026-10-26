@@ -77,6 +77,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import kotlinx.coroutines.flow.drop
 import phanan.koel.app.AppSheet
 import phanan.koel.app.R
 import phanan.koel.app.ui.LocalAppModel
@@ -353,9 +354,10 @@ private fun QueueArtworkCarousel(state: PlaybackState, modifier: Modifier = Modi
         if (pagerState.currentPage != currentIndex) pagerState.animateScrollToPage(currentIndex)
     }
     LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.settledPage }.collect { page ->
+        snapshotFlow { pagerState.settledPage }.drop(1).collect { page ->
             val latest = app.core.player.state.value
-            if (page != latest.currentIndex) latest.queue.getOrNull(page)?.let(app.core.player::play)
+            val isCurrentQueued = latest.currentIndex >= 0
+            if (isCurrentQueued && page != latest.currentIndex) latest.queue.getOrNull(page)?.let(app.core.player::play)
         }
     }
 

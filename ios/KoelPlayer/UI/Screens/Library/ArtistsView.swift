@@ -35,9 +35,7 @@ struct ArtistsView: View {
                     rows(artists)
                 }
 
-                if loadState.canLoadMore(hasMore: hasMore, loadedCount: artists.count) {
-                    LoadMoreRow(loadedCount: artists.count, load: loadMore)
-                }
+                NextPageRow(hasMore: hasMore, loadedCount: artists.count, loadState: loadState, load: loadMore)
             }
             .brandListRow()
         }

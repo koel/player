@@ -10,6 +10,7 @@ struct NowPlayingView: View {
 
     /// How much of the queue's heading shows below the player, hinting that it scrolls.
     private static let queuePeek: CGFloat = 56
+    private static let maxArtworkSize: CGFloat = 320
 
     var body: some View {
         let state = app.player.state
@@ -45,15 +46,7 @@ struct NowPlayingView: View {
 
             Spacer(minLength: 16)
 
-            if state.isRadioMode {
-                Artwork(url: artworkUrl(state), size: 320, cornerRadius: 14)
-                    .shadow(color: .black.opacity(0.5), radius: 30, y: 16)
-                    .scaleEffect(state.isPlaying ? 1 : 0.86)
-                    .animation(.spring(duration: 0.45, bounce: 0.3), value: state.isPlaying)
-            } else {
-                QueueArtworkCarousel(state: state)
-                    .padding(.horizontal, -28)
-            }
+            artwork(state)
 
             Spacer(minLength: 24)
 
@@ -81,6 +74,27 @@ struct NowPlayingView: View {
         }
         .padding(.horizontal, 28)
         .padding(.bottom, 12)
+    }
+
+    /// Full size where it fits, smaller on short screens so the controls below stay on screen.
+    private func artwork(_ state: PlaybackState) -> some View {
+        GeometryReader { proxy in
+            let size = min(proxy.size.height, Self.maxArtworkSize)
+            Group {
+                if state.isRadioMode {
+                    Artwork(url: artworkUrl(state), size: size, cornerRadius: 14)
+                        .shadow(color: .black.opacity(0.5), radius: 30, y: 16)
+                        .scaleEffect(state.isPlaying ? 1 : 0.86)
+                        .animation(.spring(duration: 0.45, bounce: 0.3), value: state.isPlaying)
+                } else {
+                    QueueArtworkCarousel(state: state, artworkSize: size)
+                        .padding(.horizontal, -28)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .frame(maxHeight: Self.maxArtworkSize)
+        .layoutPriority(1)
     }
 
     private func artworkUrl(_ state: PlaybackState) -> String? {

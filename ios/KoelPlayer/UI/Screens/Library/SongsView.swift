@@ -44,8 +44,8 @@ struct SongsView: View {
                     isSortedByTitle: currentSort.field == PlayableSortField.shared.TITLE
                 )
 
-                if !isSearching, loadState.canLoadMore(hasMore: hasMore, loadedCount: songs.count) {
-                    LoadMoreRow(loadedCount: songs.count, load: loadMore)
+                if !isSearching {
+                    NextPageRow(hasMore: hasMore, loadedCount: songs.count, loadState: loadState, load: loadMore)
                 }
             }
             .brandListRow()
@@ -79,6 +79,9 @@ struct SongsView: View {
             if store.songs.value.isEmpty { await refresh() }
         }
         .task(id: query) { await search() }
+        .collect(store.live(playables: searchResults ?? []), id: searchResults?.map(\.id)) { live in
+            if searchResults != nil { searchResults = live }
+        }
     }
 
     private func loadMore() async {

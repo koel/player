@@ -51,21 +51,28 @@ struct CarouselSongCard: View {
 struct CarouselAlbumCard: View {
     let album: Album
 
+    @Environment(AppModel.self) private var app
+    @State private var liveAlbum: Album?
+
     var body: some View {
         NavigationLink(value: Route.album(id: album.id)) {
             ArtworkCard(artworkUrl: album.cover, title: album.name, subtitle: album.artistName, size: CarouselCardSize.standard)
         }
         .buttonStyle(.plain)
         .contextMenu {
-            AlbumMenu(album: album)
+            AlbumMenu(album: liveAlbum ?? album)
         } preview: {
             AlbumPreview(album: album)
         }
+        .collect(app.core.albums.observe(id: album.id), id: album.id) { liveAlbum = $0 }
     }
 }
 
 struct CarouselArtistCard: View {
     let artist: Artist
+
+    @Environment(AppModel.self) private var app
+    @State private var liveArtist: Artist?
 
     var body: some View {
         NavigationLink(value: Route.artist(id: artist.id)) {
@@ -73,10 +80,11 @@ struct CarouselArtistCard: View {
         }
         .buttonStyle(.plain)
         .contextMenu {
-            ArtistMenu(artist: artist)
+            ArtistMenu(artist: liveArtist ?? artist)
         } preview: {
             ArtistPreview(artist: artist)
         }
+        .collect(app.core.artists.observe(id: artist.id), id: artist.id) { liveArtist = $0 }
     }
 }
 

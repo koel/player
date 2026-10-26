@@ -46,9 +46,7 @@ struct GenreDetailView: View {
         ) {
             ContentUnavailableView("No songs", systemImage: "music.note")
         } footer: {
-            if loadState.canLoadMore(hasMore: nextPage != nil, loadedCount: loadedSongs.count) {
-                LoadMoreRow(loadedCount: loadedSongs.count, load: loadMore)
-            }
+            NextPageRow(hasMore: nextPage != nil, loadedCount: loadedSongs.count, loadState: loadState, load: loadMore)
         }
         .toolbar {
             SortToolbarItem(options: SortOptions.genreSongs, sort: sort, rememberKey: Self.sortKey) { setting in

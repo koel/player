@@ -74,6 +74,7 @@ final class Navigator {
 
     func focusSearch() {
         selectedTab = .search
+        paths[.search] = []
         wantsSearchFocus = true
     }
 

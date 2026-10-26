@@ -43,9 +43,12 @@ final class LoadState {
         await perform(fetch, apply: apply, showsFailure: !hasItems(), generation: refreshGeneration)
     }
 
-    /// Off after a failure, so a failing page isn't requested again and again as the row stays visible.
-    func canLoadMore(hasMore: Bool, loadedCount: Int) -> Bool {
-        hasMore && loadedCount > 0 && !hasFailed
+    enum NextPage { case none, loadable, failed }
+
+    /// A failed page waits for a tap on Retry, so it isn't requested again and again as the row stays visible.
+    func nextPage(hasMore: Bool, loadedCount: Int) -> NextPage {
+        guard hasMore, loadedCount > 0 else { return .none }
+        return hasFailed ? .failed : .loadable
     }
 
     private func perform<Page>(_ fetch: () async throws -> Page, apply: (Page) -> Void, showsFailure: Bool, generation: Int) async {

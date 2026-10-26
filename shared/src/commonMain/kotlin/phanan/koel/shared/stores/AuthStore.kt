@@ -114,7 +114,6 @@ class AuthStore internal constructor(
     private fun forgetSession() {
         preferences.apiToken = null
         preferences.audioToken = null
-        preferences.flutterDownloadsEmail = null
         userState.value = null
     }
 

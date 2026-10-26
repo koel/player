@@ -42,6 +42,7 @@ struct PodcastAndRadioFormTests {
             url: "https://jazz.example.com/live",
             logo: nil,
             description: "Smooth",
+            homepageUrl: nil,
             isPublic: true,
             favorite: false,
             permissions: Permissions(edit: true, delete: true)

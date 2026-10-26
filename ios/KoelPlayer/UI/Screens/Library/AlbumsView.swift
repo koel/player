@@ -26,8 +26,6 @@ struct AlbumsView: View {
 
     private var isSortedByYear: Bool { currentSort.field == AlbumSortField.shared.YEAR }
 
-    private var canLoadMore: Bool { loadState.canLoadMore(hasMore: hasMore, loadedCount: albums.count) }
-
     private var grid: some View {
         let gridLayout = GridLayout(containerWidth: containerWidth)
 
@@ -36,10 +34,8 @@ struct AlbumsView: View {
                 AlbumGrid(albums: albums, layout: gridLayout, showsYear: isSortedByYear) { editingAlbum = $0 }
                     .padding(.vertical, gridLayout.padding)
 
-                if canLoadMore {
-                    LoadMoreRow(loadedCount: albums.count, load: loadMore)
-                        .padding()
-                }
+                NextPageRow(hasMore: hasMore, loadedCount: albums.count, loadState: loadState, load: loadMore)
+                    .padding()
             }
             .overlay(alignment: .trailing) {
                 if isIndexed {
@@ -67,9 +63,7 @@ struct AlbumsView: View {
                     rows(albums)
                 }
 
-                if canLoadMore {
-                    LoadMoreRow(loadedCount: albums.count, load: loadMore)
-                }
+                NextPageRow(hasMore: hasMore, loadedCount: albums.count, loadState: loadState, load: loadMore)
             }
             .brandListRow()
         }

@@ -6,8 +6,8 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.withInfiniteAnimationFrameMillis
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
@@ -26,13 +26,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import kotlin.math.PI
-import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
@@ -85,26 +83,30 @@ fun PlaybackScrubber(
                 stateDescription = position.playbackTime
             }
             .pointerInput(length) {
-                awaitEachGesture {
-                    val down = awaitFirstDown()
-                    val start = currentPosition
-                    dragStart = start
-                    var moved = 0f
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                        if (!change.pressed) break
-                        moved += change.positionChange().x
-                        change.consume()
-                        currentOnScrub(Scrubbing.target(start, moved, size.width.toFloat(), length))
-                    }
+                detectTapGestures { tap ->
+                    if (size.width > 0) currentOnCommit((tap.x / size.width).coerceIn(0f, 1f) * length)
+                }
+            }
+            .pointerInput(length) {
+                var start = 0.0
+                var moved = 0f
+                fun target() = Scrubbing.target(start, moved, size.width.toFloat(), length)
+                fun finishDrag() {
                     dragStart = null
-                    val target = if (abs(moved) < 4.dp.toPx() && size.width > 0) {
-                        (down.position.x / size.width).coerceIn(0f, 1f) * length
-                    } else {
-                        Scrubbing.target(start, moved, size.width.toFloat(), length)
-                    }
-                    currentOnCommit(target)
+                    currentOnCommit(target())
+                }
+                detectHorizontalDragGestures(
+                    onDragStart = {
+                        start = currentPosition
+                        moved = 0f
+                        dragStart = start
+                    },
+                    onDragEnd = ::finishDrag,
+                    onDragCancel = ::finishDrag,
+                ) { change, dragAmount ->
+                    change.consume()
+                    moved += dragAmount
+                    currentOnScrub(target())
                 }
             },
     ) {
