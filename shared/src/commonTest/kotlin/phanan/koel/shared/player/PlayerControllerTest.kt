@@ -1,6 +1,7 @@
 package phanan.koel.shared.player
 
 import io.ktor.http.HttpMethod
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -13,6 +14,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import phanan.koel.shared.json.KoelJson
+import phanan.koel.shared.models.Episode
 import phanan.koel.shared.models.Playable
 import phanan.koel.shared.models.QueueState
 import phanan.koel.shared.models.RadioStation
@@ -36,6 +38,10 @@ class PlayerControllerTest {
     private val engine = FakeAudioEngine()
     private val localFiles = mutableMapOf<String, String>()
     private val registeredPlays = mutableListOf<Playable>()
+    private var crossfadeSeconds = 0
+    private val gains = mutableMapOf<String, Double>()
+    private var episodeProgress: suspend (Episode) -> Double = { 0.0 }
+    private var isOffline = false
 
     private fun TestScope.player() = PlayerController(
         api = h.api,
@@ -46,6 +52,10 @@ class PlayerControllerTest {
         engine = engine,
         localFileUrl = { localFiles[it.id] },
         onPlayRegistered = { registeredPlays += it },
+        crossfadeSeconds = { crossfadeSeconds },
+        normalizationGain = { gains[it.id] ?: 0.0 },
+        episodeProgress = { episodeProgress(it) },
+        isOffline = { isOffline },
         random = Random(42),
     )
 
@@ -118,6 +128,21 @@ class PlayerControllerTest {
 
         assertEquals(1, engine.stopCount)
         assertTrue(player.state.value.hasFailed)
+    }
+
+    @Test
+    fun playReloadsAFailedItemThatIsNoLongerQueued() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        val (song) = songs("s1")
+        player.replaceQueue(listOf(song), shuffle = false, autoPlay = true)
+        engine.failMidStream()
+        player.clearQueue()
+
+        player.play()
+
+        assertEquals(2, engine.loadsOf(url(song)))
+        assertTrue(player.state.value.isPlaying)
+        assertFalse(player.state.value.hasFailed)
     }
 
     @Test
@@ -245,6 +270,101 @@ class PlayerControllerTest {
         assertEquals(1, engine.playCount)
     }
 
+    @Test
+    fun pausingWhileTheItemLoadsKeepsItFromPlaying() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        val song = songs("s1").single()
+        engine.stallingUrls += url(song)
+
+        player.replaceQueue(listOf(song), shuffle = false, autoPlay = true)
+        player.pause()
+        engine.stalledLoad!!()
+
+        assertEquals(0, engine.playCount)
+        assertFalse(player.state.value.isPlaying)
+
+        player.play()
+        assertEquals(1, engine.playCount)
+        assertTrue(player.state.value.isPlaying)
+    }
+
+    @Test
+    fun pausingWhileTheItemLoadsHoldsAcrossSkippingPastAFailure() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        val (broken, next) = songs("s1", "s2")
+        engine.stallingUrls += url(broken)
+
+        player.replaceQueue(listOf(broken, next), shuffle = false, autoPlay = true)
+        player.pause()
+        engine.stalledLoadFailure!!("500")
+
+        assertEquals("s2", player.state.value.current?.id)
+        assertEquals(0, engine.playCount)
+        assertFalse(player.state.value.isPlaying)
+    }
+
+    @Test
+    fun theEngineStoppingWhileTheItemLoadsKeepsItFromPlaying() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        val (playing, picked) = songs("s1", "s2")
+        player.replaceQueue(listOf(playing, picked), shuffle = false, autoPlay = true)
+        engine.reportPlaying(true)
+        engine.stallingUrls += url(picked)
+
+        player.play(picked)
+        engine.reportPlaying(false)
+        engine.stalledLoad!!()
+
+        assertEquals(1, engine.playCount)
+        assertFalse(player.state.value.isPlaying)
+    }
+
+    @Test
+    fun theLastSongPausingAsItEndsDoesNotStopTheNextOne() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        val (first, second) = songs("s1", "s2")
+        player.replaceQueue(listOf(first, second), shuffle = false, autoPlay = true)
+        engine.reportPlaying(true)
+        engine.stallingUrls += url(second)
+
+        engine.finish()
+        engine.reportPlaying(false)
+        engine.stalledLoad!!()
+
+        assertEquals("s2", player.state.value.current?.id)
+        assertEquals(2, engine.playCount)
+    }
+
+    @Test
+    fun playAfterAMidStreamFailureResumesWhereItFailed() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        val song = songs("s1").single()
+        player.replaceQueue(listOf(song), shuffle = false, autoPlay = true)
+        engine.reachPosition(40.0)
+
+        engine.failMidStream()
+        player.play()
+
+        assertEquals(2, engine.loadsOf(url(song)))
+        assertEquals(40.0, engine.seeks.last())
+        assertTrue(player.state.value.isPlaying)
+    }
+
+    @Test
+    fun stoppingWhileTheItemLoadsCallsOffTheLoad() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        val song = songs("s1").single()
+        engine.stallingUrls += url(song)
+        player.replaceQueue(listOf(song), shuffle = false, autoPlay = true)
+
+        player.stop()
+        advanceTimeBy(31.seconds)
+
+        assertFalse(player.state.value.hasFailed)
+        assertFalse(player.state.value.isBuffering)
+        assertEquals(1, engine.stopCount)
+    }
+
     // Queue
 
     @Test
@@ -309,6 +429,34 @@ class PlayerControllerTest {
     }
 
     @Test
+    fun playNextLeavesTheCurrentItemWhereItIs() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        val all = songs("s1", "s2", "s3")
+        player.replaceQueue(all, shuffle = false, autoPlay = false)
+        player.play(all[1])
+
+        player.playNext(all[1])
+
+        assertEquals(listOf("s1", "s2", "s3"), player.queueIds())
+    }
+
+    @Test
+    fun playNextOnSeveralItemsKeepsTheirOrderAndPutsTheQueueOnce() = runTest(UnconfinedTestDispatcher()) {
+        supportQueueSync()
+        acceptQueueSync()
+        val player = player()
+        val all = songs("s1", "s2", "s3", "s4", "s5")
+        player.replaceQueue(all.take(3), shuffle = false, autoPlay = false)
+        player.play(all[0])
+        val putsBefore = h.requestsTo(HttpMethod.Put, "queue/state").size
+
+        player.playNext(listOf(all[3], all[0], all[4]))
+
+        assertEquals(listOf("s1", "s4", "s5", "s2", "s3"), player.queueIds())
+        assertEquals(putsBefore + 1, h.requestsTo(HttpMethod.Put, "queue/state").size)
+    }
+
+    @Test
     fun playNextOnAnEmptyQueueOnlyQueues() = runTest(UnconfinedTestDispatcher()) {
         val player = player()
 
@@ -331,17 +479,58 @@ class PlayerControllerTest {
     }
 
     @Test
-    fun removeFromQueueLeavesPlaybackAlone() = runTest(UnconfinedTestDispatcher()) {
+    fun queueToBottomLeavesTheCurrentItemWhereItIs() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        val all = songs("s1", "s2", "s3")
+        player.replaceQueue(all, shuffle = false, autoPlay = true)
+
+        player.queueToBottom(all[0])
+        assertEquals(listOf("s1", "s2", "s3"), player.queueIds())
+
+        player.queueToBottom(listOf(all[0], all[1]))
+        assertEquals(listOf("s1", "s3", "s2"), player.queueIds())
+    }
+
+    @Test
+    fun queueToBottomOnSeveralItemsKeepsTheirOrderAndPutsTheQueueOnce() = runTest(UnconfinedTestDispatcher()) {
+        supportQueueSync()
+        acceptQueueSync()
+        val player = player()
+        val all = songs("s1", "s2", "s3", "s9")
+        player.replaceQueue(all.take(3), shuffle = false, autoPlay = false)
+        val putsBefore = h.requestsTo(HttpMethod.Put, "queue/state").size
+
+        player.queueToBottom(listOf(all[0], all[3]))
+
+        assertEquals(listOf("s2", "s3", "s1", "s9"), player.queueIds())
+        assertEquals(putsBefore + 1, h.requestsTo(HttpMethod.Put, "queue/state").size)
+    }
+
+    @Test
+    fun removingAnotherItemFromTheQueueLeavesPlaybackAlone() = runTest(UnconfinedTestDispatcher()) {
         val player = player()
         val all = songs("s1", "s2")
         player.replaceQueue(all, shuffle = false, autoPlay = true)
 
-        player.removeFromQueue(all[0])
+        player.removeFromQueue(all[1])
 
-        assertEquals(listOf("s2"), player.queueIds())
+        assertEquals(listOf("s1"), player.queueIds())
         assertEquals("s1", player.state.value.current?.id)
-        assertEquals(-1, player.state.value.currentIndex)
         assertEquals(1, engine.loadedUrls.size)
+    }
+
+    @Test
+    fun removingTheCurrentItemFromTheQueueMovesOnToTheNext() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        val all = songs("s1", "s2", "s3")
+        player.replaceQueue(all, shuffle = false, autoPlay = true)
+
+        player.removeFromQueue(all[0])
+        player.skipToNext()
+
+        assertEquals(listOf("s2", "s3"), player.queueIds())
+        assertEquals("s3", player.state.value.current?.id)
+        assertEquals(1, player.state.value.currentIndex)
     }
 
     @Test
@@ -565,6 +754,55 @@ class PlayerControllerTest {
         assertEquals(PlaybackState(volume = h.preferences.volume), player.state.value)
     }
 
+    @Test
+    fun aQueueRestoredAfterLogoutResumesWhereItWasSaved() = runTest(UnconfinedTestDispatcher()) {
+        supportQueueSync()
+        acceptQueueSync()
+        val player = player()
+        val (finished, saved) = songs("s1", "s2")
+        player.replaceQueue(listOf(finished), shuffle = false, autoPlay = true)
+        engine.reachPosition(100.0)
+        engine.finish()
+
+        player.cleanUpUponLogout()
+        player.restore(QueueState(listOf(saved), saved, 42.0))
+        player.play()
+
+        assertEquals(1, engine.loadsOf(url(saved)))
+        assertEquals(42.0, engine.seeks.last())
+    }
+
+    @Test
+    fun aSongFadingAtLogoutFadesAgainAfterwards() = runTest(UnconfinedTestDispatcher()) {
+        crossfadeSeconds = 5
+        val player = player()
+        val queue = songs("s1", "s2")
+        engine.stallingUrls += url(queue[1])
+        player.replaceQueue(queue, shuffle = false, autoPlay = true)
+        engine.reachPosition(95.0)
+
+        player.cleanUpUponLogout()
+        engine.stallingUrls.clear()
+        player.replaceQueue(queue, shuffle = false, autoPlay = true)
+        engine.reachPosition(95.0)
+
+        assertEquals(2, engine.crossfades.size)
+        assertEquals("s2", player.state.value.current?.id)
+    }
+
+    @Test
+    fun cleaningUpUponLogoutLeavesTheServerQueueAlone() = runTest(UnconfinedTestDispatcher()) {
+        supportQueueSync()
+        acceptQueueSync()
+        val player = player()
+        player.replaceQueue(songs("s1"), shuffle = false, autoPlay = true)
+        val putsBefore = h.requestsTo(HttpMethod.Put, "queue/state").size
+
+        player.cleanUpUponLogout()
+
+        assertEquals(putsBefore, h.requestsTo(HttpMethod.Put, "queue/state").size)
+    }
+
     // Episodes
 
     @Test
@@ -577,6 +815,148 @@ class PlayerControllerTest {
 
         assertEquals(300.0, engine.seeks.last())
         assertEquals(300.0, player.position.value)
+    }
+
+    @Test
+    fun anEpisodeFirstLooksUpWhereItWasLeftOff() = runTest(UnconfinedTestDispatcher()) {
+        episodeProgress = { 300.0 }
+        val player = player()
+
+        player.play(episode("e1"))
+
+        assertEquals("e1", player.state.value.current?.id)
+        assertEquals(300.0, engine.seeks.last())
+    }
+
+    @Test
+    fun aSongPickedWhileAnEpisodeLooksUpItsPositionKeepsPlaying() = runTest(UnconfinedTestDispatcher()) {
+        val lookup = CompletableDeferred<Double>()
+        episodeProgress = { lookup.await() }
+        val player = player()
+        val podcastEpisode = episode("e1")
+        val (song) = songs("s1")
+
+        player.play(podcastEpisode)
+        player.play(song)
+        lookup.complete(300.0)
+
+        assertEquals("s1", player.state.value.current?.id)
+        assertEquals(listOf(url(song)), engine.loadedUrls)
+    }
+
+    @Test
+    fun anEpisodeLeftOffAtItsEndStartsOver() = runTest(UnconfinedTestDispatcher()) {
+        episodeProgress = { 999.5 }
+        val player = player()
+
+        player.play(episode("e1"))
+
+        assertEquals(0.0, engine.seeks.last())
+    }
+
+    @Test
+    fun anEpisodeLeftOffAtItsLastProgressReportStartsOver() = runTest(UnconfinedTestDispatcher()) {
+        episodeProgress = { 995.0 }
+        val player = player()
+
+        player.play(episode("e1"))
+
+        assertEquals(0.0, engine.seeks.last())
+    }
+
+    @Test
+    fun offlineAnEpisodePlaysWithoutLookingUpWhereItWasLeftOff() = runTest(UnconfinedTestDispatcher()) {
+        episodeProgress = { CompletableDeferred<Double>().await() }
+        isOffline = true
+        val player = player()
+
+        player.play(episode("e1"))
+
+        assertEquals("e1", player.state.value.current?.id)
+        assertEquals(1, engine.playCount)
+    }
+
+    @Test
+    fun playWhileAnEpisodeLooksUpItsPositionWaitsForTheEpisode() = runTest(UnconfinedTestDispatcher()) {
+        val lookup = CompletableDeferred<Double>()
+        episodeProgress = { lookup.await() }
+        val player = player()
+        val podcastEpisode = episode("e1")
+        player.replaceQueue(songs("s1"), shuffle = false, autoPlay = true)
+        player.pause()
+
+        player.play(podcastEpisode)
+        player.play()
+        assertEquals(1, engine.playCount)
+
+        lookup.complete(300.0)
+        assertEquals("e1", player.state.value.current?.id)
+        assertEquals(2, engine.playCount)
+    }
+
+    @Test
+    fun pausingWhileAnEpisodeLooksUpItsPositionCallsOffPlayingIt() = runTest(UnconfinedTestDispatcher()) {
+        val lookup = CompletableDeferred<Double>()
+        episodeProgress = { lookup.await() }
+        val player = player()
+
+        player.play(episode("e1"))
+        player.pause()
+        lookup.complete(300.0)
+
+        assertTrue(engine.loadedUrls.isEmpty())
+        assertEquals(0, engine.playCount)
+        assertNull(player.state.value.current)
+    }
+
+    @Test
+    fun replacingTheQueueWhileAnEpisodeLooksUpItsPositionLetsPlayResume() = runTest(UnconfinedTestDispatcher()) {
+        val lookup = CompletableDeferred<Double>()
+        episodeProgress = { lookup.await() }
+        val player = player()
+
+        player.play(episode("e1"))
+        player.replaceQueue(songs("s1"), shuffle = false, autoPlay = true)
+        engine.reportPlaying(true)
+        engine.reportPlaying(false)
+        player.play()
+        lookup.complete(300.0)
+
+        assertEquals(2, engine.playCount)
+        assertEquals("s1", player.state.value.current?.id)
+    }
+
+    @Test
+    fun skippingWhileAnEpisodeLooksUpItsPositionLetsPlayResume() = runTest(UnconfinedTestDispatcher()) {
+        val lookup = CompletableDeferred<Double>()
+        episodeProgress = { lookup.await() }
+        val player = player()
+        player.replaceQueue(songs("s1", "s2"), shuffle = false, autoPlay = true)
+
+        player.play(episode("e1"))
+        player.skipToNext()
+        engine.reportPlaying(true)
+        engine.reportPlaying(false)
+        player.play()
+        lookup.complete(300.0)
+
+        assertEquals(3, engine.playCount)
+        assertEquals("s2", player.state.value.current?.id)
+    }
+
+    @Test
+    fun replayingAnEpisodeThatPlayedToItsEndStartsItOver() = runTest(UnconfinedTestDispatcher()) {
+        episodeProgress = { 995.0 }
+        val player = player()
+        val podcastEpisode = episode("e1")
+        player.play(podcastEpisode)
+        engine.reachPosition(995.0)
+        engine.reachPosition(999.5)
+        engine.finish()
+
+        player.play(podcastEpisode)
+
+        assertEquals(0.0, engine.seeks.last())
     }
 
     @Test
@@ -636,6 +1016,20 @@ class PlayerControllerTest {
 
         engine.reachPosition(50.0)
         engine.finish()
+        engine.reachPosition(50.0)
+
+        assertEquals(2, h.requestsTo(HttpMethod.Post, "interaction/play").size)
+    }
+
+    @Test
+    fun aSkippedSongCountsAgainWhenPlayedAgain() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        h.on(HttpMethod.Post, "interaction/play") { """{"song_id":"s1","play_count":1}""" }
+        player.replaceQueue(songs("s1", "s2"), shuffle = false, autoPlay = true)
+
+        engine.reachPosition(50.0)
+        player.skipToNext()
+        player.skipToPrevious()
         engine.reachPosition(50.0)
 
         assertEquals(2, h.requestsTo(HttpMethod.Post, "interaction/play").size)
@@ -723,6 +1117,88 @@ class PlayerControllerTest {
     }
 
     @Test
+    fun theQueueStateIsPutOneAtATimeWithTheLatestLast() = runTest(UnconfinedTestDispatcher()) {
+        supportQueueSync()
+        val firstPutAnswered = CompletableDeferred<Unit>()
+        h.onRequest(HttpMethod.Put, "queue/state") {
+            firstPutAnswered.await()
+            Harness.Reply(200, "")
+        }
+        val player = player()
+        val all = songs("s1", "s2", "s3")
+
+        player.replaceQueue(all, shuffle = false, autoPlay = false)
+        player.move(2, 0)
+        player.move(2, 0)
+        assertEquals(1, h.requestsTo(HttpMethod.Put, "queue/state").size)
+        firstPutAnswered.complete(Unit)
+
+        val sent = h.requestsTo(HttpMethod.Put, "queue/state").map { put -> put.json["songs"]!!.jsonArray.map { it.jsonPrimitive.content } }
+        assertEquals(listOf(listOf("s1", "s2", "s3"), listOf("s2", "s3", "s1")), sent)
+    }
+
+    @Test
+    fun aQueueStateWaitingToBePutAtLogoutIsNeverSent() = runTest(UnconfinedTestDispatcher()) {
+        supportQueueSync()
+        val firstPutAnswered = CompletableDeferred<Unit>()
+        h.onRequest(HttpMethod.Put, "queue/state") {
+            firstPutAnswered.await()
+            Harness.Reply(200, "")
+        }
+        val player = player()
+        player.replaceQueue(songs("s1", "s2"), shuffle = false, autoPlay = false)
+        player.move(1, 0)
+
+        player.cleanUpUponLogout()
+        firstPutAnswered.complete(Unit)
+
+        assertEquals(1, h.requestsTo(HttpMethod.Put, "queue/state").size)
+    }
+
+    @Test
+    fun restoringLeavesWhatIsAlreadyPlayingAlone() = runTest(UnconfinedTestDispatcher()) {
+        supportQueueSync()
+        acceptQueueSync()
+        val player = player()
+        val (playing, saved) = songs("s1", "s2")
+        player.replaceQueue(listOf(playing), shuffle = false, autoPlay = true)
+
+        player.restore(QueueState(listOf(saved), saved, 42.0))
+
+        assertEquals(listOf("s1"), player.queueIds())
+        assertEquals("s1", player.state.value.current?.id)
+        assertEquals(listOf(url(playing)), engine.loadedUrls)
+    }
+
+    @Test
+    fun aRestoredSongSavedAtItsEndStartsOver() = runTest(UnconfinedTestDispatcher()) {
+        supportQueueSync()
+        acceptQueueSync()
+        val player = player()
+        val song = songs("s1").single()
+
+        player.restore(QueueState(listOf(song), song, 100.2))
+
+        assertEquals(0.0, engine.seeks.last())
+    }
+
+    @Test
+    fun playAfterTheQueueRanOutStartsTheLastSongOver() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        val song = songs("s1").single()
+        player.replaceQueue(listOf(song), shuffle = false, autoPlay = true)
+        engine.reachPosition(100.0)
+        engine.finish()
+        assertFalse(player.state.value.isPlaying)
+
+        player.play()
+
+        assertEquals(0.0, engine.seeks.last())
+        assertTrue(player.state.value.isPlaying)
+        assertEquals(2, engine.playCount)
+    }
+
+    @Test
     fun abandonsARestoredItemThatFailsToLoad() = runTest(UnconfinedTestDispatcher()) {
         supportQueueSync()
         acceptQueueSync()
@@ -735,6 +1211,22 @@ class PlayerControllerTest {
         assertTrue(player.state.value.hasFailed)
         assertEquals(1, engine.stopCount)
         assertEquals(1, engine.loadedUrls.size)
+    }
+
+    @Test
+    fun playAfterARestoredItemFailedToLoadStartsWhereItWasSaved() = runTest(UnconfinedTestDispatcher()) {
+        supportQueueSync()
+        acceptQueueSync()
+        val player = player()
+        val song = songs("s1").single()
+        engine.failEveryLoad = true
+        player.restore(QueueState(listOf(song), song, 42.0))
+
+        engine.failEveryLoad = false
+        player.play()
+
+        assertEquals(42.0, engine.seeks.last())
+        assertTrue(player.state.value.isPlaying)
     }
 
     @Test
@@ -762,6 +1254,219 @@ class PlayerControllerTest {
         }
 
         assertEquals(QueueState.EMPTY, QueueState.parse(json, store))
+    }
+
+    // Crossfade
+
+    private fun FakeAudioEngine.playThrough(vararg positions: Double) = positions.forEach(::reachPosition)
+
+    @Test
+    fun aSongFadesIntoTheNextAsItNearsItsEnd() = runTest(UnconfinedTestDispatcher()) {
+        crossfadeSeconds = 5
+        val player = player()
+        val queue = songs("s1", "s2")
+        player.replaceQueue(queue, shuffle = false, autoPlay = true)
+
+        engine.playThrough(94.5, 95.0)
+
+        assertEquals(listOf(url(queue[1]) to 5.0), engine.crossfades)
+        assertEquals("s2", player.state.value.current?.id)
+        assertEquals(0.0, player.position.value)
+    }
+
+    @Test
+    fun seekingIntoTheFadeFadesOverWhatIsLeft() = runTest(UnconfinedTestDispatcher()) {
+        crossfadeSeconds = 5
+        val player = player()
+        val queue = songs("s1", "s2")
+        player.replaceQueue(queue, shuffle = false, autoPlay = true)
+
+        engine.reachPosition(50.0)
+        player.seek(97.0)
+        engine.reachPosition(97.0)
+
+        assertEquals(listOf(url(queue[1]) to 3.0), engine.crossfades)
+        assertEquals("s2", player.state.value.current?.id)
+    }
+
+    @Test
+    fun seekingRightToTheEndLetsTheSongEndAsUsual() = runTest(UnconfinedTestDispatcher()) {
+        crossfadeSeconds = 5
+        val player = player()
+        player.replaceQueue(songs("s1", "s2"), shuffle = false, autoPlay = true)
+
+        player.seek(99.5)
+        engine.reachPosition(99.5)
+
+        assertTrue(engine.crossfades.isEmpty())
+        assertEquals("s1", player.state.value.current?.id)
+    }
+
+    @Test
+    fun aSongStartsFadingOnlyOnce() = runTest(UnconfinedTestDispatcher()) {
+        crossfadeSeconds = 5
+        val player = player()
+        val queue = songs("s1", "s2")
+        engine.stallingUrls += url(queue[1])
+        player.replaceQueue(queue, shuffle = false, autoPlay = true)
+
+        engine.playThrough(95.0, 95.5, 96.0)
+
+        assertEquals(1, engine.crossfades.size)
+    }
+
+    @Test
+    fun onlySongsFadeIntoSongs() = runTest(UnconfinedTestDispatcher()) {
+        crossfadeSeconds = 5
+        val player = player()
+        player.replaceQueue(songs("s1") + episode("e1"), shuffle = false, autoPlay = true)
+
+        engine.playThrough(94.5, 95.0)
+
+        assertTrue(engine.crossfades.isEmpty())
+    }
+
+    @Test
+    fun repeatOneLoopsWithoutAFade() = runTest(UnconfinedTestDispatcher()) {
+        crossfadeSeconds = 5
+        val player = player()
+        player.replaceQueue(songs("s1", "s2"), shuffle = false, autoPlay = true)
+        player.rotateRepeatMode()
+        player.rotateRepeatMode()
+
+        engine.playThrough(94.5, 95.0)
+
+        assertTrue(engine.crossfades.isEmpty())
+    }
+
+    @Test
+    fun noFadeWhenCrossfadeIsOff() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        player.replaceQueue(songs("s1", "s2"), shuffle = false, autoPlay = true)
+
+        engine.playThrough(94.5, 95.0)
+
+        assertTrue(engine.crossfades.isEmpty())
+    }
+
+    @Test
+    fun aNextSongThatFailsToLoadLetsTheCurrentOnePlayOut() = runTest(UnconfinedTestDispatcher()) {
+        crossfadeSeconds = 5
+        val player = player()
+        val queue = songs("s1", "s2")
+        engine.failingUrls += url(queue[1])
+        player.replaceQueue(queue, shuffle = false, autoPlay = true)
+
+        engine.playThrough(94.5, 95.0)
+
+        assertEquals("s1", player.state.value.current?.id)
+        assertFalse(player.state.value.hasFailed)
+    }
+
+    @Test
+    fun seekingWhileTheNextSongLoadsCallsOffTheFade() = runTest(UnconfinedTestDispatcher()) {
+        crossfadeSeconds = 5
+        val player = player()
+        val queue = songs("s1", "s2")
+        engine.stallingUrls += url(queue[1])
+        player.replaceQueue(queue, shuffle = false, autoPlay = true)
+        engine.playThrough(94.5, 95.0)
+        val lateReady = engine.stalledLoad
+
+        player.seek(50.0)
+        lateReady?.invoke()
+
+        assertEquals("s1", player.state.value.current?.id)
+        assertEquals(1, engine.crossfadeCancelCount)
+    }
+
+    @Test
+    fun pausingWhileTheNextSongLoadsCallsOffTheFade() = runTest(UnconfinedTestDispatcher()) {
+        crossfadeSeconds = 5
+        val player = player()
+        val queue = songs("s1", "s2")
+        engine.stallingUrls += url(queue[1])
+        player.replaceQueue(queue, shuffle = false, autoPlay = true)
+        engine.playThrough(94.5, 95.0)
+        val lateReady = engine.stalledLoad
+
+        player.pause()
+        lateReady?.invoke()
+
+        assertEquals("s1", player.state.value.current?.id)
+        assertEquals(1, engine.crossfadeCancelCount)
+    }
+
+    @Test
+    fun theEnginePausingWhileTheNextSongLoadsCallsOffTheFade() = runTest(UnconfinedTestDispatcher()) {
+        crossfadeSeconds = 5
+        val player = player()
+        val queue = songs("s1", "s2")
+        engine.stallingUrls += url(queue[1])
+        player.replaceQueue(queue, shuffle = false, autoPlay = true)
+        engine.reportPlaying(true)
+        engine.playThrough(94.5, 95.0)
+        val lateReady = engine.stalledLoad
+
+        engine.reportPlaying(false)
+        lateReady?.invoke()
+
+        assertEquals("s1", player.state.value.current?.id)
+        assertEquals(1, engine.crossfadeCancelCount)
+    }
+
+    @Test
+    fun pickingAnotherSongWhileTheNextOneLoadsCallsOffTheFade() = runTest(UnconfinedTestDispatcher()) {
+        crossfadeSeconds = 5
+        val player = player()
+        val queue = songs("s1", "s2", "s3")
+        engine.stallingUrls += url(queue[1])
+        player.replaceQueue(queue, shuffle = false, autoPlay = true)
+        engine.playThrough(94.5, 95.0)
+        val lateReady = engine.stalledLoad
+
+        player.play(queue[2])
+        lateReady?.invoke()
+
+        assertEquals("s3", player.state.value.current?.id)
+    }
+
+    // Loudness
+
+    @Test
+    fun eachSongPlaysWithItsOwnLoudnessGain() = runTest(UnconfinedTestDispatcher()) {
+        crossfadeSeconds = 5
+        gains["s1"] = -4.0
+        gains["s2"] = 3.0
+        val player = player()
+        player.replaceQueue(songs("s1", "s2"), shuffle = false, autoPlay = true)
+        assertEquals(-4.0, engine.normalizationGain)
+
+        engine.playThrough(94.5, 95.0)
+
+        assertEquals(listOf(3.0), engine.crossfadeGains)
+    }
+
+    @Test
+    fun aChangedLoudnessSettingAppliesToWhatIsPlaying() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        player.replaceQueue(songs("s1"), shuffle = false, autoPlay = true)
+
+        gains["s1"] = -2.0
+        player.refreshNormalization()
+
+        assertEquals(-2.0, engine.normalizationGain)
+    }
+
+    @Test
+    fun radioPlaysWithoutALoudnessGain() = runTest(UnconfinedTestDispatcher()) {
+        gains["s1"] = -4.0
+        val player = player()
+        player.replaceQueue(songs("s1"), shuffle = false, autoPlay = true)
+
+        player.playRadio(station("r1"))
+
+        assertEquals(0.0, engine.normalizationGain)
     }
 
     // Radio
@@ -839,6 +1544,39 @@ class PlayerControllerTest {
 
         player.stop()
         assertFalse(player.state.value.isRadioMode)
+    }
+
+    @Test
+    fun skippingDoesNothingInRadioMode() = runTest(UnconfinedTestDispatcher()) {
+        val player = player()
+        h.on(HttpMethod.Get, "radio/stations/r1/now-playing") { """{"stream_title":null}""" }
+        player.replaceQueue(songs("s1", "s2"), shuffle = false, autoPlay = true)
+        player.playRadio(station("r1"))
+        val loads = engine.loadedUrls.size
+        val seeks = engine.seeks.size
+        engine.reachPosition(30.0)
+
+        player.skipToNext()
+        player.skipToPrevious()
+
+        assertTrue(player.state.value.isRadioMode)
+        assertEquals(loads, engine.loadedUrls.size)
+        assertEquals(seeks, engine.seeks.size)
+    }
+
+    @Test
+    fun restoringLeavesThePlayingRadioAlone() = runTest(UnconfinedTestDispatcher()) {
+        supportQueueSync()
+        acceptQueueSync()
+        val player = player()
+        h.on(HttpMethod.Get, "radio/stations/r1/now-playing") { """{"stream_title":null}""" }
+        val saved = songs("s1").single()
+        player.playRadio(station("r1"))
+
+        player.restore(QueueState(listOf(saved), saved, 42.0))
+
+        assertTrue(player.state.value.isRadioMode)
+        assertEquals(0, engine.loadsOf(url(saved)))
     }
 
     @Test

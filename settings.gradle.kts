@@ -2,6 +2,7 @@ rootProject.name = "koel-player"
 
 pluginManagement {
     repositories {
+        google()
         gradlePluginPortal()
         mavenCentral()
     }
@@ -9,8 +10,10 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
+        google()
         mavenCentral()
     }
 }
 
 include(":shared")
+include(":android")

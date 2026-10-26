@@ -31,6 +31,16 @@ struct NavigatorTests {
         #expect(navigator.selectedTab == .library)
     }
 
+    @Test func pickingTheSearchTabAsksForTheSearchField() {
+        let navigator = Navigator(defaults: defaults)
+
+        navigator.select(.library)
+        #expect(!navigator.wantsSearchFocus)
+
+        navigator.select(.search)
+        #expect(navigator.wantsSearchFocus)
+    }
+
     @Test func focusingSearchSwitchesToTheSearchTab() {
         let navigator = Navigator(defaults: defaults)
 

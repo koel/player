@@ -35,7 +35,7 @@ struct FormSheet<Fields: View>: View {
                         }
                     }
                 }
-                .alert("Error", isPresented: Binding(get: { failure != nil }, set: { if !$0 { failure = nil } })) {
+                .alert("Error", isPresented: $failure.isPresent) {
                     Button("OK", role: .cancel) {}
                 } message: {
                     Text(failure ?? "")

@@ -2,25 +2,29 @@ import AVFoundation
 @preconcurrency import Shared
 
 /// The native side of the shared `AudioEngine` contract. The shared `PlayerController` owns the
-/// queue and decides what to play; this class only plays one source at a time.
+/// queue and decides what to play; this class plays one source at a time, two while crossfading.
 final class AVPlayerEngine: NSObject, AudioEngine {
     var listener: (any AudioEngineListener)?
 
-    private let player = AVPlayer()
-    private var timeObserver: Any?
-    private var timeControlObservation: NSKeyValueObservation?
-    private var itemStatusObservation: NSKeyValueObservation?
-    private var itemNotifications: [NSObjectProtocol] = []
-    private var pendingLoad: (onReady: () -> Void, onFailure: (String) -> Void)?
+    private(set) var active = AudioDeck()
+    private var incoming: AudioDeck?
+    private var outgoing: AudioDeck?
+    private var fade: Task<Void, Never>?
+    private var volume: Float = 1
+    private var equalizer = Equalizer.shared.default
+    private let activateAudioSession: @MainActor () -> Void
 
-    override init() {
+    /// True from the start of a crossfade until the previous source has faded out.
+    var isFading: Bool { outgoing != nil }
+
+    init(activateAudioSession: @escaping @MainActor () -> Void = AudioSession.activate) {
+        self.activateAudioSession = activateAudioSession
         super.init()
-        player.automaticallyWaitsToMinimizeStalling = true
-        observePlayer()
+        listen(to: active)
     }
 
     var position: Double {
-        player.currentTime().seconds.finiteOrZero
+        active.position
     }
 
     func load(url: String, onReady: @escaping () -> Void, onFailure: @escaping (String) -> Void) {
@@ -29,107 +33,152 @@ final class AVPlayerEngine: NSObject, AudioEngine {
             return
         }
 
-        AudioSession.activate()
-        let item = AVPlayerItem(url: sourceUrl)
-        observe(item)
-        pendingLoad = (onReady, onFailure)
-        player.replaceCurrentItem(with: item)
+        callOffCrossfade()
+        active.load(sourceUrl, equalizer: equalizer, onReady: onReady, onFailure: onFailure)
+    }
+
+    func crossfade(url: String, seconds: Double, gainDecibels: Double, onReady: @escaping () -> Void, onFailure: @escaping (String) -> Void) {
+        guard let sourceUrl = URL(string: url) else {
+            onFailure("Invalid URL: \(url)")
+            return
+        }
+
+        callOffCrossfade()
+        let deck = makeDeck()
+        deck.fadeLevel = 0
+        deck.normalizationGain = gainDecibels
+        incoming = deck
+
+        deck.load(sourceUrl, equalizer: equalizer) { [weak self, weak deck] in
+            guard let self, let deck, deck === incoming else { return }
+            incoming = nil
+            fadeIn(deck, over: seconds)
+            onReady()
+        } onFailure: { [weak self, weak deck] message in
+            guard let self, let deck, deck === incoming else { return }
+            incoming = nil
+            deck.discard()
+            onFailure(message)
+        }
+    }
+
+    func cancelCrossfade() {
+        incoming?.discard()
+        incoming = nil
     }
 
     func play() {
-        AudioSession.activate()
-        player.play()
+        activateAudioSession()
+        active.player.play()
+        outgoing?.player.play()
     }
 
     func pause() {
-        player.pause()
+        cancelCrossfade()
+        active.player.pause()
+        outgoing?.player.pause()
     }
 
     func stop() {
-        player.pause()
-        forgetCurrentItem()
-        player.replaceCurrentItem(with: nil)
+        callOffCrossfade()
+        active.stop()
     }
 
     func seek(seconds: Double) {
-        player.seek(to: CMTime(seconds: seconds, preferredTimescale: 600))
+        callOffCrossfade()
+        active.player.seek(to: CMTime(seconds: seconds, preferredTimescale: 600))
     }
 
     func setVolume(volume: Double) {
-        player.volume = Float(volume)
+        self.volume = Float(volume)
+        for deck in decks {
+            deck.volume = self.volume
+        }
     }
 
-    private func observePlayer() {
-        timeObserver = player.addPeriodicTimeObserver(
-            forInterval: CMTime(seconds: 0.5, preferredTimescale: 600),
-            queue: .main
-        ) { [weak self] time in
-            MainActor.assumeIsolated {
-                self?.listener?.onPositionChanged(seconds: time.seconds.finiteOrZero)
+    func setNormalizationGain(decibels: Double) {
+        active.normalizationGain = decibels
+    }
+
+    func setEqualizer(preset: EqualizerPreset) {
+        equalizer = preset
+        for deck in decks {
+            deck.setEqualizer(preset)
+        }
+    }
+
+    private var decks: [AudioDeck] {
+        ([active, incoming, outgoing] as [AudioDeck?]).compactMap(\.self)
+    }
+
+    private func makeDeck() -> AudioDeck {
+        let deck = AudioDeck()
+        deck.volume = volume
+        listen(to: deck)
+        return deck
+    }
+
+    /// Makes [deck] the one the listener hears about, and fades the previous one out as it fades in. A paused
+    /// player skips the fade and switches over at once.
+    private func fadeIn(_ deck: AudioDeck, over seconds: Double) {
+        let previous = active
+        active = deck
+        guard previous.isPlaying else {
+            previous.discard()
+            deck.fadeLevel = 1
+            return
+        }
+
+        outgoing = previous
+        deck.player.play()
+        listener?.onPositionChanged(seconds: 0)
+
+        fade = Task { [weak self] in
+            while !Task.isCancelled {
+                let progress = Float(min(deck.position / seconds, 1))
+                deck.fadeLevel = sin(progress * .pi / 2)
+                previous.fadeLevel = cos(progress * .pi / 2)
+                if progress >= 1 { break }
+                try? await Task.sleep(for: Self.fadeStep)
             }
-        }
-
-        timeControlObservation = player.observe(\.timeControlStatus, options: [.initial, .new]) { [weak self] player, _ in
-            let status = player.timeControlStatus
-            Task { @MainActor in self?.timeControlStatusChanged(status) }
+            if !Task.isCancelled { self?.finishFade() }
         }
     }
 
-    private func timeControlStatusChanged(_ status: AVPlayer.TimeControlStatus) {
-        listener?.onPlayingChanged(playing: status != .paused)
-        listener?.onBufferingChanged(buffering: status == .waitingToPlayAtSpecifiedRate)
+    private func finishFade() {
+        fade?.cancel()
+        fade = nil
+        outgoing?.discard()
+        outgoing = nil
+        active.fadeLevel = 1
     }
 
-    private func observe(_ item: AVPlayerItem) {
-        forgetCurrentItem()
+    private func callOffCrossfade() {
+        cancelCrossfade()
+        finishFade()
+    }
 
-        itemStatusObservation = item.observe(\.status, options: [.initial, .new]) { [weak self] item, _ in
-            let status = item.status
-            let message = item.error?.localizedDescription ?? "The source could not be played."
-            Task { @MainActor in self?.itemStatusChanged(status, message: message) }
+
+    private func listen(to deck: AudioDeck) {
+        deck.onPosition = { [weak self, weak deck] seconds in
+            guard let self, deck === active else { return }
+            listener?.onPositionChanged(seconds: seconds)
         }
-
-        let center = NotificationCenter.default
-        itemNotifications = [
-            center.addObserver(forName: AVPlayerItem.didPlayToEndTimeNotification, object: item, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated { self?.listener?.onFinished() }
-            },
-            center.addObserver(forName: AVPlayerItem.failedToPlayToEndTimeNotification, object: item, queue: .main) { [weak self] notification in
-                let message = (notification.userInfo?[AVPlayerItemFailedToPlayToEndTimeErrorKey] as? Error)?.localizedDescription
-                MainActor.assumeIsolated {
-                    self?.listener?.onFailed(message: message ?? "Playback stopped unexpectedly.")
-                }
-            },
-        ]
-    }
-
-    /// The load callbacks fire once; a failure after that is a mid-stream failure.
-    private func itemStatusChanged(_ status: AVPlayerItem.Status, message: String) {
-        switch status {
-        case .readyToPlay:
-            pendingLoad?.onReady()
-            pendingLoad = nil
-        case .failed:
-            if let pendingLoad {
-                pendingLoad.onFailure(message)
-                self.pendingLoad = nil
-            } else {
-                listener?.onFailed(message: message)
-            }
-        default:
-            break
+        deck.onTimeControlStatus = { [weak self, weak deck] status in
+            guard let self, deck === active else { return }
+            if status == .paused { cancelCrossfade() }
+            listener?.onPlayingChanged(playing: status != .paused)
+            listener?.onBufferingChanged(buffering: status == .waitingToPlayAtSpecifiedRate)
+        }
+        deck.onFinished = { [weak self, weak deck] in
+            guard let self, deck === active else { return }
+            listener?.onFinished()
+        }
+        deck.onFailed = { [weak self, weak deck] message in
+            guard let self, deck === active else { return }
+            listener?.onFailed(message: message)
         }
     }
 
-    private func forgetCurrentItem() {
-        itemStatusObservation?.invalidate()
-        itemStatusObservation = nil
-        itemNotifications.forEach(NotificationCenter.default.removeObserver)
-        itemNotifications.removeAll()
-        pendingLoad = nil
-    }
-}
-
-private extension Double {
-    var finiteOrZero: Double { isFinite ? self : 0 }
+    private static let fadeStep = Duration.milliseconds(30)
 }

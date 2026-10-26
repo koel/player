@@ -77,7 +77,20 @@ class OverviewStoreTest {
         listOf(
             store.recentlyAddedSongs, store.leastPlayedSongs, store.randomSongs, store.similarSongs,
             store.recentlyAddedAlbums, store.randomAlbums, store.recentlyAddedArtists, store.randomArtists,
+            store.recentlyAddedEpisodes,
         ).forEach { assertTrue(it.value.isEmpty()) }
+        assertFalse(store.isEmpty)
+    }
+
+    @Test
+    fun refreshFillsNewEpisodesInServerOrder() = runTest(UnconfinedTestDispatcher()) {
+        respond(buildJsonObject {
+            put("recently_added_episodes", JsonArray(listOf(Fixtures.episode("e2"), Fixtures.episode("e1"))))
+        })
+
+        store.refresh()
+
+        assertEquals(listOf("e2", "e1"), store.recentlyAddedEpisodes.value.map { it.id })
         assertFalse(store.isEmpty)
     }
 

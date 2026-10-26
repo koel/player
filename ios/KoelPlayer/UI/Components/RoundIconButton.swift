@@ -31,13 +31,16 @@ struct PlayButton: View {
         let button = Button {
             app.player.play(playables)
         } label: {
-            Label("Play", systemImage: "play.fill")
-                .padding(.horizontal, 36)
+            HStack(spacing: 8) {
+                Image(systemName: "play.fill")
+                Text("Play")
+            }
+            .padding(.horizontal, 36)
         }
         .disabled(playables.isEmpty)
 
         if let tint {
-            button.buttonStyle(.glassProminent).tint(tint)
+            button.buttonStyle(.glassProminent).tint(tint).foregroundStyle(.white)
         } else {
             button.buttonStyle(.glass).tint(.primary)
         }

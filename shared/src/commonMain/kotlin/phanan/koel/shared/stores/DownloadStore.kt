@@ -56,6 +56,9 @@ class DownloadStore internal constructor(
     private val downloadingState = MutableStateFlow<Set<String>>(emptySet())
     val downloading: StateFlow<Set<String>> = downloadingState.asStateFlow()
 
+    /** Downloads removed while still in progress, which must not be listed once they finish. */
+    private val discardedDownloads = mutableSetOf<String>()
+
     init {
         load()
         scope.launch { playables.collect { persist() } }
@@ -76,7 +79,7 @@ class DownloadStore internal constructor(
         val owner = currentOwner() ?: return reset()
         this.owner = owner
 
-        val stored = metadata[owner.metadataKey]?.let(::decodePlayables).orEmpty()
+        val stored = storedPlayables(owner)
         val present = stored.filter { SystemFileSystem.exists(owner.fileFor(it)) }.distinctBy(Playable::id)
         setIds(playableStore.sync(present).map(Playable::id))
     }
@@ -86,6 +89,7 @@ class DownloadStore internal constructor(
         val owner = owner ?: return@onMain
         val file = owner.fileFor(playable)
         val temporaryFile = Path("$file.part")
+        discardedDownloads -= playable.id
         downloadingState.update { it + playable.id }
 
         try {
@@ -93,8 +97,11 @@ class DownloadStore internal constructor(
             fetchTo(session.sourceUrl(playable), temporaryFile)
             SystemFileSystem.atomicMove(temporaryFile, file)
 
-            if (playableStore.byId(playable.id) == null) playableStore.sync(listOf(playable))
-            setIds((liveList.ids + playable.id).distinct())
+            when {
+                discardedDownloads.remove(playable.id) -> deleteFile(file)
+                owner == this.owner -> addToLiveList(playable)
+                else -> addToStoredList(owner, playable)
+            }
         } finally {
             deleteFile(temporaryFile)
             downloadingState.update { it - playable.id }
@@ -102,13 +109,35 @@ class DownloadStore internal constructor(
     }
 
     fun remove(playable: Playable) {
+        if (isDownloading(playable)) discardedDownloads += playable.id
         owner?.let { deleteFile(it.fileFor(playable)) }
         setIds(liveList.ids - playable.id)
     }
 
     fun clear() {
+        discardedDownloads += downloadingState.value
         owner?.let { owner -> liveList.ids.forEach { id -> deleteFile(owner.fileFor(id)) } }
         setIds(emptyList())
+    }
+
+    /**
+     * Moves the downloads the Flutter app filed under the email it had stored (which can differ in case or
+     * spacing, or be missing after a QR login) to the email the server confirmed for the migrated session.
+     */
+    internal fun adoptFlutterDownloads() {
+        val flutterEmail = preferences.flutterDownloadsEmail ?: return
+        preferences.flutterDownloadsEmail = null
+
+        val host = preferences.host ?: return
+        val email = preferences.userEmail ?: return
+        val flutterOwner = Owner.of(documents, host, flutterEmail)
+        val owner = Owner.of(documents, host, email)
+        if (flutterOwner == owner) return
+
+        moveFiles(flutterOwner.directory, owner.directory)
+        writeStoredPlayables(owner, (storedPlayables(owner) + storedPlayables(flutterOwner)).distinctBy(Playable::id))
+        metadata[flutterOwner.metadataKey] = null
+        load()
     }
 
     /** Forgets the list on logout; files stay on disk for the user's next login, as in the Flutter app. */
@@ -130,6 +159,33 @@ class DownloadStore internal constructor(
         }
     }
 
+    private fun addToLiveList(playable: Playable) {
+        if (playableStore.byId(playable.id) == null) playableStore.sync(listOf(playable))
+        setIds((liveList.ids + playable.id).distinct())
+    }
+
+    /** For a download that finished after its owner logged out. */
+    private fun addToStoredList(owner: Owner, playable: Playable) {
+        writeStoredPlayables(owner, storedPlayables(owner).filterNot { it.id == playable.id } + playable)
+    }
+
+    private fun storedPlayables(owner: Owner): List<Playable> = metadata[owner.metadataKey]?.let(::decodePlayables).orEmpty()
+
+    private fun writeStoredPlayables(owner: Owner, playables: List<Playable>) {
+        metadata[owner.metadataKey] = playables.takeIf { it.isNotEmpty() }?.let {
+            KoelJson.encodeToJsonElement(ListSerializer(Playable.serializer()), it)
+        }
+    }
+
+    private fun moveFiles(from: Path, to: Path) {
+        if (!SystemFileSystem.exists(from)) return
+        SystemFileSystem.createDirectories(to)
+        SystemFileSystem.list(from).forEach { file ->
+            val target = Path(to, file.name)
+            if (!SystemFileSystem.exists(target)) runCatching { SystemFileSystem.atomicMove(file, target) }
+        }
+    }
+
     private fun setIds(ids: List<String>) {
         liveList.ids = ids
         downloadedIdsState.value = ids.toSet()
@@ -142,10 +198,7 @@ class DownloadStore internal constructor(
         // The vault is cleared on logout, possibly before we are; never let that wipe the metadata.
         if (items.size != liveList.ids.size || persisted == owner to items) return
         persisted = owner to items
-
-        metadata[owner.metadataKey] = items.takeIf { it.isNotEmpty() }?.let {
-            KoelJson.encodeToJsonElement(ListSerializer(Playable.serializer()), it)
-        }
+        writeStoredPlayables(owner, items)
     }
 
     private fun decodePlayables(json: JsonElement): List<Playable> =
@@ -157,16 +210,21 @@ class DownloadStore internal constructor(
         runCatching { SystemFileSystem.delete(file, mustExist = false) }
     }
 
+    /** Until the server confirms the email, downloads migrated from Flutter stay listed under the email Flutter used. */
     private fun currentOwner(): Owner? {
         val host = preferences.host ?: return null
-        val email = preferences.userEmail ?: return null
-        return Owner(
-            metadataKey = "$host.$email.songs",
-            directory = Path(documents, sha256Hex("$host$email".lowercase())),
-        )
+        val email = preferences.userEmail ?: preferences.flutterDownloadsEmail ?: return null
+        return Owner.of(documents, host, email)
     }
 
     private data class Owner(val metadataKey: String, val directory: Path) {
+        companion object {
+            fun of(documents: Path, host: String, email: String) = Owner(
+                metadataKey = "$host.$email.songs",
+                directory = Path(documents, sha256Hex("$host$email".lowercase())),
+            )
+        }
+
         fun fileFor(playable: Playable) = fileFor(playable.id)
 
         // The `.mp3` extension is kept from the Flutter app (whose player needed one on iOS)

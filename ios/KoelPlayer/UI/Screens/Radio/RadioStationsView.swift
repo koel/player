@@ -16,10 +16,10 @@ struct RadioStationsView: View {
 
     @Environment(AppModel.self) private var app
     @State private var stations: [RadioStation] = []
-    @State private var isLoading = true
-    @State private var loadFailed = false
+    @State private var loadState = LoadState()
     @State private var sheet: Sheet?
     @State private var stationPendingDeletion: RadioStation?
+    @State private var canAddStations = false
 
     var body: some View {
         let sortedStations = stations.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
@@ -37,21 +37,41 @@ struct RadioStationsView: View {
                 }
                 .swipeActions(edge: .trailing) {
                     if station.canDelete {
-                        Button("Delete", systemImage: "trash") { stationPendingDeletion = station }
-                            .tint(.red)
+                        ConfirmedRemovalSwipeButton(title: "Delete", systemImage: "trash") { stationPendingDeletion = station }
                     }
                 }
+                .brandListRow()
         }
-        .overlay { placeholder }
+        .listStyle(.plain)
+        .overlay {
+            ListStateOverlay(isEmpty: stations.isEmpty, loadState: loadState, retry: { Task { await load() } }) {
+                ContentUnavailableView {
+                    Label("No radio stations", systemImage: "antenna.radiowaves.left.and.right")
+                } description: {
+                    Text("No radio stations available.")
+                } actions: {
+                    if canAddStations {
+                        Button("Add a Station") { sheet = .newStation }
+                            .buttonStyle(.glass)
+                    }
+                }
+            }
+        }
         .navigationTitle("Radio")
+        .brandMeshBackground()
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button("New Station", systemImage: "plus") { sheet = .newStation }
+            if canAddStations {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("New Station", systemImage: "plus") { sheet = .newStation }
+                }
             }
         }
         .refreshable { await load() }
         .task {
             for await value in app.core.radioStations.stations { stations = value }
+        }
+        .task {
+            for await user in app.core.auth.currentUser { canAddStations = user?.canManageRadioStations ?? false }
         }
         .task { await load() }
         .sheet(item: $sheet) { sheet in
@@ -65,40 +85,8 @@ struct RadioStationsView: View {
         }
     }
 
-    @ViewBuilder
-    private var placeholder: some View {
-        if stations.isEmpty {
-            if isLoading {
-                ProgressView()
-            } else if loadFailed {
-                ContentUnavailableView {
-                    Label("Couldn't Load Stations", systemImage: "exclamationmark.triangle")
-                } actions: {
-                    Button("Try Again") { Task { await load() } }
-                        .buttonStyle(.glass)
-                }
-            } else {
-                ContentUnavailableView {
-                    Label("No Radio Stations", systemImage: "antenna.radiowaves.left.and.right")
-                } description: {
-                    Text("No radio stations available.")
-                } actions: {
-                    Button("Add a Station") { sheet = .newStation }
-                        .buttonStyle(.glassProminent)
-                }
-            }
-        }
-    }
-
     private func load() async {
-        isLoading = true
-        defer { isLoading = false }
-        do {
-            try await app.core.radioStations.fetchAll()
-            loadFailed = false
-        } catch {
-            loadFailed = true
-        }
+        await loadState.load { try await app.core.radioStations.fetchAll() }
     }
 }
 
@@ -106,41 +94,23 @@ private struct RadioStationRow: View {
     let station: RadioStation
 
     @Environment(AppModel.self) private var app
-    @Environment(\.brandColor) private var brandColor
 
     var body: some View {
         let actions = RadioStationActions(app: app)
-        let isCurrent = actions.isCurrent(station)
 
         Button {
             actions.play(station)
         } label: {
             HStack(spacing: 12) {
-                StationLogo(station: station, size: 44)
-                    .overlay {
-                        if isCurrent {
-                            NowPlayingIndicator(isPlaying: actions.isLive(station))
-                                .frame(width: 44, height: 44)
-                                .background(.black.opacity(0.45), in: .rect(cornerRadius: 6))
-                        }
-                    }
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(station.name)
-                        .lineLimit(1)
-                        .foregroundStyle(isCurrent ? brandColor : .primary)
-                    if let description = station.description_, !description.isEmpty {
-                        Text(description)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                    }
+                MediaRow(title: station.name, subtitle: station.description_.flatMap { $0.isEmpty ? nil : $0 }) {
+                    RadioStationLogo(station: station, size: 44)
+                        .nowPlayingOverlay(isCurrent: actions.isCurrent(station), isPlaying: actions.isLive(station), size: 44)
                 }
 
                 Spacer(minLength: 0)
 
                 if station.favorite {
-                    Image(systemName: "star.fill")
+                    Image(systemName: "heart.fill")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .accessibilityLabel("Favorite")
@@ -152,7 +122,8 @@ private struct RadioStationRow: View {
     }
 }
 
-private struct RadioStationMenu: View {
+/// Context menu items for a station, on its row and its carousel card.
+struct RadioStationMenu: View {
     let station: RadioStation
     let onEdit: () -> Void
     let onDelete: () -> Void
@@ -169,11 +140,8 @@ private struct RadioStationMenu: View {
                 Button("Play", systemImage: "play.fill") { actions.play(station) }
             }
             if actions.supportsFavorites {
-                Button(
-                    station.favorite ? "Undo Favorite" : "Favorite",
-                    systemImage: station.favorite ? "star.slash" : "star"
-                ) {
-                    actions.toggleFavorite(station)
+                EntityFavoriteButton(isFavorite: station.favorite) {
+                    try await app.core.radioStations.toggleFavorite(station: station)
                 }
             }
         }
@@ -190,43 +158,12 @@ private struct RadioStationMenu: View {
 }
 
 /// The station's logo, or a radio symbol when it has none.
-private struct StationLogo: View {
+struct RadioStationLogo: View {
     let station: RadioStation
     let size: CGFloat
     var cornerRadius: CGFloat = 6
 
     var body: some View {
-        if let logo = station.logo, !logo.isEmpty {
-            Artwork(url: logo, size: size, cornerRadius: cornerRadius)
-        } else {
-            Image(systemName: "antenna.radiowaves.left.and.right")
-                .font(.system(size: size * 0.4))
-                .foregroundStyle(.secondary)
-                .frame(width: size, height: size)
-                .background(.quaternary, in: .rect(cornerRadius: cornerRadius))
-                .accessibilityHidden(true)
-        }
-    }
-}
-
-private struct RadioStationPreview: View {
-    let station: RadioStation
-
-    var body: some View {
-        VStack(spacing: 12) {
-            StationLogo(station: station, size: 220, cornerRadius: 12)
-            VStack(spacing: 4) {
-                Text(station.name).font(.headline)
-                if let description = station.description_, !description.isEmpty {
-                    Text(description)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .multilineTextAlignment(.center)
-            .lineLimit(3)
-        }
-        .padding(20)
-        .frame(width: 280)
+        Artwork(url: station.logo, size: size, cornerRadius: cornerRadius, fallbackSymbol: "antenna.radiowaves.left.and.right")
     }
 }

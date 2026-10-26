@@ -45,7 +45,7 @@ struct PlaylistFormSheet: View {
                 .lineLimit(2...4)
             if !folders.isEmpty {
                 Picker("Folder", selection: $draft.folderId) {
-                    Text("None").tag(String?.none)
+                    Text("No folder").tag(String?.none)
                     ForEach(folders, id: \.id) { folder in
                         Text(folder.name).tag(Optional(folder.id))
                     }

@@ -39,6 +39,27 @@ class RecentlyPlayedStoreTest {
     }
 
     @Test
+    fun fetchesOnlyUntilTheListHasLoaded() = runTest(UnconfinedTestDispatcher()) {
+        h.on(HttpMethod.Get, "songs/recently-played") { Fixtures.list(Fixtures.song("s1")) }
+
+        store.fetchUnlessLoaded()
+        val fetchedAgain = store.fetchUnlessLoaded()
+
+        assertEquals(listOf("s1"), fetchedAgain.map { it.id })
+        assertEquals(1, h.requestsTo(HttpMethod.Get, "songs/recently-played").size)
+    }
+
+    @Test
+    fun aSeededListStillFetchesTheWholeList() = runTest(UnconfinedTestDispatcher()) {
+        store.seed(knownSongs("s1"))
+        h.on(HttpMethod.Get, "songs/recently-played") { Fixtures.list(Fixtures.song("s2"), Fixtures.song("s1")) }
+
+        store.fetchUnlessLoaded()
+
+        assertEquals(listOf("s2", "s1"), ids())
+    }
+
+    @Test
     fun seedingAnEmptyListTakesTheSnapshot() = runTest(UnconfinedTestDispatcher()) {
         store.seed(knownSongs("s1", "s2", "s3"))
 

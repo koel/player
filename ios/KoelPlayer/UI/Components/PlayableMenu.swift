@@ -10,10 +10,10 @@ struct PlayableMenu: View {
     var body: some View {
         let isCurrent = app.player.isCurrent(playable)
 
-        Section {
+        ControlGroup {
             Button(
                 playable.favorite ? "Undo Favorite" : "Favorite",
-                systemImage: playable.favorite ? "star.slash" : "star"
+                systemImage: playable.favorite ? "heart.slash" : "heart"
             ) {
                 PlayableActions(app: app).toggleFavorite(playable)
             }
@@ -46,8 +46,7 @@ struct PlayableMenu: View {
             }
             if app.player.isQueued(playable) {
                 Button("Remove from Queue", systemImage: "minus.circle") {
-                    app.player.removeFromQueue(playable)
-                    app.toasts.show("Removed from Queue", systemImage: "minus.circle")
+                    PlayableActions(app: app).removeFromQueue(playable)
                 }
             }
         }
@@ -55,17 +54,17 @@ struct PlayableMenu: View {
         Section {
             if let song = playable as? Song {
                 Button("Go to Album", systemImage: "square.stack") {
-                    app.navigator.push(.album(id: song.albumId))
+                    app.open(.album(id: song.albumId))
                 }
                 .disabled(app.isOffline)
                 Button("Go to Artist", systemImage: "music.microphone") {
-                    app.navigator.push(.artist(id: song.artistId))
+                    app.open(.artist(id: song.artistId))
                 }
                 .disabled(app.isOffline)
             }
             if let episode = playable as? Episode {
                 Button("Go to Podcast", systemImage: "mic") {
-                    app.navigator.push(.podcast(id: episode.podcastId))
+                    app.open(.podcast(id: episode.podcastId))
                 }
                 .disabled(app.isOffline)
             }
@@ -83,19 +82,38 @@ struct PlayableActions {
 
     func playNext(_ playable: any Playable) {
         app.player.playNext(playable)
-        app.toasts.show("Playing Next", systemImage: "text.line.first.and.arrowtriangle.forward")
+        showQueuedNext()
+    }
+
+    func playNext(_ playables: [any Playable]) {
+        guard !playables.isEmpty else { return }
+        app.player.playNext(playables)
+        showQueuedNext()
     }
 
     func playLast(_ playable: any Playable) {
         app.player.playLast(playable)
-        app.toasts.show("Queued", systemImage: "text.line.last.and.arrowtriangle.forward")
+        showQueuedLast()
     }
 
     /// Queues a whole album, artist or playlist at the end, as the Flutter swipe gesture did.
     func playLast(_ playables: [any Playable]) {
         guard !playables.isEmpty else { return }
-        playables.forEach(app.player.playLast)
-        app.toasts.show("Queued", systemImage: "text.line.last.and.arrowtriangle.forward")
+        app.player.playLast(playables)
+        showQueuedLast()
+    }
+
+    func removeFromQueue(_ playable: any Playable) {
+        app.player.removeFromQueue(playable)
+        app.toasts.show("Removed", message: "Removed from queue.", systemImage: "text.badge.minus")
+    }
+
+    private func showQueuedNext() {
+        app.toasts.show("Queued", message: "To be played next.", systemImage: "arrow.right.circle.fill")
+    }
+
+    private func showQueuedLast() {
+        app.toasts.show("Queued", message: "Queued to bottom.", systemImage: "arrow.down.right.circle.fill")
     }
 
     func toggleFavorite(_ playable: any Playable) {

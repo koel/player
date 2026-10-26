@@ -3,8 +3,8 @@ import SwiftUI
 
 enum AppTab: String, Codable, Hashable {
     case home
-    case search
     case library
+    case search
 }
 
 /// Every screen that can be pushed onto a tab's stack. Codable so stacks survive relaunches.
@@ -39,7 +39,7 @@ final class Navigator {
         didSet { persist() }
     }
 
-    /// Set by the Search quick action; the search screen focuses its field and clears it.
+    /// Set by picking the Search tab or the Search quick action; the search screen focuses its field and clears it.
     var wantsSearchFocus = false
 
     @ObservationIgnored private let defaults: UserDefaults
@@ -69,6 +69,7 @@ final class Navigator {
         } else {
             selectedTab = tab
         }
+        if tab == .search { wantsSearchFocus = true }
     }
 
     func focusSearch() {

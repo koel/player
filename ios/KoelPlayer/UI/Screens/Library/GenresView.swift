@@ -4,26 +4,22 @@ import SwiftUI
 struct GenresView: View {
     @Environment(AppModel.self) private var app
     @State private var genres: [Genre] = []
-    @State private var isLoading = false
-    @State private var hasFailed = false
+    @State private var loadState = LoadState()
 
     var body: some View {
         List(genres, id: \.id) { genre in
             NavigationLink(value: Route.genre(id: genre.id, name: genre.displayName)) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(genre.displayName).lineLimit(1)
-                    Text(Int(genre.songCount).pluralized("song"))
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
+                MediaRow(title: genre.displayName, subtitle: Int(genre.songCount).pluralized("song"))
             }
+            .brandListRow()
         }
         .listStyle(.plain)
         .navigationTitle("Genres")
+        .brandMeshBackground()
         .refreshable { await fetch() }
         .overlay {
-            ListStateOverlay(isEmpty: genres.isEmpty, isLoading: isLoading, hasFailed: hasFailed, retry: { Task { await fetch() } }) {
-                ContentUnavailableView("No Genres", systemImage: "guitars")
+            ListStateOverlay(isEmpty: genres.isEmpty, loadState: loadState, retry: { Task { await fetch() } }) {
+                ContentUnavailableView("No genres", systemImage: "guitars")
             }
         }
         .task {
@@ -33,14 +29,7 @@ struct GenresView: View {
     }
 
     private func fetch() async {
-        isLoading = true
-        defer { isLoading = false }
-        do {
-            _ = try await app.core.genres.fetch()
-            hasFailed = false
-        } catch {
-            hasFailed = true
-        }
+        await loadState.load { _ = try await app.core.genres.fetch() }
     }
 }
 

@@ -19,12 +19,12 @@ struct DataLoadingView: View {
         Group {
             if hasFailed {
                 ContentUnavailableView {
-                    Label("Oops!", systemImage: "exclamationmark.icloud")
+                    Label(LoadFailure.title, systemImage: "exclamationmark.icloud")
                 } description: {
-                    Text("The request cannot be completed. Please double-check if you are connected to the internet.")
+                    Text(LoadFailure.message)
                 } actions: {
-                    Button("Retry") { attempt += 1 }
-                        .buttonStyle(.glassProminent)
+                    Button(LoadFailure.retry) { attempt += 1 }
+                        .buttonStyle(.glass)
                     Button("Log Out", role: .destructive) {
                         Task { await app.logOut() }
                     }
@@ -61,7 +61,7 @@ struct DataLoadingView: View {
         }
         defer { slowNotice.cancel() }
 
-        let loading = Task { try await app.core.loadData() }
+        let loading = Task { try await app.loadLibrary() }
         let timeout = Task {
             try await Task.sleep(for: Self.timeout)
             loading.cancel()
@@ -74,7 +74,6 @@ struct DataLoadingView: View {
             } onCancel: {
                 loading.cancel()
             }
-            app.didLoadData()
         } catch {
             if !Task.isCancelled { hasFailed = true }
         }

@@ -9,8 +9,8 @@ struct QueueArtworkCarousel: View {
     @State private var scrolledId: String?
 
     private static let artworkSize: CGFloat = 320
-    private static let neighborScale: CGFloat = 0.8
-    private static let spacing: CGFloat = -12
+    private static let neighborScale: CGFloat = 0.7
+    private static let spacing: CGFloat = -28
 
     private var neighborhood: [any Playable] {
         let index = Int(state.currentIndex)

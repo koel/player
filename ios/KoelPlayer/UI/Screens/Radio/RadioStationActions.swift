@@ -44,7 +44,7 @@ struct RadioStationActions {
             do {
                 try await app.player.controller.playRadio(station: station)
             } catch {
-                app.toasts.showError("Could not play station.")
+                app.toasts.showError(message: "Could not play station.")
             }
         }
     }
@@ -53,23 +53,13 @@ struct RadioStationActions {
         app.player.controller.stopRadio()
     }
 
-    func toggleFavorite(_ station: RadioStation) {
-        Task {
-            do {
-                try await app.core.radioStations.toggleFavorite(station: station)
-            } catch {
-                app.toasts.showError()
-            }
-        }
-    }
-
     func delete(_ station: RadioStation) {
         Task {
             do {
                 try await app.core.radioStations.remove(station: station)
                 app.toasts.show("Station deleted", systemImage: "trash")
             } catch {
-                app.toasts.showError("Could not delete station.")
+                app.toasts.showError(message: "Could not delete station.")
             }
         }
     }
@@ -121,7 +111,7 @@ struct RadioStationFormSheet: View {
                     .lineLimit(2...4)
             }
             Section {
-                Toggle("Accessible to All Users", isOn: $draft.isPublic)
+                Toggle("Accessible to all users", isOn: $draft.isPublic)
             }
         }
         .onAppear { isNameFocused = !isEditing }
@@ -152,3 +142,5 @@ struct RadioStationFormSheet: View {
         }
     }
 }
+
+extension RadioStation: @retroactive Identifiable {}

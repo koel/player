@@ -6,12 +6,28 @@ struct LoadMoreRow: View {
     let loadedCount: Int
     let load: () async -> Void
 
+    @State private var isVisible = false
+
+    private struct Trigger: Equatable {
+        let loadedCount: Int
+        let isVisible: Bool
+    }
+
     var body: some View {
         ProgressView()
             .frame(maxWidth: .infinity)
             .listRowSeparator(.hidden)
-            .task(id: loadedCount) { await load() }
+            .onScrollVisibilityChange { isVisible = $0 }
+            .task(id: Trigger(loadedCount: loadedCount, isVisible: isVisible)) {
+                if isVisible { await load() }
+            }
     }
+}
+
+enum LoadFailure {
+    static let title = "Oops!"
+    static let message = "The request cannot be completed. Please double-check if you are connected to the internet."
+    static let retry = "Retry"
 }
 
 struct LoadFailedView: View {
@@ -19,11 +35,11 @@ struct LoadFailedView: View {
 
     var body: some View {
         ContentUnavailableView {
-            Label("Couldn’t Load", systemImage: "wifi.exclamationmark")
+            Label(LoadFailure.title, systemImage: "wifi.exclamationmark")
         } description: {
-            Text("Check your connection and try again.")
+            Text(LoadFailure.message)
         } actions: {
-            Button("Try Again", action: retry)
+            Button(LoadFailure.retry, action: retry)
                 .buttonStyle(.glass)
         }
     }
@@ -34,9 +50,9 @@ struct ListStateOverlay<Empty: View>: View {
     let isEmpty: Bool
     let isLoading: Bool
     let hasFailed: Bool
-    let retry: () -> Void
     /// Off for lists that show `LoadingRows` instead.
     var showsSpinner = true
+    let retry: () -> Void
     @ViewBuilder var empty: () -> Empty
 
     var body: some View {
@@ -49,5 +65,24 @@ struct ListStateOverlay<Empty: View>: View {
                 empty()
             }
         }
+    }
+}
+
+extension ListStateOverlay {
+    init(
+        isEmpty: Bool,
+        loadState: LoadState,
+        showsSpinner: Bool = true,
+        retry: @escaping () -> Void,
+        @ViewBuilder empty: @escaping () -> Empty
+    ) {
+        self.init(
+            isEmpty: isEmpty,
+            isLoading: loadState.isPending,
+            hasFailed: loadState.hasFailed,
+            showsSpinner: showsSpinner,
+            retry: retry,
+            empty: empty
+        )
     }
 }

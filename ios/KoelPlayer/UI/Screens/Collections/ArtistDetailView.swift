@@ -8,12 +8,8 @@ struct ArtistDetailView: View {
     @State private var artist: Artist?
     @State private var songs: [any Playable] = []
     @State private var biography = ""
-    @State private var hasFailed = false
-    @State private var hasLoadedSongs = false
+    @State private var loadState = LoadState()
     @State private var editingArtist: Artist?
-    @State private var coverColor: Color?
-    @State private var isHeroScrolledAway = false
-    @State private var isShowingBiography = false
 
     private static let topSongCount = 5
 
@@ -24,53 +20,43 @@ struct ArtistDetailView: View {
     var body: some View {
         ScrollView {
             if let artist {
-                VStack(alignment: .leading, spacing: 28) {
-                    ArtistHero(artist: artist, songs: songs, tint: coverColor, hasBiography: !biography.plainText.isBlank) {
-                        isShowingBiography = true
-                    }
+                VStack(alignment: .leading, spacing: SectionHeader.sectionGap) {
+                    ArtistHero(artist: artist, songs: songs)
 
-                    topSongsSection
+                    PlayableSection(
+                        title: "Top Songs",
+                        destination: .artistSongs(id: artistId),
+                        playables: topSongs,
+                        style: .artist,
+                        isLoading: songs.isEmpty && loadState.isPending,
+                        placeholderCount: Self.topSongCount
+                    )
 
                     ArtistAlbumsShelf(songs: songs)
 
                     AboutSection(title: "About", html: biography)
-                        .padding(.horizontal)
                 }
                 .padding(.bottom)
+            } else {
+                ListStateOverlay(isEmpty: true, loadState: loadState, retry: { Task { await load() } }) {
+                    ContentUnavailableView("No artist", systemImage: "music.microphone")
+                }
+                .containerRelativeFrame([.horizontal, .vertical])
             }
         }
-        .ignoresSafeArea(edges: .top)
-        .background { CoverBackground(color: coverColor) }
-        .tint(coverColor ?? .primary)
-        .navigationTitle(isHeroScrolledAway ? artist?.name ?? "" : "")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
-        .onScrollGeometryChange(for: Bool.self) { geometry in
-            geometry.contentOffset.y > geometry.containerSize.width
-        } action: { _, scrolledAway in
-            isHeroScrolledAway = scrolledAway
-        }
+        .collectionScreen(
+            title: artist?.name ?? "",
+            artworkUrl: artist?.imageUrl,
+            headerHeight: { $0.containerSize.width },
+            extendsUnderNavigationBar: true
+        )
         .refreshable { await load(forceRefresh: true) }
         .toolbar {
             if let artist {
-                ToolbarItem(placement: .primaryAction) {
-                    Menu("More", systemImage: "ellipsis") {
-                        ArtistMenu(artist: artist) { editingArtist = artist }
-                    }
+                MoreMenuToolbarItem {
+                    ArtistMenu(artist: artist) { editingArtist = artist }
                 }
             }
-        }
-        .overlay {
-            if artist == nil {
-                if hasFailed {
-                    LoadFailedView { Task { await load() } }
-                } else {
-                    ProgressView()
-                }
-            }
-        }
-        .sheet(isPresented: $isShowingBiography) {
-            BiographySheet(name: artist?.name ?? "", biography: biography)
         }
         .artistEditSheet($editingArtist)
         .collect(app.core.artists.observe(id: artistId), id: artistId) { artist = $0 }
@@ -79,50 +65,13 @@ struct ArtistDetailView: View {
         .task(id: artistId) {
             biography = (try? await app.core.mediaInfo.fetchForArtist(artistId: artistId).biography) ?? ""
         }
-        .task(id: artist?.imageUrl) { coverColor = await CoverColor.of(artist?.imageUrl) }
-    }
-
-    private var topSongsSection: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            NavigationLink(value: Route.artistSongs(id: artistId)) {
-                HStack(spacing: 4) {
-                    Text("Top Songs")
-                    Image(systemName: "chevron.forward")
-                        .foregroundStyle(.secondary)
-                        .imageScale(.small)
-                }
-                .font(.title3.bold())
-            }
-            .buttonStyle(.plain)
-            .accessibilityHint("Shows all songs")
-            .padding(.horizontal)
-
-            LazyVStack(spacing: 0) {
-                if songs.isEmpty, !hasLoadedSongs, !hasFailed {
-                    LoadingRows(count: Self.topSongCount)
-                        .padding(.horizontal)
-                        .padding(.vertical, 6)
-                }
-
-                ForEach(topSongs, id: \.id) { playable in
-                    PlayableRow(playable: playable, style: .artist)
-                        .padding(.horizontal)
-                        .padding(.vertical, 6)
-                    Divider().padding(.leading, 72)
-                }
-            }
-        }
     }
 
     private func load(forceRefresh: Bool = false) async {
-        do {
+        await loadState.load {
             async let resolvedArtist = app.core.artists.resolve(id: artistId, forceRefresh: forceRefresh)
             async let fetchedSongs = app.core.playables.fetchForArtist(artistId: artistId, forceRefresh: forceRefresh)
             _ = try await (resolvedArtist, fetchedSongs)
-            hasFailed = false
-            hasLoadedSongs = true
-        } catch {
-            hasFailed = true
         }
     }
 }
@@ -131,18 +80,14 @@ struct ArtistDetailView: View {
 private struct ArtistHero: View {
     let artist: Artist
     let songs: [any Playable]
-    let tint: Color?
-    let hasBiography: Bool
-    let showBiography: () -> Void
 
     @Environment(AppModel.self) private var app
-    @State private var image: UIImage?
 
     private static let overlap: CGFloat = 96
 
     var body: some View {
         VStack(spacing: 20) {
-            photo
+            ArtworkImage(url: artist.imageUrl, pointSize: 430)
                 .containerRelativeFrame(.horizontal)
                 .aspectRatio(1, contentMode: .fit)
                 .clipped()
@@ -150,6 +95,7 @@ private struct ArtistHero: View {
                     LinearGradient(stops: [.init(color: .black, location: 0.6), .init(color: .clear, location: 1)], startPoint: .top, endPoint: .bottom)
                 }
                 .padding(.bottom, -Self.overlap)
+                .accessibilityHidden(true)
 
             Text(artist.name)
                 .font(.largeTitle.bold())
@@ -158,43 +104,12 @@ private struct ArtistHero: View {
                 .shadow(color: .black.opacity(0.5), radius: 8)
                 .padding(.horizontal)
 
-            HStack(spacing: 16) {
-                RoundIconButton(title: "About", systemImage: "info", action: showBiography)
-                    .disabled(!hasBiography)
-
-                PlayButton(playables: songs, tint: tint)
-
-                if app.core.session.supports(feature: .favoriteEntities) {
-                    RoundIconButton(title: artist.favorite ? "Undo Favorite" : "Favorite", systemImage: artist.favorite ? "star.fill" : "star", action: toggleFavorite)
-                }
-            }
-            .controlSize(.large)
-            .padding(.horizontal)
+            CollectionActions(
+                favorite: FavoriteToggle(isFavorite: artist.favorite) { try await app.core.artists.toggleFavorite(artist: artist) },
+                playables: songs
+            )
         }
         .frame(maxWidth: .infinity)
-        .task(id: artist.imageUrl) {
-            guard let url = artist.imageUrl.flatMap(URL.init(string:)) else { return }
-            image = await ImagePipeline.shared.image(for: url, pointSize: 430)
-        }
-    }
-
-    @ViewBuilder
-    private var photo: some View {
-        if let image {
-            Image(uiImage: image).resizable().scaledToFill()
-        } else {
-            Image("default-image").resizable().scaledToFill()
-        }
-    }
-
-    private func toggleFavorite() {
-        Task {
-            do {
-                try await app.core.artists.toggleFavorite(artist: artist)
-            } catch {
-                app.toasts.showError()
-            }
-        }
     }
 }
 
@@ -202,19 +117,12 @@ private struct ArtistHero: View {
 private struct ArtistAlbumsShelf: View {
     let songs: [any Playable]
 
-    private struct AlbumSummary: Identifiable {
-        let id: String
-        let name: String
-        let cover: String?
-        let year: Int?
-    }
-
-    private var albums: [AlbumSummary] {
+    private var albums: [ArtistAlbumSummary] {
         var seen = Set<String>()
         return songs
             .compactMap { $0 as? Song }
             .filter { !$0.albumId.isEmpty && seen.insert($0.albumId).inserted }
-            .map { AlbumSummary(id: $0.albumId, name: $0.albumName, cover: $0.albumCover, year: $0.year?.intValue) }
+            .map { ArtistAlbumSummary(id: $0.albumId, name: $0.albumName, cover: $0.albumCover, year: $0.year?.intValue) }
             .sorted { ($0.year ?? 0) > ($1.year ?? 0) }
     }
 
@@ -222,39 +130,47 @@ private struct ArtistAlbumsShelf: View {
         let albums = albums
         if !albums.isEmpty {
             CardCarousel(title: "Albums") {
-                ForEach(albums) { album in
-                    NavigationLink(value: Route.album(id: album.id)) {
-                        ArtworkCard(artworkUrl: album.cover, title: album.name, subtitle: album.year.map(String.init), size: CarouselCardSize.standard)
-                    }
-                    .buttonStyle(.plain)
-                }
+                ForEach(albums) { ArtistAlbumCard(summary: $0) }
             }
         }
     }
 }
 
-private struct BiographySheet: View {
+private struct ArtistAlbumSummary: Identifiable {
+    let id: String
     let name: String
-    let biography: String
+    let cover: String?
+    let year: Int?
+}
 
-    @Environment(\.dismiss) private var dismiss
+/// An album on the artist's shelf. The artist's songs only carry the album's name and cover, so the
+/// album itself loads when a long press starts, in time for its menu.
+private struct ArtistAlbumCard: View {
+    let summary: ArtistAlbumSummary
+
+    @Environment(AppModel.self) private var app
+    @State private var album: Album?
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                Text(biography.plainText)
-                    .textSelection(.enabled)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-            }
-            .navigationTitle(name)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done", systemImage: "checkmark") { dismiss() }
-                }
-            }
+        NavigationLink(value: Route.album(id: summary.id)) {
+            ArtworkCard(artworkUrl: summary.cover, title: summary.name, subtitle: summary.year.map(String.init), size: CarouselCardSize.standard)
         }
-        .presentationDetents([.medium, .large])
+        .buttonStyle(.plain)
+        .simultaneousGesture(LongPressGesture(minimumDuration: 0.1).onEnded { _ in loadAlbum() })
+        .contextMenu {
+            if let album {
+                AlbumMenu(album: album)
+            } else {
+                Text("Loading…")
+            }
+        } preview: {
+            ContextMenuPreview(title: summary.name, subtitle: summary.year.map(String.init), artworkUrl: summary.cover)
+        }
+        .collect(app.core.albums.observe(id: summary.id), id: summary.id) { album = $0 }
+    }
+
+    private func loadAlbum() {
+        guard album == nil else { return }
+        Task { _ = try? await app.core.albums.resolve(id: summary.id, forceRefresh: false) }
     }
 }

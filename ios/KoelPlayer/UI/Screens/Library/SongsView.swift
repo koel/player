@@ -9,13 +9,14 @@ struct SongsView: View {
     @State private var sort: SortSetting?
     @State private var query = ""
     @State private var searchResults: [any Playable]?
-    @State private var isLoading = false
-    @State private var hasFailed = false
+    @State private var loadState = LoadState()
+
+    private static let sortKey = "songs.sort"
 
     private var store: PlayableStore { app.core.playables }
 
     private var currentSort: SortSetting {
-        sort ?? SortSetting(field: store.songSortField, order: store.songSortOrder)
+        sort ?? SortSetting.remembered(for: Self.sortKey, default: SortSetting(field: store.songSortField, order: store.songSortOrder))
     }
 
     private var isSearching: Bool {
@@ -29,41 +30,42 @@ struct SongsView: View {
 
     var body: some View {
         List {
-            if !isSearching {
-                AllSongsPlayButtons(sort: currentSort)
-                    .listRowSeparator(.hidden)
-            }
+            Group {
+                if !isSearching {
+                    AllSongsPlayButtons(sort: currentSort)
+                }
 
-            PlayableListContent(
-                playables: displayedSongs,
-                isSortedByTitle: currentSort.field == PlayableSortField.shared.TITLE
-            )
+                if !isSearching, songs.isEmpty, loadState.isPending {
+                    LoadingRows()
+                }
 
-            if !isSearching, hasMore, !songs.isEmpty, !hasFailed {
-                LoadMoreRow(loadedCount: songs.count, load: loadMore)
+                PlayableListContent(
+                    playables: displayedSongs,
+                    isSortedByTitle: currentSort.field == PlayableSortField.shared.TITLE
+                )
+
+                if !isSearching, loadState.canLoadMore(hasMore: hasMore, loadedCount: songs.count) {
+                    LoadMoreRow(loadedCount: songs.count, load: loadMore)
+                }
             }
+            .brandListRow()
         }
         .listStyle(.plain)
-        .navigationTitle("Songs")
-        .filterable(text: $query, prompt: "Search Songs")
+        .navigationTitle("All songs")
+        .brandMeshBackground()
+        .filterable(text: $query, matchesNothing: isSearching && searchResults?.isEmpty == true, isShown: isSearching || !songs.isEmpty || loadState.isPending, prompt: "Search Songs")
         .refreshable { await refresh() }
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                SortMenu(options: SortOptions.songs, field: currentSort.field, order: currentSort.order) { field, order in
-                    sort = SortSetting(field: field, order: order)
-                    guard !isSearching else { return }
-                    Task { await refresh() }
-                }
+            SortToolbarItem(options: SortOptions.songs, sort: currentSort, rememberKey: Self.sortKey) { setting in
+                sort = setting
+                guard !isSearching else { return }
+                Task { await refresh() }
             }
         }
         .overlay {
-            if isSearching {
-                if searchResults?.isEmpty == true {
-                    ContentUnavailableView.search(text: query)
-                }
-            } else {
-                ListStateOverlay(isEmpty: songs.isEmpty, isLoading: isLoading, hasFailed: hasFailed, retry: retry) {
-                    ContentUnavailableView("No Songs", systemImage: "music.note")
+            if !isSearching {
+                ListStateOverlay(isEmpty: songs.isEmpty, loadState: loadState, showsSpinner: false, retry: { Task { await loadMore() } }) {
+                    ContentUnavailableView("No songs", systemImage: "music.note")
                 }
             }
         }
@@ -74,35 +76,19 @@ struct SongsView: View {
             for await next in store.hasMoreSongs { hasMore = next.boolValue }
         }
         .task {
-            if songs.isEmpty { await loadMore() }
+            if store.songs.value.isEmpty { await refresh() }
         }
         .task(id: query) { await search() }
     }
 
     private func loadMore() async {
-        guard !isLoading else { return }
-        isLoading = true
-        defer { isLoading = false }
-        do {
-            try await store.loadMoreSongs()
-            hasFailed = false
-        } catch {
-            hasFailed = true
-        }
+        await loadState.load { try await store.loadMoreSongs() }
     }
 
     private func refresh() async {
-        do {
+        await loadState.refresh(hasItems: !songs.isEmpty) {
             try await store.refreshSongs(sortField: currentSort.field, sortOrder: currentSort.order)
-            hasFailed = false
-        } catch {
-            hasFailed = songs.isEmpty
         }
-    }
-
-    private func retry() {
-        hasFailed = false
-        Task { await loadMore() }
     }
 
     private func search() async {
@@ -131,21 +117,11 @@ private struct AllSongsPlayButtons: View {
     @State private var isFetching = false
 
     var body: some View {
-        HStack(spacing: 12) {
-            Button {
-                fetchAndPlay { try await app.core.playables.fetchInOrder(sortField: sort.field, sortOrder: sort.order) }
-            } label: {
-                Label("Play", systemImage: "play.fill").frame(maxWidth: .infinity)
-            }
-            Button {
-                fetchAndPlay(shuffled: true) { try await app.core.playables.fetchRandom() }
-            } label: {
-                Label("Shuffle", systemImage: "shuffle").frame(maxWidth: .infinity)
-            }
+        PlayShuffleRow(isDisabled: isFetching) {
+            fetchAndPlay { try await app.core.playables.fetchInOrder(sortField: sort.field, sortOrder: sort.order) }
+        } shuffle: {
+            fetchAndPlay(shuffled: true) { try await app.core.playables.fetchRandom() }
         }
-        .buttonStyle(.glass)
-        .controlSize(.large)
-        .disabled(isFetching)
     }
 
     private func fetchAndPlay(shuffled: Bool = false, fetch: @escaping () async throws -> [any Playable]) {

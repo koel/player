@@ -29,15 +29,8 @@ struct OfflineView: View {
             NowPlayingView()
                 .navigationTransition(.zoom(sourceID: "now-playing", in: nowPlayingTransition))
         }
-        .sheet(item: $app.sheet) { sheet in
-            switch sheet {
-            case .addToPlaylist(let playables):
-                AddToPlaylistView(playables: playables)
-            case .details(let playable):
-                PlayableDetailsView(playable: playable)
-            }
-        }
-        .modifier(ToastOverlay(toasts: app.toasts))
+        .appSheets(isFrontmost: !app.isNowPlayingPresented)
+        .modifier(ToastOverlay(toasts: app.toasts, isShown: !app.isNowPlayingPresented))
     }
 }
 
@@ -49,7 +42,7 @@ private struct ConnectivityBanner: View {
             Button("Connection restored! Tap to refresh.", systemImage: "wifi") {
                 app.reconnect()
             }
-            .buttonStyle(.glassProminent)
+            .buttonStyle(.glass)
         } else {
             Label("No internet connection", systemImage: "wifi.slash")
                 .font(.subheadline)

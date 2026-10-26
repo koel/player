@@ -8,9 +8,8 @@ struct CardCarousel<Cards: View>: View {
     @ViewBuilder var cards: () -> Cards
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            header
-                .padding(.horizontal)
+        VStack(alignment: .leading, spacing: SectionHeader.contentGap) {
+            SectionHeader(title: title, destination: seeAll)
 
             ScrollView(.horizontal) {
                 LazyHStack(alignment: .top, spacing: 16) {
@@ -21,25 +20,6 @@ struct CardCarousel<Cards: View>: View {
             .contentMargins(.horizontal, 16, for: .scrollContent)
             .scrollTargetBehavior(.viewAligned)
             .scrollIndicators(.hidden)
-        }
-    }
-
-    @ViewBuilder
-    private var header: some View {
-        if let seeAll {
-            NavigationLink(value: seeAll) {
-                HStack(spacing: 4) {
-                    Text(title)
-                    Image(systemName: "chevron.forward")
-                        .foregroundStyle(.secondary)
-                        .imageScale(.small)
-                }
-                .font(.title3.bold())
-            }
-            .buttonStyle(.plain)
-            .accessibilityHint("Shows all")
-        } else {
-            Text(title).font(.title3.bold())
         }
     }
 }
@@ -62,6 +42,8 @@ struct CarouselSongCard: View {
         .buttonStyle(.plain)
         .contextMenu {
             PlayableMenu(playable: playable)
+        } preview: {
+            PlayablePreview(playable: playable)
         }
     }
 }
@@ -74,6 +56,11 @@ struct CarouselAlbumCard: View {
             ArtworkCard(artworkUrl: album.cover, title: album.name, subtitle: album.artistName, size: CarouselCardSize.standard)
         }
         .buttonStyle(.plain)
+        .contextMenu {
+            AlbumMenu(album: album)
+        } preview: {
+            AlbumPreview(album: album)
+        }
     }
 }
 
@@ -85,17 +72,33 @@ struct CarouselArtistCard: View {
             ArtworkCard(artworkUrl: artist.imageUrl, title: artist.name, size: CarouselCardSize.standard, isCircular: true)
         }
         .buttonStyle(.plain)
+        .contextMenu {
+            ArtistMenu(artist: artist)
+        } preview: {
+            ArtistPreview(artist: artist)
+        }
     }
 }
 
 struct CarouselPodcastCard: View {
     let podcast: Podcast
 
+    @Environment(AppModel.self) private var app
+    @State private var podcastPendingUnsubscribe: Podcast?
+
     var body: some View {
         NavigationLink(value: Route.podcast(id: podcast.id)) {
             ArtworkCard(artworkUrl: podcast.imageUrl, title: podcast.title, subtitle: podcast.author, size: CarouselCardSize.standard)
         }
         .buttonStyle(.plain)
+        .contextMenu {
+            PodcastMenu(podcast: podcast) { podcastPendingUnsubscribe = podcast }
+        } preview: {
+            PodcastPreview(podcast: podcast)
+        }
+        .podcastUnsubscribeConfirmation($podcastPendingUnsubscribe) { podcast in
+            PodcastActions(app: app).unsubscribe(podcast)
+        }
     }
 }
 
@@ -103,19 +106,28 @@ struct CarouselRadioStationCard: View {
     let station: RadioStation
 
     @Environment(AppModel.self) private var app
+    @State private var editingStation: RadioStation?
+    @State private var stationPendingDeletion: RadioStation?
 
     var body: some View {
         Button {
-            Task {
-                do {
-                    try await app.core.player.playRadio(station: station)
-                } catch {
-                    app.toasts.showError("Couldn't play this station")
-                }
-            }
+            RadioStationActions(app: app).play(station)
         } label: {
             ArtworkCard(artworkUrl: station.logo, title: station.name, size: CarouselCardSize.standard)
         }
         .buttonStyle(.plain)
+        .contextMenu {
+            RadioStationMenu(
+                station: station,
+                onEdit: { editingStation = station },
+                onDelete: { stationPendingDeletion = station }
+            )
+        } preview: {
+            RadioStationPreview(station: station)
+        }
+        .sheet(item: $editingStation) { RadioStationFormSheet(station: $0) }
+        .radioStationDeletionConfirmation($stationPendingDeletion) { station in
+            RadioStationActions(app: app).delete(station)
+        }
     }
 }

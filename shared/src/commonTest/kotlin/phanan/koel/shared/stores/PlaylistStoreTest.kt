@@ -142,6 +142,19 @@ class PlaylistStoreTest {
     }
 
     @Test
+    fun updatingASmartPlaylistSendsItsRulesBack() = runTest(UnconfinedTestDispatcher()) {
+        val rules = KoelJson.parseToJsonElement(
+            """[{"id":"g1","rules":[{"id":"r1","model":"title","operator":"contains","value":["love"]}]}]"""
+        )
+        val (smart) = seed(JsonObject(Fixtures.playlist("p1", isSmart = true) + ("rules" to rules)))
+        h.on(HttpMethod.Put, "playlists/p1") { "" }
+
+        store.update(smart, name = "Renamed", folderId = "f1")
+
+        assertEquals(rules, h.requests.single().json.getValue("rules"))
+    }
+
+    @Test
     fun removingDropsThePlaylistBeforeTheServerAnswers() = runTest(UnconfinedTestDispatcher()) {
         val (first) = seed(Fixtures.playlist("p1"), Fixtures.playlist("p2"))
         h.on(HttpMethod.Get, "playlists/p1/songs") { Fixtures.list(Fixtures.song("s1")) }

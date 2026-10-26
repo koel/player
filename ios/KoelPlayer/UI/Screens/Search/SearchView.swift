@@ -2,28 +2,31 @@
 import SwiftUI
 
 struct SearchView: View {
-    private static let debounce = Duration.milliseconds(300)
+    private static let skeletonRowCount = 5
 
     @Environment(AppModel.self) private var app
     @State private var text = ""
-    @State private var result: SearchResult?
-    @State private var searchedKeywords = ""
+    @State private var model = SearchModel()
     @FocusState private var isSearchFocused: Bool
 
     var body: some View {
-        let sections = result.map { SearchSection.visible(in: $0, supports: app.core.session.supports(feature:)) } ?? []
+        let sections = model.result.map { SearchSection.visible(in: $0, supports: app.core.session.supports(feature:)) } ?? []
 
         ScrollView {
-            if let result {
-                SearchResults(result: result, keywords: searchedKeywords, sections: sections)
+            if model.isSearching {
+                LoadingRowStack(count: Self.skeletonRowCount)
+                    .padding(.vertical)
+            } else if let result = model.result {
+                SearchResults(result: result, keywords: model.searchedKeywords, sections: sections)
             }
         }
         .overlay {
-            if result != nil, sections.isEmpty {
-                ContentUnavailableView.search(text: searchedKeywords)
+            if model.result != nil, sections.isEmpty {
+                ContentUnavailableView.search(text: model.searchedKeywords)
             }
         }
         .navigationTitle("Search")
+        .brandMeshBackground()
         .searchable(text: $text, prompt: "Search your library")
         .searchFocused($isSearchFocused)
         .task(id: text) { await search(text) }
@@ -35,21 +38,10 @@ struct SearchView: View {
     }
 
     private func search(_ text: String) async {
-        switch SearchQuery(text) {
-        case .clear:
-            result = nil
-        case .keepResults:
-            break
-        case .search(let keywords):
-            do {
-                try await Task.sleep(for: Self.debounce)
-                let found = try await app.core.search.searchExcerpts(keywords: keywords)
-                guard !Task.isCancelled else { return }
-                result = found
-                searchedKeywords = keywords
-            } catch {
-                if !Task.isCancelled { app.toasts.showError() }
-            }
+        do {
+            try await model.search(text) { try await app.core.search.searchExcerpts(keywords: $0) }
+        } catch {
+            if !Task.isCancelled { app.toasts.showError() }
         }
     }
 }
@@ -60,11 +52,11 @@ private struct SearchResults: View {
     let sections: [SearchSection]
 
     var body: some View {
-        LazyVStack(alignment: .leading, spacing: 32) {
+        LazyVStack(alignment: .leading, spacing: SectionHeader.sectionGap) {
             ForEach(sections, id: \.self) { section in
                 switch section {
                 case .songs:
-                    SongResults(playables: result.playables, keywords: keywords)
+                    PlayableSection(title: section.title, destination: .searchSongs(keywords: keywords), playables: result.playables)
                 case .albums:
                     CardCarousel(title: section.title) {
                         ForEach(result.albums, id: \.id) { CarouselAlbumCard(album: $0) }
@@ -85,28 +77,5 @@ private struct SearchResults: View {
             }
         }
         .padding(.vertical)
-    }
-}
-
-private struct SongResults: View {
-    let playables: [any Playable]
-    let keywords: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(SearchSection.songs.title).font(.title3.bold())
-                Spacer()
-                NavigationLink("See All", value: Route.searchSongs(keywords: keywords))
-            }
-            .padding(.horizontal)
-            .padding(.bottom, 4)
-
-            ForEach(playables, id: \.id) { playable in
-                PlayableRow(playable: playable)
-                    .padding(.horizontal)
-                    .padding(.vertical, 6)
-            }
-        }
     }
 }

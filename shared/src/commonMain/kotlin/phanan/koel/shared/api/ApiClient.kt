@@ -2,6 +2,10 @@ package phanan.koel.shared.api
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.network.sockets.SocketTimeoutException
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.header
 import io.ktor.client.request.request
@@ -24,24 +28,55 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import phanan.koel.shared.json.KoelJson
 import phanan.koel.shared.storage.Preferences
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 class HttpResponseException(val statusCode: Int, val body: String) :
     Exception("Request failed with status code $statusCode.")
 
 class NoHostException : Exception("No Koel server is configured.")
 
-class ApiClient(engine: HttpClientEngine, private val preferences: Preferences) {
-    internal val http = HttpClient(engine) { expectSuccess = false }
+/** The server was reached but answered with an error or stopped answering, rather than not being reachable at all. */
+val Throwable.isServerFailure: Boolean
+    get() = this is HttpResponseException || this is HttpRequestTimeoutException || this is SocketTimeoutException
+
+/**
+ * Requests fail once the server stops sending for [stallTimeout], not after a fixed total, so a large response on a
+ * slow network can take as long as it needs while a dead server still fails quickly. The connect timeout covers
+ * OkHttp; Darwin ignores it, but counts waiting for the connection toward the socket (idle) timeout.
+ */
+class ApiClient(
+    engine: HttpClientEngine,
+    private val preferences: Preferences,
+    stallTimeout: Duration = 15.seconds,
+) {
+    internal val http = HttpClient(engine) {
+        expectSuccess = false
+        install(HttpTimeout) {
+            connectTimeoutMillis = stallTimeout.inWholeMilliseconds
+            socketTimeoutMillis = stallTimeout.inWholeMilliseconds
+        }
+    }
 
     suspend fun get(path: String): JsonElement = request(HttpMethod.Get, path, null)
 
+    /** For the few calls the server takes minutes to answer, which [timeout] then allows for. */
+    internal suspend fun get(path: String, timeout: Duration?): JsonElement =
+        request(HttpMethod.Get, path, null, timeoutOverride = timeout)
+
     suspend fun post(path: String, body: JsonElement = EMPTY_BODY): JsonElement = request(HttpMethod.Post, path, body)
+
+    /** For the few calls the server takes minutes to answer, which [timeout] then allows for. */
+    internal suspend fun post(path: String, body: JsonElement, timeout: Duration): JsonElement =
+        request(HttpMethod.Post, path, body, timeoutOverride = timeout)
 
     suspend fun put(path: String, body: JsonElement = EMPTY_BODY): JsonElement = request(HttpMethod.Put, path, body)
 
     suspend fun patch(path: String, body: JsonElement = EMPTY_BODY): JsonElement = request(HttpMethod.Patch, path, body)
 
     suspend fun delete(path: String, body: JsonElement = EMPTY_BODY): JsonElement = request(HttpMethod.Delete, path, body)
+
+    internal suspend fun delete(path: String, apiToken: String?): JsonElement = request(HttpMethod.Delete, path, EMPTY_BODY, apiToken)
 
     internal suspend fun <T> get(path: String, deserializer: DeserializationStrategy<T>): T =
         KoelJson.decodeFromJsonElement(deserializer, get(path))
@@ -52,14 +87,26 @@ class ApiClient(engine: HttpClientEngine, private val preferences: Preferences) 
     internal suspend fun <T> getPage(path: String, deserializer: DeserializationStrategy<T>): Page<T> =
         Page.parse(get(path), deserializer)
 
-    private suspend fun request(method: HttpMethod, path: String, body: JsonElement?): JsonElement {
+    private suspend fun request(
+        method: HttpMethod,
+        path: String,
+        body: JsonElement?,
+        apiToken: String? = preferences.apiToken,
+        timeoutOverride: Duration? = null,
+    ): JsonElement {
         val baseUrl = preferences.apiBaseUrl ?: throw NoHostException()
 
         val response = http.request("$baseUrl/$path") {
             this.method = method
+            timeoutOverride?.let { duration ->
+                timeout {
+                    requestTimeoutMillis = duration.inWholeMilliseconds
+                    socketTimeoutMillis = duration.inWholeMilliseconds
+                }
+            }
             header(HttpHeaders.Accept, ContentType.Application.Json.toString())
             header("X-Api-Version", API_VERSION)
-            preferences.apiToken?.let { bearerAuth(it) }
+            apiToken?.let { bearerAuth(it) }
 
             if (body != null) {
                 contentType(ContentType.Application.Json)

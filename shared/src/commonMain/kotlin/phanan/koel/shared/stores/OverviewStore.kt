@@ -18,6 +18,7 @@ class OverviewStore internal constructor(
 ) {
     private val mostPlayedSongList = playableStore.vault.liveList()
     private val recentlyAddedSongList = playableStore.vault.liveList()
+    private val recentlyAddedEpisodeList = playableStore.vault.liveList()
     private val recentlyPlayedSongList = playableStore.vault.liveList()
     private val leastPlayedSongList = playableStore.vault.liveList()
     private val randomSongList = playableStore.vault.liveList()
@@ -32,6 +33,7 @@ class OverviewStore internal constructor(
     private val playableSections = mapOf(
         "most_played_songs" to mostPlayedSongList,
         "recently_added_songs" to recentlyAddedSongList,
+        "recently_added_episodes" to recentlyAddedEpisodeList,
         "recently_played_songs" to recentlyPlayedSongList,
         "least_played_songs" to leastPlayedSongList,
         "random_songs" to randomSongList,
@@ -54,6 +56,7 @@ class OverviewStore internal constructor(
 
     val mostPlayedSongs: StateFlow<List<Playable>> = mostPlayedSongList.items
     val recentlyAddedSongs: StateFlow<List<Playable>> = recentlyAddedSongList.items
+    val recentlyAddedEpisodes: StateFlow<List<Playable>> = recentlyAddedEpisodeList.items
     val recentlyPlayedSongs: StateFlow<List<Playable>> = recentlyPlayedSongList.items
     val leastPlayedSongs: StateFlow<List<Playable>> = leastPlayedSongList.items
     val randomSongs: StateFlow<List<Playable>> = randomSongList.items

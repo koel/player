@@ -6,14 +6,15 @@ struct ArtistsView: View {
     @State private var artists: [Artist] = []
     @State private var hasMore = true
     @State private var sort: SortSetting?
-    @State private var isLoading = false
-    @State private var hasFailed = false
+    @State private var loadState = LoadState()
     @State private var editingArtist: Artist?
+
+    private static let sortKey = "artists.sort"
 
     private var store: ArtistStore { app.core.artists }
 
     private var currentSort: SortSetting {
-        sort ?? SortSetting(field: store.sortField, order: store.sortOrder)
+        sort ?? SortSetting.remembered(for: Self.sortKey, default: SortSetting(field: store.sortField, order: store.sortOrder))
     }
 
     private var isIndexed: Bool {
@@ -22,35 +23,37 @@ struct ArtistsView: View {
 
     var body: some View {
         List {
-            if isIndexed {
-                ForEach(SectionIndex.sections(artists, name: \.name)) { section in
-                    Section {
-                        rows(section.items)
+            Group {
+                if isIndexed {
+                    ForEach(SectionIndex.sections(artists, name: \.name)) { section in
+                        Section {
+                            rows(section.items)
+                        }
+                        .sectionIndexLabel(section.letter)
                     }
-                    .sectionIndexLabel(section.letter)
+                } else {
+                    rows(artists)
                 }
-            } else {
-                rows(artists)
-            }
 
-            if hasMore, !artists.isEmpty, !hasFailed {
-                LoadMoreRow(loadedCount: artists.count, load: loadMore)
+                if loadState.canLoadMore(hasMore: hasMore, loadedCount: artists.count) {
+                    LoadMoreRow(loadedCount: artists.count, load: loadMore)
+                }
             }
+            .brandListRow()
         }
         .listStyle(.plain)
         .navigationTitle("Artists")
+        .brandMeshBackground()
         .refreshable { await refresh() }
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                SortMenu(options: SortOptions.artists, field: currentSort.field, order: currentSort.order) { field, order in
-                    sort = SortSetting(field: field, order: order)
-                    Task { await refresh() }
-                }
+            SortToolbarItem(options: SortOptions.artists, sort: currentSort, rememberKey: Self.sortKey) { setting in
+                sort = setting
+                Task { await refresh() }
             }
         }
         .overlay {
-            ListStateOverlay(isEmpty: artists.isEmpty, isLoading: isLoading, hasFailed: hasFailed, retry: retry) {
-                ContentUnavailableView("No Artists", systemImage: "music.microphone")
+            ListStateOverlay(isEmpty: artists.isEmpty, loadState: loadState, retry: { Task { await loadMore() } }) {
+                ContentUnavailableView("No artists", systemImage: "music.microphone")
             }
         }
         .artistEditSheet($editingArtist)
@@ -61,7 +64,7 @@ struct ArtistsView: View {
             for await next in store.hasMore { hasMore = next.boolValue }
         }
         .task {
-            if artists.isEmpty { await loadMore() }
+            if store.items.value.isEmpty { await refresh() }
         }
     }
 
@@ -72,29 +75,13 @@ struct ArtistsView: View {
     }
 
     private func loadMore() async {
-        guard !isLoading else { return }
-        isLoading = true
-        defer { isLoading = false }
-        do {
-            try await store.loadMore()
-            hasFailed = false
-        } catch {
-            hasFailed = true
-        }
+        await loadState.load { try await store.loadMore() }
     }
 
     private func refresh() async {
-        do {
+        await loadState.refresh(hasItems: !artists.isEmpty) {
             try await store.refresh(sortField: currentSort.field, sortOrder: currentSort.order)
-            hasFailed = false
-        } catch {
-            hasFailed = artists.isEmpty
         }
-    }
-
-    private func retry() {
-        hasFailed = false
-        Task { await loadMore() }
     }
 }
 
@@ -106,22 +93,19 @@ private struct ArtistRow: View {
 
     var body: some View {
         NavigationLink(value: Route.artist(id: artist.id)) {
-            HStack(spacing: 12) {
+            MediaRow(title: artist.name) {
                 Artwork(url: artist.imageUrl, size: 44, isCircle: true)
-                Text(artist.name).lineLimit(1)
             }
         }
         .contextMenu {
             ArtistMenu(artist: artist, onEdit: onEdit)
         } preview: {
-            ArtworkCard(artworkUrl: artist.imageUrl, title: artist.name, size: 240, isCircular: true)
-                .padding()
+            ArtistPreview(artist: artist)
         }
         .swipeActions(edge: .trailing) {
-            Button("Play Last", systemImage: "text.line.last.and.arrowtriangle.forward") {
+            PlayLastSwipeButton {
                 CollectionQueueActions.artist(artist, app: app).playLast()
             }
-            .tint(.purple)
         }
     }
 }

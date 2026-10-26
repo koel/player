@@ -9,19 +9,13 @@ enum LibraryDestination: CaseIterable, Identifiable {
     case albums
     case genres
     case podcasts
-    case radioStations
+    case radio
     case downloads
 
     var id: Self { self }
 
-    static func visible(supportsPodcasts: Bool, supportsRadioStations: Bool) -> [LibraryDestination] {
-        allCases.filter { destination in
-            switch destination {
-            case .podcasts: supportsPodcasts
-            case .radioStations: supportsRadioStations
-            default: true
-            }
-        }
+    static func visible(supportsPodcasts: Bool, supportsRadio: Bool) -> [LibraryDestination] {
+        allCases.filter { ($0 != .podcasts || supportsPodcasts) && ($0 != .radio || supportsRadio) }
     }
 
     var title: String {
@@ -33,7 +27,7 @@ enum LibraryDestination: CaseIterable, Identifiable {
         case .albums: "Albums"
         case .genres: "Genres"
         case .podcasts: "Podcasts"
-        case .radioStations: "Radio"
+        case .radio: "Radio"
         case .downloads: "Downloaded"
         }
     }
@@ -41,13 +35,13 @@ enum LibraryDestination: CaseIterable, Identifiable {
     var systemImage: String {
         switch self {
         case .songs: "music.note"
-        case .favorites: "star"
+        case .favorites: "heart"
         case .playlists: "music.note.list"
         case .artists: "music.microphone"
         case .albums: "square.stack"
         case .genres: "guitars"
         case .podcasts: "mic"
-        case .radioStations: "antenna.radiowaves.left.and.right"
+        case .radio: "dot.radiowaves.left.and.right"
         case .downloads: "arrow.down.circle"
         }
     }
@@ -61,7 +55,7 @@ enum LibraryDestination: CaseIterable, Identifiable {
         case .albums: .albums
         case .genres: .genres
         case .podcasts: .podcasts
-        case .radioStations: .radioStations
+        case .radio: .radioStations
         case .downloads: .downloads
         }
     }

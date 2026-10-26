@@ -51,7 +51,8 @@ struct LoginView: View {
                                 }
                                 .frame(maxWidth: .infinity)
                             }
-                            .buttonStyle(.glass)
+                            .buttonStyle(.glassProminent)
+                            .tint(.highlight)
 
                             Button(action: scanQRCode) {
                                 Image(systemName: "qrcode.viewfinder")
@@ -92,9 +93,9 @@ struct LoginView: View {
     }
 
     private var credentials: some View {
-        VStack(spacing: 0) {
-            CredentialField {
-                TextField("Server URL", text: $host)
+        VStack(spacing: 12) {
+            CredentialField(label: "Host", isFloating: isFloating(.host, text: host)) {
+                TextField("Host", text: $host, prompt: hint("https://www.koel.music", for: .host, text: host))
                     .keyboardType(.URL)
                     .textContentType(.URL)
                     .accessibilityLabel("Host")
@@ -102,9 +103,8 @@ struct LoginView: View {
                     .submitLabel(.next)
                     .onSubmit { focusedField = .email }
             }
-            Divider().padding(.leading, 20)
-            CredentialField {
-                TextField("Email", text: $email)
+            CredentialField(label: "Email", isFloating: isFloating(.email, text: email)) {
+                TextField("Email", text: $email, prompt: hint("you@koel.music", for: .email, text: email))
                     .keyboardType(.emailAddress)
                     .textContentType(.username)
                     .accessibilityLabel("Email")
@@ -112,35 +112,40 @@ struct LoginView: View {
                     .submitLabel(.next)
                     .onSubmit { focusedField = .password }
             }
-            Divider().padding(.leading, 20)
-            CredentialField {
-                HStack {
-                    Group {
-                        if isPasswordRevealed {
-                            TextField("Password", text: $password)
-                        } else {
-                            SecureField("Password", text: $password)
-                        }
+            CredentialField(label: "Password", isFloating: isFloating(.password, text: password)) {
+                Group {
+                    if isPasswordRevealed {
+                        TextField("Password", text: $password, prompt: Text(""))
+                    } else {
+                        SecureField("Password", text: $password, prompt: Text(""))
                     }
-                    .textContentType(.password)
-                    .accessibilityLabel("Password")
-                    .focused($focusedField, equals: .password)
-                    .submitLabel(.go)
-                    .onSubmit(logIn)
-
-                    Button(action: togglePasswordReveal) {
-                        Image(systemName: isPasswordRevealed ? "eye.slash" : "eye")
-                            .foregroundStyle(.secondary)
-                            .contentTransition(.symbolEffect(.replace))
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(isPasswordRevealed ? "Hide Password" : "Show Password")
                 }
+                .textContentType(.password)
+                .accessibilityLabel("Password")
+                .focused($focusedField, equals: .password)
+                .submitLabel(.go)
+                .onSubmit(logIn)
+            } trailing: {
+                Button(action: togglePasswordReveal) {
+                    Image(systemName: isPasswordRevealed ? "eye.slash" : "eye")
+                        .foregroundStyle(.secondary)
+                        .contentTransition(.symbolEffect(.replace))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(isPasswordRevealed ? "Hide Password" : "Show Password")
             }
         }
         .textInputAutocapitalization(.never)
         .autocorrectionDisabled()
-        .glassEffect(.regular, in: .rect(cornerRadius: 28, style: .continuous))
+    }
+
+    private func isFloating(_ field: Field, text: String) -> Bool {
+        !text.isEmpty || focusedField == field
+    }
+
+    /// The example only shows once the label has moved out of its way.
+    private func hint(_ example: String, for field: Field, text: String) -> Text {
+        Text(isFloating(field, text: text) ? example : "")
     }
 
     private func togglePasswordReveal() {
@@ -220,20 +225,40 @@ extension String {
     }
 }
 
-extension Optional {
-    /// Drives `.alert(isPresented:)` from an optional message.
-    var isPresent: Bool {
-        get { self != nil }
-        set { if !newValue { self = nil } }
+/// A login field with a label that sits inside it while it's empty and moves to the top once
+/// it has focus or text, like the Flutter app's.
+private struct CredentialField<Field: View, Trailing: View>: View {
+    let label: String
+    let isFloating: Bool
+    @ViewBuilder let field: () -> Field
+    @ViewBuilder let trailing: () -> Trailing
+
+    private static var floatingOffset: CGFloat { 10 }
+
+    var body: some View {
+        HStack {
+            ZStack(alignment: .leading) {
+                Text(label)
+                    .font(isFloating ? .caption : .body)
+                    .foregroundStyle(isFloating ? .secondary : .tertiary)
+                    .offset(y: isFloating ? -Self.floatingOffset - 2 : 0)
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+                field()
+                    .offset(y: isFloating ? Self.floatingOffset : 0)
+            }
+            trailing()
+        }
+        .frame(minHeight: 48)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 6)
+        .authFieldBackground()
+        .animation(.snappy(duration: 0.2), value: isFloating)
     }
 }
 
-private struct CredentialField<Field: View>: View {
-    @ViewBuilder let field: () -> Field
-
-    var body: some View {
-        field()
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
+extension CredentialField where Trailing == EmptyView {
+    init(label: String, isFloating: Bool, @ViewBuilder field: @escaping () -> Field) {
+        self.init(label: label, isFloating: isFloating, field: field, trailing: { EmptyView() })
     }
 }

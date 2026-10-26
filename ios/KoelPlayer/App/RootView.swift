@@ -7,8 +7,7 @@ struct RootView: View {
         Group {
             switch app.phase {
             case .launching:
-                ProgressView()
-                    .controlSize(.large)
+                LaunchLogo()
                     .task { await app.launch() }
             case .noConnection:
                 NoConnectionView()
@@ -22,7 +21,11 @@ struct RootView: View {
                 OfflineView()
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background { BrandMeshBackground() }
         .animation(.default, value: app.phase)
         .modifier(NowPlayingBrandColor())
+        .onOpenURL { QuickActions.receive($0) }
+        .task { await QuickActions.handle(app: app) }
     }
 }

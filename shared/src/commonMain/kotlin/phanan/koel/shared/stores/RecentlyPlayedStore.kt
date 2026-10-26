@@ -26,6 +26,9 @@ class RecentlyPlayedStore internal constructor(
         items.value
     }
 
+    @Throws(Exception::class)
+    suspend fun fetchUnlessLoaded(): List<Playable> = if (loaded.value) items.value else fetch()
+
     fun add(playable: Playable) {
         if (playables.byId(playable.id) == null) playables.sync(listOf(playable))
         list.prepend(playable.id)

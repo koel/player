@@ -11,12 +11,14 @@ struct ArtistMenu: View {
     var body: some View {
         let queue = CollectionQueueActions.artist(artist, app: app)
 
-        if app.core.session.supports(feature: .favoriteEntities) {
-            Section {
+        ControlGroup {
+            if app.core.session.supports(feature: .favoriteEntities) {
                 EntityFavoriteButton(isFavorite: artist.favorite) {
                     try await app.core.artists.toggleFavorite(artist: artist)
                 }
             }
+            Button("Info", systemImage: "info.circle") { app.sheet = .artistInfo(artist) }
+                .disabled(app.isOffline)
         }
 
         Section {
@@ -34,13 +36,33 @@ struct ArtistMenu: View {
     }
 }
 
+/// The artist's biography, opened from the Info button in its menu.
+struct ArtistInfoSheet: View {
+    let artist: Artist
+
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ArtistBiography(artistId: artist.id)
+                .navigationTitle(artist.name)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done", systemImage: "checkmark") { dismiss() }
+                    }
+                }
+        }
+        .presentationDetents([.medium, .large])
+        .presentationBackground(Color(uiColor: .systemBackground))
+    }
+}
+
 struct ArtistEditSheet: View {
     let artist: Artist
 
     @Environment(AppModel.self) private var app
-    @Environment(\.dismiss) private var dismiss
     @State private var name: String
-    @State private var isSaving = false
 
     init(artist: Artist) {
         self.artist = artist
@@ -52,43 +74,26 @@ struct ArtistEditSheet: View {
     }
 
     var body: some View {
-        NavigationStack {
-            Form {
-                TextField("Artist Name", text: $name)
-            }
-            .navigationTitle("Edit Artist")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(role: .cancel) { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(role: .confirm, action: save)
-                        .disabled(trimmedName.isEmpty || isSaving)
-                }
-            }
+        FormSheet(
+            title: "Edit Artist",
+            submitLabel: "Save",
+            canSubmit: !trimmedName.isEmpty,
+            failureMessage: { _ in "Could not update artist." },
+            submit: save
+        ) {
+            TextField("Artist Name", text: $name)
         }
-        .presentationDetents([.height(200), .medium])
     }
 
-    private func save() {
-        isSaving = true
-        Task {
-            defer { isSaving = false }
-            do {
-                _ = try await app.core.artists.update(artist: artist, name: trimmedName)
-                dismiss()
-                app.toasts.show("Artist Updated")
-            } catch {
-                app.toasts.showError("Could not update artist")
-            }
-        }
+    private func save() async throws {
+        _ = try await app.core.artists.update(artist: artist, name: trimmedName)
+        app.toasts.show("Artist updated")
     }
 }
 
 extension View {
     func artistEditSheet(_ artist: Binding<Artist?>) -> some View {
-        sheet(isPresented: Binding(get: { artist.wrappedValue != nil }, set: { if !$0 { artist.wrappedValue = nil } })) {
+        sheet(isPresented: artist.isPresent) {
             if let editing = artist.wrappedValue {
                 ArtistEditSheet(artist: editing)
             }

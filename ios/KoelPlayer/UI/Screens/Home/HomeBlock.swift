@@ -29,6 +29,15 @@ enum HomeBlock: String, CaseIterable {
         }
     }
 
+    /// The full list a section's header opens.
+    var seeAll: Route {
+        switch self {
+        case .recentlyAddedAlbums, .mostPlayedAlbums, .randomAlbums: .albums
+        case .mostPlayedArtists, .recentlyAddedArtists, .randomArtists: .artists
+        default: .songs
+        }
+    }
+
     /// Blocks named in `savedOrder` come first, in that order; the rest keep their default order.
     static func ordered(by savedOrder: [String]) -> [HomeBlock] {
         func rank(_ block: HomeBlock, defaultIndex: Int) -> Int {

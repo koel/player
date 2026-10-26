@@ -3,6 +3,8 @@ package phanan.koel.shared.support
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.MockEngineConfig
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.network.sockets.SocketTimeoutException
+import io.ktor.client.plugins.HttpTimeoutCapability
 import io.ktor.client.request.HttpRequestData
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
@@ -13,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
@@ -56,7 +59,7 @@ class Harness {
 
     val requests = mutableListOf<RecordedRequest>()
 
-    private val routes = mutableMapOf<Pair<HttpMethod, String>, (RecordedRequest) -> Reply>()
+    private val routes = mutableMapOf<Pair<HttpMethod, String>, suspend (RecordedRequest) -> Reply>()
 
     /** Unconfined so a request fired and forgotten has been answered by the time the call returns. */
     val engine = MockEngine(
@@ -67,7 +70,7 @@ class Harness {
                 val route = routes[request.method to recorded.path]
                     ?: routes[request.method to recorded.path.substringBefore('?')]
                     ?: error("No fake route for ${request.method.value} ${recorded.path}")
-                val reply = route(recorded)
+                val reply = withStallTimeout(request) { route(recorded) }
                 respond(
                     content = reply.body,
                     status = HttpStatusCode.fromValue(reply.status),
@@ -83,12 +86,19 @@ class Harness {
         routes[method to path] = { Reply(status, body()) }
     }
 
-    fun onRequest(method: HttpMethod, path: String, reply: (RecordedRequest) -> Reply) {
+    fun onRequest(method: HttpMethod, path: String, reply: suspend (RecordedRequest) -> Reply) {
         routes[method to path] = reply
     }
 
     fun requestsTo(method: HttpMethod, path: String): List<RecordedRequest> =
         requests.filter { it.method == method && (it.path == path || it.path.substringBefore('?') == path) }
+
+    /** Stands in for a real engine's socket timeout: the fake server sends nothing until it replies. */
+    private suspend fun withStallTimeout(request: HttpRequestData, reply: suspend () -> Reply): Reply {
+        val stallTimeoutMillis = request.getCapabilityOrNull(HttpTimeoutCapability)?.socketTimeoutMillis ?: return reply()
+        return withTimeoutOrNull(stallTimeoutMillis) { reply() }
+            ?: throw SocketTimeoutException("No reply from ${request.url} in $stallTimeoutMillis ms")
+    }
 
     private fun record(request: HttpRequestData): RecordedRequest {
         val path = request.url.encodedPathAndQuery.removePrefix("/api/")

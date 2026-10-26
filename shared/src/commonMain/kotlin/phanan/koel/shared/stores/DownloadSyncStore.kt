@@ -62,6 +62,11 @@ class DownloadSyncStore internal constructor(
         }
     }
 
+    internal fun reset() {
+        scheduledSync?.cancel()
+        lastSyncResultState.value = null
+    }
+
     private suspend fun syncWithServer(local: List<Playable>): DownloadSyncResult {
         val response = api.post("songs/by-ids", buildJsonObject {
             put("ids", JsonArray(local.map { JsonPrimitive(it.id) }))

@@ -11,14 +11,25 @@ struct LoadingRows: View {
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
                     .fill(.fill.tertiary)
                     .frame(width: 44, height: 44)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(verbatim: "Placeholder song title")
-                    Text(verbatim: "Placeholder artist").font(.subheadline)
+                VStack(alignment: .leading, spacing: 8) {
+                    PlaceholderBar(height: 14)
+                    PlaceholderBar(height: 11)
+                        .padding(.trailing, 96)
                 }
-                .redacted(reason: .placeholder)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
             .listRowSeparator(.hidden)
         }
         .accessibilityHidden(true)
+    }
+}
+
+private struct PlaceholderBar: View {
+    let height: CGFloat
+
+    var body: some View {
+        Capsule()
+            .fill(.fill.tertiary)
+            .frame(height: height)
     }
 }

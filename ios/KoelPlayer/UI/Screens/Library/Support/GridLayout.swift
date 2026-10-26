@@ -5,6 +5,7 @@ struct GridLayout {
     let containerWidth: CGFloat
     var minimumCardSize: CGFloat = 150
     var spacing: CGFloat = 16
+    var rowSpacing: CGFloat = 20
     var padding: CGFloat = 16
 
     var columnCount: Int {

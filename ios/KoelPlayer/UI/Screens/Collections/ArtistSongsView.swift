@@ -10,8 +10,7 @@ struct ArtistSongsView: View {
     @State private var songs: [any Playable] = []
     @State private var sort = SortSetting.remembered(for: Self.sortKey, default: SortSetting(field: PlayableSortField.shared.TITLE, order: .asc))
     @State private var query = ""
-    @State private var hasLoaded = false
-    @State private var hasFailed = false
+    @State private var loadState = LoadState()
 
     private static let sortKey = "artist.sort"
 
@@ -20,33 +19,32 @@ struct ArtistSongsView: View {
     }
 
     var body: some View {
+        let displayedSongs = displayedSongs
+
         List {
-            PlayShuffleButtons(playables: displayedSongs)
-                .listRowSeparator(.hidden)
-                .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+            Group {
+                PlayShuffleButtons(playables: displayedSongs)
 
-            if songs.isEmpty, !hasLoaded, !hasFailed {
-                LoadingRows(count: 8)
+                if songs.isEmpty, loadState.isPending {
+                    LoadingRows()
+                }
+
+                PlayableListContent(playables: displayedSongs, style: .artist, isSortedByTitle: sort.field == PlayableSortField.shared.TITLE)
             }
-
-            PlayableListContent(playables: displayedSongs, style: .artist)
+            .brandListRow()
         }
         .listStyle(.plain)
         .navigationTitle(artist?.name ?? "Songs")
+        .brandMeshBackground()
         .navigationBarTitleDisplayMode(.inline)
-        .filterable(text: $query, prompt: "Filter Songs")
+        .filterable(text: $query, matchesNothing: !songs.isEmpty && displayedSongs.isEmpty, isShown: !songs.isEmpty || loadState.isPending)
         .refreshable { await load(forceRefresh: true) }
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                SortMenu(options: SortOptions.artistSongs, field: sort.field, order: sort.order) { field, order in
-                    sort = SortSetting(field: field, order: order)
-                    sort.remember(for: Self.sortKey)
-                }
-            }
+            SortToolbarItem(options: SortOptions.artistSongs, sort: sort, rememberKey: Self.sortKey) { sort = $0 }
         }
         .overlay {
-            if hasFailed, songs.isEmpty {
-                LoadFailedView { Task { await load() } }
+            ListStateOverlay(isEmpty: songs.isEmpty, loadState: loadState, showsSpinner: false, retry: { Task { await load() } }) {
+                ContentUnavailableView("No songs", systemImage: "music.note")
             }
         }
         .collect(app.core.artists.observe(id: artistId), id: artistId) { artist = $0 }
@@ -55,12 +53,8 @@ struct ArtistSongsView: View {
     }
 
     private func load(forceRefresh: Bool = false) async {
-        do {
+        await loadState.load {
             _ = try await app.core.playables.fetchForArtist(artistId: artistId, forceRefresh: forceRefresh)
-            hasFailed = false
-            hasLoaded = true
-        } catch {
-            hasFailed = true
         }
     }
 }

@@ -1,3 +1,4 @@
+import Foundation
 @testable import KoelPlayer
 @preconcurrency import Shared
 import Testing
@@ -11,6 +12,7 @@ struct PlaylistLibraryTests {
             folderId: folderId,
             description: nil,
             cover: nil,
+            rules: nil,
             permissions: Permissions(edit: true, delete: true)
         )
     }
@@ -65,12 +67,18 @@ struct PlaylistLibraryTests {
 
     @Test func customOrderIsTheDefaultSortOnlyWhenTheServerSupportsIt() {
         let fields = PlayableSortField.shared
-        let supported = PlaylistSongSorting(supportsCustomOrder: true)
-        let unsupported = PlaylistSongSorting(supportsCustomOrder: false)
 
-        #expect(supported.field(stored: "") == fields.POSITION)
-        #expect(unsupported.field(stored: "") == fields.TITLE)
-        #expect(unsupported.field(stored: fields.POSITION) == fields.TITLE)
-        #expect(unsupported.field(stored: fields.ARTIST_NAME) == fields.ARTIST_NAME)
+        #expect(SortOptions.playlistSongs(supportsCustomOrder: true).first?.field == fields.POSITION)
+        #expect(SortOptions.playlistSongs(supportsCustomOrder: false).first?.field == fields.TITLE)
+    }
+
+    @Test func aRememberedCustomOrderFallsBackWhereTheServerDoesNotOfferIt() {
+        let fields = PlayableSortField.shared
+        let key = "test.\(UUID().uuidString)"
+        let fallback = SortSetting(field: fields.TITLE, order: .asc)
+        SortSetting(field: fields.POSITION, order: .desc).remember(for: key)
+
+        #expect(SortSetting.remembered(for: key, among: SortOptions.playlistSongs(supportsCustomOrder: false), default: fallback) == fallback)
+        #expect(SortSetting.remembered(for: key, among: SortOptions.playlistSongs(supportsCustomOrder: true), default: fallback).field == fields.POSITION)
     }
 }

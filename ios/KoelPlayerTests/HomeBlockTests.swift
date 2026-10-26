@@ -13,6 +13,12 @@ struct HomeBlockTests {
         #expect(ordered.count == HomeBlock.allCases.count)
     }
 
+    @Test func sectionsOpenTheirFullList() {
+        #expect(HomeBlock.recentlyAddedAlbums.seeAll == .albums)
+        #expect(HomeBlock.randomArtists.seeAll == .artists)
+        #expect(HomeBlock.leastPlayedSongs.seeAll == .songs)
+    }
+
     @Test func ignoresUnknownIds() {
         let ordered = HomeBlock.ordered(by: ["recently-played-songs", "random-songs"])
 

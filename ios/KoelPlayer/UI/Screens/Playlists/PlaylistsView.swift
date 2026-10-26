@@ -27,31 +27,29 @@ struct PlaylistsView: View {
         let library = PlaylistLibrary(playlists: playlists, folders: folders)
 
         List {
-            ForEach(library.folderGroups) { group in
-                DisclosureGroup(isExpanded: expansion(of: group.folder)) {
-                    ForEach(group.playlists, id: \.id, content: playlistLink)
-                } label: {
-                    PlaylistFolderLabel(folder: group.folder, playlistCount: group.playlists.count)
+            Group {
+                ForEach(library.folderGroups) { group in
+                    DisclosureGroup(isExpanded: expansion(of: group.folder)) {
+                        ForEach(group.playlists, id: \.id, content: playlistLink)
+                    } label: {
+                        PlaylistFolderLabel(folder: group.folder, playlistCount: group.playlists.count)
+                    }
+                    .swipeActions(edge: .leading) {
+                        queueButton(for: group.playlists)
+                    }
                 }
-                .swipeActions(edge: .leading) {
-                    queueButton(for: group.playlists)
-                }
+                ForEach(library.rootPlaylists, id: \.id, content: playlistLink)
             }
-            ForEach(library.rootPlaylists, id: \.id, content: playlistLink)
+            .brandListRow()
         }
+        .listStyle(.plain)
         .overlay {
             if playlists.isEmpty {
-                ContentUnavailableView {
-                    Label("No Playlists", systemImage: "music.note.list")
-                } description: {
-                    Text("Create a playlist to organize your favorite songs.")
-                } actions: {
-                    Button("Create Playlist") { sheet = .newPlaylist }
-                        .buttonStyle(.glassProminent)
-                }
+                NoPlaylistsView { sheet = .newPlaylist }
             }
         }
         .navigationTitle("Playlists")
+        .brandMeshBackground()
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
@@ -91,8 +89,7 @@ struct PlaylistsView: View {
         }
         .swipeActions(edge: .trailing) {
             if playlist.canDelete {
-                Button("Delete", systemImage: "trash") { playlistPendingDeletion = playlist }
-                    .tint(.red)
+                ConfirmedRemovalSwipeButton(title: "Delete", systemImage: "trash") { playlistPendingDeletion = playlist }
             }
         }
         .contextMenu {
@@ -101,14 +98,15 @@ struct PlaylistsView: View {
                 onEdit: { sheet = .edit(playlist) },
                 onDelete: { playlistPendingDeletion = playlist }
             )
+        } preview: {
+            PlaylistPreview(playlist: playlist)
         }
     }
 
     private func queueButton(for playlists: [Playlist]) -> some View {
-        Button("Play Last", systemImage: "text.line.last.and.arrowtriangle.forward") {
+        PlayLastSwipeButton {
             PlaylistActions(app: app).queue(playlists)
         }
-        .tint(.purple)
     }
 
     private func expansion(of folder: PlaylistFolder) -> Binding<Bool> {
@@ -127,5 +125,21 @@ struct PlaylistsView: View {
     private func refresh() async {
         try? await app.core.playlists.fetchAll()
         try? await app.core.playlistFolders.fetchAll()
+    }
+}
+
+/// Shown wherever playlists are listed but there are none yet.
+struct NoPlaylistsView: View {
+    let create: () -> Void
+
+    var body: some View {
+        ContentUnavailableView {
+            Label("No playlists", systemImage: "music.note.list")
+        } description: {
+            Text("Create a playlist to organize your favorite songs.")
+        } actions: {
+            Button("Create Playlist", action: create)
+                .buttonStyle(.glass)
+        }
     }
 }

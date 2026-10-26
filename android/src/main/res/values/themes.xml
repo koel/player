@@ -1,0 +1,5 @@
+<resources>
+    <style name="Theme.Koel" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/brand_base</item>
+    </style>
+</resources>

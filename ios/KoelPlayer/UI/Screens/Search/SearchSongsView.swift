@@ -1,55 +1,40 @@
 @preconcurrency import Shared
 import SwiftUI
 
-/// Every song matching a search, behind the Songs section's "See All".
+/// Every song matching a search, behind the Songs section's heading.
 struct SearchSongsView: View {
     let keywords: String
 
     @Environment(AppModel.self) private var app
-    @State private var playables: [any Playable]?
-    @State private var hasFailed = false
+    @State private var playables: [any Playable] = []
+    @State private var loadState = LoadState()
 
     var body: some View {
         List {
-            if let playables, !playables.isEmpty {
-                PlayShuffleButtons(playables: playables)
-                    .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
-                    .listRowSeparator(.hidden)
-
-                ForEach(playables, id: \.id) { playable in
-                    PlayableRow(playable: playable)
+            Group {
+                if !playables.isEmpty {
+                    PlayShuffleButtons(playables: playables)
                 }
+
+                PlayableListContent(playables: playables)
             }
+            .brandListRow()
         }
         .listStyle(.plain)
         .overlay { placeholder }
         .navigationTitle(keywords)
+        .brandMeshBackground()
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
     }
 
-    @ViewBuilder
     private var placeholder: some View {
-        if hasFailed {
-            ContentUnavailableView {
-                Label("Couldn't Load Songs", systemImage: "exclamationmark.triangle")
-            } actions: {
-                Button("Try Again") { Task { await load() } }
-                    .buttonStyle(.glass)
-            }
-        } else if let playables {
-            if playables.isEmpty { ContentUnavailableView.search(text: keywords) }
-        } else {
-            ProgressView()
+        ListStateOverlay(isEmpty: playables.isEmpty, loadState: loadState, retry: { Task { await load() } }) {
+            ContentUnavailableView.search(text: keywords)
         }
     }
 
     private func load() async {
-        hasFailed = false
-        do {
-            playables = try await app.core.search.searchPlayables(keywords: keywords)
-        } catch {
-            hasFailed = !Task.isCancelled
-        }
+        await loadState.load { playables = try await app.core.search.searchPlayables(keywords: keywords) }
     }
 }

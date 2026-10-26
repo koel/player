@@ -36,6 +36,10 @@ data class Song(
     @SerialName("play_count") override val playCount: Int = 0,
     @SerialName("created_at") override val createdAt: String = "",
     val type: String = "songs",
+    /** Integrated loudness in LUFS, from Koel Plus's audio analysis. */
+    val loudness: Double? = null,
+    /** In dBTP, from Koel Plus's audio analysis. */
+    @SerialName("true_peak") val truePeak: Double? = null,
 ) : Playable {
     override val artworkUrl: String? get() = albumCover
     override val subtitle: String get() = artistName

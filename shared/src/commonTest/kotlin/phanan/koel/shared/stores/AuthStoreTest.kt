@@ -1,6 +1,9 @@
 package phanan.koel.shared.stores
 
 import io.ktor.http.HttpMethod
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.jsonPrimitive
 import phanan.koel.shared.api.HttpResponseException
@@ -13,7 +16,7 @@ import kotlin.test.assertNull
 
 class AuthStoreTest {
     private val h = Harness()
-    private val auth = AuthStore(h.api, h.preferences)
+    private val auth = AuthStore(h.api, h.preferences, CoroutineScope(Dispatchers.Unconfined))
 
     @Test
     fun storesBothTokensAfterAPlainLogin() = runTest {
@@ -57,6 +60,20 @@ class AuthStoreTest {
     }
 
     @Test
+    fun aStartedSessionFetchesTheUserWithItsToken() = runTest {
+        h.preferences.apiToken = null
+        h.on(HttpMethod.Get, "me") { Fixtures.user(email = "mock@koel.test").toString() }
+
+        auth.startSession("https://mock.test", "mock-api", "mock-audio")
+
+        assertEquals("https://mock.test", h.preferences.host)
+        assertEquals("mock-audio", h.preferences.audioToken)
+        assertEquals("mock-api", h.preferences.apiToken)
+        assertEquals("mock@koel.test", auth.fetchCurrentUser()?.email)
+        assertEquals("Bearer mock-api", h.requestsTo(HttpMethod.Get, "me").single().headers["Authorization"])
+    }
+
+    @Test
     fun surfacesRejectedCredentials() = runTest {
         h.on(HttpMethod.Post, "me", status = 401) { """{"message":"Unauthenticated."}""" }
 
@@ -74,6 +91,43 @@ class AuthStoreTest {
 
         h.preferences.apiToken = null
         assertNull(auth.fetchCurrentUser())
+    }
+
+    @Test
+    fun aRejectedTokenMeansLoggedOut() = runTest {
+        h.on(HttpMethod.Get, "me", status = 401) { """{"message":"Unauthenticated."}""" }
+
+        assertNull(auth.fetchCurrentUser())
+        assertNull(h.preferences.apiToken)
+        assertNull(h.preferences.audioToken)
+    }
+
+    @Test
+    fun aTokenWithoutAHostMeansLoggedOut() = runTest {
+        h.preferences.host = null
+
+        assertNull(auth.fetchCurrentUser())
+        assertNull(h.preferences.apiToken)
+        assertNull(h.preferences.audioToken)
+        assertEquals(emptyList(), h.requests)
+    }
+
+    @Test
+    fun anUnreachableServerIsAnErrorNotALogout() = runTest {
+        h.onRequest(HttpMethod.Get, "me") { throw IllegalStateException("Unable to resolve host") }
+
+        assertFailsWith<IllegalStateException> { auth.fetchCurrentUser() }
+        assertEquals("api-token", h.preferences.apiToken)
+    }
+
+    @Test
+    fun logoutDoesNotWaitForTheServer() = runTest {
+        h.onRequest(HttpMethod.Delete, "me") { awaitCancellation() }
+
+        auth.logout()
+
+        assertNull(h.preferences.apiToken)
+        assertEquals("Bearer api-token", h.requestsTo(HttpMethod.Delete, "me").single().headers["Authorization"])
     }
 
     @Test

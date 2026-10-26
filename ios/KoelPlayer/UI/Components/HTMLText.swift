@@ -32,6 +32,8 @@ struct HTMLText: View {
         var text = AttributedString(rendered)
         text.foregroundColor = nil
         text.font = nil
+        text.uiKit.foregroundColor = nil
+        text.uiKit.font = nil
         return text
     }
 }

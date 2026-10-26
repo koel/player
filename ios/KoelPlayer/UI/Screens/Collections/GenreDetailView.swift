@@ -12,8 +12,7 @@ struct GenreDetailView: View {
     @State private var nextPage: Int32? = 1
     @State private var sort = SortSetting.remembered(for: Self.sortKey, default: SortSetting(field: PlayableSortField.shared.TITLE, order: .asc))
     @State private var query = ""
-    @State private var isLoading = false
-    @State private var hasFailed = false
+    @State private var loadState = LoadState()
 
     private static let sortKey = "genre.sort"
 
@@ -26,44 +25,35 @@ struct GenreDetailView: View {
     }
 
     var body: some View {
-        List {
-            if loadedSongs.isEmpty, nextPage != nil, !hasFailed {
-                LoadingRows()
-            }
+        let displayedSongs = displayedSongs
 
-            if !loadedSongs.isEmpty {
-                CollectionHeader(
-                    artworkUrl: loadedSongs.first?.artworkUrl,
-                    title: name,
-                    detail: songCountLabel,
-                    playables: displayedSongs
-                )
-                .listRowSeparator(.hidden)
-            }
-
-            PlayableListContent(playables: displayedSongs, isSortedByTitle: sort.field == PlayableSortField.shared.TITLE)
-
-            if nextPage != nil, !loadedSongs.isEmpty, !hasFailed {
+        CollectionDetailList(
+            title: name,
+            artworkUrl: loadedSongs.first?.artworkUrl,
+            header: loadedSongs.isEmpty ? nil : CollectionHeader(
+                artworkUrl: loadedSongs.first?.artworkUrl,
+                title: name,
+                detail: songCountLabel,
+                playables: displayedSongs
+            ),
+            songs: loadedSongs,
+            displayedSongs: displayedSongs,
+            query: $query,
+            loadState: loadState,
+            isSortedByTitle: sort.field == PlayableSortField.shared.TITLE,
+            retry: { Task { await loadMore() } },
+            refresh: refresh
+        ) {
+            ContentUnavailableView("No songs", systemImage: "music.note")
+        } footer: {
+            if loadState.canLoadMore(hasMore: nextPage != nil, loadedCount: loadedSongs.count) {
                 LoadMoreRow(loadedCount: loadedSongs.count, load: loadMore)
             }
         }
-        .listStyle(.plain)
-        .navigationTitle(name)
-        .navigationBarTitleDisplayMode(.inline)
-        .filterable(text: $query, prompt: "Filter Songs")
-        .refreshable { await refresh() }
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                SortMenu(options: SortOptions.genreSongs, field: sort.field, order: sort.order) { field, order in
-                    sort = SortSetting(field: field, order: order)
-                    sort.remember(for: Self.sortKey)
-                    Task { await refresh() }
-                }
-            }
-        }
-        .overlay {
-            ListStateOverlay(isEmpty: loadedSongs.isEmpty, isLoading: isLoading || nextPage != nil, hasFailed: hasFailed, retry: retry, showsSpinner: false) {
-                ContentUnavailableView("No Songs", systemImage: "music.note")
+            SortToolbarItem(options: SortOptions.genreSongs, sort: sort, rememberKey: Self.sortKey) { setting in
+                sort = setting
+                Task { await refresh() }
             }
         }
         .collect(app.core.playables.live(playables: loadedSongs), id: loadedSongs.map(\.id)) { songs = $0 }
@@ -83,33 +73,18 @@ struct GenreDetailView: View {
     }
 
     private func loadMore() async {
-        guard !isLoading, let page = nextPage else { return }
-        isLoading = true
-        defer { isLoading = false }
-        do {
-            let result = try await fetchPage(page)
+        guard let page = nextPage else { return }
+        await loadState.load { try await fetchPage(page) } apply: { result in
             let loadedIds = Set(loadedSongs.map(\.id))
             loadedSongs += result.songs.filter { !loadedIds.contains($0.id) }
             nextPage = result.nextPage
-            hasFailed = false
-        } catch {
-            hasFailed = true
         }
     }
 
     private func refresh() async {
-        do {
-            let result = try await fetchPage(1)
+        await loadState.refresh(hasItems: !loadedSongs.isEmpty) { try await fetchPage(1) } apply: { result in
             loadedSongs = result.songs
             nextPage = result.nextPage
-            hasFailed = false
-        } catch {
-            hasFailed = loadedSongs.isEmpty
         }
-    }
-
-    private func retry() {
-        hasFailed = false
-        Task { await loadMore() }
     }
 }

@@ -6,6 +6,7 @@ data class ServerInfo(
     val transcoding: Boolean,
     val useLastFm: Boolean,
     val songCount: Int,
+    val koelPlus: Boolean = false,
 ) {
     fun supports(feature: Feature): Boolean = version >= feature.minimumVersion
 }

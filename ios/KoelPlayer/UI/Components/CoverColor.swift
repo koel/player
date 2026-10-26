@@ -6,6 +6,20 @@ import UIKit
 enum CoverColor {
     private static let context = CIContext(options: [.workingColorSpace: NSNull()])
 
+    /// SwiftUI doesn't animate tints inside List rows, so the change is stepped frame by frame.
+    static func fade(from start: Color?, to end: Color?, apply: (Color?) -> Void) async {
+        let neutral = Color(uiColor: .systemGray)
+        let steps = 30
+        for step in 1...steps {
+            let progress = Double(step) / Double(steps)
+            let eased = progress < 0.5 ? 2 * progress * progress : 1 - pow(2 - 2 * progress, 2) / 2
+            apply((start ?? neutral).mix(with: end ?? neutral, by: eased))
+            try? await Task.sleep(for: .seconds(0.8 / Double(steps)))
+            if Task.isCancelled { return }
+        }
+        apply(end)
+    }
+
     static func of(_ url: String?) async -> Color? {
         guard let remote = url.flatMap(URL.init(string:)),
               let image = await ImagePipeline.shared.image(for: remote, pointSize: 40),
@@ -50,7 +64,7 @@ enum CoverColor {
         return UIColor(hue: hue, saturation: boostedSaturation, brightness: lower, alpha: 1)
     }
 
-    private static func luminance(of color: UIColor) -> CGFloat {
+    static func luminance(of color: UIColor) -> CGFloat {
         var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
         color.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
         func linear(_ channel: CGFloat) -> CGFloat {

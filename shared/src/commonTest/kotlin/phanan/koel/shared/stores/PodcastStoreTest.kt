@@ -1,6 +1,7 @@
 package phanan.koel.shared.stores
 
 import io.ktor.http.HttpMethod
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -8,6 +9,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
+import phanan.koel.shared.api.ApiClient
 import phanan.koel.shared.api.HttpResponseException
 import phanan.koel.shared.json.KoelJson
 import phanan.koel.shared.models.Episode
@@ -22,6 +24,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 
 class PodcastStoreTest {
     private val h = Harness()
@@ -130,6 +133,17 @@ class PodcastStoreTest {
         assertEquals(KoelJson.parseToJsonElement("""{"url":"https://example.com/feed.xml"}"""), h.requests.single().body)
         assertEquals("Added", added.title)
         assertEquals(listOf("p1", "p2"), store.podcasts.value.map { it.id })
+    }
+
+    @Test
+    fun addingWaitsForASlowFeedLongerThanOtherRequests() = runTest(UnconfinedTestDispatcher()) {
+        h.onRequest(HttpMethod.Post, "podcasts") {
+            delay(300.milliseconds)
+            Harness.Reply(200, Fixtures.podcast("p1").toString())
+        }
+        val impatientStore = PodcastStore(ApiClient(h.engine, h.preferences, stallTimeout = 100.milliseconds))
+
+        assertEquals("p1", impatientStore.add("https://example.com/feed.xml").id)
     }
 
     @Test

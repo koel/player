@@ -30,14 +30,7 @@ struct AddToPlaylistView: View {
             }
             .overlay {
                 if playlists.isEmpty {
-                    ContentUnavailableView {
-                        Label("No Playlists", systemImage: "music.note.list")
-                    } description: {
-                        Text("Create a playlist to organize your favorite songs.")
-                    } actions: {
-                        Button("Create Playlist") { isCreatingPlaylist = true }
-                            .buttonStyle(.glassProminent)
-                    }
+                    NoPlaylistsView { isCreatingPlaylist = true }
                 }
             }
             .navigationTitle("Add to a Playlist")

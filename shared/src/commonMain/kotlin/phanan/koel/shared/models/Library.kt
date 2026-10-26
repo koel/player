@@ -1,7 +1,10 @@
 package phanan.koel.shared.models
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNames
 import phanan.koel.shared.json.FlexibleBooleanSerializer
 import phanan.koel.shared.json.FlexibleIntSerializer
 import phanan.koel.shared.json.FlexibleProgressMapSerializer
@@ -52,6 +55,7 @@ data class Playlist(
     @SerialName("folder_id") val folderId: String? = null,
     val description: String? = null,
     val cover: String? = null,
+    val rules: JsonElement? = null,
     val permissions: Permissions = Permissions(),
 ) {
     val canEdit: Boolean get() = permissions.edit
@@ -108,9 +112,20 @@ data class User(
     val email: String,
     val avatar: String? = null,
     val preferences: UserPreferences = UserPreferences(),
-)
+    val abilities: List<String> = emptyList(),
+) {
+    val canManageRadioStations: Boolean get() = MANAGE_RADIO_STATIONS in abilities
+}
 
+private const val MANAGE_RADIO_STATIONS = "manage radio stations"
+
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class UserPreferences(
     @SerialName("home_blocks_order") val homeBlocksOrder: List<String> = emptyList(),
+    @SerialName("current_equalizer_preset") @JsonNames("equalizer") val equalizer: EqualizerPreset? = null,
+    /** Absent on servers that can't save presets yet. */
+    @SerialName("equalizer_presets") val equalizerPresets: List<EqualizerPreset>? = null,
+    @SerialName("crossfade_duration") val crossfadeDuration: Int? = null,
+    @SerialName("normalize_volume") val normalizeVolume: Boolean? = null,
 )

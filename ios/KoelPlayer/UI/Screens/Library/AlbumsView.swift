@@ -6,56 +6,106 @@ struct AlbumsView: View {
     @State private var albums: [Album] = []
     @State private var hasMore = true
     @State private var sort: SortSetting?
-    @State private var isLoading = false
-    @State private var hasFailed = false
+    @State private var loadState = LoadState()
     @State private var containerWidth: CGFloat = 0
     @State private var editingAlbum: Album?
+    @State private var layout = CollectionLayout.remembered(for: Self.layoutKey)
+
+    private static let sortKey = "albums.sort"
+    private static let layoutKey = "albums"
 
     private var store: AlbumStore { app.core.albums }
 
     private var currentSort: SortSetting {
-        sort ?? SortSetting(field: store.sortField, order: store.sortOrder)
+        sort ?? SortSetting.remembered(for: Self.sortKey, default: SortSetting(field: store.sortField, order: store.sortOrder))
     }
 
-    var body: some View {
-        let layout = GridLayout(containerWidth: containerWidth)
+    private var isIndexed: Bool {
+        SectionIndex.isShown(itemCount: albums.count, isSortedByName: currentSort.field == AlbumSortField.shared.NAME)
+    }
 
-        ScrollView {
-            LazyVGrid(
-                columns: Array(repeating: GridItem(.fixed(layout.cardSize), spacing: layout.spacing), count: layout.columnCount),
-                spacing: 20
-            ) {
-                ForEach(albums, id: \.id) { album in
-                    AlbumGridCard(album: album, size: layout.cardSize, showsYear: currentSort.field == AlbumSortField.shared.YEAR) {
-                        editingAlbum = album
+    private var isSortedByYear: Bool { currentSort.field == AlbumSortField.shared.YEAR }
+
+    private var canLoadMore: Bool { loadState.canLoadMore(hasMore: hasMore, loadedCount: albums.count) }
+
+    private var grid: some View {
+        let gridLayout = GridLayout(containerWidth: containerWidth)
+
+        return ScrollViewReader { scroller in
+            ScrollView {
+                AlbumGrid(albums: albums, layout: gridLayout, showsYear: isSortedByYear) { editingAlbum = $0 }
+                    .padding(.vertical, gridLayout.padding)
+
+                if canLoadMore {
+                    LoadMoreRow(loadedCount: albums.count, load: loadMore)
+                        .padding()
+                }
+            }
+            .overlay(alignment: .trailing) {
+                if isIndexed {
+                    let sections = SectionIndex.sections(albums, name: \.name)
+                    AlphabetIndexBar(letters: sections.map(\.letter)) { letter in
+                        guard let first = sections.first(where: { $0.letter == letter })?.items.first else { return }
+                        scroller.scrollTo(first.id, anchor: .top)
                     }
                 }
             }
-            .padding(layout.padding)
+        }
+    }
 
-            if hasMore, !albums.isEmpty, !hasFailed {
-                ProgressView()
-                    .padding()
-                    .task(id: albums.count) { await loadMore() }
+    private var list: some View {
+        List {
+            Group {
+                if isIndexed {
+                    ForEach(SectionIndex.sections(albums, name: \.name)) { section in
+                        Section {
+                            rows(section.items)
+                        }
+                        .sectionIndexLabel(section.letter)
+                    }
+                } else {
+                    rows(albums)
+                }
+
+                if canLoadMore {
+                    LoadMoreRow(loadedCount: albums.count, load: loadMore)
+                }
+            }
+            .brandListRow()
+        }
+        .listStyle(.plain)
+    }
+
+    private func rows(_ albums: [Album]) -> some View {
+        ForEach(albums, id: \.id) { album in
+            AlbumRow(album: album, showsYear: isSortedByYear) { editingAlbum = album }
+        }
+    }
+
+    var body: some View {
+        Group {
+            switch layout {
+            case .grid: grid
+            case .list: list
             }
         }
         .onGeometryChange(for: CGFloat.self, of: \.size.width) { containerWidth = $0 }
         .navigationTitle("Albums")
+        .brandMeshBackground()
         .refreshable { await refresh() }
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                SortMenu(options: SortOptions.albums, field: currentSort.field, order: currentSort.order) { field, order in
-                    sort = SortSetting(field: field, order: order)
-                    Task { await refresh() }
-                }
+            SortToolbarItem(options: SortOptions.albums, sort: currentSort, rememberKey: Self.sortKey, layout: $layout) { setting in
+                sort = setting
+                Task { await refresh() }
             }
         }
         .overlay {
-            ListStateOverlay(isEmpty: albums.isEmpty, isLoading: isLoading, hasFailed: hasFailed, retry: retry) {
-                ContentUnavailableView("No Albums", systemImage: "square.stack")
+            ListStateOverlay(isEmpty: albums.isEmpty, loadState: loadState, retry: { Task { await loadMore() } }) {
+                ContentUnavailableView("No albums", systemImage: "square.stack")
             }
         }
         .albumEditSheet($editingAlbum)
+        .onChange(of: layout) { _, newLayout in newLayout.remember(for: Self.layoutKey) }
         .task {
             for await next in store.items { albums = next }
         }
@@ -63,42 +113,64 @@ struct AlbumsView: View {
             for await next in store.hasMore { hasMore = next.boolValue }
         }
         .task {
-            if albums.isEmpty { await loadMore() }
+            if store.items.value.isEmpty { await refresh() }
         }
     }
 
     private func loadMore() async {
-        guard !isLoading else { return }
-        isLoading = true
-        defer { isLoading = false }
-        do {
-            try await store.loadMore()
-            hasFailed = false
-        } catch {
-            hasFailed = true
-        }
+        await loadState.load { try await store.loadMore() }
     }
 
     private func refresh() async {
-        do {
+        await loadState.refresh(hasItems: !albums.isEmpty) {
             try await store.refresh(sortField: currentSort.field, sortOrder: currentSort.order)
-            hasFailed = false
-        } catch {
-            hasFailed = albums.isEmpty
         }
-    }
-
-    private func retry() {
-        hasFailed = false
-        Task { await loadMore() }
     }
 }
 
-private struct AlbumGridCard: View {
+/// Flutter's albums list row: a small cover, the album and its artist, and the year when sorted by it.
+private struct AlbumRow: View {
+    let album: Album
+    let showsYear: Bool
+    let onEdit: () -> Void
+
+    @Environment(AppModel.self) private var app
+
+    var body: some View {
+        NavigationLink(value: Route.album(id: album.id)) {
+            HStack {
+                MediaRow(title: album.name, subtitle: album.artistName) {
+                    Artwork(url: album.cover, size: 40)
+                }
+                if showsYear, let year = album.year {
+                    Spacer()
+                    Text(String(year.intValue))
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .contextMenu {
+            AlbumMenu(album: album, onEdit: onEdit)
+        } preview: {
+            AlbumPreview(album: album)
+        }
+        .swipeActions(edge: .leading) {
+            QueueSwipeButton {
+                CollectionQueueActions.album(album, app: app).playLast()
+            }
+        }
+    }
+}
+
+/// Pushes with a button rather than a NavigationLink, which would get a List row's disclosure chevron inside the Library.
+struct AlbumGridCard: View {
     let album: Album
     let size: CGFloat
     let showsYear: Bool
     let onEdit: () -> Void
+
+    @Environment(AppModel.self) private var app
 
     private var subtitle: String {
         guard showsYear, let year = album.year else { return album.artistName }
@@ -106,15 +178,16 @@ private struct AlbumGridCard: View {
     }
 
     var body: some View {
-        NavigationLink(value: Route.album(id: album.id)) {
+        Button {
+            app.navigator.push(.album(id: album.id))
+        } label: {
             ArtworkCard(artworkUrl: album.cover, title: album.name, subtitle: subtitle, size: size)
         }
         .buttonStyle(.plain)
         .contextMenu {
             AlbumMenu(album: album, onEdit: onEdit)
         } preview: {
-            ArtworkCard(artworkUrl: album.cover, title: album.name, subtitle: album.artistName, size: 240)
-                .padding()
+            AlbumPreview(album: album)
         }
     }
 }

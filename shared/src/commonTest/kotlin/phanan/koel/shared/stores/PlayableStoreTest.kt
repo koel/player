@@ -1,9 +1,12 @@
 package phanan.koel.shared.stores
 
+import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.http.HttpMethod
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import phanan.koel.shared.api.ApiClient
 import phanan.koel.shared.models.PlayableSortField
 import phanan.koel.shared.models.Song
 import phanan.koel.shared.models.SortOrder
@@ -13,8 +16,10 @@ import phanan.koel.shared.support.Fixtures
 import phanan.koel.shared.support.Harness
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 
 class PlayableStoreTest {
     private val h = Harness()
@@ -90,6 +95,18 @@ class PlayableStoreTest {
         store.fetchForPodcast("p1", checkForNewEpisodes = true)
 
         assertEquals(listOf("podcasts/p1/episodes", "podcasts/p1/episodes?refresh=1"), h.requests.map { it.path })
+    }
+
+    @Test
+    fun checkingForNewEpisodesWaitsForASlowFeedLongerThanOtherRequests() = runTest(UnconfinedTestDispatcher()) {
+        h.onRequest(HttpMethod.Get, "podcasts/p1/episodes") {
+            delay(300.milliseconds)
+            Harness.Reply(200, Fixtures.list(Fixtures.episode("e1")))
+        }
+        val impatientStore = PlayableStore(ApiClient(h.engine, h.preferences, stallTimeout = 100.milliseconds))
+
+        assertFailsWith<SocketTimeoutException> { impatientStore.fetchForPodcast("p1") }
+        assertEquals(listOf("e1"), impatientStore.fetchForPodcast("p1", checkForNewEpisodes = true).map { it.id })
     }
 
     @Test

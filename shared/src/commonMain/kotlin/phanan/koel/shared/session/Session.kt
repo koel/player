@@ -16,6 +16,8 @@ class Session(private val preferences: Preferences) {
 
     fun supports(feature: Feature): Boolean = serverInfo.value?.supports(feature) ?: false
 
+    val isKoelPlus: Boolean get() = serverInfo.value?.koelPlus == true
+
     internal fun update(info: ServerInfo?) {
         serverInfoState.value = info
     }

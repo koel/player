@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.Koel" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/brand_base</item>
+        <item name="android:windowSplashScreenBackground">@color/brand_base</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
+    </style>
+</resources>

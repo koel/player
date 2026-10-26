@@ -16,6 +16,7 @@ import phanan.koel.shared.models.Playable
 import phanan.koel.shared.models.PlayableSortField
 import phanan.koel.shared.models.Song
 import phanan.koel.shared.models.SortOrder
+import kotlin.time.Duration
 
 /** Owns every song and episode the app has seen, plus the collections that list them. */
 class PlayableStore internal constructor(private val api: ApiClient) {
@@ -83,7 +84,12 @@ class PlayableStore internal constructor(private val api: ApiClient) {
         checkForNewEpisodes: Boolean = false,
     ): List<Playable> = onMain {
         val query = if (checkForNewEpisodes) "?refresh=1" else ""
-        fetchCollection(podcastKey(podcastId), "podcasts/$podcastId/episodes$query", forceRefresh || checkForNewEpisodes)
+        fetchCollection(
+            podcastKey(podcastId),
+            "podcasts/$podcastId/episodes$query",
+            forceRefresh || checkForNewEpisodes,
+            timeout = PodcastStore.FEED_FETCH_TIMEOUT.takeIf { checkForNewEpisodes },
+        )
     }
 
     @Throws(Exception::class)
@@ -148,11 +154,16 @@ class PlayableStore internal constructor(private val api: ApiClient) {
         songPager.reset()
     }
 
-    private suspend fun fetchCollection(key: String, path: String, forceRefresh: Boolean): List<Playable> {
+    private suspend fun fetchCollection(
+        key: String,
+        path: String,
+        forceRefresh: Boolean,
+        timeout: Duration? = null,
+    ): List<Playable> {
         val cached = collections.value[key]
         if (cached != null && !forceRefresh) return cached.mapNotNull(vault::get)
 
-        val playables = sync(api.get(path))
+        val playables = sync(api.get(path, timeout))
         collections.update { it + (key to playables.map(Playable::id)) }
         return playables
     }

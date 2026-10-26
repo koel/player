@@ -11,61 +11,72 @@ struct TwoFactorView: View {
     @State private var code = ""
     @State private var isVerifying = false
     @State private var errorMessage: String?
-    @FocusState private var isCodeFocused: Bool
+    @FocusState private var isRecoveryCodeFocused: Bool
 
     private static let authenticatorCodeLength = 6
 
     var body: some View {
-        Form {
-            Section {
+        ScrollView {
+            VStack(spacing: 16) {
+                Text("Two-Factor Authentication")
+                    .font(.title2.bold())
+                    .multilineTextAlignment(.center)
+
+                Text(usesRecoveryCode ? "Enter one of your recovery codes." : "Enter the code from your authenticator app.")
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+
                 if usesRecoveryCode {
                     TextField("Recovery code", text: $code)
                         .textInputAutocapitalization(.characters)
                         .autocorrectionDisabled()
                         .monospaced()
+                        .tracking(2)
+                        .multilineTextAlignment(.center)
+                        .submitLabel(.go)
                         .onSubmit(verify)
-                } else {
-                    TextField("Authentication code", text: $code)
-                        .keyboardType(.numberPad)
-                        .textContentType(.oneTimeCode)
-                        .monospacedDigit()
                         .onChange(of: code) { _, newCode in
-                            let digits = String(newCode.filter(\.isNumber).prefix(Self.authenticatorCodeLength))
-                            if digits != newCode { code = digits }
-                            if digits.count == Self.authenticatorCodeLength { verify() }
+                            let uppercased = newCode.uppercased()
+                            if uppercased != newCode { code = uppercased }
                         }
+                        .focused($isRecoveryCodeFocused)
+                        .onAppear { isRecoveryCodeFocused = true }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 16)
+                        .authFieldBackground()
+                } else {
+                    OneTimeCodeField(code: $code, length: Self.authenticatorCodeLength, onComplete: verify)
                 }
-            } footer: {
-                Text(usesRecoveryCode ? "Enter one of your recovery codes." : "Enter the code from your authenticator app.")
-            }
-            .focused($isCodeFocused)
 
-            Section {
                 Button(action: verify) {
                     Group {
-                        if isVerifying { ProgressView() } else { Text("Verify") }
+                        if isVerifying { ProgressView() } else { Text("Verify").fontWeight(.semibold) }
                     }
                     .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.glassProminent)
-                .controlSize(.large)
-                .disabled(code.isBlank || isVerifying)
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets())
+                .tint(.highlight)
+                .controlSize(.extraLarge)
+                .disabled(isVerifying)
 
-                Button(usesRecoveryCode ? "Use Authenticator Code Instead" : "Use a Recovery Code") {
+                Button(usesRecoveryCode ? "Use authenticator code instead" : "Use a recovery code") {
                     usesRecoveryCode.toggle()
                     code = ""
-                    isCodeFocused = true
                 }
-                .frame(maxWidth: .infinity)
                 .disabled(isVerifying)
-                .listRowBackground(Color.clear)
+
+                Button("Back to login") { dismiss() }
+                    .disabled(isVerifying)
             }
+            .tint(.white)
+            .padding(.horizontal, 24)
+            .frame(maxWidth: 480)
+            .frame(maxWidth: .infinity)
         }
-        .navigationTitle("Two-Factor Authentication")
-        .navigationBarTitleDisplayMode(.inline)
-        .onAppear { isCodeFocused = true }
+        .defaultScrollAnchor(.center)
+        .scrollDismissesKeyboard(.interactively)
+        .background { BrandMeshBackground() }
+        .toolbar(.hidden, for: .navigationBar)
         .alert("Error", isPresented: $errorMessage.isPresent) {
             Button("OK", role: .cancel) {}
         } message: {

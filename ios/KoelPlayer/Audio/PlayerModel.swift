@@ -5,13 +5,11 @@ import Observation
 @Observable
 final class PlayerModel {
     let controller: PlayerController
-    private let podcasts: PodcastStore
     private let liveState: Live<PlaybackState>
     private let livePosition: Live<KotlinDouble>
 
-    init(controller: PlayerController, podcasts: PodcastStore) {
+    init(controller: PlayerController) {
         self.controller = controller
-        self.podcasts = podcasts
         liveState = Live(controller.state)
         livePosition = Live(controller.position)
     }
@@ -32,19 +30,7 @@ final class PlayerModel {
         isCurrent(playable) && state.isPlaying && !state.hasFailed
     }
 
-    /// Episodes resume where the user left off, possibly on another device.
-    func play(_ playable: any Playable) {
-        guard let episode = playable as? Episode, controller.rememberedPosition(playableId: episode.id) == nil else {
-            controller.play(playable: playable)
-            return
-        }
-
-        Task {
-            let progress = (try? await podcasts.episodeProgress(episode: episode))?.doubleValue ?? 0
-            controller.rememberPosition(playableId: episode.id, seconds: progress)
-            controller.play(playable: episode)
-        }
-    }
+    func play(_ playable: any Playable) { controller.play(playable: playable) }
 
     func play(_ playables: [any Playable], shuffled: Bool = false) {
         guard !playables.isEmpty else { return }
@@ -57,6 +43,8 @@ final class PlayerModel {
     func seek(to seconds: Double) { controller.seek(seconds: seconds) }
     func playNext(_ playable: any Playable) { controller.playNext(playable: playable) }
     func playLast(_ playable: any Playable) { controller.queueToBottom(playable: playable) }
+    func playNext(_ playables: [any Playable]) { controller.playNext(playables: playables) }
+    func playLast(_ playables: [any Playable]) { controller.queueToBottom(playables: playables) }
     func removeFromQueue(_ playable: any Playable) { controller.removeFromQueue(playable: playable) }
     func isQueued(_ playable: any Playable) -> Bool { controller.isQueued(playable: playable) }
 

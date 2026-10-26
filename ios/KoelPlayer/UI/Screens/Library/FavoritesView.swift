@@ -6,9 +6,7 @@ struct FavoritesView: View {
     @State private var favorites: [any Playable] = []
     @State private var sort: SortSetting?
     @State private var query = ""
-    @State private var isLoading = false
-    @State private var hasLoaded = false
-    @State private var hasFailed = false
+    @State private var loadState = LoadState()
 
     private static let sortKey = "favorites.sort"
 
@@ -16,13 +14,15 @@ struct FavoritesView: View {
         app.core.session.supports(feature: .customFavoritesOrder)
     }
 
+    private var sortOptions: [SortOption] {
+        SortOptions.favorites(supportsCustomOrder: supportsCustomOrder)
+    }
+
     private var currentSort: SortSetting {
         sort ?? SortSetting.remembered(
             for: Self.sortKey,
-            default: SortSetting(
-                field: supportsCustomOrder ? PlayableSortField.shared.POSITION : PlayableSortField.shared.TITLE,
-                order: .asc
-            )
+            among: sortOptions,
+            default: SortSetting(field: sortOptions[0].field, order: .asc)
         )
     }
 
@@ -31,46 +31,40 @@ struct FavoritesView: View {
     }
 
     var body: some View {
+        let displayedSongs = displayedSongs
+
         List {
-            if favorites.isEmpty, !hasLoaded, !hasFailed {
-                LoadingRows()
-            }
+            Group {
+                if favorites.isEmpty, loadState.isPending {
+                    LoadingRows()
+                }
 
-            if !favorites.isEmpty {
-                PlayShuffleButtons(playables: displayedSongs)
-                    .listRowInsets(EdgeInsets())
-                    .listRowSeparator(.hidden)
-            }
+                if !favorites.isEmpty {
+                    PlayShuffleButtons(playables: displayedSongs)
+                }
 
-            PlayableListContent(
-                playables: displayedSongs,
-                isSortedByTitle: currentSort.field == PlayableSortField.shared.TITLE,
-                removal: unfavoriteAction
-            )
+                PlayableListContent(
+                    playables: displayedSongs,
+                    isSortedByTitle: currentSort.field == PlayableSortField.shared.TITLE,
+                    removal: unfavoriteAction
+                )
+            }
+            .brandListRow()
         }
         .listStyle(.plain)
         .navigationTitle("Favorites")
-        .filterable(text: $query, prompt: "Filter Favorites")
+        .brandMeshBackground()
+        .filterable(text: $query, matchesNothing: !favorites.isEmpty && displayedSongs.isEmpty, isShown: !favorites.isEmpty || loadState.isPending)
         .refreshable { await fetch(forceRefresh: true) }
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                SortMenu(
-                    options: SortOptions.favorites(supportsCustomOrder: supportsCustomOrder),
-                    field: currentSort.field,
-                    order: currentSort.order
-                ) { field, order in
-                    let setting = SortSetting(field: field, order: order)
-                    setting.remember(for: Self.sortKey)
-                    sort = setting
-                }
-            }
+            SortToolbarItem(options: sortOptions, sort: currentSort, rememberKey: Self.sortKey) { sort = $0 }
         }
         .overlay {
-            ListStateOverlay(isEmpty: favorites.isEmpty, isLoading: isLoading || !hasLoaded, hasFailed: hasFailed, retry: { Task { await fetch() } }, showsSpinner: false) {
+            ListStateOverlay(isEmpty: favorites.isEmpty, loadState: loadState, showsSpinner: false, retry: { Task { await fetch() } }) {
                 ContentUnavailableView(
-                    "No Favorites",
-                    systemImage: "star",
-                    description: Text("Tap Favorite in a song’s menu to add it here.")
+                    "No favorites",
+                    systemImage: "heart",
+                    description: Text("Tap the \(Image(systemName: "heart")) icon in a song’s menu to mark it as favorite.")
                 )
             }
         }
@@ -81,7 +75,7 @@ struct FavoritesView: View {
     }
 
     private func unfavoriteAction(_ playable: any Playable) -> PlayableRow.Removal {
-        PlayableRow.Removal(title: "Undo Favorite", systemImage: "star.slash") {
+        PlayableRow.Removal(title: "Undo Favorite", systemImage: "heart.slash") {
             Task {
                 do {
                     try await app.core.favorites.unlike(playable: playable)
@@ -93,14 +87,6 @@ struct FavoritesView: View {
     }
 
     private func fetch(forceRefresh: Bool = false) async {
-        isLoading = true
-        defer { isLoading = false }
-        do {
-            _ = try await app.core.favorites.fetch(forceRefresh: forceRefresh)
-            hasFailed = false
-            hasLoaded = true
-        } catch {
-            hasFailed = true
-        }
+        await loadState.load { _ = try await app.core.favorites.fetch(forceRefresh: forceRefresh) }
     }
 }

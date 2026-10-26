@@ -1,3 +1,4 @@
+import AVFoundation
 import MediaPlayer
 @preconcurrency import Shared
 import UIKit
@@ -8,7 +9,11 @@ final class SystemMediaControls {
     private var stateTask: Task<Void, Never>?
     private var positionTask: Task<Void, Never>?
     private var artworkTask: Task<Void, Never>?
-    private var artworkUrl: String?
+    private var interruptionTask: Task<Void, Never>?
+    private var isPlaying = false
+    private var wasPlayingBeforeInterruption = false
+    private var shownArtwork: (url: String?, artwork: MPMediaItemArtwork)?
+    private var loadingArtworkUrl: String?
     private var reportedPosition: (seconds: Double, at: Date, rate: Double) = (0, .now, 0)
 
     private var center: MPNowPlayingInfoCenter { .default() }
@@ -23,12 +28,18 @@ final class SystemMediaControls {
         positionTask = Task { [weak self] in
             for await position in player.position { self?.syncElapsedTimeIfJumped(position.doubleValue) }
         }
+        interruptionTask = Task { [weak self] in
+            for await notification in NotificationCenter.default.notifications(named: AVAudioSession.interruptionNotification) {
+                self?.handleInterruption(notification)
+            }
+        }
     }
 
     isolated deinit {
         stateTask?.cancel()
         positionTask?.cancel()
         artworkTask?.cancel()
+        interruptionTask?.cancel()
     }
 
     private func registerCommands() {
@@ -37,6 +48,7 @@ final class SystemMediaControls {
         commands.playCommand.addTarget { [player] _ in player.play(); return .success }
         commands.pauseCommand.addTarget { [player] _ in player.pause(); return .success }
         commands.togglePlayPauseCommand.addTarget { [player] _ in player.togglePlayPause(); return .success }
+        commands.stopCommand.addTarget { [player] _ in player.stop(); return .success }
         commands.nextTrackCommand.addTarget { [player] _ in player.skipToNext(); return .success }
         commands.previousTrackCommand.addTarget { [player] _ in player.skipToPrevious(); return .success }
         commands.changePlaybackPositionCommand.addTarget { [player] event in
@@ -46,7 +58,29 @@ final class SystemMediaControls {
         }
     }
 
+    /// Picks playback back up after a call or Siri, when the system says it should.
+    private func handleInterruption(_ notification: Notification) {
+        guard let rawType = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: rawType) else { return }
+
+        switch type {
+        case .began:
+            wasPlayingBeforeInterruption = isPlaying
+        case .ended:
+            if Self.shouldResume(after: notification, wasPlaying: wasPlayingBeforeInterruption) { player.play() }
+            wasPlayingBeforeInterruption = false
+        @unknown default:
+            break
+        }
+    }
+
+    static func shouldResume(after notification: Notification, wasPlaying: Bool) -> Bool {
+        let rawOptions = notification.userInfo?[AVAudioSessionInterruptionOptionKey] as? UInt ?? 0
+        return wasPlaying && AVAudioSession.InterruptionOptions(rawValue: rawOptions).contains(.shouldResume)
+    }
+
     private func render(_ state: PlaybackState) {
+        isPlaying = state.isPlaying
         let commands = MPRemoteCommandCenter.shared()
         let isRadio = state.isRadioMode
         commands.nextTrackCommand.isEnabled = !isRadio
@@ -54,6 +88,7 @@ final class SystemMediaControls {
         commands.changePlaybackPositionCommand.isEnabled = !isRadio
 
         guard let info = nowPlayingInfo(for: state) else {
+            forgetArtwork()
             center.nowPlayingInfo = nil
             center.playbackState = .stopped
             return
@@ -68,13 +103,12 @@ final class SystemMediaControls {
             nowPlaying[MPNowPlayingInfoPropertyElapsedPlaybackTime] = position
             reportedPosition = (position, .now, rate)
         }
-        if let artwork = center.nowPlayingInfo?[MPMediaItemPropertyArtwork], info.artworkUrl == artworkUrl {
-            nowPlaying[MPMediaItemPropertyArtwork] = artwork
-        }
+        let artwork = shownArtwork.flatMap { $0.url == info.artworkUrl ? $0.artwork : nil }
+        nowPlaying[MPMediaItemPropertyArtwork] = artwork
 
         center.nowPlayingInfo = nowPlaying
         center.playbackState = state.isPlaying ? .playing : .paused
-        loadArtwork(info.artworkUrl)
+        if artwork == nil { loadArtwork(info.artworkUrl) }
     }
 
     private func nowPlayingInfo(for state: PlaybackState) -> (metadata: [String: Any], artworkUrl: String?)? {
@@ -113,19 +147,36 @@ final class SystemMediaControls {
     }
 
     private func loadArtwork(_ url: String?) {
-        guard url != artworkUrl else { return }
-        artworkUrl = url
+        guard let remote = url.flatMap(URL.init(string:)) else {
+            forgetArtwork()
+            show(Self.defaultArtwork, for: url)
+            return
+        }
+        guard url != loadingArtworkUrl else { return }
+        loadingArtworkUrl = url
         artworkTask?.cancel()
 
         artworkTask = Task { [weak self] in
-            let image = if let remote = url.flatMap(URL.init(string:)) {
-                await ImagePipeline.shared.image(for: remote, pointSize: 300)
-            } else {
-                UIImage(named: "default-image")
-            }
-            guard let self, !Task.isCancelled, let image, var info = center.nowPlayingInfo else { return }
-            info[MPMediaItemPropertyArtwork] = Self.artwork(image)
-            center.nowPlayingInfo = info
+            let image = await ImagePipeline.shared.image(for: remote, pointSize: 300)
+            guard let self, !Task.isCancelled else { return }
+            loadingArtworkUrl = nil
+            show(image ?? Self.defaultArtwork, for: url)
         }
     }
+
+    private func show(_ image: UIImage?, for url: String?) {
+        guard let image, var info = center.nowPlayingInfo else { return }
+        let artwork = Self.artwork(image)
+        shownArtwork = (url, artwork)
+        info[MPMediaItemPropertyArtwork] = artwork
+        center.nowPlayingInfo = info
+    }
+
+    private func forgetArtwork() {
+        artworkTask?.cancel()
+        loadingArtworkUrl = nil
+        shownArtwork = nil
+    }
+
+    private static var defaultArtwork: UIImage? { UIImage(named: "default-image") }
 }

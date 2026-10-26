@@ -5,15 +5,8 @@ struct PlaylistRow: View {
     let playlist: Playlist
 
     var body: some View {
-        HStack(spacing: 12) {
+        MediaRow(title: playlist.name, subtitle: playlist.kindLabel) {
             PlaylistArtwork(playlist: playlist, size: 44)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(playlist.name)
-                    .lineLimit(1)
-                Text(playlist.isSmart ? "Smart Playlist" : "Playlist")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
         }
     }
 }
@@ -24,16 +17,15 @@ struct PlaylistArtwork: View {
     let size: CGFloat
 
     var body: some View {
-        if let cover = playlist.cover, !cover.isEmpty {
-            Artwork(url: cover, size: size, cornerRadius: 6)
-        } else {
-            Image(systemName: playlist.isSmart ? "gearshape" : "music.note.list")
-                .font(.system(size: size * 0.4))
-                .foregroundStyle(.secondary)
-                .frame(width: size, height: size)
-                .background(.quaternary, in: .rect(cornerRadius: 6))
-                .accessibilityHidden(true)
-        }
+        Artwork(url: playlist.cover, size: size, cornerRadius: 6, fallbackSymbol: playlist.isSmart ? "wand.and.sparkles" : "music.note.list")
+    }
+}
+
+extension Playlist {
+    static let smartKindLabel = "Smart playlist"
+
+    var kindLabel: String {
+        isSmart ? Self.smartKindLabel : "Standard playlist"
     }
 }
 
@@ -42,18 +34,11 @@ struct PlaylistFolderLabel: View {
     let playlistCount: Int
 
     var body: some View {
-        HStack(spacing: 12) {
+        MediaRow(title: folder.name, subtitle: playlistCount.pluralized("playlist")) {
             Image(systemName: "folder")
                 .font(.title3)
                 .foregroundStyle(.secondary)
                 .frame(width: 44, height: 44)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(folder.name)
-                    .lineLimit(1)
-                Text(playlistCount.pluralized("playlist"))
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
         }
     }
 }
@@ -87,7 +72,7 @@ struct PlaylistMenu: View {
         if !folders.isEmpty {
             Menu("Move to Folder", systemImage: "folder") {
                 Picker("Folder", selection: Binding(get: { playlist.folderId }, set: { move(toFolderId: $0) })) {
-                    Text("None").tag(String?.none)
+                    Text("No folder").tag(String?.none)
                     ForEach(folders, id: \.id) { folder in
                         Text(folder.name).tag(Optional(folder.id))
                     }

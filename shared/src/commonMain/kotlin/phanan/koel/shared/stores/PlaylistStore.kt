@@ -73,6 +73,7 @@ class PlaylistStore internal constructor(
             put("name", name)
             put("description", description.orEmpty())
             put("folder_id", folderId)
+            playlist.rules?.let { put("rules", it) }
         })
         replace(playlist.id) { it.copy(name = name, description = description, folderId = folderId) }
     }

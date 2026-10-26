@@ -53,18 +53,14 @@ struct MiniPlayer: View {
 
     private func artwork(_ state: PlaybackState) -> some View {
         Artwork(url: state.radioStation?.logo ?? state.current?.artworkUrl, size: 30, cornerRadius: 6)
-            .overlay {
+            .artworkOverlay(isShown: state.hasFailed || state.isBuffering, size: 30, dimming: 0.55) {
                 if state.hasFailed {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.caption)
-                        .frame(width: 30, height: 30)
-                        .background(.black.opacity(0.55), in: .rect(cornerRadius: 6))
                         .accessibilityLabel("Couldn't play this item")
-                } else if state.isBuffering {
+                } else {
                     ProgressView()
                         .controlSize(.mini)
-                        .frame(width: 30, height: 30)
-                        .background(.black.opacity(0.55), in: .rect(cornerRadius: 6))
                 }
             }
     }

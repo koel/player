@@ -8,13 +8,34 @@ struct NowPlayingView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.brandColor) private var brandColor
 
-    @State private var isQueuePresented = false
-    @State private var scrubPosition: Double?
-    @State private var waveform: [Double] = []
+    /// How much of the queue's heading shows below the player, hinting that it scrolls.
+    private static let queuePeek: CGFloat = 56
 
     var body: some View {
         let state = app.player.state
 
+        GeometryReader { proxy in
+            NowPlayingScroller(
+                queue: state.queue,
+                playerHeight: state.queue.isEmpty ? proxy.size.height : proxy.size.height - Self.queuePeek,
+                player: { player(state) },
+                heading: { QueueHeading() },
+                onMove: { from, to in app.player.controller.move(from: Int32(from), to: Int32(to)) },
+                onRemove: { app.player.removeFromQueue($0) }
+            )
+        }
+        .background { blurredBackground(state) }
+        .appSheets(isFrontmost: true)
+        .modifier(ToastOverlay(toasts: app.toasts))
+        .onChange(of: state.hasFailed) { _, hasFailed in
+            if hasFailed { app.toasts.showError("Couldn't play this item") }
+        }
+        .onChange(of: app.player.hasSomethingToShow) { _, hasSomething in
+            if !hasSomething { dismiss() }
+        }
+    }
+
+    private func player(_ state: PlaybackState) -> some View {
         VStack(spacing: 0) {
             Capsule()
                 .fill(.secondary)
@@ -45,9 +66,8 @@ struct NowPlayingView: View {
                     .foregroundStyle(.secondary)
                     .padding(.bottom, 20)
             } else if let current = state.current {
-                progress(for: current)
+                PlaybackProgress(current: current)
                     .padding(.bottom, 16)
-                    .task(id: current.id) { await loadWaveform(for: current) }
             }
 
             transportControls(state)
@@ -61,20 +81,6 @@ struct NowPlayingView: View {
         }
         .padding(.horizontal, 28)
         .padding(.bottom, 12)
-        .background { blurredBackground(state) }
-        .sheet(isPresented: $isQueuePresented) {
-            QueueView()
-                .presentationDetents([.medium, .large])
-        }
-        .onChange(of: app.player.hasSomethingToShow) { _, hasSomething in
-            if !hasSomething { dismiss() }
-        }
-    }
-
-    private func loadWaveform(for current: any Playable) async {
-        waveform = []
-        guard current is Song else { return }
-        waveform = ((try? await app.core.mediaInfo.fetchWaveform(songId: current.id)) ?? []).map(\.doubleValue)
     }
 
     private func artworkUrl(_ state: PlaybackState) -> String? {
@@ -86,32 +92,35 @@ struct NowPlayingView: View {
         HStack(alignment: .center, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
                 if let station = state.radioStation {
-                    Text(state.radioStreamTitle ?? station.name)
+                    MarqueeText(text: state.radioStreamTitle ?? station.name)
                         .font(.title3.bold())
                     if state.radioStreamTitle != nil {
-                        Text(station.name).foregroundStyle(.secondary)
+                        MarqueeText(text: station.name).foregroundStyle(.secondary)
                     }
                 } else if let current = state.current {
-                    Text(current.title)
+                    MarqueeText(text: current.title)
                         .font(.title3.bold())
-                    Button(current.subtitle) { goToArtist(current) }
-                        .foregroundStyle(.secondary)
-                        .disabled(app.isOffline)
+                    Button { goToArtist(current) } label: {
+                        MarqueeText(text: current.subtitle)
+                    }
+                    .foregroundStyle(.secondary)
+                    .disabled(app.isOffline)
                 }
             }
-            .lineLimit(1)
             .frame(maxWidth: .infinity, alignment: .leading)
 
             if let current = state.current, !state.isRadioMode {
                 Button {
                     PlayableActions(app: app).toggleFavorite(current)
                 } label: {
-                    Image(systemName: current.favorite ? "star.fill" : "star")
+                    Image(systemName: current.favorite ? "heart.fill" : "heart")
                         .contentTransition(.symbolEffect(.replace))
                 }
                 .foregroundStyle(current.favorite ? brandColor : .primary)
                 .disabled(app.isOffline)
                 .accessibilityLabel(current.favorite ? "Undo Favorite" : "Favorite")
+
+                DownloadButton(playable: current)
 
                 Menu {
                     PlayableMenu(playable: current)
@@ -123,28 +132,6 @@ struct NowPlayingView: View {
         }
         .font(.title2)
         .buttonStyle(.plain)
-    }
-
-    private func progress(for current: any Playable) -> some View {
-        let position = scrubPosition ?? app.player.position
-        let length = max(current.length, 1)
-
-        return VStack(spacing: 4) {
-            PlaybackScrubber(position: min(position, length), length: length, waveform: waveform) { target in
-                scrubPosition = target
-            } onCommit: { target in
-                app.player.seek(to: target)
-                scrubPosition = nil
-            }
-
-            HStack {
-                Text(position.playbackTime)
-                Spacer()
-                Text("-" + max(length - position, 0).playbackTime)
-            }
-            .font(.caption.monospacedDigit())
-            .foregroundStyle(.secondary)
-        }
     }
 
     private func transportControls(_ state: PlaybackState) -> some View {
@@ -159,9 +146,10 @@ struct NowPlayingView: View {
 
             Button { app.player.togglePlayPause() } label: {
                 Image(systemName: state.isPlaying ? "pause.fill" : "play.fill")
-                    .font(.system(size: 52))
+                    .font(.system(size: 36))
                     .contentTransition(.symbolEffect(.replace))
-                    .frame(width: 72, height: 72)
+                    .frame(width: 84, height: 84)
+                    .glassEffect(.clear.interactive(), in: .circle)
             }
             .accessibilityLabel(state.isPlaying ? "Pause" : "Play")
 
@@ -176,14 +164,6 @@ struct NowPlayingView: View {
         .font(.system(size: 34))
         .buttonStyle(.plain)
         .padding(.horizontal, 24)
-        .overlay {
-            if state.hasFailed {
-                Label("Couldn't play this item", systemImage: "exclamationmark.triangle.fill")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .offset(y: 52)
-            }
-        }
     }
 
     private func bottomBar(_ state: PlaybackState) -> some View {
@@ -200,6 +180,11 @@ struct NowPlayingView: View {
             Spacer()
             AirPlayButton().frame(width: 44, height: 44)
             Spacer()
+            Button { app.sheet = .playbackSettings } label: {
+                Image(systemName: "slider.vertical.3")
+            }
+            .accessibilityLabel("Playback settings")
+            Spacer()
 
             if !state.isRadioMode {
                 Button { app.player.rotateRepeatMode() } label: {
@@ -207,12 +192,6 @@ struct NowPlayingView: View {
                         .foregroundStyle(state.repeatMode == .none ? Color.secondary : brandColor)
                 }
                 .accessibilityLabel("Repeat: \(state.repeatMode.label)")
-                Spacer()
-
-                Button { isQueuePresented = true } label: {
-                    Image(systemName: "list.bullet")
-                }
-                .accessibilityLabel("Queue")
             }
         }
         .font(.title3)
@@ -225,12 +204,59 @@ struct NowPlayingView: View {
     }
 
     private func goToArtist(_ playable: any Playable) {
-        dismiss()
         if let song = playable as? Song {
-            app.navigator.push(.artist(id: song.artistId))
+            app.open(.artist(id: song.artistId))
         } else if let episode = playable as? Episode {
-            app.navigator.push(.podcast(id: episode.podcastId))
+            app.open(.podcast(id: episode.podcastId))
         }
+    }
+}
+
+/// The scrubber and times. Its own view, so the position ticking along redraws only this and not the queue below.
+private struct PlaybackProgress: View {
+    let current: any Playable
+
+    @Environment(AppModel.self) private var app
+    @State private var scrubPosition: Double?
+    @State private var waveform: [Double] = []
+
+    var body: some View {
+        let position = scrubPosition ?? app.player.position
+        let length = max(current.length, 1)
+
+        VStack(spacing: 4) {
+            PlaybackScrubber(position: min(position, length), length: length, waveform: waveform, isPlaying: app.player.state.isPlaying) { target in
+                scrubPosition = target
+            } onCommit: { target in
+                app.player.seek(to: target)
+                scrubPosition = nil
+            }
+
+            HStack {
+                Text(position.playbackTime)
+                Spacer()
+                Text("-" + max(length - position, 0).playbackTime)
+            }
+            .font(.caption.monospacedDigit())
+            .foregroundStyle(.secondary)
+        }
+        .task(id: current.id) { await loadWaveform() }
+    }
+
+    private func loadWaveform() async {
+        waveform = []
+        guard current is Song else { return }
+        waveform = ((try? await app.core.mediaInfo.fetchWaveform(songId: current.id)) ?? []).map(\.doubleValue)
+    }
+}
+
+private struct QueueHeading: View {
+    @Environment(AppModel.self) private var app
+
+    var body: some View {
+        SectionHeader(title: "Queued", action: SectionHeader.Action(title: "Clear", role: .destructive) {
+            app.player.controller.clearQueue()
+        })
     }
 }
 

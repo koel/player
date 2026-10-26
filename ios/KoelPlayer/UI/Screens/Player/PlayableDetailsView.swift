@@ -28,7 +28,7 @@ struct PlayableDetailsView: View {
 
                         switch pane {
                         case .lyrics: LyricsPane(song: song)
-                        case .artist: ArtistInfoPane(song: song)
+                        case .artist: ArtistBiography(artistId: song.artistId)
                         case .album: AlbumInfoPane(song: song)
                         }
                     }
@@ -44,7 +44,7 @@ struct PlayableDetailsView: View {
             .navigationBarTitleDisplayMode(.inline)
         }
         .presentationDetents([.medium, .large])
-        .presentationBackground(.thinMaterial)
+        .presentationBackground(Color(uiColor: .systemBackground))
     }
 }
 
@@ -55,7 +55,7 @@ private struct LyricsPane: View {
 
     var body: some View {
         if song.lyrics.isBlank {
-            ContentUnavailableView("No Lyrics Available", systemImage: "quote.bubble")
+            ContentUnavailableView("No lyrics available.", systemImage: "quote.bubble")
         } else if Lyrics.shared.isSynced(lyrics: song.lyrics) {
             SyncedLyrics(lines: Lyrics.shared.parseSynced(lyrics: song.lyrics), isCurrent: app.player.isCurrent(song))
         } else {
@@ -103,20 +103,21 @@ private struct SyncedLyrics: View {
     }
 }
 
-private struct ArtistInfoPane: View {
-    let song: Song
+/// The artist's biography, in the song details and the artist's Info sheet.
+struct ArtistBiography: View {
+    let artistId: String
 
     @Environment(AppModel.self) private var app
     @State private var biography: String?
     @State private var hasFailed = false
 
     var body: some View {
-        InfoScroll(isLoading: biography == nil && !hasFailed, isEmpty: biography?.isBlank ?? hasFailed, emptyTitle: "No Artist Information") {
+        InfoScroll(isLoading: biography == nil && !hasFailed, isEmpty: biography?.plainText.isBlank ?? hasFailed, emptyTitle: "No artist information available.") {
             HTMLText(html: biography ?? "")
         }
-        .task(id: song.artistId) {
+        .task(id: artistId) {
             do {
-                biography = try await app.core.mediaInfo.fetchForArtist(artistId: song.artistId).biography
+                biography = try await app.core.mediaInfo.fetchForArtist(artistId: artistId).biography
             } catch {
                 hasFailed = true
             }
@@ -132,7 +133,7 @@ private struct AlbumInfoPane: View {
     @State private var hasFailed = false
 
     var body: some View {
-        InfoScroll(isLoading: info == nil && !hasFailed, isEmpty: info.map { $0.information.isBlank && $0.tracks.isEmpty } ?? hasFailed, emptyTitle: "No Album Information") {
+        InfoScroll(isLoading: info == nil && !hasFailed, isEmpty: info.map { $0.information.isBlank && $0.tracks.isEmpty } ?? hasFailed, emptyTitle: "No album information available.") {
             if let info {
                 VStack(alignment: .leading, spacing: 20) {
                     if !info.information.isBlank {

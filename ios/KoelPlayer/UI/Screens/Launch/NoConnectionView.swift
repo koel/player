@@ -5,15 +5,13 @@ struct NoConnectionView: View {
 
     var body: some View {
         ContentUnavailableView {
-            Label("You Are Offline", systemImage: "wifi.slash")
+            Label("You are offline.", systemImage: "wifi.slash")
         } description: {
             Text("Please connect to the internet and try again.")
         } actions: {
-            Button("View Downloaded Songs", action: app.goOffline)
-                .buttonStyle(.glassProminent)
+            Button("View downloaded songs", action: app.goOffline)
+                .buttonStyle(.glass)
         }
-        .onChange(of: app.connectivity.isOnline) { _, isOnline in
-            if isOnline { app.reconnect() }
-        }
+        .background { BrandMeshBackground() }
     }
 }

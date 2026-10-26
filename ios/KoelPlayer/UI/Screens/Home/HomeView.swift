@@ -12,9 +12,7 @@ struct HomeView: View {
 private struct HomeScreen: View {
     @Environment(AppModel.self) private var app
     @State private var feed: HomeFeed
-    @State private var hasLoaded = false
-    @State private var isLoading = false
-    @State private var hasFailed = false
+    @State private var loadState = LoadState()
 
     init(core: KoelCore) {
         _feed = State(initialValue: HomeFeed(core: core))
@@ -26,7 +24,7 @@ private struct HomeScreen: View {
                 placeholder
                     .containerRelativeFrame(.vertical)
             } else {
-                LazyVStack(alignment: .leading, spacing: 32) {
+                LazyVStack(alignment: .leading, spacing: SectionHeader.sectionGap) {
                     RecentlyPlayedSection(playables: feed.recentlyPlayed)
                     ForEach(feed.blocks, id: \.self) { block in
                         HomeBlockCarousel(block: block, items: feed.items(for: block))
@@ -37,6 +35,7 @@ private struct HomeScreen: View {
         }
         .refreshable { await load() }
         .navigationTitle("Home")
+        .brandMeshBackground()
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 NavigationLink(value: Route.recentlyPlayed) {
@@ -49,28 +48,15 @@ private struct HomeScreen: View {
             }
         }
         .task {
-            guard !hasLoaded else { return }
-            hasLoaded = true
+            guard !loadState.hasLoaded else { return }
             await load()
         }
     }
 
-    @ViewBuilder
     private var placeholder: some View {
-        if isLoading || !hasLoaded {
-            ProgressView()
-        } else if hasFailed {
-            ContentUnavailableView {
-                Label("Couldn't Load Home", systemImage: "exclamationmark.triangle")
-            } description: {
-                Text("Check your connection and try again.")
-            } actions: {
-                Button("Try Again") { Task { await load() } }
-                    .buttonStyle(.glass)
-            }
-        } else {
+        ListStateOverlay(isEmpty: true, loadState: loadState, retry: { Task { await load() } }) {
             ContentUnavailableView(
-                "No Activities… Yet",
+                "No activities… yet",
                 systemImage: "music.note",
                 description: Text("Pull down to refresh this screen.")
             )
@@ -78,17 +64,8 @@ private struct HomeScreen: View {
     }
 
     private func load() async {
-        guard !isLoading else { return }
-        isLoading = true
-        defer { isLoading = false }
-
-        do {
-            try await feed.refresh()
-            hasFailed = false
-        } catch where !error.isCancellation {
-            hasFailed = true
-            if !feed.isEmpty { app.toasts.showError() }
-        } catch {}
+        await loadState.load { try await feed.refresh() }
+        if loadState.hasFailed, !feed.isEmpty { app.toasts.showError() }
     }
 }
 
@@ -97,33 +74,27 @@ private struct RecentlyPlayedSection: View {
 
     var body: some View {
         if !playables.isEmpty {
-            VStack(spacing: 0) {
-                ForEach(playables, id: \.id) { playable in
-                    PlayableRow(playable: playable)
-                        .padding(.horizontal)
-                        .padding(.vertical, 6)
-                }
-            }
+            PlayableRowStack(playables: playables)
         }
     }
 }
 
-private struct HomeBlockCarousel: View {
+struct HomeBlockCarousel: View {
     let block: HomeBlock
     let items: HomeFeed.Items
 
     var body: some View {
         switch items {
         case .songs(let songs):
-            CardCarousel(title: block.title, seeAll: .songs) {
+            CardCarousel(title: block.title, seeAll: block.seeAll) {
                 ForEach(songs, id: \.id) { CarouselSongCard(playable: $0) }
             }
         case .albums(let albums):
-            CardCarousel(title: block.title, seeAll: .albums) {
+            CardCarousel(title: block.title, seeAll: block.seeAll) {
                 ForEach(albums, id: \.id) { CarouselAlbumCard(album: $0) }
             }
         case .artists(let artists):
-            CardCarousel(title: block.title, seeAll: .artists) {
+            CardCarousel(title: block.title, seeAll: block.seeAll) {
                 ForEach(artists, id: \.id) { CarouselArtistCard(artist: $0) }
             }
         }

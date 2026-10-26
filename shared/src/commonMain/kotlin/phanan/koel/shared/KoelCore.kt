@@ -3,6 +3,9 @@ package phanan.koel.shared
 import io.ktor.client.engine.HttpClientEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.jsonObject
@@ -14,6 +17,7 @@ import phanan.koel.shared.json.string
 import phanan.koel.shared.models.Playlist
 import phanan.koel.shared.models.PlaylistFolder
 import phanan.koel.shared.player.AudioEngine
+import phanan.koel.shared.player.VolumeNormalizer
 import phanan.koel.shared.player.PlayerController
 import phanan.koel.shared.models.QueueState
 import phanan.koel.shared.session.Feature
@@ -34,6 +38,7 @@ import phanan.koel.shared.stores.MediaInfoStore
 import phanan.koel.shared.stores.OverviewStore
 import phanan.koel.shared.stores.PlayableStore
 import phanan.koel.shared.stores.PlaylistFolderStore
+import phanan.koel.shared.stores.PlaybackSettingsStore
 import phanan.koel.shared.stores.PlaylistStore
 import phanan.koel.shared.stores.PodcastStore
 import phanan.koel.shared.stores.RadioStationStore
@@ -52,7 +57,13 @@ class KoelCore internal constructor(
     val session = Session(preferences)
     private val api = ApiClient(httpEngine, preferences)
 
-    val auth = AuthStore(api, preferences)
+    val auth = AuthStore(
+        api,
+        preferences,
+        scope,
+        onSessionRejected = ::forgetUserData,
+        onUserConfirmed = { downloads.adoptFlutterDownloads() },
+    )
     val playables = PlayableStore(api)
     val albums = AlbumStore(api, playables)
     val artists = ArtistStore(api, playables, albums)
@@ -68,6 +79,10 @@ class KoelCore internal constructor(
     val radioStations = RadioStationStore(api)
     val downloads = DownloadStore(api, playables, session, preferences, documentsPath, scope)
     val downloadSync = DownloadSyncStore(api, downloads, playables, scope)
+    val playbackSettings = PlaybackSettingsStore(api, preferences, scope)
+
+    /** Set by the app while it runs without a server connection, so nothing waits on the network in vain. */
+    var isOffline = false
 
     val player = PlayerController(
         api = api,
@@ -78,7 +93,21 @@ class KoelCore internal constructor(
         engine = audioEngine,
         localFileUrl = downloads::localFileUrl,
         onPlayRegistered = recentlyPlayed::add,
+        crossfadeSeconds = { playbackSettings.crossfadeDuration.value },
+        normalizationGain = { playable ->
+            VolumeNormalizer.gainDecibels(playable, session.isKoelPlus && playbackSettings.normalizeVolume.value)
+        },
+        episodeProgress = podcasts::episodeProgress,
+        isOffline = { isOffline },
     )
+
+    init {
+        scope.launch { auth.currentUser.filterNotNull().collect { playbackSettings.seed(it.preferences) } }
+        scope.launch { playbackSettings.equalizer.collect(audioEngine::setEqualizer) }
+        scope.launch {
+            combine(session.serverInfo, playbackSettings.normalizeVolume) { _, _ -> }.collect { player.refreshNormalization() }
+        }
+    }
 
     /** Keeps users who update from the Flutter app logged in, with their downloads. */
     fun migrateFlutterData() {
@@ -105,8 +134,12 @@ class KoelCore internal constructor(
 
     @Throws(Exception::class)
     suspend fun logout(): Unit = onMain {
-        player.cleanUpUponLogout()
         auth.logout()
+        forgetUserData()
+    }
+
+    private fun forgetUserData() {
+        player.cleanUpUponLogout()
         session.update(null)
 
         playables.reset()
@@ -123,6 +156,8 @@ class KoelCore internal constructor(
         podcasts.reset()
         radioStations.reset()
         downloads.reset()
+        downloadSync.reset()
+        playbackSettings.reset()
     }
 
     private fun serverInfo(data: JsonObject) = ServerInfo(
@@ -131,5 +166,6 @@ class KoelCore internal constructor(
         transcoding = data["transcoding"]?.jsonPrimitive?.booleanOrNull ?: false,
         useLastFm = data["use_last_fm"]?.jsonPrimitive?.booleanOrNull ?: false,
         songCount = data.int("song_count") ?: 0,
+        koelPlus = (data["koel_plus"] as? JsonObject)?.get("active")?.jsonPrimitive?.booleanOrNull ?: false,
     )
 }

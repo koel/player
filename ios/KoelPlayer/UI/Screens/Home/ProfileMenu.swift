@@ -1,7 +1,7 @@
 @preconcurrency import Shared
 import SwiftUI
 
-/// The avatar in Home's toolbar: who is logged in, Remove All Downloads and Log Out.
+/// The avatar in Home's toolbar: who is logged in, Playback Settings, Remove All Downloads and Log out.
 struct ProfileMenu: View {
     let user: User?
 
@@ -12,12 +12,16 @@ struct ProfileMenu: View {
     var body: some View {
         Menu {
             Section {
-                Button("Remove All Downloads", systemImage: "arrow.down.circle.dotted", role: .destructive) {
+                Button("Playback settings", systemImage: "slider.vertical.3") {
+                    app.sheet = .playbackSettings
+                }
+
+                Button("Remove all downloads", systemImage: "arrow.down.circle.dotted", role: .destructive) {
                     isConfirmingRemoveAllDownloads = true
                 }
                 .disabled(app.downloadedIds.value.isEmpty)
 
-                Button("Log Out", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
+                Button("Log out", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
                     isConfirmingLogOut = true
                 }
             } header: {
@@ -30,10 +34,10 @@ struct ProfileMenu: View {
         }
         .accessibilityLabel("Profile")
         .alert("Log out?", isPresented: $isConfirmingLogOut) {
-            Button("Log Out", role: .destructive) {
+            Button("Cancel", role: .cancel) {}
+            Button("Confirm", role: .destructive) {
                 Task { await app.logOut() }
             }
-            Button("Cancel", role: .cancel) {}
         }
         .removeAllDownloadsConfirmation(isPresented: $isConfirmingRemoveAllDownloads)
     }

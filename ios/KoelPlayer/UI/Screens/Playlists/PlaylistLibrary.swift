@@ -51,23 +51,3 @@ struct PlaylistDraft {
     var trimmedDescription: String { description.trimmingCharacters(in: .whitespacesAndNewlines) }
     var isValid: Bool { !trimmedName.isEmpty }
 }
-
-/// Sort fields for a playlist's songs. Servers that keep a custom order offer it first, as the default.
-struct PlaylistSongSorting {
-    let supportsCustomOrder: Bool
-
-    var options: [(field: String, label: String)] {
-        let fields = PlayableSortField.shared
-        let custom = supportsCustomOrder ? [(field: fields.POSITION, label: "Custom Order")] : []
-        return custom + [
-            (field: fields.TITLE, label: "Title"),
-            (field: fields.ARTIST_NAME, label: "Artist"),
-            (field: fields.CREATED_AT, label: "Recently Added"),
-        ]
-    }
-
-    /// The stored field when it's still offered, otherwise the default.
-    func field(stored: String) -> String {
-        options.contains { $0.field == stored } ? stored : options[0].field
-    }
-}

@@ -97,4 +97,30 @@ class ModelParsingTest {
 
         assertEquals(listOf("recently_played_songs"), user.preferences.homeBlocksOrder)
     }
+
+    @Test
+    fun aUserWithTheRadioAbilityCanManageStations() {
+        val user = KoelJson.decodeFromString(
+            User.serializer(),
+            """{"id":"u1","name":"Me","email":"me@koel.test","abilities":["manage songs","manage radio stations"]}""",
+        )
+
+        assertEquals(listOf("manage songs", "manage radio stations"), user.abilities)
+        assertTrue(user.canManageRadioStations)
+    }
+
+    @Test
+    fun aUserWithoutTheRadioAbilityCannotManageStations() {
+        val user = KoelJson.decodeFromString(User.serializer(), """{"id":"u1","name":"Me","email":"me@koel.test","abilities":["manage songs"]}""")
+
+        assertFalse(user.canManageRadioStations)
+    }
+
+    @Test
+    fun aUserFromAServerWithoutAbilitiesCannotManageStations() {
+        val user = KoelJson.decodeFromJsonElement(User.serializer(), Fixtures.user())
+
+        assertEquals(emptyList(), user.abilities)
+        assertFalse(user.canManageRadioStations)
+    }
 }

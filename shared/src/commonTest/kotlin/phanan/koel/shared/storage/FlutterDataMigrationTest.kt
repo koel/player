@@ -58,6 +58,19 @@ class FlutterDataMigrationTest {
     }
 
     @Test
+    fun replacesATokenLeftWithoutAHost() {
+        writeFlutterPreferences("""{"hostUrl":"https://koel.test","apiToken":"flutter-token"}""")
+        preferences.apiToken = "left-over-token"
+        preferences.audioToken = "left-over-audio-token"
+
+        migrate()
+
+        assertEquals("https://koel.test", preferences.host)
+        assertEquals("flutter-token", preferences.apiToken)
+        assertNull(preferences.audioToken)
+    }
+
+    @Test
     fun doesNothingWithoutFlutterData() {
         migrate()
 

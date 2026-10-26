@@ -1,7 +1,9 @@
 package phanan.koel.shared.stores
 
 import io.ktor.http.HttpMethod
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.yield
 import kotlinx.coroutines.test.runTest
@@ -193,6 +195,50 @@ class DownloadStoreTest {
         h.preferences.userEmail = "me@koel.test"
         store.load()
         assertEquals(listOf("s1"), store.playables.value.map { it.id })
+    }
+
+    @Test
+    fun aDownloadFinishingAfterAUserSwitchIsKeptForTheUserWhoStartedIt() = runTest(UnconfinedTestDispatcher()) {
+        val store = backgroundScope.store()
+        val finishDownload = serveAudioOnSignal("s1")
+        val download = launch { store.download(song("s1")) }
+
+        store.reset()
+        h.preferences.userEmail = "other@koel.test"
+        store.load()
+        finishDownload.complete(Unit)
+        download.join()
+
+        assertEquals(emptyList(), store.playables.value)
+        assertEquals(listOf("s1"), storedPlayables().map { it.getValue("id").jsonPrimitive.content })
+
+        h.preferences.userEmail = "me@koel.test"
+        store.load()
+        assertEquals(listOf("s1"), store.playables.value.map { it.id })
+    }
+
+    @Test
+    fun removingAllDuringADownloadKeepsItRemoved() = runTest(UnconfinedTestDispatcher()) {
+        val store = backgroundScope.store()
+        val finishDownload = serveAudioOnSignal("s1")
+        val download = launch { store.download(song("s1")) }
+
+        store.clear()
+        finishDownload.complete(Unit)
+        download.join()
+
+        assertEquals(emptyList(), store.playables.value)
+        assertFalse(Path(userDirectory, "CACHE_s1.mp3").exists())
+        assertEquals(emptyList(), storedPlayables())
+    }
+
+    private fun serveAudioOnSignal(id: String): CompletableDeferred<Unit> {
+        val signal = CompletableDeferred<Unit>()
+        h.onRequest(HttpMethod.Get, "/play/$id") {
+            signal.await()
+            Harness.Reply(200, "audio of $id")
+        }
+        return signal
     }
 
     @Test

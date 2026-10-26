@@ -17,12 +17,8 @@ struct CollectionQueueActions {
         withSongs { songs in app.player.play(songs, shuffled: shuffled) }
     }
 
-    /// Each song goes right after the current one, so going backwards keeps the original order.
     func playNext() {
-        withSongs { songs in
-            songs.reversed().forEach(app.player.playNext)
-            app.toasts.show("Playing Next", systemImage: "text.line.first.and.arrowtriangle.forward")
-        }
+        withSongs { songs in PlayableActions(app: app).playNext(songs) }
     }
 
     func playLast() {

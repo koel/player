@@ -27,7 +27,7 @@ struct PlaylistActions {
                 try await app.core.playlists.remove(playlist: playlist)
                 app.toasts.show("Playlist deleted", systemImage: "trash")
             } catch {
-                app.toasts.showError("Could not delete playlist.")
+                app.toasts.showError(message: "Could not delete playlist.")
             }
         }
     }
@@ -43,7 +43,7 @@ struct PlaylistActions {
                 )
                 app.toasts.show("Playlist updated")
             } catch {
-                app.toasts.showError("Could not update playlist.")
+                app.toasts.showError(message: "Could not update playlist.")
             }
         }
     }
@@ -54,9 +54,9 @@ struct PlaylistActions {
         Task {
             do {
                 try await app.core.playlists.addToPlaylist(playables: playables, playlist: playlist)
-                app.toasts.show("Added to \(playlist.name)", systemImage: "text.badge.plus")
+                app.toasts.show("Added", message: "Item added to playlist.", systemImage: "text.badge.plus")
             } catch {
-                app.toasts.showError("Could not add to playlist.")
+                app.toasts.showError(message: "Could not add to playlist.")
             }
         }
     }
@@ -67,7 +67,7 @@ struct PlaylistActions {
                 try await app.core.playlists.removeFromPlaylist(playables: [playable], playlist: playlist)
                 app.toasts.show("Removed from Playlist", systemImage: "minus.circle")
             } catch {
-                app.toasts.showError("Could not remove from playlist.")
+                app.toasts.showError(message: "Could not remove from playlist.")
             }
         }
     }

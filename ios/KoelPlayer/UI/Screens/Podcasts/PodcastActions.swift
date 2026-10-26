@@ -36,23 +36,13 @@ struct PodcastActions {
         }
     }
 
-    func toggleFavorite(_ podcast: Podcast) {
-        Task {
-            do {
-                try await app.core.podcasts.toggleFavorite(podcast: podcast)
-            } catch {
-                app.toasts.showError()
-            }
-        }
-    }
-
     func unsubscribe(_ podcast: Podcast) {
         Task {
             do {
                 try await app.core.podcasts.unsubscribe(podcast: podcast)
                 app.toasts.show("Unsubscribed", systemImage: "minus.circle")
             } catch {
-                app.toasts.showError("Could not unsubscribe.")
+                app.toasts.showError(message: "Could not unsubscribe.")
             }
         }
     }
@@ -88,14 +78,11 @@ struct PodcastMenu: View {
 
         Section {
             if actions.supportsFavorites {
-                Button(
-                    podcast.favorite ? "Undo Favorite" : "Favorite",
-                    systemImage: podcast.favorite ? "star.slash" : "star"
-                ) {
-                    actions.toggleFavorite(podcast)
+                EntityFavoriteButton(isFavorite: podcast.favorite) {
+                    try await app.core.podcasts.toggleFavorite(podcast: podcast)
                 }
             }
-            Button("Check for New Episodes", systemImage: "arrow.clockwise") {
+            Button("Refresh", systemImage: "arrow.clockwise") {
                 let podcast = podcast
                 Task { await actions.checkForNewEpisodes(podcast) }
             }

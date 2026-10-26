@@ -12,6 +12,7 @@ import phanan.koel.shared.json.KoelJson
 import phanan.koel.shared.models.Episode
 import phanan.koel.shared.models.Podcast
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Duration.Companion.minutes
 
 class PodcastStore internal constructor(private val api: ApiClient) {
     internal val vault = Vault<Podcast> { it.id }
@@ -71,7 +72,7 @@ class PodcastStore internal constructor(private val api: ApiClient) {
 
     @Throws(Exception::class)
     suspend fun add(url: String): Podcast = onMain {
-        val json = api.post("podcasts", buildJsonObject { put("url", url) })
+        val json = api.post("podcasts", buildJsonObject { put("url", url) }, timeout = FEED_FETCH_TIMEOUT)
         val podcast = vault.sync(KoelJson.decodeFromJsonElement(Podcast.serializer(), json))
         list.append(listOf(podcast.id))
         podcast
@@ -102,4 +103,9 @@ class PodcastStore internal constructor(private val api: ApiClient) {
     }
 
     private suspend fun fetchSubscriptions(): List<Podcast> = api.getList("podcasts", Podcast.serializer())
+
+    internal companion object {
+        /** Koel fetches and parses the whole feed before it answers, allowing itself up to five minutes. */
+        val FEED_FETCH_TIMEOUT = 5.minutes
+    }
 }

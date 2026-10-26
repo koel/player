@@ -39,26 +39,6 @@ struct AlbumMenu: View {
     }
 }
 
-/// Favorite or Undo Favorite for albums, artists and the like; failures roll back in the store.
-struct EntityFavoriteButton: View {
-    let isFavorite: Bool
-    let toggle: () async throws -> Void
-
-    @Environment(AppModel.self) private var app
-
-    var body: some View {
-        Button(isFavorite ? "Undo Favorite" : "Favorite", systemImage: isFavorite ? "star.slash" : "star") {
-            Task {
-                do {
-                    try await toggle()
-                } catch {
-                    app.toasts.showError()
-                }
-            }
-        }
-    }
-}
-
 extension Album {
     var hasBrowsableArtist: Bool {
         artistName != "Unknown Artist" && artistName != "Various Artists"
@@ -69,10 +49,8 @@ struct AlbumEditSheet: View {
     let album: Album
 
     @Environment(AppModel.self) private var app
-    @Environment(\.dismiss) private var dismiss
     @State private var name: String
     @State private var year: String
-    @State private var isSaving = false
 
     init(album: Album) {
         self.album = album
@@ -85,47 +63,30 @@ struct AlbumEditSheet: View {
     }
 
     var body: some View {
-        NavigationStack {
-            Form {
-                TextField("Album Name", text: $name)
-                TextField("Year (optional)", text: $year)
-                    .keyboardType(.numberPad)
-                    .onChange(of: year) { _, newValue in year = YearInput.sanitized(newValue) }
-            }
-            .navigationTitle("Edit Album")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(role: .cancel) { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(role: .confirm, action: save)
-                        .disabled(trimmedName.isEmpty || isSaving)
-                }
-            }
+        FormSheet(
+            title: "Edit Album",
+            submitLabel: "Save",
+            canSubmit: !trimmedName.isEmpty,
+            failureMessage: { _ in "Could not update album." },
+            submit: save
+        ) {
+            TextField("Album Name", text: $name)
+            TextField("Year (optional)", text: $year)
+                .keyboardType(.numberPad)
+                .onChange(of: year) { _, newValue in year = YearInput.sanitized(newValue) }
         }
-        .presentationDetents([.medium])
     }
 
-    private func save() {
-        isSaving = true
-        Task {
-            defer { isSaving = false }
-            do {
-                let savedYear = YearInput.value(year).map { KotlinInt(int: Int32($0)) }
-                _ = try await app.core.albums.update(album: album, name: trimmedName, year: savedYear)
-                dismiss()
-                app.toasts.show("Album Updated")
-            } catch {
-                app.toasts.showError("Could not update album")
-            }
-        }
+    private func save() async throws {
+        let savedYear = YearInput.value(year).map { KotlinInt(int: Int32($0)) }
+        _ = try await app.core.albums.update(album: album, name: trimmedName, year: savedYear)
+        app.toasts.show("Album updated")
     }
 }
 
 extension View {
     func albumEditSheet(_ album: Binding<Album?>) -> some View {
-        sheet(isPresented: Binding(get: { album.wrappedValue != nil }, set: { if !$0 { album.wrappedValue = nil } })) {
+        sheet(isPresented: album.isPresent) {
             if let editing = album.wrappedValue {
                 AlbumEditSheet(album: editing)
             }

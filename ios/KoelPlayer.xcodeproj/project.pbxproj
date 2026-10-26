@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		A10000000000000000000116 /* KoelWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A10000000000000000000014 /* KoelWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		A10000000000000000000301 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,12 +25,34 @@
 			remoteGlobalIDString = A10000000000000000000101;
 			remoteInfo = KoelPlayer;
 		};
+		A10000000000000000000305 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A10000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A10000000000000000000901;
+			remoteInfo = KoelWidgets;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A10000000000000000000115 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A10000000000000000000116 /* KoelWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		A10000000000000000000011 /* KoelPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KoelPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A10000000000000000000012 /* KoelPlayerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KoelPlayerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A10000000000000000000013 /* KoelPlayerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KoelPlayerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000000000000000000014 /* KoelWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = KoelWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -36,6 +62,13 @@
 				Info.plist,
 			);
 			target = A10000000000000000000101 /* KoelPlayer */;
+		};
+		A10000000000000000000027 /* Exceptions for "KoelWidgets" folder in "KoelWidgets" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A10000000000000000000901 /* KoelWidgets */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -56,6 +89,19 @@
 		A10000000000000000000024 /* KoelPlayerUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = KoelPlayerUITests;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000025 /* KoelWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A10000000000000000000027 /* Exceptions for "KoelWidgets" folder in "KoelWidgets" target */,
+			);
+			path = KoelWidgets;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000026 /* KoelShared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = KoelShared;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -82,6 +128,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A10000000000000000000911 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -91,6 +144,8 @@
 				A10000000000000000000021 /* KoelPlayer */,
 				A10000000000000000000022 /* KoelPlayerTests */,
 				A10000000000000000000024 /* KoelPlayerUITests */,
+				A10000000000000000000025 /* KoelWidgets */,
+				A10000000000000000000026 /* KoelShared */,
 				A10000000000000000000003 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -101,6 +156,7 @@
 				A10000000000000000000011 /* KoelPlayer.app */,
 				A10000000000000000000012 /* KoelPlayerTests.xctest */,
 				A10000000000000000000013 /* KoelPlayerUITests.xctest */,
+				A10000000000000000000014 /* KoelWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -116,13 +172,16 @@
 				A10000000000000000000112 /* Sources */,
 				A10000000000000000000111 /* Frameworks */,
 				A10000000000000000000113 /* Resources */,
+				A10000000000000000000115 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				A10000000000000000000306 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				A10000000000000000000021 /* KoelPlayer */,
+				A10000000000000000000026 /* KoelShared */,
 			);
 			name = KoelPlayer;
 			productName = KoelPlayer;
@@ -171,6 +230,27 @@
 			productReference = A10000000000000000000013 /* KoelPlayerUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		A10000000000000000000901 /* KoelWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A10000000000000000000A01 /* Build configuration list for PBXNativeTarget "KoelWidgets" */;
+			buildPhases = (
+				A10000000000000000000912 /* Sources */,
+				A10000000000000000000911 /* Frameworks */,
+				A10000000000000000000913 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A10000000000000000000025 /* KoelWidgets */,
+				A10000000000000000000026 /* KoelShared */,
+			);
+			name = KoelWidgets;
+			productName = KoelWidgets;
+			productReference = A10000000000000000000014 /* KoelWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -198,6 +278,7 @@
 				A10000000000000000000101 /* KoelPlayer */,
 				A10000000000000000000201 /* KoelPlayerTests */,
 				A10000000000000000000701 /* KoelPlayerUITests */,
+				A10000000000000000000901 /* KoelWidgets */,
 			);
 		};
 /* End PBXProject section */
@@ -224,6 +305,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A10000000000000000000913 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -244,7 +332,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export JAVA_HOME=\"${JAVA_HOME:-/Applications/Android Studio.app/Contents/jbr/Contents/Home}\"\ncd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode\n";
+			shellScript = "cd \"$SRCROOT/..\"\nframework=\"shared/build/xcode-frameworks/$CONFIGURATION/$SDK_NAME/Shared.framework\"\nstamp=\"$DERIVED_FILE_DIR/shared-framework.stamp\"\nif [ -d \"$framework\" ] && [ -f \"$stamp\" ] && [ -z \"$(find shared/src shared/build.gradle.kts build.gradle.kts settings.gradle.kts gradle/libs.versions.toml -newer \"$stamp\" -print -quit)\" ]; then\n  echo \"Shared framework is up to date\"\n  exit 0\nfi\nexport JAVA_HOME=\"${JAVA_HOME:-/Applications/Android Studio.app/Contents/jbr/Contents/Home}\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode || exit 1\nmkdir -p \"$DERIVED_FILE_DIR\"\ntouch \"$stamp\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -270,6 +358,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A10000000000000000000912 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -282,6 +377,11 @@
 			isa = PBXTargetDependency;
 			target = A10000000000000000000101 /* KoelPlayer */;
 			targetProxy = A10000000000000000000303 /* PBXContainerItemProxy */;
+		};
+		A10000000000000000000306 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A10000000000000000000901 /* KoelWidgets */;
+			targetProxy = A10000000000000000000305 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -306,6 +406,7 @@
 					"$(inherited)",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
+				KOEL_APP_GROUP = group.debug.dev.koel.koel;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
@@ -337,6 +438,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
+				KOEL_APP_GROUP = group.dev.koel.koel;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -357,14 +459,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = KoelPlayer/KoelPlayer.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = KoelPlayer/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Koel Player";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Koel Player uses the camera to scan the login QR code.";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = NO;
+				INFOPLIST_KEY_UILaunchScreen_Generation = NO;
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -384,14 +487,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = KoelPlayer/KoelPlayer.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = KoelPlayer/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Koel Player";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Koel Player uses the camera to scan the login QR code.";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = NO;
+				INFOPLIST_KEY_UILaunchScreen_Generation = NO;
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -474,6 +578,56 @@
 			};
 			name = Release;
 		};
+		A10000000000000000000A02 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = KoelWidgets/KoelWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KoelWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Koel Player";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 3.0.0;
+				OTHER_LDFLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = debug.dev.koel.koel.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		A10000000000000000000A03 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = KoelWidgets/KoelWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KoelWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Koel Player";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 3.0.0;
+				OTHER_LDFLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = dev.koel.koel.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -509,6 +663,15 @@
 			buildConfigurations = (
 				A10000000000000000000802 /* Debug */,
 				A10000000000000000000803 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A10000000000000000000A01 /* Build configuration list for PBXNativeTarget "KoelWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A10000000000000000000A02 /* Debug */,
+				A10000000000000000000A03 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
