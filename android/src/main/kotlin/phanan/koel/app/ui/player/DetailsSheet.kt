@@ -38,7 +38,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.fromHtml
@@ -54,6 +62,7 @@ import phanan.koel.shared.models.Episode
 import phanan.koel.shared.models.Playable
 import phanan.koel.shared.models.Song
 import phanan.koel.shared.stores.AlbumInfo
+import phanan.koel.app.ui.theme.LocalBrandColor
 import phanan.koel.shared.util.LyricLine
 import phanan.koel.shared.util.Lyrics
 
@@ -85,6 +94,7 @@ private val Panes = listOf("Lyrics", "Artist", "Album")
 @Composable
 private fun SongDetails(song: Song) {
     var pane by rememberSaveable { mutableIntStateOf(0) }
+    val brandColor = LocalBrandColor.current
 
     SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(16.dp)) {
         Panes.forEachIndexed { index, title ->
@@ -94,7 +104,7 @@ private fun SongDetails(song: Song) {
                 shape = SegmentedButtonDefaults.itemShape(index, Panes.size),
                 icon = {},
                 colors = SegmentedButtonDefaults.colors(
-                    activeContainerColor = Color.White.copy(alpha = 0.24f),
+                    activeContainerColor = brandColor,
                     activeContentColor = Color.White,
                     activeBorderColor = Color.Transparent,
                     inactiveContainerColor = Color.White.copy(alpha = 0.08f),
@@ -129,6 +139,7 @@ private fun SyncedLyrics(song: Song, lines: List<LyricLine>) {
     val isCurrent = state.current?.id == song.id
     val currentIndex = if (isCurrent) Lyrics.currentLineIndex(lines, position) else -1
     val listState = rememberLazyListState()
+    val brandColor = LocalBrandColor.current
 
     LaunchedEffect(currentIndex) {
         if (currentIndex < 0) return@LaunchedEffect
@@ -142,18 +153,34 @@ private fun SyncedLyrics(song: Song, lines: List<LyricLine>) {
         state = listState,
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         itemsIndexed(lines) { index, line ->
+            val look = Lyrics.lineLook(index, currentIndex)
+            val opacity by animateFloatAsState(look.opacity.toFloat(), LyricTransition, label = "lyricOpacity")
+            val blur by animateFloatAsState(look.blur.toFloat(), LyricTransition, label = "lyricBlur")
+            val scale by animateFloatAsState(look.scale.toFloat(), LyricTransition, label = "lyricScale")
+            val color by animateColorAsState(if (index == currentIndex) brandColor else Color.White, tween(450), label = "lyricColor")
             Text(
                 line.text,
-                style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.Bold),
-                color = if (index == currentIndex) Color.White else Color.White.copy(alpha = 0.3f),
-                modifier = Modifier.fillMaxWidth().clickable(enabled = isCurrent) { app.core.player.seek(line.time) },
+                style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp, fontWeight = FontWeight.Bold),
+                color = color,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(enabled = isCurrent) { app.core.player.seek(line.time) }
+                    .graphicsLayer {
+                        alpha = opacity
+                        scaleX = scale
+                        scaleY = scale
+                        transformOrigin = TransformOrigin(0f, 0.5f)
+                    }
+                    .blur(blur.dp, BlurredEdgeTreatment.Unbounded),
             )
         }
     }
 }
+
+private val LyricTransition = tween<Float>(durationMillis = 450, easing = FastOutSlowInEasing)
 
 @Composable
 private fun ArtistPane(song: Song) {

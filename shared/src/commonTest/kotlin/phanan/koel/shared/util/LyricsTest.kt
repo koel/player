@@ -52,4 +52,26 @@ class LyricsTest {
         assertEquals(0, Lyrics.currentLineIndex(lines, 10.0))
         assertEquals(1, Lyrics.currentLineIndex(lines, 99.0))
     }
+
+    @Test
+    fun linesFadeAndBlurWithDistanceFromTheCurrentOne() {
+        val current = Lyrics.lineLook(index = 5, currentIndex = 5)
+        val next = Lyrics.lineLook(index = 6, currentIndex = 5)
+        val previous = Lyrics.lineLook(index = 4, currentIndex = 5)
+        val far = Lyrics.lineLook(index = 20, currentIndex = 5)
+
+        assertEquals(LyricLineLook(opacity = 1.0, blur = 0.0, scale = 1.0), current)
+        assertEquals(next, previous)
+        assertTrue(next.opacity < current.opacity && next.blur > current.blur)
+        assertTrue(far.opacity < next.opacity && far.blur > next.blur)
+        assertEquals(far, Lyrics.lineLook(index = 9, currentIndex = 5))
+    }
+
+    @Test
+    fun allLinesLookAlikeWhileTheSongIsNotPlaying() {
+        val looks = (0..10).map { Lyrics.lineLook(index = it, currentIndex = -1) }
+
+        assertEquals(1, looks.toSet().size)
+        assertEquals(0.0, looks.first().blur)
+    }
 }

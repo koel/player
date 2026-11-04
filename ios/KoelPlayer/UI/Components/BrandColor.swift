@@ -18,5 +18,8 @@ struct NowPlayingBrandColor: ViewModifier {
             .environment(\.brandColor, coverColor ?? .highlight)
             .animation(.easeInOut(duration: 0.5), value: coverColor)
             .task(id: artworkUrl) { coverColor = await CoverColor.of(artworkUrl) }
+            .onChange(of: coverColor, initial: true) { _, color in
+                UISegmentedControl.appearance().selectedSegmentTintColor = UIColor(color ?? .highlight)
+            }
     }
 }

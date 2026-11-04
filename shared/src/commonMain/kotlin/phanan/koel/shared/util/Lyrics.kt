@@ -2,6 +2,8 @@ package phanan.koel.shared.util
 
 data class LyricLine(val time: Double, val text: String)
 
+data class LyricLineLook(val opacity: Double, val blur: Double, val scale: Double)
+
 /** Time-synced lyrics in LRC format: lines like `[01:02.34]Text`, possibly with several tags. */
 object Lyrics {
     private val timeTag = Regex("""\[(\d{1,2}):(\d{2})\.(\d{2,3})]""")
@@ -21,6 +23,21 @@ object Lyrics {
     /** The index of the line being sung at [position], or -1 before the first line. */
     fun currentLineIndex(lines: List<LyricLine>, position: Double): Int =
         lines.indexOfLast { position >= it.time }
+
+    /** Lines fade, blur and shrink the further they are from the one being sung; all look alike while the song isn't playing. */
+    fun lineLook(index: Int, currentIndex: Int): LyricLineLook {
+        if (currentIndex < 0) return idleLook
+        val distance = minOf(kotlin.math.abs(index - currentIndex), opacityByDistance.lastIndex)
+        return LyricLineLook(
+            opacity = opacityByDistance[distance],
+            blur = blurByDistance[distance],
+            scale = if (distance == 0) 1.0 else 0.96,
+        )
+    }
+
+    private val opacityByDistance = listOf(1.0, 0.55, 0.35, 0.22, 0.12)
+    private val blurByDistance = listOf(0.0, 0.5, 1.5, 2.5, 3.5)
+    private val idleLook = LyricLineLook(opacity = 0.3, blur = 0.0, scale = 1.0)
 
     private fun MatchResult.seconds(): Double {
         val (minutes, seconds, fraction) = destructured

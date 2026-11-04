@@ -73,21 +73,27 @@ private struct SyncedLyrics: View {
     let isCurrent: Bool
 
     @Environment(AppModel.self) private var app
+    @Environment(\.brandColor) private var brandColor
 
     var body: some View {
         let currentIndex = isCurrent ? Int(Lyrics.shared.currentLineIndex(lines: lines, position: app.player.position)) : -1
 
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 16) {
+                LazyVStack(alignment: .leading, spacing: 20) {
                     ForEach(Array(lines.enumerated()), id: \.offset) { index, line in
+                        let look = Lyrics.shared.lineLook(index: Int32(index), currentIndex: Int32(currentIndex))
                         Button {
                             if isCurrent { app.player.seek(to: line.time) }
                         } label: {
                             Text(line.text)
-                                .font(.title3.bold())
-                                .foregroundStyle(index == currentIndex ? .primary : .tertiary)
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundStyle(index == currentIndex ? brandColor : .white)
                                 .frame(maxWidth: .infinity, alignment: .leading)
+                                .scaleEffect(look.scale, anchor: .leading)
+                                .opacity(look.opacity)
+                                .blur(radius: look.blur)
+                                .animation(.easeInOut(duration: 0.45), value: currentIndex)
                         }
                         .buttonStyle(.plain)
                         .id(index)
