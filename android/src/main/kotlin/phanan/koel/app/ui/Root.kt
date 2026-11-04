@@ -3,8 +3,7 @@ package phanan.koel.app.ui
 import phanan.koel.app.ui.theme.KoelColors
 import phanan.koel.app.ui.components.BrandMeshBackground
 import phanan.koel.app.ui.components.LoadFailure
-import phanan.koel.app.ui.auth.ProminentButton
-import phanan.koel.app.ui.auth.GlassButton
+import phanan.koel.app.ui.components.GlassButton
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.Color
@@ -80,7 +79,7 @@ private fun NoConnectionScreen() {
 
     LaunchBackdrop {
         StatusMessage(Icons.Default.WifiOff, "You are offline.", "Please connect to the internet and try again.")
-        ProminentButton("View downloaded songs", onClick = app::goOffline)
+        GlassButton("View downloaded songs", onClick = app::goOffline)
     }
 }
 
@@ -115,7 +114,7 @@ private fun DataLoadingScreen() {
                 LoadFailure.TITLE,
                 LoadFailure.MESSAGE,
             )
-            ProminentButton(LoadFailure.RETRY, onClick = { attempt++ })
+            GlassButton(LoadFailure.RETRY, onClick = { attempt++ })
             TextButton(onClick = { app.logOut() }) {
                 Text("Log Out", color = MaterialTheme.colorScheme.error)
             }

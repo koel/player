@@ -289,7 +289,7 @@ private fun TransportButton(icon: ImageVector, label: String, onClick: () -> Uni
     }
 }
 
-/** Lyrics and details, playback settings, the output switcher and repeat, spread across the bottom. */
+/** Playback settings, the output switcher, lyrics and details, and repeat, spread across the bottom. */
 @Composable
 private fun BottomBar(state: PlaybackState) {
     val app = LocalAppModel.current
@@ -297,18 +297,18 @@ private fun BottomBar(state: PlaybackState) {
     val current = state.current
 
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = { app.sheet = AppSheet.PlaybackSettings }) {
+            Icon(PlaybackSettingsEntry.icon, contentDescription = PlaybackSettingsEntry.LABEL, tint = KoelColors.secondaryText)
+        }
+        IconButton(onClick = { showOutputSwitcher(context) }) {
+            Icon(Icons.Default.SpeakerGroup, contentDescription = "Choose Output", tint = KoelColors.secondaryText)
+        }
         if (current != null && !state.isRadioMode) {
             IconButton(onClick = { app.sheet = AppSheet.Details(current) }) {
                 Icon(Icons.AutoMirrored.Outlined.Chat, contentDescription = "Lyrics and Details", tint = KoelColors.secondaryText)
             }
         } else {
             Spacer(Modifier.size(BottomBarButtonSize))
-        }
-        IconButton(onClick = { app.sheet = AppSheet.PlaybackSettings }) {
-            Icon(PlaybackSettingsEntry.icon, contentDescription = PlaybackSettingsEntry.LABEL, tint = KoelColors.secondaryText)
-        }
-        IconButton(onClick = { showOutputSwitcher(context) }) {
-            Icon(Icons.Default.SpeakerGroup, contentDescription = "Choose Output", tint = KoelColors.secondaryText)
         }
         if (!state.isRadioMode) RepeatButton(state.repeatMode) else Spacer(Modifier.size(BottomBarButtonSize))
     }

@@ -379,6 +379,15 @@ class PlayerUiTest {
     }
 
     @Test
+    fun nowPlayingOrdersTheBottomBarLikeIos() {
+        openQueue()
+
+        val order = listOf("Playback settings", "Choose Output", "Lyrics and Details")
+            .sortedBy { compose.onNodeWithContentDescription(it).fetchSemanticsNode().boundsInRoot.left }
+        assertEquals(listOf("Playback settings", "Choose Output", "Lyrics and Details"), order)
+    }
+
+    @Test
     fun aVerticalSwipeOnTheProgressBarDoesNotSeek() {
         openQueue()
         val positionBefore = app.core.player.position.value

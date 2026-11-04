@@ -371,6 +371,14 @@ final class PlayerUITests: XCTestCase {
         XCTAssertLessThanOrEqual(bottomBar.maxY, player.maxY - playerBottomPadding + 0.5, "The player's controls run past its bottom")
     }
 
+    func testNowPlayingPutsThePlaybackSettingsFirstAndTheLyricsAfterAirPlay() {
+        openNowPlaying()
+
+        let order = ["Playback settings", "AirPlay", "Lyrics and Details"]
+            .sorted { app.buttons[$0].firstMatch.frame.minX < app.buttons[$1].firstMatch.frame.minX }
+        XCTAssertEqual(order, ["Playback settings", "AirPlay", "Lyrics and Details"])
+    }
+
     func testPickingAnEqualizerPresetInNowPlayingMovesTheBands() {
         openNowPlaying()
         app.buttons["Playback settings"].tap()

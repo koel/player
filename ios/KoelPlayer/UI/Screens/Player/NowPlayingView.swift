@@ -182,6 +182,14 @@ struct NowPlayingView: View {
 
     private func bottomBar(_ state: PlaybackState) -> some View {
         HStack {
+            Button { app.sheet = .playbackSettings } label: {
+                Image(systemName: "slider.vertical.3")
+            }
+            .accessibilityLabel("Playback settings")
+
+            Spacer()
+            AirPlayButton().frame(width: 44, height: 44)
+            Spacer()
             if let current = state.current, !state.isRadioMode {
                 Button { app.sheet = .details(current) } label: {
                     Image(systemName: "quote.bubble")
@@ -190,14 +198,6 @@ struct NowPlayingView: View {
             } else {
                 Color.clear.frame(width: 28)
             }
-
-            Spacer()
-            AirPlayButton().frame(width: 44, height: 44)
-            Spacer()
-            Button { app.sheet = .playbackSettings } label: {
-                Image(systemName: "slider.vertical.3")
-            }
-            .accessibilityLabel("Playback settings")
             Spacer()
 
             if !state.isRadioMode {

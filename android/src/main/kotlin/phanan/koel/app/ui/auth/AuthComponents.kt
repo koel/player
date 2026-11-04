@@ -52,23 +52,7 @@ fun cardFieldColors() = TextFieldDefaults.colors(
     cursorColor = KoelColors.highlight,
 )
 
-/** A large, fully rounded frosted button with semibold text, or a spinner while [isBusy]. */
-@Composable
-fun GlassButton(label: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, isBusy: Boolean = false) {
-    Surface(
-        onClick = onClick,
-        enabled = enabled,
-        shape = CircleShape,
-        color = KoelGlass.fill,
-        contentColor = Color.White,
-        border = KoelGlass.border,
-        modifier = modifier.height(56.dp),
-    ) {
-        ButtonContent(label, isBusy)
-    }
-}
-
-/** The tinted, prominent version of [GlassButton], for a screen's main action. */
+/** A tinted capsule for a screen's main action. */
 @Composable
 fun ProminentButton(label: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, isBusy: Boolean = false) {
     Surface(

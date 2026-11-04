@@ -58,9 +58,17 @@ struct LoadFailedView: View {
         } description: {
             Text(LoadFailure.message)
         } actions: {
-            Button(LoadFailure.retry, action: retry)
-                .buttonStyle(.glass)
+            RetryButton(action: retry)
         }
+    }
+}
+
+struct RetryButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(LoadFailure.retry, action: action)
+            .buttonStyle(.glass)
     }
 }
 

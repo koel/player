@@ -23,8 +23,7 @@ struct DataLoadingView: View {
                 } description: {
                     Text(LoadFailure.message)
                 } actions: {
-                    Button(LoadFailure.retry) { attempt += 1 }
-                        .buttonStyle(.glass)
+                    RetryButton { attempt += 1 }
                     Button("Log Out", role: .destructive) {
                         Task { await app.logOut() }
                     }

@@ -18,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SignalWifiStatusbarConnectedNoInternet4
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -46,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import phanan.koel.app.ui.theme.KoelColors
-import phanan.koel.app.ui.theme.KoelInputs
 
 class PlaceholderAction(val label: String, val onClick: () -> Unit)
 
@@ -103,7 +101,7 @@ fun ContentUnavailable(
         }
         action?.let {
             Spacer(Modifier.height(20.dp))
-            Button(onClick = it.onClick, shape = KoelInputs.shape) { Text(it.label, fontWeight = FontWeight.SemiBold) }
+            GlassButton(it.label, onClick = it.onClick)
         }
     }
 }

@@ -1,9 +1,7 @@
 package phanan.koel.app.ui.main
 
-import androidx.compose.material3.Button
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.filled.Wifi
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import phanan.koel.app.ui.theme.LocalBrandColor
 import phanan.koel.app.ui.theme.KoelColors
 import phanan.koel.app.ui.theme.BrandMesh
+import phanan.koel.app.ui.components.GlassButton
 import phanan.koel.app.ui.components.ToastHost
 import phanan.koel.app.ui.components.ToastSpacing
 import androidx.compose.runtime.mutableStateOf
@@ -236,10 +235,7 @@ private fun ConnectivityBanner() {
     val isRestored by app.connectionRestored.collectAsStateWithLifecycle()
     Box(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 16.dp, vertical = 8.dp), contentAlignment = Alignment.Center) {
         if (isRestored) {
-            Button(onClick = app::reconnect, shape = CircleShape) {
-                Icon(Icons.Default.Wifi, contentDescription = null, modifier = Modifier.size(18.dp))
-                Text("Connection restored! Tap to refresh.", modifier = Modifier.padding(start = 8.dp))
-            }
+            GlassButton("Connection restored! Tap to refresh.", onClick = app::reconnect, icon = Icons.Default.Wifi)
         } else {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Icon(Icons.Default.WifiOff, contentDescription = null, tint = KoelColors.secondaryText, modifier = Modifier.size(16.dp))
