@@ -43,6 +43,21 @@ final class PlayerUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts[MockKoelServer.songTitles[0]].waitForExistence(timeout: 10), "Tapping the album didn't open it")
     }
 
+    func testTheAlbumsAboutSectionStandsApartFromItsSongs() {
+        selectRoot(ofTab: "Library", in: app)
+        let album = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Test Album")).firstMatch
+        XCTAssertTrue(album.waitForExistence(timeout: 15))
+        for _ in 0..<5 where !album.isHittable { app.swipeUp(velocity: .slow) }
+        album.tap()
+
+        let about = app.staticTexts["About"]
+        for _ in 0..<15 where !about.isHittable { app.swipeUp(velocity: .slow) }
+        XCTAssertTrue(about.isHittable, "The album's About section never showed")
+        let songRows = app.cells.containing(NSPredicate(format: "label BEGINSWITH %@", "Song ")).allElementsBoundByIndex
+        let lastSongBottom = songRows.map { $0.frame.maxY }.filter { $0 <= about.frame.minY }.max() ?? 0
+        XCTAssertGreaterThanOrEqual(about.frame.minY - lastSongBottom, 32, "About sits right under the last song")
+    }
+
     func testAlbumsCanBeListed() {
         openLibraryList(app, named: "Albums")
         app.navigationBars.buttons["Sort"].tap()

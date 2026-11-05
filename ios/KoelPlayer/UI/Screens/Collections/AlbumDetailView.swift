@@ -47,6 +47,7 @@ struct AlbumDetailView: View {
             ContentUnavailableView("No songs", systemImage: "music.note")
         } footer: {
             AboutSection(title: "About", html: info?.information ?? "")
+                .padding(.top, SectionHeader.sectionGap)
                 .brandListRow()
         }
         .toolbar {

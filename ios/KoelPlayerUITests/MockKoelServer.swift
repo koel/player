@@ -170,6 +170,8 @@ final class MockKoelServer: @unchecked Sendable {
             return json(["data": [album], "links": ["next": NSNull()], "meta": ["current_page": 1]])
         case ("GET", "/api/albums/album-1"):
             return json(album)
+        case ("GET", "/api/albums/album-1/information"):
+            return json(["wiki": ["summary": "", "full": "Test Album is a test album."], "tracks": []])
         case ("GET", "/api/albums/album-1/songs"):
             return json(songs)
         case ("GET", "/api/songs"):
