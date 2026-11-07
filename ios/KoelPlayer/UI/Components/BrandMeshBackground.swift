@@ -4,6 +4,10 @@ import SwiftUI
 /// app's background artwork.
 struct BrandMeshBackground: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
+
+    /// The drift is slow, so ten frames a second look smooth and spare the battery.
+    private static let frameInterval: TimeInterval = 0.1
 
     static let base = Color("BrandBase")
 
@@ -14,7 +18,7 @@ struct BrandMeshBackground: View {
     ]
 
     var body: some View {
-        TimelineView(.animation(paused: reduceMotion)) { context in
+        TimelineView(.animation(minimumInterval: Self.frameInterval, paused: Self.isPaused(reduceMotion: reduceMotion, scenePhase: scenePhase))) { context in
             MeshGradient(
                 width: 3,
                 height: 3,
@@ -23,6 +27,10 @@ struct BrandMeshBackground: View {
             )
         }
         .ignoresSafeArea()
+    }
+
+    static func isPaused(reduceMotion: Bool, scenePhase: ScenePhase) -> Bool {
+        reduceMotion || scenePhase != .active
     }
 
     /// Corners stay pinned; edge midpoints slide along their edge and the center wanders,

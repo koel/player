@@ -22,10 +22,15 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.animation.core.withInfiniteAnimationFrameMillis
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.delay
 import phanan.koel.app.ui.theme.BrandMesh
 import kotlin.math.PI
 import kotlin.math.max
 import kotlin.math.sin
+import kotlin.time.Duration.Companion.milliseconds
 
 /** Koel's purple-and-pink brand backdrop, slowly drifting, as on iOS. */
 @Composable
@@ -58,16 +63,27 @@ fun BrandMeshHeaderBackground(scrolledDistance: () -> Float, modifier: Modifier 
     }
 }
 
-/** Seconds since the backdrop appeared, frozen at zero when the system turns animations off. */
+/** The drift is slow, so ten frames a second look smooth and spare the battery. */
+private val FrameInterval = 100.milliseconds
+
+/**
+ * Seconds the backdrop has drifted, counted only while the app is the active one, and frozen
+ * at zero when the system turns animations off.
+ */
 @Composable
 private fun rememberDriftSeconds() = run {
     val context = LocalContext.current
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
     val isMotionReduced = remember { Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f }
-    produceState(0.0) {
+    produceState(0.0, lifecycle) {
         if (isMotionReduced) return@produceState
-        val start = withInfiniteAnimationFrameMillis { it }
-        while (true) {
-            withInfiniteAnimationFrameMillis { value = (it - start) / 1000.0 }
+        lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            val driftedBefore = value
+            val start = withInfiniteAnimationFrameMillis { it }
+            while (true) {
+                withInfiniteAnimationFrameMillis { value = driftedBefore + (it - start) / 1000.0 }
+                delay(FrameInterval)
+            }
         }
     }
 }
