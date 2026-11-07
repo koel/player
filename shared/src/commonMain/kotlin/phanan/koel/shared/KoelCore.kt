@@ -70,7 +70,7 @@ class KoelCore internal constructor(
     val genres = GenreStore(api)
     val recentlyPlayed = RecentlyPlayedStore(api, playables)
     val overview = OverviewStore(api, playables, albums, artists, recentlyPlayed)
-    val search = SearchStore(api, playables, albums, artists)
+    val search = SearchStore(api, playables, albums, artists, preferences)
     val mediaInfo = MediaInfoStore(api)
     val favorites = FavoriteStore(api, playables)
     val playlists = PlaylistStore(api, playables)

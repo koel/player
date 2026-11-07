@@ -6,6 +6,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import phanan.koel.shared.storage.Preferences
 import phanan.koel.shared.support.Fixtures
 import phanan.koel.shared.support.Harness
 import kotlin.test.Test
@@ -17,7 +18,7 @@ class SearchStoreTest {
     private val playables = PlayableStore(h.api)
     private val albums = AlbumStore(h.api, playables)
     private val artists = ArtistStore(h.api, playables, albums)
-    private val store = SearchStore(h.api, playables, albums, artists)
+    private val store = SearchStore(h.api, playables, albums, artists, h.preferences)
 
     private fun excerpts(withPodcastsAndRadio: Boolean = true) = buildJsonObject {
         put("songs", JsonArray(listOf(Fixtures.song("s1"), Fixtures.episode("e1"))))
@@ -103,5 +104,60 @@ class SearchStoreTest {
         store.searchPlayables("song")
 
         assertEquals(2, h.requestsTo(HttpMethod.Get, "search/songs").size)
+    }
+
+    @Test
+    fun aSearchIsRememberedFirstAndOnlyOnce() {
+        store.rememberSearch("kamelot")
+        store.rememberSearch("nightwish")
+        store.rememberSearch("  Kamelot ")
+
+        assertEquals(listOf("Kamelot", "nightwish"), store.recentSearches.value)
+    }
+
+    @Test
+    fun blankSearchesAreNotRemembered() {
+        store.rememberSearch("   ")
+
+        assertEquals(emptyList(), store.recentSearches.value)
+    }
+
+    @Test
+    fun onlyTheLatestTwentySearchesAreKept() {
+        (1..25).forEach { store.rememberSearch("search $it") }
+
+        assertEquals(20, store.recentSearches.value.size)
+        assertEquals("search 25", store.recentSearches.value.first())
+        assertEquals("search 6", store.recentSearches.value.last())
+    }
+
+    @Test
+    fun aSearchCanBeForgottenOrAllCleared() {
+        listOf("one", "two", "three").forEach(store::rememberSearch)
+
+        store.forgetSearch("two")
+        assertEquals(listOf("three", "one"), store.recentSearches.value)
+
+        store.clearRecentSearches()
+        assertEquals(emptyList(), store.recentSearches.value)
+    }
+
+    @Test
+    fun recentSearchesSurviveARestart() {
+        store.rememberSearch("kamelot")
+
+        val nextLaunch = SearchStore(h.api, playables, albums, artists, Preferences(h.keyValueStore))
+
+        assertEquals(listOf("kamelot"), nextLaunch.recentSearches.value)
+    }
+
+    @Test
+    fun resettingForgetsRecentSearches() {
+        store.rememberSearch("kamelot")
+
+        store.reset()
+
+        assertEquals(emptyList(), store.recentSearches.value)
+        assertEquals(emptyList(), SearchStore(h.api, playables, albums, artists, Preferences(h.keyValueStore)).recentSearches.value)
     }
 }

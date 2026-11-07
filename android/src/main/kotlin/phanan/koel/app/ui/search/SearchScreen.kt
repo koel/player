@@ -1,5 +1,7 @@
 package phanan.koel.app.ui.search
 
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -9,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Search
@@ -30,8 +34,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CancellationException
@@ -141,7 +148,15 @@ fun SearchScreen() {
                 )
             }
             item(key = "field") {
-                SearchField(query) { query = it }
+                SearchField(query, onChange = { query = it }, onSubmit = { app.core.search.rememberSearch(query) })
+            }
+            if (keywords.isEmpty()) {
+                item(key = "recent-searches") {
+                    RecentSearches(app.core.search) { recent ->
+                        query = recent
+                        app.core.search.rememberSearch(recent)
+                    }
+                }
             }
             if (isSearching) {
                 item(key = "skeleton") {
@@ -153,7 +168,7 @@ fun SearchScreen() {
             }
             sections.forEach { section ->
                 item(key = section.name) {
-                    Box(Modifier.padding(top = if (section == sections.first()) 8.dp else SectionSpacing)) {
+                    Box(Modifier.padding(top = if (section == sections.first()) 8.dp else SectionSpacing).onAnyTap { app.core.search.rememberSearch(searchedKeywords) }) {
                         when (section) {
                             SearchSection.Songs -> SongResults(found!!, searchedKeywords)
                             SearchSection.Albums -> Shelf(section.title, found!!.albums, key = { it.id }) { album ->
@@ -177,7 +192,7 @@ fun SearchScreen() {
 }
 
 @Composable
-private fun SearchField(query: String, onChange: (String) -> Unit) {
+private fun SearchField(query: String, onChange: (String) -> Unit, onSubmit: () -> Unit) {
     val navigator = LocalAppModel.current.navigator
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(navigator.wantsSearchFocus) {
@@ -197,6 +212,8 @@ private fun SearchField(query: String, onChange: (String) -> Unit) {
             }
         },
         singleLine = true,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        keyboardActions = KeyboardActions(onSearch = { onSubmit() }),
         shape = KoelInputs.shape,
         colors = KoelInputs.colors().copy(
             focusedContainerColor = KoelColors.hairline,
@@ -214,4 +231,18 @@ private fun SearchField(query: String, onChange: (String) -> Unit) {
 private fun SongResults(result: SearchResult, keywords: String) {
     val app = LocalAppModel.current
     PlayableSection(SearchSection.Songs.title, result.playables) { app.navigator.push(Route.SearchSongs(keywords)) }
+}
+
+/** Notices a tap anywhere inside without taking it from the buttons and cards there. */
+private fun Modifier.onAnyTap(onTap: () -> Unit) = pointerInput(onTap) {
+    awaitEachGesture {
+        val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+        var isTap = true
+        while (true) {
+            val change = awaitPointerEvent(PointerEventPass.Initial).changes.firstOrNull { it.id == down.id } ?: return@awaitEachGesture
+            if ((change.position - down.position).getDistance() > viewConfiguration.touchSlop) isTap = false
+            if (!change.pressed) break
+        }
+        if (isTap) onTap()
+    }
 }

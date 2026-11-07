@@ -77,7 +77,7 @@ struct PlayableRow: View {
         }
         .swipeActions(edge: .trailing) {
             if let removal {
-                Button(removal.title, systemImage: removal.systemImage, role: .destructive, action: removal.action)
+                RemovalSwipeButton(title: removal.title, systemImage: removal.systemImage, action: removal.action)
             }
             if style != .queue {
                 PlayLastSwipeButton {

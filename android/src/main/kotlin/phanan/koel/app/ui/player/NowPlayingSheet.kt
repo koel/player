@@ -45,7 +45,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -88,6 +87,7 @@ import phanan.koel.app.ui.components.GlassCircle
 import phanan.koel.app.ui.components.PlayPauseIcon
 import phanan.koel.app.ui.components.PlayableRow
 import phanan.koel.app.ui.components.PlayableRowStyle
+import phanan.koel.app.ui.components.SectionClearButton
 import phanan.koel.app.ui.components.SectionTitle
 import phanan.koel.app.ui.components.SheetDragHandle
 import phanan.koel.app.ui.components.SwipeToRemove
@@ -142,11 +142,7 @@ fun NowPlayingSheet(onDismiss: () -> Unit) {
                 }
                 if (queue.isNotEmpty()) {
                     item(key = "queue-heading") {
-                        SectionTitle("Queued") {
-                            TextButton(onClick = { app.core.player.clearQueue() }) {
-                                Text("Clear", color = KoelColors.destructiveSwipe, fontSize = 17.sp)
-                            }
-                        }
+                        SectionTitle("Queued") { SectionClearButton { app.core.player.clearQueue() } }
                     }
                     items(queue, key = { it.id }) { playable ->
                         ReorderableItem(reorderState, key = playable.id) {

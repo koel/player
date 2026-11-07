@@ -32,3 +32,15 @@ struct ConfirmedRemovalSwipeButton: View {
             .tint(.red)
     }
 }
+
+/// Takes a row out of its list straight away. Tinted red as well, since the app's tint would otherwise turn it white.
+struct RemovalSwipeButton: View {
+    var title = "Remove"
+    var systemImage = "minus.circle"
+    let action: () -> Void
+
+    var body: some View {
+        Button(title, systemImage: systemImage, role: .destructive, action: action)
+            .tint(.red)
+    }
+}

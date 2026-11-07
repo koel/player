@@ -1,5 +1,7 @@
 package phanan.koel.shared.storage
 
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import phanan.koel.shared.json.KoelJson
 import phanan.koel.shared.models.EqualizerPreset
 import phanan.koel.shared.player.RepeatMode
@@ -48,6 +50,10 @@ class Preferences(private val store: KeyValueStore) {
     var normalizeVolume: Boolean
         get() = store.get("normalizeVolume")?.toBooleanStrictOrNull() ?: true
         set(value) = store.set("normalizeVolume", value.toString())
+
+    var recentSearches: List<String>
+        get() = store.get("recentSearches")?.let { runCatching { KoelJson.decodeFromString(ListSerializer(String.serializer()), it) }.getOrNull() }.orEmpty()
+        set(value) = store.set("recentSearches", value.takeIf { it.isNotEmpty() }?.let { KoelJson.encodeToString(ListSerializer(String.serializer()), it) })
 
     /** The email the Flutter app filed downloads under, until they're moved to the email the server confirms. */
     internal var flutterDownloadsEmail: String?

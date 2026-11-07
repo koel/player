@@ -12,12 +12,22 @@ struct SearchView: View {
     var body: some View {
         let sections = model.result.map { SearchSection.visible(in: $0, supports: app.core.session.supports(feature:)) } ?? []
 
-        ScrollView {
-            if model.isSearching {
-                LoadingRowStack(count: Self.skeletonRowCount)
-                    .padding(.vertical)
-            } else if let result = model.result {
-                SearchResults(result: result, keywords: model.searchedKeywords, sections: sections)
+        Group {
+            if !model.isSearching, model.result == nil, text.isBlank {
+                RecentSearches(store: app.core.search) { keywords in
+                    text = keywords
+                    app.core.search.rememberSearch(keywords: keywords)
+                }
+            } else {
+                ScrollView {
+                    if model.isSearching {
+                        LoadingRowStack(count: Self.skeletonRowCount)
+                            .padding(.vertical)
+                    } else if let result = model.result {
+                        SearchResults(result: result, keywords: model.searchedKeywords, sections: sections)
+                            .simultaneousGesture(TapGesture().onEnded { rememberSearch() })
+                    }
+                }
             }
         }
         .overlay {
@@ -29,12 +39,17 @@ struct SearchView: View {
         .brandMeshBackground()
         .searchable(text: $text, prompt: "Search your library")
         .searchFocused($isSearchFocused)
+        .onSubmit(of: .search) { rememberSearch() }
         .task(id: text) { await search(text) }
         .onChange(of: app.navigator.wantsSearchFocus, initial: true) { _, wantsFocus in
             guard wantsFocus else { return }
             isSearchFocused = true
             app.navigator.wantsSearchFocus = false
         }
+    }
+
+    private func rememberSearch() {
+        app.core.search.rememberSearch(keywords: text)
     }
 
     private func search(_ text: String) async {

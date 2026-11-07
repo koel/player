@@ -114,6 +114,45 @@ final class PlayerUITests: XCTestCase {
         assertFavoritingFlipsTheMenu(of: album)
     }
 
+    func testASubmittedSearchCanBeRunAgainFromRecentlySearched() {
+        searchLibrary(for: "Album\n")
+        let song = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", MockKoelServer.songTitles[0])).firstMatch
+        XCTAssertTrue(song.waitForExistence(timeout: 15), "Search found no song")
+
+        app.searchFields["Search your library"].buttons["Clear text"].tap()
+        let recent = app.buttons["Album"]
+        XCTAssertTrue(app.staticTexts["Recently Searched"].waitForExistence(timeout: 5), "Clearing the search showed no recent searches")
+        recent.tap()
+
+        XCTAssertTrue(song.waitForExistence(timeout: 15), "Tapping a recent search didn't run it again")
+    }
+
+    func testTappingASearchResultRemembersTheSearch() {
+        searchLibrary(for: "Album")
+        let song = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", MockKoelServer.songTitles[0])).firstMatch
+        XCTAssertTrue(song.waitForExistence(timeout: 15), "Search found no song")
+
+        app.buttons["Songs"].firstMatch.tap()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.searchFields["Search your library"].buttons["Clear text"].tap()
+
+        XCTAssertTrue(app.buttons["Album"].waitForExistence(timeout: 5), "Tapping a result didn't remember the search")
+    }
+
+    func testSwipingAwayTheLastRecentSearchHidesRecentlySearched() {
+        searchLibrary(for: "Album\n")
+        app.searchFields["Search your library"].buttons["Clear text"].tap()
+        let recent = app.buttons["Album"]
+        XCTAssertTrue(recent.waitForExistence(timeout: 5), "Clearing the search showed no recent searches")
+
+        recent.swipeLeft()
+        let remove = app.buttons["Remove"]
+        XCTAssertTrue(remove.waitForExistence(timeout: 5), "Swiping a recent search showed no Remove button")
+        remove.tap()
+
+        XCTAssertTrue(app.staticTexts["Recently Searched"].waitForNonExistence(timeout: 5), "Recently Searched stayed with nothing in it")
+    }
+
     private func searchLibrary(for keywords: String) {
         let searchField = app.searchFields["Search your library"]
         for _ in 0..<5 where !searchField.waitForExistence(timeout: 2) {

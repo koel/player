@@ -35,6 +35,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
@@ -911,6 +912,46 @@ class PlayerUiTest {
         scenario.recreate()
         compose.waitForIdle()
         assertSearchResultsShown()
+    }
+
+    @Test
+    fun aSubmittedSearchCanBeRunAgainFromRecentlySearched() {
+        searchAndClear("song")
+
+        compose.waitUntilAtLeastOneExists(hasText("Recently Searched"), 5_000)
+        compose.onNodeWithText("song").performClick()
+
+        compose.waitUntilAtLeastOneExists(hasText(MockKoelServer.SONG_TITLES[0]), 10_000)
+    }
+
+    @Test
+    fun swipingAwayTheLastRecentSearchHidesRecentlySearched() {
+        searchAndClear("song")
+
+        compose.onNodeWithText("song").performTouchInput { swipeLeft(startX = width * 0.8f, endX = 0f) }
+
+        compose.onNodeWithText("Recently Searched").assertDoesNotExist()
+    }
+
+    @Test
+    fun tappingASearchResultRemembersTheSearch() {
+        compose.onNodeWithText("Search").performClick()
+        compose.onNode(hasSetTextAction()).performTextInput("song")
+        compose.waitUntilAtLeastOneExists(hasText(MockKoelServer.SONG_TITLES[0]), 10_000)
+        assertEquals(emptyList<String>(), app.core.search.recentSearches.value)
+
+        compose.onNode(hasClickLabel("Show All")).performClick()
+
+        compose.waitUntil(5_000) { app.core.search.recentSearches.value == listOf("song") }
+    }
+
+    private fun searchAndClear(keywords: String) {
+        compose.onNodeWithText("Search").performClick()
+        compose.onNodeWithText("Recently Searched").assertDoesNotExist()
+        compose.onNode(hasSetTextAction()).performTextInput(keywords)
+        compose.onNode(hasSetTextAction()).performImeAction()
+        compose.waitUntilAtLeastOneExists(hasText(MockKoelServer.SONG_TITLES[0]), 10_000)
+        compose.onNodeWithContentDescription("Clear").performClick()
     }
 
     @Test

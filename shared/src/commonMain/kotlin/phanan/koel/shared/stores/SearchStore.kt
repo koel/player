@@ -2,6 +2,9 @@ package phanan.koel.shared.stores
 
 import phanan.koel.shared.onMain
 import io.ktor.http.encodeURLParameter
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.json.jsonObject
 import phanan.koel.shared.api.ApiClient
 import phanan.koel.shared.json.decodeList
@@ -10,6 +13,7 @@ import phanan.koel.shared.models.Artist
 import phanan.koel.shared.models.Playable
 import phanan.koel.shared.models.Podcast
 import phanan.koel.shared.models.RadioStation
+import phanan.koel.shared.storage.Preferences
 
 data class SearchResult(
     val playables: List<Playable> = emptyList(),
@@ -24,9 +28,32 @@ class SearchStore internal constructor(
     private val playableStore: PlayableStore,
     private val albumStore: AlbumStore,
     private val artistStore: ArtistStore,
+    private val preferences: Preferences,
 ) {
     private val excerptCache = mutableMapOf<String, SearchResult>()
     private val playableCache = mutableMapOf<String, List<Playable>>()
+
+    private val recentSearchesState = MutableStateFlow(preferences.recentSearches)
+
+    /** Newest first. */
+    val recentSearches: StateFlow<List<String>> = recentSearchesState.asStateFlow()
+
+    fun rememberSearch(keywords: String) {
+        val trimmed = keywords.trim()
+        if (trimmed.isEmpty()) return
+        updateRecentSearches { searches ->
+            (listOf(trimmed) + searches.filterNot { it.equals(trimmed, ignoreCase = true) }).take(MAX_RECENT_SEARCHES)
+        }
+    }
+
+    fun forgetSearch(keywords: String) = updateRecentSearches { searches -> searches - keywords }
+
+    fun clearRecentSearches() = updateRecentSearches { emptyList() }
+
+    private fun updateRecentSearches(change: (List<String>) -> List<String>) {
+        recentSearchesState.value = change(recentSearchesState.value)
+        preferences.recentSearches = recentSearchesState.value
+    }
 
     @Throws(Exception::class)
     suspend fun searchExcerpts(keywords: String): SearchResult = onMain {
@@ -57,6 +84,7 @@ class SearchStore internal constructor(
     internal fun reset() {
         excerptCache.clear()
         playableCache.clear()
+        clearRecentSearches()
     }
 
     private fun SearchResult.withCurrentEntities() = copy(
@@ -65,3 +93,5 @@ class SearchStore internal constructor(
         albums = albums.map { albumStore.byId(it.id) ?: it },
     )
 }
+
+private const val MAX_RECENT_SEARCHES = 20
