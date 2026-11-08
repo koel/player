@@ -5,46 +5,60 @@ import SwiftUI
 struct PlayableDetailsView: View {
     let playable: any Playable
 
-    private enum Pane: String, CaseIterable, Identifiable {
+    private enum Pane: String, CaseIterable {
         case lyrics = "Lyrics"
         case artist = "Artist"
         case album = "Album"
-
-        var id: Self { self }
     }
 
     @State private var pane = Pane.lyrics
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if let song = playable as? Song {
-                    VStack(spacing: 0) {
-                        Picker("Details", selection: $pane) {
-                            ForEach(Pane.allCases) { Text($0.rawValue).tag($0) }
-                        }
-                        .pickerStyle(.segmented)
-                        .padding()
+        VStack(spacing: 0) {
+            PlayableDetailsHeader(playable: playable)
 
-                        switch pane {
-                        case .lyrics: LyricsPane(song: song)
-                        case .artist: ArtistBiography(artistId: song.artistId)
-                        case .album: AlbumInfoPane(song: song)
-                        }
-                    }
-                } else if let episode = playable as? Episode {
-                    ScrollView {
-                        HTMLText(html: episode.description_)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding()
-                    }
+            if let song = playable as? Song {
+                SegmentedTabs(options: Pane.allCases, selection: $pane, title: \.rawValue)
+                    .padding()
+
+                switch pane {
+                case .lyrics: LyricsPane(song: song)
+                case .artist: ArtistBiography(artistId: song.artistId)
+                case .album: AlbumInfoPane(song: song)
+                }
+            } else if let episode = playable as? Episode {
+                ScrollView {
+                    HTMLText(html: episode.description_)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
                 }
             }
-            .navigationTitle(playable.title)
-            .navigationBarTitleDisplayMode(.inline)
         }
+        .presentationDragIndicator(.visible)
         .presentationDetents([.medium, .large])
         .presentationBackground(Color(uiColor: .systemBackground))
+    }
+}
+
+/// The cover with the title and artist beside it, like Apple Music's sheets.
+private struct PlayableDetailsHeader: View {
+    let playable: any Playable
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Artwork(url: playable.artworkUrl, size: 56)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(playable.title)
+                    .font(.headline)
+                Text(playable.subtitle)
+                    .foregroundStyle(.secondary)
+            }
+            .lineLimit(1)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .accessibilityElement(children: .combine)
+        .padding(.horizontal)
+        .padding(.top, 28)
     }
 }
 

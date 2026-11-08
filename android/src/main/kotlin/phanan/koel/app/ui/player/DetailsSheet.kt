@@ -24,9 +24,6 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -38,6 +35,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.Alignment
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -56,7 +55,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import phanan.koel.app.ui.LocalAppModel
 import phanan.koel.app.ui.components.ContentUnavailable
 import phanan.koel.app.ui.components.LoadingSpinner
-import phanan.koel.app.ui.components.SheetTitle
+import phanan.koel.app.ui.components.Artwork
+import phanan.koel.app.ui.components.SegmentedTabs
 import phanan.koel.app.ui.theme.KoelColors
 import phanan.koel.shared.models.Episode
 import phanan.koel.shared.models.Playable
@@ -79,7 +79,7 @@ fun DetailsSheet(playable: Playable, onDismiss: () -> Unit) {
         containerColor = Color.Black,
     ) {
         Column(Modifier.fillMaxSize()) {
-            SheetTitle(playable.title, Modifier.padding(horizontal = 48.dp))
+            DetailsHeader(playable)
             when (playable) {
                 is Song -> SongDetails(playable)
                 is Episode -> InfoScroll { HtmlText(playable.description) }
@@ -91,29 +91,31 @@ fun DetailsSheet(playable: Playable, onDismiss: () -> Unit) {
 private val Panes = listOf("Lyrics", "Artist", "Album")
 
 @OptIn(ExperimentalMaterial3Api::class)
+/** The cover with the title and artist beside it, like Apple Music's sheets. */
+@Composable
+private fun DetailsHeader(playable: Playable) {
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Artwork(playable.artworkUrl, size = 56.dp)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                playable.title,
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp, fontWeight = FontWeight.SemiBold),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(playable.subtitle, color = KoelColors.secondaryText, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+    }
+}
+
 @Composable
 private fun SongDetails(song: Song) {
     var pane by rememberSaveable { mutableIntStateOf(0) }
-    val brandColor = LocalBrandColor.current
-
-    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(16.dp)) {
-        Panes.forEachIndexed { index, title ->
-            SegmentedButton(
-                selected = pane == index,
-                onClick = { pane = index },
-                shape = SegmentedButtonDefaults.itemShape(index, Panes.size),
-                icon = {},
-                colors = SegmentedButtonDefaults.colors(
-                    activeContainerColor = brandColor,
-                    activeContentColor = Color.White,
-                    activeBorderColor = Color.Transparent,
-                    inactiveContainerColor = Color.White.copy(alpha = 0.08f),
-                    inactiveContentColor = KoelColors.text,
-                    inactiveBorderColor = Color.Transparent,
-                ),
-            ) { Text(title, fontWeight = FontWeight.Medium) }
-        }
-    }
+    SegmentedTabs(Panes, selectedIndex = pane, onSelect = { pane = it }, modifier = Modifier.padding(16.dp))
     when (pane) {
         0 -> LyricsPane(song)
         1 -> ArtistPane(song)

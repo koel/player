@@ -27,6 +27,12 @@ struct PodcastsView: View {
                     .listRowSeparator(.hidden)
                 PlayableListContent(playables: newEpisodes)
                     .brandListRow()
+                if !sortedPodcasts.isEmpty {
+                    SectionHeader(title: "All Podcasts")
+                        .listRowInsets(EdgeInsets(top: SectionHeader.sectionGap, leading: 0, bottom: SectionHeader.contentGap - PlayableRow.verticalInset, trailing: 0))
+                        .brandListRow()
+                        .listRowSeparator(.hidden)
+                }
             }
 
             ForEach(sortedPodcasts, id: \.id) { podcast in
@@ -41,6 +47,7 @@ struct PodcastsView: View {
                 .swipeActions(edge: .trailing) {
                     ConfirmedRemovalSwipeButton(title: "Unsubscribe", systemImage: "minus.circle") { podcastPendingUnsubscribe = podcast }
                 }
+                .listRowInsets(EdgeInsets(top: PlayableRow.verticalInset, leading: 16, bottom: PlayableRow.verticalInset, trailing: 16))
                 .brandListRow()
             }
         }
@@ -97,7 +104,7 @@ private struct PodcastRow: View {
 
     var body: some View {
         MediaRow(title: podcast.title, subtitle: podcast.author, titleLineLimit: 2) {
-            Artwork(url: podcast.imageUrl, size: 56, cornerRadius: 8)
+            Artwork(url: podcast.imageUrl, size: PlayableRow.artworkSize, cornerRadius: PlayableRow.artworkCornerRadius)
         }
     }
 }

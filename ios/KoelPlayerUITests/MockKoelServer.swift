@@ -141,7 +141,7 @@ final class MockKoelServer: @unchecked Sendable {
             return json([
                 "recently_played_songs": Array(songs.prefix(4)),
                 "most_played_songs": Array(songs.prefix(3)),
-                "recently_added_songs": Array(songs.prefix(6)),
+                "recently_added_songs": Array(songs.prefix(20)),
                 "recently_added_albums": [album],
                 "recently_added_episodes": [[
                     "type": "episodes", "id": "episode-1", "title": Self.episodeTitle, "podcast_id": "podcast-1",

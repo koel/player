@@ -1,8 +1,6 @@
 package phanan.koel.app.ui.library
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -45,6 +43,8 @@ import phanan.koel.app.ui.components.LoadMore
 import phanan.koel.app.ui.components.NowPlayingIndicator
 import phanan.koel.app.ui.components.PlaceholderAction
 import phanan.koel.app.ui.components.PlayableRow
+import phanan.koel.app.ui.components.PlayableRowArtworkCornerRadius
+import phanan.koel.app.ui.components.PlayableRowArtworkSize
 import phanan.koel.app.ui.components.RefreshableListScaffold
 import phanan.koel.app.ui.components.ScreenBottomPadding
 import phanan.koel.app.ui.components.SectionGapAboveRows
@@ -199,7 +199,11 @@ fun PodcastsScreen() {
                     SectionTitle("New Episodes", Modifier.padding(top = 8.dp, bottom = SectionGapAboveRows))
                 }
                 items(newEpisodes, key = { "episode-${it.id}" }) { PlayableRow(it) }
-                item(key = "podcasts-gap") { Spacer(Modifier.height(SectionSpacing)) }
+                if (sorted.isNotEmpty()) {
+                    item(key = "podcasts-title") {
+                        SectionTitle("All Podcasts", Modifier.padding(top = SectionSpacing, bottom = SectionGapAboveRows))
+                    }
+                }
             }
             items(sorted, key = { it.id }) { podcast ->
                 SwipeActions(
@@ -211,8 +215,7 @@ fun PodcastsScreen() {
                         title = podcast.title,
                         subtitle = podcast.author,
                         titleLines = 2,
-                        artwork = { Artwork(podcast.imageUrl, size = 56.dp, cornerRadius = 8.dp) },
-                        artworkWidth = 56.dp,
+                        artwork = { Artwork(podcast.imageUrl, size = PlayableRowArtworkSize, cornerRadius = PlayableRowArtworkCornerRadius) },
                         onLongClick = { menuFor = podcast },
                     ) { app.navigator.push(Route.Podcast(podcast.id)) }
                 }

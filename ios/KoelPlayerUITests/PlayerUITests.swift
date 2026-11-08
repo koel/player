@@ -79,11 +79,19 @@ final class PlayerUITests: XCTestCase {
         XCTAssertTrue(song.exists, "The most played song isn't listed")
     }
 
-    func testPodcastsListTheNewEpisodesFirst() {
+    func testPodcastsListTheNewEpisodesFirstThenAllPodcastsInLine() {
         openLibraryList(app, named: "Podcasts")
 
         XCTAssertTrue(app.staticTexts["New Episodes"].waitForExistence(timeout: 15), "Podcasts showed no New Episodes")
-        XCTAssertTrue(app.staticTexts[MockKoelServer.episodeTitle].exists, "The new episode isn't listed")
+        let episode = app.staticTexts[MockKoelServer.episodeTitle]
+        XCTAssertTrue(episode.exists, "The new episode isn't listed")
+        let allPodcasts = app.staticTexts["All Podcasts"]
+        XCTAssertTrue(allPodcasts.waitForExistence(timeout: 5), "The podcasts have no header")
+        let podcast = app.staticTexts[MockKoelServer.podcastTitle]
+        XCTAssertTrue(podcast.exists)
+        XCTAssertLessThan(episode.frame.maxY, allPodcasts.frame.minY)
+        XCTAssertLessThan(allPodcasts.frame.maxY, podcast.frame.minY)
+        XCTAssertEqual(podcast.frame.minX, episode.frame.minX, accuracy: 1, "Podcast titles don't line up with episode titles")
     }
 
     func testOpeningPodcastsLeavesHomesSectionsAlone() {
@@ -433,6 +441,22 @@ final class PlayerUITests: XCTestCase {
         XCTAssertEqual(order, ["Playback settings", "AirPlay", "Lyrics and Details"])
     }
 
+    func testTheDetailsSheetShowsTheSongOnTheLeftAndSwitchesTabs() {
+        openNowPlaying()
+
+        app.buttons["Lyrics and Details"].firstMatch.tap()
+
+        let header = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label BEGINSWITH %@ AND label ENDSWITH %@", "Song ", ", Test Artist")).firstMatch
+        XCTAssertTrue(header.waitForExistence(timeout: 5), "The details sheet shows no title and artist")
+        XCTAssertLessThan(header.frame.minX, app.windows.firstMatch.frame.width / 4, "The details header isn't on the left")
+
+        let albumTab = app.buttons["Album"].firstMatch
+        albumTab.tap()
+        XCTAssertTrue(albumTab.isSelected, "Tapping a details tab didn't select it")
+        XCTAssertFalse(app.buttons["Lyrics"].firstMatch.isSelected, "Two details tabs are selected")
+    }
+
     func testPickingAnEqualizerPresetInNowPlayingMovesTheBands() {
         openNowPlaying()
         app.buttons["Playback settings"].tap()
@@ -526,6 +550,20 @@ final class PlayerUITests: XCTestCase {
         return app.cells.allElementsBoundByIndex.filter { cell in
             cell.frame.minY > headingBottom && cell.frame.maxY < screenBottom
         }.dropFirst(skipped).first
+    }
+
+    func testAFlickCarriesAShelfPastMoreThanOneCard() {
+        selectRoot(ofTab: "Home", in: app)
+        let shelfTitle = app.staticTexts["New Songs"]
+        XCTAssertTrue(shelfTitle.waitForExistence(timeout: 15), "New Songs never showed")
+        for _ in 0..<8 where !shelfTitle.isHittable || shelfTitle.frame.minY > app.frame.height * 0.5 { app.swipeUp(velocity: .slow) }
+
+        let shelf = app.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: app.frame.width * 0.9, dy: shelfTitle.frame.maxY + 80))
+        shelf.press(forDuration: 0.01, thenDragTo: shelf.withOffset(CGVector(dx: -app.frame.width * 0.6, dy: 0)), withVelocity: .fast, thenHoldForDuration: 0)
+
+        let shelfCards = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Song ")).allElementsBoundByIndex.filter { $0.frame.minY > shelfTitle.frame.maxY }
+        let cardsScrolledPast = shelfCards.filter { $0.frame.maxX < 0 }.count
+        XCTAssertGreaterThan(cardsScrolledPast, 1, "The flick stopped after one card")
     }
 
     private func openNowPlayingFromTheMiniPlayer() {

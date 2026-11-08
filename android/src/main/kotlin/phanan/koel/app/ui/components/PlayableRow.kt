@@ -61,7 +61,8 @@ enum class PlayableRowStyle {
     Queue,
 }
 
-private val ArtworkSize = 44.dp
+val PlayableRowArtworkSize = 44.dp
+val PlayableRowArtworkCornerRadius = 6.dp
 
 /** The space above and below a row's content. */
 val PlayableRowVerticalPadding = 8.dp
@@ -139,7 +140,7 @@ private fun PlayableRowContent(
                 }
             }
             PlayableRowStyle.Episode -> Unit
-            else -> ArtworkWithOverlay(ArtworkSize, isOverlaid = isCurrent, artwork = { Artwork(playable.artworkUrl, size = ArtworkSize, cornerRadius = 6.dp) }) {
+            else -> ArtworkWithOverlay(PlayableRowArtworkSize, isOverlaid = isCurrent, artwork = { Artwork(playable.artworkUrl, size = PlayableRowArtworkSize, cornerRadius = PlayableRowArtworkCornerRadius) }) {
                 NowPlayingIndicator(isPlaying)
             }
         }

@@ -18,7 +18,7 @@ struct CardCarousel<Cards: View>: View {
                 .scrollTargetLayout()
             }
             .contentMargins(.horizontal, 16, for: .scrollContent)
-            .scrollTargetBehavior(.viewAligned)
+            .scrollTargetBehavior(.viewAligned(limitBehavior: .never))
             .scrollIndicators(.hidden)
         }
     }

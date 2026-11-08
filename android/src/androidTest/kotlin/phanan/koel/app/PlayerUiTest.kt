@@ -12,6 +12,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import org.junit.Assert.assertEquals
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -24,7 +25,10 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.longClick
@@ -259,13 +263,18 @@ class PlayerUiTest {
     }
 
     @Test
-    fun podcastsListTheNewEpisodesFirst() {
+    fun podcastsListTheNewEpisodesFirstThenAllPodcastsInLine() {
         compose.onNodeWithText("Library").performClick()
         compose.onNodeWithText("Podcasts").performClick()
 
         compose.waitUntilAtLeastOneExists(hasText("New Episodes"), 10_000)
         compose.waitUntilAtLeastOneExists(hasText("Episode 3"), 10_000)
         compose.waitUntilAtLeastOneExists(hasText(MockKoelServer.PODCAST_TITLE), 10_000)
+        val episode = compose.onNodeWithText("Episode 3").getUnclippedBoundsInRoot()
+        val allPodcasts = compose.onNodeWithText("All Podcasts").getUnclippedBoundsInRoot()
+        val podcast = compose.onNodeWithText(MockKoelServer.PODCAST_TITLE).getUnclippedBoundsInRoot()
+        assertTrue("All Podcasts isn't between the episodes and the podcasts", episode.bottom < allPodcasts.top && allPodcasts.bottom < podcast.top)
+        assertEquals("Podcast titles don't line up with episode titles", episode.left, podcast.left)
     }
 
     @Test
@@ -386,6 +395,24 @@ class PlayerUiTest {
         val order = listOf("Playback settings", "Choose Output", "Lyrics and Details")
             .sortedBy { compose.onNodeWithContentDescription(it).fetchSemanticsNode().boundsInRoot.left }
         assertEquals(listOf("Playback settings", "Choose Output", "Lyrics and Details"), order)
+    }
+
+    @Test
+    fun theDetailsSheetShowsTheSongOnTheLeftAndSwitchesTabs() {
+        openQueue()
+
+        compose.onNodeWithContentDescription("Lyrics and Details").performClick()
+
+        compose.waitUntilAtLeastOneExists(hasText("Lyrics"), 5_000)
+        val inSheet = hasAnyAncestor(hasAnyDescendant(hasText("Lyrics")) and hasAnyDescendant(hasText("Album")))
+        val artist = compose.onNode(hasText("Test Artist") and inSheet).fetchSemanticsNode()
+        val title = compose.onNode(hasText(MockKoelServer.SONG_TITLES[0]) and inSheet).fetchSemanticsNode()
+        assertTrue("The title isn't above the artist", title.boundsInRoot.bottom <= artist.boundsInRoot.top)
+        assertEquals("The title and artist don't line up on the left", title.boundsInRoot.left, artist.boundsInRoot.left)
+
+        compose.onNodeWithText("Album").performClick()
+        compose.onNodeWithText("Album").assertIsSelected()
+        compose.onNodeWithText("Lyrics").assertIsNotSelected()
     }
 
     @Test

@@ -6,6 +6,8 @@ struct PlayableRow: View {
     static let verticalInset: CGFloat = 8
     /// Where a divider under a row starts: past the artwork, in line with the title.
     static let dividerInset: CGFloat = 72
+    static let artworkSize: CGFloat = 44
+    static let artworkCornerRadius: CGFloat = 6
 
     enum Style {
         /// Artwork, title, artist (or podcast).
@@ -110,8 +112,8 @@ private struct PlayableRowLeading: View {
     var body: some View {
         switch style {
         case .standard, .artist, .queue:
-            Artwork(url: playable.artworkUrl, size: 44, cornerRadius: 6)
-                .nowPlayingOverlay(isCurrent: app.player.isCurrent(playable), isPlaying: app.player.isPlaying(playable), size: 44)
+            Artwork(url: playable.artworkUrl, size: PlayableRow.artworkSize, cornerRadius: PlayableRow.artworkCornerRadius)
+                .nowPlayingOverlay(isCurrent: app.player.isCurrent(playable), isPlaying: app.player.isPlaying(playable), size: PlayableRow.artworkSize)
         case .album:
             Group {
                 if app.player.isCurrent(playable) {
